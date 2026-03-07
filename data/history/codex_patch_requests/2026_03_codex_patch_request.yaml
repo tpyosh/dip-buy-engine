@@ -1,0 +1,31 @@
+snapshot_month: "2026_03"
+must:
+  - "portfolio.py に半導体エクスポージャ警告の説明を追加"
+should:
+  - "review_parser.py で理由抽出を安定化"
+nice_to_have:
+  - "README に四半期見直し運用を追記"
+  - "修正目的: 警告とレビューの整合性を上げる"
+  - "変更すべき仕様: 半導体警告の説明を詳細化する"
+  - "影響範囲: portfolio.py, README.md"
+  - "推奨テスト: test_portfolio.py を更新"
+objectives:
+  - "ChatGPT の改善提案を、既存の CLI 月次ワークフローを壊さずに反映する。"
+  - "Python 候補値と ChatGPT 提案との差分保存を継続しつつ、レビュー品質を高める。"
+target_files:
+  - "README.md"
+  - "config/portfolio_policy.yaml"
+  - "src/monthly_limit_order_review/portfolio.py"
+  - "tests/test_portfolio.py"
+spec_diffs:
+  - "must: portfolio.py に半導体エクスポージャ警告の説明を追加"
+  - "should: review_parser.py で理由抽出を安定化"
+  - "nice_to_have: README に四半期見直し運用を追記"
+tests_to_update:
+  - "tests/test_portfolio.py"
+  - "tests/test_review_parser.py"
+backward_compatibility_notes:
+  - "自動発注は追加しない。"
+  - "YAML 入力と CLI ベースの運用を維持する。"
+  - "既存の生成物パス規約を変更する場合は README とテストも更新する。"
+

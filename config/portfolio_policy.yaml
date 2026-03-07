@@ -1,0 +1,51 @@
+portfolio_buckets:
+  liquidity:
+    target_pct: 0.10
+    min_jpy: 1000000
+    preferred_pct_range: [0.05, 0.15]
+    hard_max_pct: 0.20
+
+  core:
+    target_pct: 0.45
+    preferred_pct_range: [0.35, 0.55]
+
+  jun_core:
+    target_pct: 0.20
+    preferred_pct_range: [0.10, 0.30]
+
+  satellite_core:
+    target_pct: 0.15
+    preferred_pct_range: [0.10, 0.25]
+
+  satellite:
+    target_pct: 0.10
+    preferred_pct_range: [0.00, 0.15]
+
+symbol_to_bucket:
+  "7203": "jun_core"
+  "MSFT": "jun_core"
+  "ALL_COUNTRY_FUND": "core"
+  "SP500_FUND": "core"
+  "NIKKO_SOX_FUND": "satellite_core"
+  "SMH": "satellite_core"
+  "URA": "satellite_core"
+  "CIBR": "satellite_core"
+  "PLTR": "satellite"
+
+risk_limits:
+  satellite_plus_satellite_core_max_pct: 0.25
+  satellite_max_pct: 0.15
+  single_high_vol_name_max_pct: 0.05
+  pltr_max_total_assets_pct: 0.03
+  semi_exposure_max_pct_of_total_assets: 0.18
+
+satellite_subtargets:
+  semiconductor_combined: 0.40
+  URA: 0.25
+  CIBR: 0.20
+  PLTR: 0.15
+
+cash_policy:
+  hard_floor_jpy: 1000000
+  preferred_total_assets_pct_range: [0.05, 0.10]
+

@@ -1,0 +1,60 @@
+snapshot_date: "2026-03-07"
+currency_base: "JPY"
+total_assets_jpy: 5000000
+liquidity_target_jpy: 1000000
+
+holdings:
+  - symbol: "JPY_CASH"
+    name: "Cash"
+    asset_class: "liquidity"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 1200000
+    currency: "JPY"
+
+  - symbol: "ALL_COUNTRY_FUND"
+    name: "All Country Mutual Funds"
+    asset_class: "core"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 1800000
+    currency: "JPY"
+
+  - symbol: "MSFT"
+    name: "Microsoft"
+    asset_class: "jun_core"
+    quantity: 4
+    avg_cost: 410
+    current_price: 400
+    market_value_jpy: 800000
+    currency: "USD"
+
+  - symbol: "NIKKO_SOX_FUND"
+    name: "Nikkei SOX Index Fund"
+    asset_class: "satellite_core"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 600000
+    currency: "JPY"
+
+  - symbol: "SMH"
+    name: "VanEck Semiconductor ETF"
+    asset_class: "satellite_core"
+    quantity: 1
+    avg_cost: 200
+    current_price: 230
+    market_value_jpy: 200000
+    currency: "USD"
+
+  - symbol: "PLTR"
+    name: "Palantir Technologies"
+    asset_class: "satellite"
+    quantity: 10
+    avg_cost: 80
+    current_price: 70
+    market_value_jpy: 400000
+    currency: "USD"
+

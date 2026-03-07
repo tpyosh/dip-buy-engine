@@ -1,0 +1,57 @@
+base_price_method:
+  type: "mean_close"
+  lookback_trading_days: 20
+
+limit_order_rules:
+  CIBR:
+    tranches:
+      - drawdown_pct: -5
+        shares: 1
+      - drawdown_pct: -8
+        shares: 1
+      - drawdown_pct: -12
+        shares: 1
+
+  URA:
+    tranches:
+      - drawdown_pct: -6
+        shares: 2
+      - drawdown_pct: -10
+        shares: 2
+      - drawdown_pct: -15
+        shares: 2
+
+  PLTR:
+    tranches:
+      - drawdown_pct: -10
+        shares: 1
+      - drawdown_pct: -15
+        shares: 2
+      - drawdown_pct: -22
+        shares: 2
+
+  MSFT:
+    tranches:
+      - drawdown_pct: -6
+        shares: 1
+      - drawdown_pct: -10
+        shares: 2
+      - drawdown_pct: -18
+        shares: 2
+
+sox_buy_judgement:
+  proxy_symbol: "SMH"
+  method: "drawdown_from_recent_high_close"
+  lookback_trading_days: 63
+  buy_zone_min_pct: -10
+  buy_zone_max_pct: -5
+  monthly_buy_budget_jpy:
+    min: 100000
+    max: 200000
+
+execution:
+  order_expiration: "month_end"
+  round_price:
+    usd_decimals: 2
+    jpy_decimals: 0
+

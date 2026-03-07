@@ -1,0 +1,217 @@
+snapshot:
+  snapshot_date: "2026-03-07"
+  currency_base: "JPY"
+  total_assets_jpy: 5000000
+  liquidity_target_jpy: 1000000
+  holdings:
+    - symbol: "JPY_CASH"
+      name: "Cash"
+      asset_class: "liquidity"
+      quantity: null
+      avg_cost: null
+      current_price: null
+      market_value_jpy: 1200000
+      currency: "JPY"
+    - symbol: "ALL_COUNTRY_FUND"
+      name: "All Country Mutual Funds"
+      asset_class: "core"
+      quantity: null
+      avg_cost: null
+      current_price: null
+      market_value_jpy: 1800000
+      currency: "JPY"
+    - symbol: "MSFT"
+      name: "Microsoft"
+      asset_class: "jun_core"
+      quantity: 4
+      avg_cost: 410
+      current_price: 400
+      market_value_jpy: 800000
+      currency: "USD"
+    - symbol: "NIKKO_SOX_FUND"
+      name: "Nikkei SOX Index Fund"
+      asset_class: "satellite_core"
+      quantity: null
+      avg_cost: null
+      current_price: null
+      market_value_jpy: 600000
+      currency: "JPY"
+    - symbol: "SMH"
+      name: "VanEck Semiconductor ETF"
+      asset_class: "satellite_core"
+      quantity: 1
+      avg_cost: 200
+      current_price: 230
+      market_value_jpy: 200000
+      currency: "USD"
+    - symbol: "PLTR"
+      name: "Palantir Technologies"
+      asset_class: "satellite"
+      quantity: 10
+      avg_cost: 80
+      current_price: 70
+      market_value_jpy: 400000
+      currency: "USD"
+  warnings:
+    - "Holding JPY_CASH is missing quantity; stored as null."
+    - "Holding JPY_CASH is missing avg_cost; stored as null."
+    - "Holding JPY_CASH is missing current_price; stored as null."
+generated_at: "2026-03-07T00:00:00Z"
+bucket_allocations:
+  - bucket: "core"
+    market_value_jpy: 1800000
+    actual_pct: 0.36
+    target_pct: 0.45
+    delta_pct: -0.09
+    preferred_min_pct: 0.35
+    preferred_max_pct: 0.55
+  - bucket: "jun_core"
+    market_value_jpy: 800000
+    actual_pct: 0.16
+    target_pct: 0.2
+    delta_pct: -0.04
+    preferred_min_pct: 0.1
+    preferred_max_pct: 0.3
+  - bucket: "liquidity"
+    market_value_jpy: 1200000
+    actual_pct: 0.24
+    target_pct: 0.1
+    delta_pct: 0.14
+    preferred_min_pct: 0.05
+    preferred_max_pct: 0.15
+  - bucket: "satellite"
+    market_value_jpy: 400000
+    actual_pct: 0.08
+    target_pct: 0.1
+    delta_pct: -0.02
+    preferred_min_pct: 0.0
+    preferred_max_pct: 0.15
+  - bucket: "satellite_core"
+    market_value_jpy: 800000
+    actual_pct: 0.16
+    target_pct: 0.15
+    delta_pct: 0.01
+    preferred_min_pct: 0.1
+    preferred_max_pct: 0.25
+market_references:
+  - symbol: "CIBR"
+    yfinance_symbol: "CIBR"
+    current_price: 90
+    mean_close_20d: 100
+    recent_high_63d: 120
+    currency: "USD"
+    as_of: "2026-03-07"
+  - symbol: "URA"
+    yfinance_symbol: "URA"
+    current_price: 80
+    mean_close_20d: 100
+    recent_high_63d: 120
+    currency: "USD"
+    as_of: "2026-03-07"
+  - symbol: "PLTR"
+    yfinance_symbol: "PLTR"
+    current_price: 70
+    mean_close_20d: 100
+    recent_high_63d: 120
+    currency: "USD"
+    as_of: "2026-03-07"
+  - symbol: "MSFT"
+    yfinance_symbol: "MSFT"
+    current_price: 400
+    mean_close_20d: 500
+    recent_high_63d: 550
+    currency: "USD"
+    as_of: "2026-03-07"
+  - symbol: "SMH"
+    yfinance_symbol: "SMH"
+    current_price: 230
+    mean_close_20d: 240
+    recent_high_63d: 250
+    currency: "USD"
+    as_of: "2026-03-07"
+  - symbol: "USDJPY"
+    yfinance_symbol: "USDJPY=X"
+    current_price: 150
+    mean_close_20d: 150
+    recent_high_63d: 151
+    currency: "JPY"
+    as_of: "2026-03-07"
+candidate_orders:
+  - symbol: "CIBR"
+    base_price: 100
+    current_price: 90
+    limit_price: 95
+    shares: 1
+    estimated_cost: 95
+    estimated_cost_jpy: 14250
+    currency: "USD"
+    drawdown_pct: -5
+    reference_method: "mean_close_20d"
+    suppressed: false
+    suppression_reasons: []
+  - symbol: "URA"
+    base_price: 100
+    current_price: 80
+    limit_price: 94
+    shares: 2
+    estimated_cost: 188
+    estimated_cost_jpy: 28200
+    currency: "USD"
+    drawdown_pct: -6
+    reference_method: "mean_close_20d"
+    suppressed: false
+    suppression_reasons: []
+  - symbol: "PLTR"
+    base_price: 100
+    current_price: 70
+    limit_price: 90
+    shares: 1
+    estimated_cost: 90
+    estimated_cost_jpy: 13500
+    currency: "USD"
+    drawdown_pct: -10
+    reference_method: "mean_close_20d"
+    suppressed: true
+    suppression_reasons:
+      - "PLTR already exceeds policy cap; shallow dip tranche is suppressed."
+  - symbol: "MSFT"
+    base_price: 500
+    current_price: 400
+    limit_price: 470
+    shares: 1
+    estimated_cost: 470
+    estimated_cost_jpy: 70500
+    currency: "USD"
+    drawdown_pct: -6
+    reference_method: "mean_close_20d"
+    suppressed: true
+    suppression_reasons:
+      - "Liquidity hard floor would be breached."
+warnings:
+  - code: "cash_above_preferred"
+    message: "Liquidity is above preferred total-assets band: 24.00% > 10.00%"
+    severity: "info"
+    related_symbols:
+      - "liquidity"
+  - code: "pltr_limit"
+    message: "PLTR exceeds total-assets cap: 8.00% > 3.00%"
+    severity: "warning"
+    related_symbols:
+      - "PLTR"
+semi_exposure_pct: 0.16
+liquidity_jpy: 1200000
+sox_buy_signal:
+  proxy_symbol: "SMH"
+  method: "drawdown_from_recent_high_close"
+  current_price: 230
+  recent_high_63d: 250
+  drawdown_pct: -8
+  buy_zone_min_pct: -10
+  buy_zone_max_pct: -5
+  within_buy_zone: true
+  monthly_buy_budget_jpy:
+    min: 100000
+    max: 200000
+metadata:
+  snapshot_path: "data/normalized/snapshot_2026_03.yaml"
+

@@ -1,0 +1,34 @@
+- symbol: "CIBR"
+  python_price: 95
+  chatgpt_price: 94
+  price_diff_pct: -1.05
+  python_shares: 1
+  chatgpt_shares: 1
+  reason_summary: "サイバーセキュリティ比率の補強"
+  added_warnings:
+    - "半導体エクスポージャはやや高い"
+    - "今月は core を優先補強"
+  candidate_removed: false
+- symbol: "MSFT"
+  python_price: 470
+  chatgpt_price: 468
+  price_diff_pct: -0.43
+  python_shares: 1
+  chatgpt_shares: 1
+  reason_summary: "20日平均からの押し目として妥当"
+  added_warnings:
+    - "半導体エクスポージャはやや高い"
+    - "今月は core を優先補強"
+  candidate_removed: false
+- symbol: "PLTR"
+  python_price: 90
+  chatgpt_price: null
+  price_diff_pct: null
+  python_shares: 1
+  chatgpt_shares: null
+  reason_summary: "ChatGPT review did not include a proposal for this symbol."
+  added_warnings:
+    - "半導体エクスポージャはやや高い"
+    - "今月は core を優先補強"
+  candidate_removed: true
+

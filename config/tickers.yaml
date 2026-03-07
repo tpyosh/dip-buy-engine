@@ -1,0 +1,12 @@
+yfinance_symbols:
+  CIBR: "CIBR"
+  URA: "URA"
+  PLTR: "PLTR"
+  MSFT: "MSFT"
+  SMH: "SMH"
+  TOYOTA_US_PROXY: "TM"
+  VT: "VT"
+  VOO: "VOO"
+  SOXX: "SOXX"
+  USDJPY: "USDJPY=X"
+

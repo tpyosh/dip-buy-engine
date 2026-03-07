@@ -1,60 +1,193 @@
 snapshot_date: "2026-03-07"
 currency_base: "JPY"
-total_assets_jpy: 5000000
-liquidity_target_jpy: 1000000
-
+total_assets_jpy: 32692503
+liquidity_target_jpy: null
 holdings:
-  - symbol: "JPY_CASH"
-    name: "Cash"
+  - symbol: "CASH_EQUIV"
+    name: "預金・現金・暗号資産"
     asset_class: "liquidity"
     quantity: null
     avg_cost: null
     current_price: null
-    market_value_jpy: 1200000
+    market_value_jpy: 14526912
     currency: "JPY"
 
-  - symbol: "ALL_COUNTRY_FUND"
-    name: "All Country Mutual Funds"
-    asset_class: "core"
-    quantity: null
-    avg_cost: null
-    current_price: null
-    market_value_jpy: 1800000
+  - symbol: "7203"
+    name: "トヨタ自動車"
+    asset_class: "other"
+    quantity: 800
+    avg_cost: 532
+    current_price: 3515
+    market_value_jpy: 2812000
     currency: "JPY"
 
-  - symbol: "MSFT"
-    name: "Microsoft"
-    asset_class: "jun_core"
-    quantity: 4
-    avg_cost: 410
-    current_price: 400
-    market_value_jpy: 800000
-    currency: "USD"
+  - symbol: "9444"
+    name: "トーシンホールディングス"
+    asset_class: "other"
+    quantity: 1500
+    avg_cost: 628
+    current_price: 355
+    market_value_jpy: 532500
+    currency: "JPY"
 
-  - symbol: "NIKKO_SOX_FUND"
-    name: "Nikkei SOX Index Fund"
-    asset_class: "satellite_core"
-    quantity: null
-    avg_cost: null
-    current_price: null
-    market_value_jpy: 600000
+  - symbol: "2353"
+    name: "日本駐車場開発"
+    asset_class: "other"
+    quantity: 100
+    avg_cost: 265
+    current_price: 274
+    market_value_jpy: 27400
+    currency: "JPY"
+
+  - symbol: "7201"
+    name: "日産自動車"
+    asset_class: "other"
+    quantity: 100
+    avg_cost: 368
+    current_price: 386
+    market_value_jpy: 38600
     currency: "JPY"
 
   - symbol: "SMH"
-    name: "VanEck Semiconductor ETF"
-    asset_class: "satellite_core"
+    name: "ヴァンエック・半導体株ETF"
+    asset_class: "satellite"
     quantity: 1
-    avg_cost: 200
-    current_price: 230
-    market_value_jpy: 200000
+    avg_cost: 369.63
+    current_price: 395.35
+    market_value_jpy: 62457
     currency: "USD"
 
   - symbol: "PLTR"
-    name: "Palantir Technologies"
+    name: "パランティア・テクノロジーズ"
     asset_class: "satellite"
-    quantity: 10
-    avg_cost: 80
-    current_price: 70
-    market_value_jpy: 400000
+    quantity: 9
+    avg_cost: 160.48
+    current_price: 152.67
+    market_value_jpy: 217069
     currency: "USD"
 
+  - symbol: "CIBR"
+    name: "ファーストトラスト ナスダック サイバーセキュリティETF"
+    asset_class: "satellite"
+    quantity: 88
+    avg_cost: 76.66
+    current_price: 65.79
+    market_value_jpy: 914628
+    currency: "USD"
+
+  - symbol: "MSFT"
+    name: "マイクロソフト"
+    asset_class: "jun_core"
+    quantity: 4
+    avg_cost: 431.42
+    current_price: 410.68
+    market_value_jpy: 259516
+    currency: "USD"
+
+  - symbol: "URA"
+    name: "グローバルX ウラニウム ETF"
+    asset_class: "satellite"
+    quantity: 66
+    avg_cost: 46.19
+    current_price: 50.06
+    market_value_jpy: 521959
+    currency: "USD"
+
+  - symbol: "NISSEI_SOX_1"
+    name: "ニッセイSOX指数インデックスファンド〈米国半導体株〉〈購入・換金手数料なし〉"
+    asset_class: "jun_core"
+    quantity: 860960
+    avg_cost: 15802
+    current_price: 29807
+    market_value_jpy: 2566263
+    currency: "JPY"
+
+  - symbol: "NISSEI_SOX_2"
+    name: "ニッセイSOX指数インデックスファンド〈米国半導体株〉〈購入・換金手数料なし〉"
+    asset_class: "jun_core"
+    quantity: 415654
+    avg_cost: 14435
+    current_price: 29807
+    market_value_jpy: 1238940
+    currency: "JPY"
+
+  - symbol: "RAKUTEN_ALL_COUNTRY_1"
+    name: "楽天・プラス・オールカントリー株式インデックス・ファンド（楽天・プラス・オールカントリー）"
+    asset_class: "core"
+    quantity: 949731
+    avg_cost: 13688
+    current_price: 17451
+    market_value_jpy: 1657376
+    currency: "JPY"
+
+  - symbol: "RAKUTEN_ALL_COUNTRY_2"
+    name: "楽天・プラス・オールカントリー株式インデックス・ファンド（楽天・プラス・オールカントリー）"
+    asset_class: "core"
+    quantity: 725688
+    avg_cost: 17570
+    current_price: 17451
+    market_value_jpy: 1266398
+    currency: "JPY"
+
+  - symbol: "RAKUTEN_SP500"
+    name: "楽天・プラス・S&P500インデックス・ファンド（楽天・プラス・S&P500）"
+    asset_class: "core"
+    quantity: 106530
+    avg_cost: 11715
+    current_price: 17534
+    market_value_jpy: 186790
+    currency: "JPY"
+
+  - symbol: "EMAXIS_SP500_1"
+    name: "eMAXIS Slim 米国株式(S&P500)"
+    asset_class: "core"
+    quantity: 44024
+    avg_cost: 38615
+    current_price: 39406
+    market_value_jpy: 173481
+    currency: "JPY"
+
+  - symbol: "EMAXIS_SP500_2"
+    name: "eMAXIS Slim 米国株式(S&P500)"
+    asset_class: "core"
+    quantity: 348947
+    avg_cost: 31953
+    current_price: 39406
+    market_value_jpy: 1375061
+    currency: "JPY"
+
+  - symbol: "EMAXIS_SP500_3"
+    name: "eMAXIS Slim 米国株式(S&P500)"
+    asset_class: "core"
+    quantity: 170193
+    avg_cost: 39661
+    current_price: 39406
+    market_value_jpy: 670663
+    currency: "JPY"
+
+  - symbol: "EMAXIS_ALL_COUNTRY"
+    name: "eMAXIS Slim 全世界株式(オール・カントリー)"
+    asset_class: "core"
+    quantity: 55611
+    avg_cost: 32368
+    current_price: 33853
+    market_value_jpy: 188260
+    currency: "JPY"
+
+  - symbol: "PENSION_EMAXIS_ALL_COUNTRY"
+    name: "eMAXIS Slim 全世界株式(オール・カントリー)"
+    asset_class: "pension"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 3440168
+    currency: "JPY"
+
+  - symbol: "POINTS_MILES"
+    name: "ポイント・マイル"
+    asset_class: "other"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 16060
+    currency: "JPY"

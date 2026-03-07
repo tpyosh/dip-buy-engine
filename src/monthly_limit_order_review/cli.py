@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
-from datetime import datetime
+from datetime import UTC, datetime
 from pathlib import Path
 
 from .codex_patch_builder import build_codex_patch_prompt, build_codex_patch_request
@@ -162,7 +162,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     )
     return MonthlyComputation(
         snapshot=snapshot,
-        generated_at=datetime.utcnow().isoformat(timespec="seconds") + "Z",
+        generated_at=datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
         bucket_allocations=portfolio_analysis["bucket_allocations"],
         market_references=market_references,
         candidate_orders=candidate_orders,
@@ -170,7 +170,10 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         semi_exposure_pct=portfolio_analysis["semi_exposure_pct"],
         liquidity_jpy=portfolio_analysis["liquidity_jpy"],
         sox_buy_signal=sox_buy_signal,
-        metadata={"snapshot_path": str(snapshot_path)},
+        metadata={
+            "snapshot_path": str(snapshot_path),
+            "resolved_buckets": portfolio_analysis["resolved_buckets"],
+        },
     )
 
 

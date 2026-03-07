@@ -1,217 +1,516 @@
 snapshot:
-  snapshot_date: "2026-03-07"
-  currency_base: "JPY"
-  total_assets_jpy: 5000000
-  liquidity_target_jpy: 1000000
+  snapshot_date: '2026-03-07'
+  currency_base: JPY
+  total_assets_jpy: 32692503
+  liquidity_target_jpy: null
   holdings:
-    - symbol: "JPY_CASH"
-      name: "Cash"
-      asset_class: "liquidity"
-      quantity: null
-      avg_cost: null
-      current_price: null
-      market_value_jpy: 1200000
-      currency: "JPY"
-    - symbol: "ALL_COUNTRY_FUND"
-      name: "All Country Mutual Funds"
-      asset_class: "core"
-      quantity: null
-      avg_cost: null
-      current_price: null
-      market_value_jpy: 1800000
-      currency: "JPY"
-    - symbol: "MSFT"
-      name: "Microsoft"
-      asset_class: "jun_core"
-      quantity: 4
-      avg_cost: 410
-      current_price: 400
-      market_value_jpy: 800000
-      currency: "USD"
-    - symbol: "NIKKO_SOX_FUND"
-      name: "Nikkei SOX Index Fund"
-      asset_class: "satellite_core"
-      quantity: null
-      avg_cost: null
-      current_price: null
-      market_value_jpy: 600000
-      currency: "JPY"
-    - symbol: "SMH"
-      name: "VanEck Semiconductor ETF"
-      asset_class: "satellite_core"
-      quantity: 1
-      avg_cost: 200
-      current_price: 230
-      market_value_jpy: 200000
-      currency: "USD"
-    - symbol: "PLTR"
-      name: "Palantir Technologies"
-      asset_class: "satellite"
-      quantity: 10
-      avg_cost: 80
-      current_price: 70
-      market_value_jpy: 400000
-      currency: "USD"
+  - symbol: CASH_EQUIV
+    name: 預金・現金・暗号資産
+    asset_class: liquidity
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 14526912
+    currency: JPY
+  - symbol: '7203'
+    name: トヨタ自動車
+    asset_class: other
+    quantity: 800
+    avg_cost: 532
+    current_price: 3515
+    market_value_jpy: 2812000
+    currency: JPY
+  - symbol: '9444'
+    name: トーシンホールディングス
+    asset_class: other
+    quantity: 1500
+    avg_cost: 628
+    current_price: 355
+    market_value_jpy: 532500
+    currency: JPY
+  - symbol: '2353'
+    name: 日本駐車場開発
+    asset_class: other
+    quantity: 100
+    avg_cost: 265
+    current_price: 274
+    market_value_jpy: 27400
+    currency: JPY
+  - symbol: '7201'
+    name: 日産自動車
+    asset_class: other
+    quantity: 100
+    avg_cost: 368
+    current_price: 386
+    market_value_jpy: 38600
+    currency: JPY
+  - symbol: SMH
+    name: ヴァンエック・半導体株ETF
+    asset_class: satellite
+    quantity: 1
+    avg_cost: 369.63
+    current_price: 395.35
+    market_value_jpy: 62457
+    currency: USD
+  - symbol: PLTR
+    name: パランティア・テクノロジーズ
+    asset_class: satellite
+    quantity: 9
+    avg_cost: 160.48
+    current_price: 152.67
+    market_value_jpy: 217069
+    currency: USD
+  - symbol: CIBR
+    name: ファーストトラスト ナスダック サイバーセキュリティETF
+    asset_class: satellite
+    quantity: 88
+    avg_cost: 76.66
+    current_price: 65.79
+    market_value_jpy: 914628
+    currency: USD
+  - symbol: MSFT
+    name: マイクロソフト
+    asset_class: jun_core
+    quantity: 4
+    avg_cost: 431.42
+    current_price: 410.68
+    market_value_jpy: 259516
+    currency: USD
+  - symbol: URA
+    name: グローバルX ウラニウム ETF
+    asset_class: satellite
+    quantity: 66
+    avg_cost: 46.19
+    current_price: 50.06
+    market_value_jpy: 521959
+    currency: USD
+  - symbol: NISSEI_SOX_1
+    name: ニッセイSOX指数インデックスファンド〈米国半導体株〉〈購入・換金手数料なし〉
+    asset_class: jun_core
+    quantity: 860960
+    avg_cost: 15802
+    current_price: 29807
+    market_value_jpy: 2566263
+    currency: JPY
+  - symbol: NISSEI_SOX_2
+    name: ニッセイSOX指数インデックスファンド〈米国半導体株〉〈購入・換金手数料なし〉
+    asset_class: jun_core
+    quantity: 415654
+    avg_cost: 14435
+    current_price: 29807
+    market_value_jpy: 1238940
+    currency: JPY
+  - symbol: RAKUTEN_ALL_COUNTRY_1
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド（楽天・プラス・オールカントリー）
+    asset_class: core
+    quantity: 949731
+    avg_cost: 13688
+    current_price: 17451
+    market_value_jpy: 1657376
+    currency: JPY
+  - symbol: RAKUTEN_ALL_COUNTRY_2
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド（楽天・プラス・オールカントリー）
+    asset_class: core
+    quantity: 725688
+    avg_cost: 17570
+    current_price: 17451
+    market_value_jpy: 1266398
+    currency: JPY
+  - symbol: RAKUTEN_SP500
+    name: 楽天・プラス・S&P500インデックス・ファンド（楽天・プラス・S&P500）
+    asset_class: core
+    quantity: 106530
+    avg_cost: 11715
+    current_price: 17534
+    market_value_jpy: 186790
+    currency: JPY
+  - symbol: EMAXIS_SP500_1
+    name: eMAXIS Slim 米国株式(S&P500)
+    asset_class: core
+    quantity: 44024
+    avg_cost: 38615
+    current_price: 39406
+    market_value_jpy: 173481
+    currency: JPY
+  - symbol: EMAXIS_SP500_2
+    name: eMAXIS Slim 米国株式(S&P500)
+    asset_class: core
+    quantity: 348947
+    avg_cost: 31953
+    current_price: 39406
+    market_value_jpy: 1375061
+    currency: JPY
+  - symbol: EMAXIS_SP500_3
+    name: eMAXIS Slim 米国株式(S&P500)
+    asset_class: core
+    quantity: 170193
+    avg_cost: 39661
+    current_price: 39406
+    market_value_jpy: 670663
+    currency: JPY
+  - symbol: EMAXIS_ALL_COUNTRY
+    name: eMAXIS Slim 全世界株式(オール・カントリー)
+    asset_class: core
+    quantity: 55611
+    avg_cost: 32368
+    current_price: 33853
+    market_value_jpy: 188260
+    currency: JPY
+  - symbol: PENSION_EMAXIS_ALL_COUNTRY
+    name: eMAXIS Slim 全世界株式(オール・カントリー)
+    asset_class: pension
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 3440168
+    currency: JPY
+  - symbol: POINTS_MILES
+    name: ポイント・マイル
+    asset_class: other
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 16060
+    currency: JPY
   warnings:
-    - "Holding JPY_CASH is missing quantity; stored as null."
-    - "Holding JPY_CASH is missing avg_cost; stored as null."
-    - "Holding JPY_CASH is missing current_price; stored as null."
-generated_at: "2026-03-07T00:00:00Z"
+  - Holding CASH_EQUIV is missing quantity; stored as null.
+  - Holding CASH_EQUIV is missing avg_cost; stored as null.
+  - Holding CASH_EQUIV is missing current_price; stored as null.
+  - Holding PENSION_EMAXIS_ALL_COUNTRY is missing quantity; stored as null.
+  - Holding PENSION_EMAXIS_ALL_COUNTRY is missing avg_cost; stored as null.
+  - Holding PENSION_EMAXIS_ALL_COUNTRY is missing current_price; stored as null.
+  - Holding POINTS_MILES is missing quantity; stored as null.
+  - Holding POINTS_MILES is missing avg_cost; stored as null.
+  - Holding POINTS_MILES is missing current_price; stored as null.
+generated_at: '2026-03-07T06:46:57Z'
 bucket_allocations:
-  - bucket: "core"
-    market_value_jpy: 1800000
-    actual_pct: 0.36
-    target_pct: 0.45
-    delta_pct: -0.09
-    preferred_min_pct: 0.35
-    preferred_max_pct: 0.55
-  - bucket: "jun_core"
-    market_value_jpy: 800000
-    actual_pct: 0.16
-    target_pct: 0.2
-    delta_pct: -0.04
-    preferred_min_pct: 0.1
-    preferred_max_pct: 0.3
-  - bucket: "liquidity"
-    market_value_jpy: 1200000
-    actual_pct: 0.24
-    target_pct: 0.1
-    delta_pct: 0.14
-    preferred_min_pct: 0.05
-    preferred_max_pct: 0.15
-  - bucket: "satellite"
-    market_value_jpy: 400000
-    actual_pct: 0.08
-    target_pct: 0.1
-    delta_pct: -0.02
-    preferred_min_pct: 0.0
-    preferred_max_pct: 0.15
-  - bucket: "satellite_core"
-    market_value_jpy: 800000
-    actual_pct: 0.16
-    target_pct: 0.15
-    delta_pct: 0.01
-    preferred_min_pct: 0.1
-    preferred_max_pct: 0.25
+- bucket: core
+  market_value_jpy: 5518029
+  actual_pct: 0.1688
+  target_pct: 0.45
+  delta_pct: -0.2812
+  preferred_min_pct: 0.35
+  preferred_max_pct: 0.55
+- bucket: jun_core
+  market_value_jpy: 3071516
+  actual_pct: 0.094
+  target_pct: 0.2
+  delta_pct: -0.106
+  preferred_min_pct: 0.1
+  preferred_max_pct: 0.3
+- bucket: liquidity
+  market_value_jpy: 14526912
+  actual_pct: 0.4443
+  target_pct: 0.1
+  delta_pct: 0.3443
+  preferred_min_pct: 0.05
+  preferred_max_pct: 0.15
+- bucket: other
+  market_value_jpy: 614560
+  actual_pct: 0.0188
+  target_pct: null
+  delta_pct: null
+  preferred_min_pct: null
+  preferred_max_pct: null
+- bucket: pension
+  market_value_jpy: 3440168
+  actual_pct: 0.1052
+  target_pct: null
+  delta_pct: null
+  preferred_min_pct: null
+  preferred_max_pct: null
+- bucket: satellite
+  market_value_jpy: 217069
+  actual_pct: 0.0066
+  target_pct: 0.1
+  delta_pct: -0.0934
+  preferred_min_pct: 0
+  preferred_max_pct: 0.15
+- bucket: satellite_core
+  market_value_jpy: 5304247
+  actual_pct: 0.1622
+  target_pct: 0.15
+  delta_pct: 0.0122
+  preferred_min_pct: 0.1
+  preferred_max_pct: 0.25
 market_references:
-  - symbol: "CIBR"
-    yfinance_symbol: "CIBR"
-    current_price: 90
-    mean_close_20d: 100
-    recent_high_63d: 120
-    currency: "USD"
-    as_of: "2026-03-07"
-  - symbol: "URA"
-    yfinance_symbol: "URA"
-    current_price: 80
-    mean_close_20d: 100
-    recent_high_63d: 120
-    currency: "USD"
-    as_of: "2026-03-07"
-  - symbol: "PLTR"
-    yfinance_symbol: "PLTR"
-    current_price: 70
-    mean_close_20d: 100
-    recent_high_63d: 120
-    currency: "USD"
-    as_of: "2026-03-07"
-  - symbol: "MSFT"
-    yfinance_symbol: "MSFT"
-    current_price: 400
-    mean_close_20d: 500
-    recent_high_63d: 550
-    currency: "USD"
-    as_of: "2026-03-07"
-  - symbol: "SMH"
-    yfinance_symbol: "SMH"
-    current_price: 230
-    mean_close_20d: 240
-    recent_high_63d: 250
-    currency: "USD"
-    as_of: "2026-03-07"
-  - symbol: "USDJPY"
-    yfinance_symbol: "USDJPY=X"
-    current_price: 150
-    mean_close_20d: 150
-    recent_high_63d: 151
-    currency: "JPY"
-    as_of: "2026-03-07"
+- symbol: CIBR
+  yfinance_symbol: CIBR
+  current_price: 66
+  mean_close_20d: 65.0615
+  recent_high_63d: 76.1
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: URA
+  yfinance_symbol: URA
+  current_price: 48.78
+  mean_close_20d: 53.1685
+  recent_high_63d: 61.81
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: PLTR
+  yfinance_symbol: PLTR
+  current_price: 157.16
+  mean_close_20d: 138.762
+  recent_high_63d: 194.17
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: MSFT
+  yfinance_symbol: MSFT
+  current_price: 408.96
+  mean_close_20d: 401.177
+  recent_high_63d: 492.02
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: SMH
+  yfinance_symbol: SMH
+  current_price: 380.56
+  mean_close_20d: 406.8
+  recent_high_63d: 426.16
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: USDJPY
+  yfinance_symbol: USDJPY=X
+  current_price: 157.534
+  mean_close_20d: 155.3215
+  recent_high_63d: 159.179
+  currency: JPY
+  as_of: '2026-03-06'
 candidate_orders:
-  - symbol: "CIBR"
-    base_price: 100
-    current_price: 90
-    limit_price: 95
-    shares: 1
-    estimated_cost: 95
-    estimated_cost_jpy: 14250
-    currency: "USD"
-    drawdown_pct: -5
-    reference_method: "mean_close_20d"
-    suppressed: false
-    suppression_reasons: []
-  - symbol: "URA"
-    base_price: 100
-    current_price: 80
-    limit_price: 94
-    shares: 2
-    estimated_cost: 188
-    estimated_cost_jpy: 28200
-    currency: "USD"
-    drawdown_pct: -6
-    reference_method: "mean_close_20d"
-    suppressed: false
-    suppression_reasons: []
-  - symbol: "PLTR"
-    base_price: 100
-    current_price: 70
-    limit_price: 90
-    shares: 1
-    estimated_cost: 90
-    estimated_cost_jpy: 13500
-    currency: "USD"
-    drawdown_pct: -10
-    reference_method: "mean_close_20d"
-    suppressed: true
-    suppression_reasons:
-      - "PLTR already exceeds policy cap; shallow dip tranche is suppressed."
-  - symbol: "MSFT"
-    base_price: 500
-    current_price: 400
-    limit_price: 470
-    shares: 1
-    estimated_cost: 470
-    estimated_cost_jpy: 70500
-    currency: "USD"
-    drawdown_pct: -6
-    reference_method: "mean_close_20d"
-    suppressed: true
-    suppression_reasons:
-      - "Liquidity hard floor would be breached."
-warnings:
-  - code: "cash_above_preferred"
-    message: "Liquidity is above preferred total-assets band: 24.00% > 10.00%"
-    severity: "info"
-    related_symbols:
-      - "liquidity"
-  - code: "pltr_limit"
-    message: "PLTR exceeds total-assets cap: 8.00% > 3.00%"
-    severity: "warning"
-    related_symbols:
-      - "PLTR"
-semi_exposure_pct: 0.16
-liquidity_jpy: 1200000
-sox_buy_signal:
-  proxy_symbol: "SMH"
-  method: "drawdown_from_recent_high_close"
-  current_price: 230
-  recent_high_63d: 250
+- symbol: CIBR
+  base_price: 65.0615
+  current_price: 66
+  limit_price: 61.81
+  shares: 1
+  estimated_cost: 61.81
+  estimated_cost_jpy: 9737
+  currency: USD
+  drawdown_pct: -5
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: CIBR
+  base_price: 65.0615
+  current_price: 66
+  limit_price: 59.86
+  shares: 1
+  estimated_cost: 59.86
+  estimated_cost_jpy: 9430
+  currency: USD
   drawdown_pct: -8
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: CIBR
+  base_price: 65.0615
+  current_price: 66
+  limit_price: 57.25
+  shares: 1
+  estimated_cost: 57.25
+  estimated_cost_jpy: 9019
+  currency: USD
+  drawdown_pct: -12
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: URA
+  base_price: 53.1685
+  current_price: 48.78
+  limit_price: 49.98
+  shares: 2
+  estimated_cost: 99.96
+  estimated_cost_jpy: 15747
+  currency: USD
+  drawdown_pct: -6
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: URA
+  base_price: 53.1685
+  current_price: 48.78
+  limit_price: 47.85
+  shares: 2
+  estimated_cost: 95.7
+  estimated_cost_jpy: 15076
+  currency: USD
+  drawdown_pct: -10
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: URA
+  base_price: 53.1685
+  current_price: 48.78
+  limit_price: 45.19
+  shares: 2
+  estimated_cost: 90.38
+  estimated_cost_jpy: 14238
+  currency: USD
+  drawdown_pct: -15
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: PLTR
+  base_price: 138.762
+  current_price: 157.16
+  limit_price: 124.89
+  shares: 1
+  estimated_cost: 124.89
+  estimated_cost_jpy: 19674
+  currency: USD
+  drawdown_pct: -10
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: PLTR
+  base_price: 138.762
+  current_price: 157.16
+  limit_price: 117.95
+  shares: 2
+  estimated_cost: 235.9
+  estimated_cost_jpy: 37162
+  currency: USD
+  drawdown_pct: -15
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: PLTR
+  base_price: 138.762
+  current_price: 157.16
+  limit_price: 108.23
+  shares: 2
+  estimated_cost: 216.46
+  estimated_cost_jpy: 34100
+  currency: USD
+  drawdown_pct: -22
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: MSFT
+  base_price: 401.177
+  current_price: 408.96
+  limit_price: 377.11
+  shares: 1
+  estimated_cost: 377.11
+  estimated_cost_jpy: 59408
+  currency: USD
+  drawdown_pct: -6
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: MSFT
+  base_price: 401.177
+  current_price: 408.96
+  limit_price: 361.06
+  shares: 2
+  estimated_cost: 722.12
+  estimated_cost_jpy: 113758
+  currency: USD
+  drawdown_pct: -10
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+- symbol: MSFT
+  base_price: 401.177
+  current_price: 408.96
+  limit_price: 328.97
+  shares: 2
+  estimated_cost: 657.94
+  estimated_cost_jpy: 103648
+  currency: USD
+  drawdown_pct: -18
+  reference_method: mean_close_20d
+  suppressed: false
+  suppression_reasons: []
+warnings:
+- code: core_below_range
+  message: 'Bucket core is below preferred range: 16.88% < 35.00%'
+  severity: info
+  related_symbols: []
+- code: jun_core_below_range
+  message: 'Bucket jun_core is below preferred range: 9.40% < 10.00%'
+  severity: info
+  related_symbols: []
+- code: liquidity_above_range
+  message: 'Bucket liquidity is above preferred range: 44.43% > 15.00%'
+  severity: warning
+  related_symbols: []
+- code: cash_above_preferred
+  message: 'Liquidity is above preferred total-assets band: 44.43% > 10.00%'
+  severity: info
+  related_symbols:
+  - liquidity
+- code: snapshot_warning
+  message: Holding CASH_EQUIV is missing quantity; stored as null.
+  severity: info
+  related_symbols: []
+- code: snapshot_warning
+  message: Holding CASH_EQUIV is missing avg_cost; stored as null.
+  severity: info
+  related_symbols: []
+- code: snapshot_warning
+  message: Holding CASH_EQUIV is missing current_price; stored as null.
+  severity: info
+  related_symbols: []
+- code: snapshot_warning
+  message: Holding PENSION_EMAXIS_ALL_COUNTRY is missing quantity; stored as null.
+  severity: info
+  related_symbols: []
+- code: snapshot_warning
+  message: Holding PENSION_EMAXIS_ALL_COUNTRY is missing avg_cost; stored as null.
+  severity: info
+  related_symbols: []
+- code: snapshot_warning
+  message: Holding PENSION_EMAXIS_ALL_COUNTRY is missing current_price; stored as
+    null.
+  severity: info
+  related_symbols: []
+- code: snapshot_warning
+  message: Holding POINTS_MILES is missing quantity; stored as null.
+  severity: info
+  related_symbols: []
+- code: snapshot_warning
+  message: Holding POINTS_MILES is missing avg_cost; stored as null.
+  severity: info
+  related_symbols: []
+- code: snapshot_warning
+  message: Holding POINTS_MILES is missing current_price; stored as null.
+  severity: info
+  related_symbols: []
+semi_exposure_pct: 0.1183
+liquidity_jpy: 14526912
+sox_buy_signal:
+  proxy_symbol: SMH
+  method: drawdown_from_recent_high_close
+  current_price: 380.56
+  recent_high_63d: 426.16
+  drawdown_pct: -10.7
   buy_zone_min_pct: -10
   buy_zone_max_pct: -5
-  within_buy_zone: true
+  within_buy_zone: false
   monthly_buy_budget_jpy:
     min: 100000
     max: 200000
 metadata:
-  snapshot_path: "data/normalized/snapshot_2026_03.yaml"
-
+  snapshot_path: data/normalized/snapshot_2026_03.yaml
+  resolved_buckets:
+    CASH_EQUIV: liquidity
+    '7203': jun_core
+    '9444': other
+    '2353': other
+    '7201': other
+    SMH: satellite_core
+    PLTR: satellite
+    CIBR: satellite_core
+    MSFT: jun_core
+    URA: satellite_core
+    NISSEI_SOX_1: satellite_core
+    NISSEI_SOX_2: satellite_core
+    RAKUTEN_ALL_COUNTRY_1: core
+    RAKUTEN_ALL_COUNTRY_2: core
+    RAKUTEN_SP500: core
+    EMAXIS_SP500_1: core
+    EMAXIS_SP500_2: core
+    EMAXIS_SP500_3: core
+    EMAXIS_ALL_COUNTRY: core
+    PENSION_EMAXIS_ALL_COUNTRY: pension
+    POINTS_MILES: other

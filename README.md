@@ -15,12 +15,13 @@
 
 1. Money Forward の資産キャプチャを ChatGPT に貼る
 2. [prompts/moneyforward_normalization_prompt.md](/Users/tappeiyoshida/Documents/stock/prompts/moneyforward_normalization_prompt.md) を使って YAML に正規化する
-3. YAML を [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/Documents/stock/data/normalized/snapshot_2026_03.yaml) の形式で保存する
-4. CLI で市場データ取得、比率計算、ルール計算、警告抽出を実行する
-5. 生成された月次レビュー用プロンプトを ChatGPT に貼る
-6. ChatGPT の回答をテキストで保存する
-7. CLI でレビュー取り込み、差分保存、Codex 向け修正プロンプト生成を行う
-8. 必要なら Codex に修正プロンプトを渡してスクリプトを改善する
+3. ChatGPT の返した YAML を `data/normalized/snapshot_YYYY_MM.yaml` という命名規約で保存する
+4. 例として [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/Documents/stock/data/normalized/snapshot_2026_03.yaml) の形式を使う
+5. CLI で市場データ取得、比率計算、ルール計算、警告抽出を実行する
+6. 生成された月次レビュー用プロンプトを ChatGPT に貼る
+7. ChatGPT の回答をテキストで保存する
+8. CLI でレビュー取り込み、差分保存、Codex 向け修正プロンプト生成を行う
+9. 必要なら Codex に修正プロンプトを渡してスクリプトを改善する
 
 ## 役割分担
 
@@ -40,8 +41,11 @@ python -m pip install -e .
 ## 入力 YAML の作り方
 
 - 画像 OCR は Python に入れず、ChatGPT に YAML 正規化だけをさせます
+- ChatGPT はファイルを書かず、チャット上に YAML を返します。ユーザがそれを保存します
+- 保存ファイル名は `snapshot_date` に合わせて `data/normalized/snapshot_YYYY_MM.yaml` とします
 - 読み取れない値は `null` にします
 - `asset_class` は `liquidity`, `core`, `jun_core`, `satellite_core`, `satellite`, `pension`, `other` のいずれかを付けます
+- `currency_base` は原則 `JPY` を入れます
 - サンプルは [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/Documents/stock/data/normalized/snapshot_2026_03.yaml) を参照してください
 
 ## 主要コマンド
@@ -113,4 +117,3 @@ python -m monthly_limit_order_review.cli monthly-run \
 - 発注は人間が証券会社で手動で行います
 - 本ツールは助言補助と構造化補助のための CLI です
 - 自動発注、証券会社 API 接続、ブラウザ自動操作は実装していません
-

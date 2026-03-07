@@ -14,6 +14,7 @@ LOGGER = logging.getLogger(__name__)
 
 ROOT_REQUIRED_FIELDS = ("snapshot_date", "currency_base", "total_assets_jpy", "holdings")
 OPTIONAL_HOLDING_FIELDS = ("quantity", "avg_cost", "current_price")
+TOTAL_ASSETS_TOLERANCE_JPY = Decimal("10")
 
 
 def load_snapshot(path: str | Path) -> PortfolioSnapshot:
@@ -77,7 +78,7 @@ def load_snapshot(path: str | Path) -> PortfolioSnapshot:
     )
 
     holdings_total = sum((holding.market_value_jpy for holding in holdings), start=Decimal("0"))
-    if abs(holdings_total - snapshot.total_assets_jpy) > Decimal("1"):
+    if abs(holdings_total - snapshot.total_assets_jpy) > TOTAL_ASSETS_TOLERANCE_JPY:
         message = (
             "Sum of holding market values does not match total_assets_jpy: "
             f"{holdings_total} vs {snapshot.total_assets_jpy}"
@@ -86,4 +87,3 @@ def load_snapshot(path: str | Path) -> PortfolioSnapshot:
         LOGGER.warning(message)
 
     return snapshot
-

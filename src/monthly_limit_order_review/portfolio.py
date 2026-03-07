@@ -3,20 +3,26 @@ from __future__ import annotations
 from collections import defaultdict
 from decimal import Decimal
 
-from .models import BucketAllocation, PortfolioSnapshot, PortfolioWarning
+from .models import BucketAllocation, Holding, PortfolioSnapshot, PortfolioWarning
 from .utils import percent, quantize, to_optional_decimal
 
-SEMICONDUCTOR_SYMBOLS = {"NIKKO_SOX_FUND", "SMH"}
+SEMICONDUCTOR_SYMBOL_KEYWORDS = ("SOX", "SMH", "SOXX", "SEMICONDUCTOR")
+SEMICONDUCTOR_NAME_KEYWORDS = ("SOX", "半導体", "SEMICONDUCTOR")
 
 
 def analyze_portfolio(snapshot: PortfolioSnapshot, policy_config: dict) -> dict:
     bucket_values: dict[str, Decimal] = defaultdict(lambda: Decimal("0"))
     symbol_weights: dict[str, Decimal] = {}
+    semiconductor_symbols: list[str] = []
+    resolved_buckets: dict[str, str] = {}
 
     for holding in snapshot.holdings:
-        bucket = resolve_bucket(holding.symbol, holding.asset_class, policy_config)
+        bucket = resolve_bucket(holding.symbol, holding.asset_class, policy_config, holding.name)
         bucket_values[bucket] += holding.market_value_jpy
         symbol_weights[holding.symbol] = percent(holding.market_value_jpy, snapshot.total_assets_jpy)
+        resolved_buckets[holding.symbol] = bucket
+        if is_semiconductor_holding(holding):
+            semiconductor_symbols.append(holding.symbol)
 
     bucket_allocations = build_bucket_allocations(snapshot, policy_config, bucket_values)
     warnings = build_portfolio_warnings(snapshot, policy_config, bucket_values, symbol_weights, bucket_allocations)
@@ -30,7 +36,7 @@ def analyze_portfolio(snapshot: PortfolioSnapshot, policy_config: dict) -> dict:
             PortfolioWarning(
                 code="semi_exposure_limit",
                 severity="warning",
-                related_symbols=sorted(SEMICONDUCTOR_SYMBOLS),
+                related_symbols=sorted(set(semiconductor_symbols)),
                 message=(
                     "Semiconductor exposure exceeds policy cap: "
                     f"{format_pct(semi_exposure_pct)} > {format_pct(semi_limit)}"
@@ -44,11 +50,17 @@ def analyze_portfolio(snapshot: PortfolioSnapshot, policy_config: dict) -> dict:
         "semi_exposure_pct": semi_exposure_pct,
         "liquidity_jpy": liquidity_jpy,
         "symbol_weights": symbol_weights,
+        "resolved_buckets": resolved_buckets,
     }
 
 
-def resolve_bucket(symbol: str, asset_class: str, policy_config: dict) -> str:
-    return policy_config.get("symbol_to_bucket", {}).get(symbol, asset_class)
+def resolve_bucket(symbol: str, asset_class: str, policy_config: dict, name: str = "") -> str:
+    explicit_bucket = policy_config.get("symbol_to_bucket", {}).get(symbol)
+    if explicit_bucket is not None:
+        return explicit_bucket
+    if is_semiconductor_identifier(symbol, name):
+        return "satellite_core"
+    return asset_class
 
 
 def build_bucket_allocations(
@@ -84,7 +96,7 @@ def build_bucket_allocations(
 
 def calculate_semiconductor_exposure(snapshot: PortfolioSnapshot) -> Decimal:
     semi_value = sum(
-        (holding.market_value_jpy for holding in snapshot.holdings if holding.symbol in SEMICONDUCTOR_SYMBOLS),
+        (holding.market_value_jpy for holding in snapshot.holdings if is_semiconductor_holding(holding)),
         start=Decimal("0"),
     )
     return percent(semi_value, snapshot.total_assets_jpy)
@@ -215,7 +227,7 @@ def build_portfolio_warnings(
     high_vol_limit = to_optional_decimal(risk_limits.get("single_high_vol_name_max_pct"))
     if high_vol_limit is not None:
         for holding in snapshot.holdings:
-            bucket = resolve_bucket(holding.symbol, holding.asset_class, policy_config)
+            bucket = resolve_bucket(holding.symbol, holding.asset_class, policy_config, holding.name)
             if bucket != "satellite":
                 continue
             weight = symbol_weights.get(holding.symbol, Decimal("0"))
@@ -238,3 +250,14 @@ def build_portfolio_warnings(
 def format_pct(value: Decimal) -> str:
     return f"{quantize(value * Decimal('100'), 2)}%"
 
+
+def is_semiconductor_holding(holding: Holding) -> bool:
+    return is_semiconductor_identifier(holding.symbol, holding.name)
+
+
+def is_semiconductor_identifier(symbol: str, name: str) -> bool:
+    symbol_upper = symbol.upper()
+    name_upper = name.upper()
+    return any(keyword in symbol_upper for keyword in SEMICONDUCTOR_SYMBOL_KEYWORDS) or any(
+        keyword in name_upper or keyword in name for keyword in SEMICONDUCTOR_NAME_KEYWORDS
+    )

@@ -13,4 +13,5 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "## 5. SOX 判定材料" in prompt
     assert "【Codex向け修正要約】" in prompt
     assert "| MSFT |" in prompt
-
+    assert "0段以上の任意段数" in prompt
+    assert "ルール上の判断" in prompt

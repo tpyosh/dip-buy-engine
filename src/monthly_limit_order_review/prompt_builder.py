@@ -10,6 +10,7 @@ from .utils import month_key, quantize
 
 def build_monthly_review_prompt(computation: MonthlyComputation, template_text: str) -> str:
     snapshot = computation.snapshot
+    resolved_buckets = computation.metadata.get("resolved_buckets", {})
     grouped_candidates: dict[str, list] = defaultdict(list)
     for candidate in computation.candidate_orders:
         grouped_candidates[candidate.symbol].append(candidate)
@@ -28,9 +29,13 @@ def build_monthly_review_prompt(computation: MonthlyComputation, template_text: 
 
     lines.extend(["", "## 2. この月の snapshot 要約"])
     for holding in snapshot.holdings:
+        effective_bucket = resolved_buckets.get(holding.symbol, holding.asset_class)
+        bucket_label = effective_bucket
+        if effective_bucket != holding.asset_class:
+            bucket_label = f"{effective_bucket} (raw={holding.asset_class})"
         lines.append(
             "- "
-            f"{holding.symbol} | {holding.asset_class} | value_jpy={holding.market_value_jpy} | "
+            f"{holding.symbol} | {bucket_label} | value_jpy={holding.market_value_jpy} | "
             f"price={holding.current_price if holding.current_price is not None else 'null'} | "
             f"quantity={holding.quantity if holding.quantity is not None else 'null'}"
         )
@@ -82,9 +87,13 @@ def build_monthly_review_prompt(computation: MonthlyComputation, template_text: 
             "## 7. ChatGPT に期待する出力形式",
             "以下の見出しを維持してください。",
             "【今月の指値提案】",
+            "- 各銘柄について 0段以上の任意段数で提案してよい",
             "- 銘柄ごとの推奨指値",
             "- 推奨株数",
             "- 提案理由",
+            "- 0段の場合は「今月は見送り」と明記する",
+            "- Python 候補より段数を減らした場合は、その理由が『ルール上の判断』か『今月の裁量判断』かを明記する",
+            "- Python 候補より段数を増やした場合も、その理由を明記する",
             "",
             "【SOX投信判定】",
             "- 買う / 買わない",
@@ -119,6 +128,7 @@ def build_monthly_review_prompt(computation: MonthlyComputation, template_text: 
             "- 毎月の運用と四半期ごとのルール変更を分離してレビューしてください。",
             "- 半導体エクスポージャの合算管理が妥当か確認してください。",
             "- PLTR の浅い押し目候補抑制ロジックの是非も評価してください。",
+            "- 指値段数は各銘柄 0段以上の任意とし、1段しか出さない場合は『1段にした理由』を必ず書いてください。",
             "",
             "## 9. 必須の Codex 向け修正要約",
             "- must / should / nice_to_have を必ず埋めてください。",
@@ -128,4 +138,3 @@ def build_monthly_review_prompt(computation: MonthlyComputation, template_text: 
         ]
     )
     return "\n".join(lines).strip() + "\n"
-

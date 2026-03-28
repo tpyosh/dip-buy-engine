@@ -49,3 +49,65 @@ cash_policy:
   hard_floor_jpy: 1000000
   preferred_total_assets_pct_range: [0.05, 0.10]
 
+exposure_groups:
+  semiconductor:
+    symbols:
+      - "SMH"
+      - "NIKKO_SOX_FUND"
+    symbol_prefixes:
+      - "NISSEI_SOX_"
+      - "NIKKO_SOX_"
+    name_keywords:
+      - "SOX"
+      - "半導体"
+      - "semiconductor"
+    optional_symbols:
+      MSFT: false
+
+long_term_thesis:
+  URA:
+    enabled: true
+    thesis_id: nuclear_revival
+    long_term_thesis_summary: >
+      脱炭素、電力需要増、エネルギー安全保障を背景に、
+      原子力需要が中長期で再評価されるという仮説。
+    key_risk_if_thesis_breaks:
+      - 炭素回収技術の量産化・低コスト化
+      - 再エネ＋蓄電の経済性改善
+      - 政策転換
+      - 原子力新設の採算悪化
+    review_priority: high
+
+  PLTR:
+    enabled: true
+    thesis_id: defense_ai_gov_software_scaling
+    long_term_thesis_summary: >
+      政府・防衛・大企業向けの高付加価値ソフトウェア需要が継続し、
+      AI時代のプラットフォーム企業として拡大するという仮説。
+    key_risk_if_thesis_breaks:
+      - 政府需要の鈍化
+      - 競争激化
+      - 収益化の鈍化
+    review_priority: medium
+
+  CIBR:
+    enabled: true
+    thesis_id: persistent_cybersecurity_spending
+    long_term_thesis_summary: >
+      サイバーセキュリティ支出は構造的に維持・拡大するという仮説。
+    key_risk_if_thesis_breaks:
+      - 支出成長の鈍化
+      - バリュエーション過熱後の長期低迷
+    review_priority: medium
+
+  MSFT:
+    enabled: true
+    thesis_id: hyperscaler_ai_platform_compounding
+    long_term_thesis_summary: >
+      クラウド・AI基盤・企業ソフトウェアの複合優位により、
+      長期で利益成長が継続するという仮説。
+    key_risk_if_thesis_breaks:
+      - AI投資回収の停滞
+      - 規制強化
+      - 競争優位の低下
+    review_priority: medium

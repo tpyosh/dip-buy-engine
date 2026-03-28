@@ -10,7 +10,7 @@ SECTION_HEADINGS = {
     "monthly_proposals": ["今月の指値提案", "指値提案"],
     "sox_decision": ["SOX投信判定", "SOX判定"],
     "portfolio_diagnosis": ["ポートフォリオ診断", "資産配分診断"],
-    "rule_review": ["ルール改善レビュー", "改善レビュー"],
+    "rule_review": ["四半期ルール見直し", "ルール改善レビュー", "改善レビュー"],
     "codex_summary": ["Codex向け修正要約", "Codex 向け修正要約", "修正要約"],
 }
 
@@ -142,4 +142,3 @@ def extract_bullets(section_text: str) -> list[str]:
         if line.startswith(("-", "*")):
             bullets.append(line.lstrip("-* ").strip())
     return bullets
-

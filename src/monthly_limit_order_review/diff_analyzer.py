@@ -25,7 +25,12 @@ def build_proposal_diffs(
         python_candidate = python_map.get(symbol)
         review_candidate = review_map.get(symbol)
         price_diff_pct = None
-        if python_candidate is not None and review_candidate is not None and review_candidate.recommended_price is not None:
+        if (
+            python_candidate is not None
+            and python_candidate.limit_price not in (None, Decimal("0"))
+            and review_candidate is not None
+            and review_candidate.recommended_price is not None
+        ):
             if python_candidate.limit_price != 0:
                 price_diff_pct = quantize(
                     (
@@ -66,4 +71,3 @@ def select_primary_candidates(candidate_orders: list[CandidateOrder]) -> dict[st
         if current.suppressed and not candidate.suppressed:
             selected[candidate.symbol] = candidate
     return selected
-

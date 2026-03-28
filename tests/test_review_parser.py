@@ -19,3 +19,14 @@ def test_review_parser_warns_when_sections_are_missing() -> None:
     assert feedback.parser_warnings
     assert any("Section not found" in warning for warning in feedback.parser_warnings)
 
+
+def test_review_parser_accepts_quarterly_rule_review_heading() -> None:
+    feedback = parse_review_feedback(
+        "【今月の指値提案】\n- MSFT: 指値 468.00 USD, 1株\n"
+        "【SOX投信判定】\n- 買わない\n"
+        "【ポートフォリオ診断】\n- core を優先\n"
+        "【四半期ルール見直し】\n- 大きなルール変更提案なし\n"
+        "【Codex向け修正要約】\n```md\nmust:\n- なし\n```"
+    )
+
+    assert "大きなルール変更提案なし" in feedback.rule_review

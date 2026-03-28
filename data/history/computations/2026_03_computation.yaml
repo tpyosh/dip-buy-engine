@@ -182,7 +182,7 @@ snapshot:
   - Holding POINTS_MILES is missing quantity; stored as null.
   - Holding POINTS_MILES is missing avg_cost; stored as null.
   - Holding POINTS_MILES is missing current_price; stored as null.
-generated_at: '2026-03-07T06:46:57Z'
+generated_at: '2026-03-07T11:58:03Z'
 bucket_allocations:
 - bucket: core
   market_value_jpy: 5518029
@@ -238,6 +238,7 @@ market_references:
   yfinance_symbol: CIBR
   current_price: 66
   mean_close_20d: 65.0615
+  recent_high_21d: 68.83
   recent_high_63d: 76.1
   currency: USD
   as_of: '2026-03-06'
@@ -245,6 +246,7 @@ market_references:
   yfinance_symbol: URA
   current_price: 48.78
   mean_close_20d: 53.1685
+  recent_high_21d: 56.45
   recent_high_63d: 61.81
   currency: USD
   as_of: '2026-03-06'
@@ -252,6 +254,7 @@ market_references:
   yfinance_symbol: PLTR
   current_price: 157.16
   mean_close_20d: 138.762
+  recent_high_21d: 157.16
   recent_high_63d: 194.17
   currency: USD
   as_of: '2026-03-06'
@@ -259,6 +262,7 @@ market_references:
   yfinance_symbol: MSFT
   current_price: 408.96
   mean_close_20d: 401.177
+  recent_high_21d: 413.6
   recent_high_63d: 492.02
   currency: USD
   as_of: '2026-03-06'
@@ -266,6 +270,7 @@ market_references:
   yfinance_symbol: SMH
   current_price: 380.56
   mean_close_20d: 406.8
+  recent_high_21d: 426.16
   recent_high_63d: 426.16
   currency: USD
   as_of: '2026-03-06'
@@ -273,11 +278,69 @@ market_references:
   yfinance_symbol: USDJPY=X
   current_price: 157.534
   mean_close_20d: 155.3215
+  recent_high_21d: 157.773
   recent_high_63d: 159.179
   currency: JPY
   as_of: '2026-03-06'
+- symbol: RAKUTEN_ALL_COUNTRY_1
+  yfinance_symbol: VT
+  current_price: 141.93
+  mean_close_20d: 146.5585
+  recent_high_21d: 148.91
+  recent_high_63d: 148.91
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: RAKUTEN_ALL_COUNTRY_2
+  yfinance_symbol: VT
+  current_price: 141.93
+  mean_close_20d: 146.5585
+  recent_high_21d: 148.91
+  recent_high_63d: 148.91
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: RAKUTEN_SP500
+  yfinance_symbol: VOO
+  current_price: 618.43
+  mean_close_20d: 630.8555
+  recent_high_21d: 638.23
+  recent_high_63d: 639.7
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: EMAXIS_SP500_1
+  yfinance_symbol: VOO
+  current_price: 618.43
+  mean_close_20d: 630.8555
+  recent_high_21d: 638.23
+  recent_high_63d: 639.7
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: EMAXIS_SP500_2
+  yfinance_symbol: VOO
+  current_price: 618.43
+  mean_close_20d: 630.8555
+  recent_high_21d: 638.23
+  recent_high_63d: 639.7
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: EMAXIS_SP500_3
+  yfinance_symbol: VOO
+  current_price: 618.43
+  mean_close_20d: 630.8555
+  recent_high_21d: 638.23
+  recent_high_63d: 639.7
+  currency: USD
+  as_of: '2026-03-06'
+- symbol: EMAXIS_ALL_COUNTRY
+  yfinance_symbol: VT
+  current_price: 141.93
+  mean_close_20d: 146.5585
+  recent_high_21d: 148.91
+  recent_high_63d: 148.91
+  currency: USD
+  as_of: '2026-03-06'
 candidate_orders:
 - symbol: CIBR
+  bucket: satellite_core
   base_price: 65.0615
   current_price: 66
   limit_price: 61.81
@@ -286,10 +349,15 @@ candidate_orders:
   estimated_cost_jpy: 9737
   currency: USD
   drawdown_pct: -5
+  drawdown_rule: -5% x 1
   reference_method: mean_close_20d
   suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: shallow_candidate,bucket_over_target,default_deep_only_due_to_bucket_over_target
   suppression_reasons: []
 - symbol: CIBR
+  bucket: satellite_core
   base_price: 65.0615
   current_price: 66
   limit_price: 59.86
@@ -298,10 +366,15 @@ candidate_orders:
   estimated_cost_jpy: 9430
   currency: USD
   drawdown_pct: -8
+  drawdown_rule: -8% x 1
   reference_method: mean_close_20d
   suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: bucket_over_target,default_deep_only_due_to_bucket_over_target
   suppression_reasons: []
 - symbol: CIBR
+  bucket: satellite_core
   base_price: 65.0615
   current_price: 66
   limit_price: 57.25
@@ -310,10 +383,15 @@ candidate_orders:
   estimated_cost_jpy: 9019
   currency: USD
   drawdown_pct: -12
+  drawdown_rule: -12% x 1
   reference_method: mean_close_20d
   suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: bucket_over_target,default_deep_only_due_to_bucket_over_target
   suppression_reasons: []
 - symbol: URA
+  bucket: satellite_core
   base_price: 53.1685
   current_price: 48.78
   limit_price: 49.98
@@ -322,10 +400,16 @@ candidate_orders:
   estimated_cost_jpy: 15747
   currency: USD
   drawdown_pct: -6
+  drawdown_rule: -6% x 2
   reference_method: mean_close_20d
-  suppressed: false
-  suppression_reasons: []
+  suppressed: true
+  suppressed_reason_code: limit_above_current
+  suppressed_reason_text: Calculated limit price is not below the current price.
+  note_for_chatgpt: shallow_candidate,bucket_over_target,default_deep_only_due_to_bucket_over_target,limit_above_current
+  suppression_reasons:
+  - Calculated limit price is not below the current price.
 - symbol: URA
+  bucket: satellite_core
   base_price: 53.1685
   current_price: 48.78
   limit_price: 47.85
@@ -334,10 +418,15 @@ candidate_orders:
   estimated_cost_jpy: 15076
   currency: USD
   drawdown_pct: -10
+  drawdown_rule: -10% x 2
   reference_method: mean_close_20d
   suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: bucket_over_target,default_deep_only_due_to_bucket_over_target
   suppression_reasons: []
 - symbol: URA
+  bucket: satellite_core
   base_price: 53.1685
   current_price: 48.78
   limit_price: 45.19
@@ -346,10 +435,15 @@ candidate_orders:
   estimated_cost_jpy: 14238
   currency: USD
   drawdown_pct: -15
+  drawdown_rule: -15% x 2
   reference_method: mean_close_20d
   suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: deep_drawdown_candidate,bucket_over_target,default_allow_deep_drawdown_even_if_bucket_over_target
   suppression_reasons: []
 - symbol: PLTR
+  bucket: satellite
   base_price: 138.762
   current_price: 157.16
   limit_price: 124.89
@@ -358,10 +452,17 @@ candidate_orders:
   estimated_cost_jpy: 19674
   currency: USD
   drawdown_pct: -10
+  drawdown_rule: -10% x 1
   reference_method: mean_close_20d
-  suppressed: false
-  suppression_reasons: []
+  suppressed: true
+  suppressed_reason_code: high_volatility_shallow_suppressed
+  suppressed_reason_text: High-volatility names default to deeper pullbacks before
+    adding.
+  note_for_chatgpt: high_volatility_name,rule_based_high_volatility_shallow_suppression,high_volatility_shallow_suppressed
+  suppression_reasons:
+  - High-volatility names default to deeper pullbacks before adding.
 - symbol: PLTR
+  bucket: satellite
   base_price: 138.762
   current_price: 157.16
   limit_price: 117.95
@@ -370,10 +471,15 @@ candidate_orders:
   estimated_cost_jpy: 37162
   currency: USD
   drawdown_pct: -15
+  drawdown_rule: -15% x 2
   reference_method: mean_close_20d
   suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: deep_drawdown_candidate,high_volatility_name
   suppression_reasons: []
 - symbol: PLTR
+  bucket: satellite
   base_price: 138.762
   current_price: 157.16
   limit_price: 108.23
@@ -382,10 +488,15 @@ candidate_orders:
   estimated_cost_jpy: 34100
   currency: USD
   drawdown_pct: -22
+  drawdown_rule: -22% x 2
   reference_method: mean_close_20d
   suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: deep_drawdown_candidate,high_volatility_name
   suppression_reasons: []
 - symbol: MSFT
+  bucket: jun_core
   base_price: 401.177
   current_price: 408.96
   limit_price: 377.11
@@ -394,10 +505,15 @@ candidate_orders:
   estimated_cost_jpy: 59408
   currency: USD
   drawdown_pct: -6
+  drawdown_rule: -6% x 1
   reference_method: mean_close_20d
   suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: shallow_candidate
   suppression_reasons: []
 - symbol: MSFT
+  bucket: jun_core
   base_price: 401.177
   current_price: 408.96
   limit_price: 361.06
@@ -406,10 +522,15 @@ candidate_orders:
   estimated_cost_jpy: 113758
   currency: USD
   drawdown_pct: -10
+  drawdown_rule: -10% x 2
   reference_method: mean_close_20d
   suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: null
   suppression_reasons: []
 - symbol: MSFT
+  bucket: jun_core
   base_price: 401.177
   current_price: 408.96
   limit_price: 328.97
@@ -418,8 +539,12 @@ candidate_orders:
   estimated_cost_jpy: 103648
   currency: USD
   drawdown_pct: -18
+  drawdown_rule: -18% x 2
   reference_method: mean_close_20d
   suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: deep_drawdown_candidate
   suppression_reasons: []
 warnings:
 - code: core_below_range
@@ -439,40 +564,50 @@ warnings:
   severity: info
   related_symbols:
   - liquidity
-- code: snapshot_warning
+- code: limit_above_current
+  message: 'URA: Calculated limit price is not below the current price.'
+  severity: warning
+  related_symbols:
+  - URA
+- code: high_volatility_shallow_suppressed
+  message: 'PLTR: High-volatility names default to deeper pullbacks before adding.'
+  severity: warning
+  related_symbols:
+  - PLTR
+- code: missing_quantity
   message: Holding CASH_EQUIV is missing quantity; stored as null.
   severity: info
   related_symbols: []
-- code: snapshot_warning
+- code: missing_avg_cost
   message: Holding CASH_EQUIV is missing avg_cost; stored as null.
   severity: info
   related_symbols: []
-- code: snapshot_warning
+- code: missing_current_price
   message: Holding CASH_EQUIV is missing current_price; stored as null.
   severity: info
   related_symbols: []
-- code: snapshot_warning
+- code: missing_quantity
   message: Holding PENSION_EMAXIS_ALL_COUNTRY is missing quantity; stored as null.
   severity: info
   related_symbols: []
-- code: snapshot_warning
+- code: missing_avg_cost
   message: Holding PENSION_EMAXIS_ALL_COUNTRY is missing avg_cost; stored as null.
   severity: info
   related_symbols: []
-- code: snapshot_warning
+- code: missing_current_price
   message: Holding PENSION_EMAXIS_ALL_COUNTRY is missing current_price; stored as
     null.
   severity: info
   related_symbols: []
-- code: snapshot_warning
+- code: missing_quantity
   message: Holding POINTS_MILES is missing quantity; stored as null.
   severity: info
   related_symbols: []
-- code: snapshot_warning
+- code: missing_avg_cost
   message: Holding POINTS_MILES is missing avg_cost; stored as null.
   severity: info
   related_symbols: []
-- code: snapshot_warning
+- code: missing_current_price
   message: Holding POINTS_MILES is missing current_price; stored as null.
   severity: info
   related_symbols: []
@@ -480,16 +615,218 @@ semi_exposure_pct: 0.1183
 liquidity_jpy: 14526912
 sox_buy_signal:
   proxy_symbol: SMH
-  method: drawdown_from_recent_high_close
   current_price: 380.56
+  recent_high_21d: 426.16
   recent_high_63d: 426.16
   drawdown_pct: -10.7
-  buy_zone_min_pct: -10
-  buy_zone_max_pct: -5
+  drawdown_pct_from_21d_high: -10.7
+  drawdown_pct_from_63d_high: -10.7
+  buy_zone: -10% to -5%
+  buy_zone_rule_text: drawdown from 63d high between -10% and -5%
   within_buy_zone: false
+  within_buy_zone_boolean: false
+  near_boundary_boolean: true
   monthly_buy_budget_jpy:
     min: 100000
     max: 200000
+  related_bucket_actual_pct: 0.1622
+  related_bucket_target_pct: 0.15
+  semiconductor_exposure_total_pct: 0.1183
+  priority_lowered_boolean: true
+  priority_lowered_reason: related_bucket_over_target
+portfolio_summary:
+  core_actual_pct: 0.1688
+  core_target_pct: 0.45
+  core_delta_pct: -0.2812
+  liquidity_actual_pct: 0.4443
+  liquidity_target_pct: 0.1
+  cash_excess_pct: 0.3443
+  core_bucket_total_jpy: 5518029
+  total_assets_jpy: 32692503
+core_buy_materials:
+  core_actual_pct: 0.1688
+  core_target_pct: 0.45
+  core_delta_pct: -0.2812
+  liquidity_actual_pct: 0.4443
+  liquidity_target_pct: 0.1
+  cash_excess_pct: 0.3443
+  core_bucket_total_jpy: 5518029
+  monthly_core_budget_policy:
+    base_monthly_buy_amount_jpy: 100000
+    monthly_core_buy_budget_min_jpy: 100000
+    monthly_core_buy_budget_max_jpy: 300000
+    budget_tiers:
+      standard:
+        budget_jpy: 100000
+      aggressive:
+        budget_jpy: 300000
+    override_conditions:
+      core_shortfall_pct_gte: 0.15
+      cash_excess_pct_gte: 0.15
+      budget_tier: aggressive
+      reason_code: core_underweight_and_cash_overweight
+  monthly_core_buy_budget_min_jpy: 100000
+  monthly_core_buy_budget_max_jpy: 300000
+  recommended_monthly_core_buy_budget_jpy: 300000
+  monthly_core_budget_tier: aggressive
+  monthly_core_budget_override_active: true
+  monthly_core_budget_override_reason: core_underweight_and_cash_overweight
+  core_constituents:
+  - symbol: RAKUTEN_ALL_COUNTRY_1
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド（楽天・プラス・オールカントリー）
+    quantity: 949731
+    value_jpy: 1657376
+    current_price: 17451
+    reference_symbol: VT
+    reference_current_price: 141.93
+    recent_high_21d: 148.91
+    recent_high_63d: 148.91
+    drawdown_pct_from_recent_high: -4.69
+  - symbol: RAKUTEN_ALL_COUNTRY_2
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド（楽天・プラス・オールカントリー）
+    quantity: 725688
+    value_jpy: 1266398
+    current_price: 17451
+    reference_symbol: VT
+    reference_current_price: 141.93
+    recent_high_21d: 148.91
+    recent_high_63d: 148.91
+    drawdown_pct_from_recent_high: -4.69
+  - symbol: RAKUTEN_SP500
+    name: 楽天・プラス・S&P500インデックス・ファンド（楽天・プラス・S&P500）
+    quantity: 106530
+    value_jpy: 186790
+    current_price: 17534
+    reference_symbol: VOO
+    reference_current_price: 618.43
+    recent_high_21d: 638.23
+    recent_high_63d: 639.7
+    drawdown_pct_from_recent_high: -3.32
+  - symbol: EMAXIS_SP500_1
+    name: eMAXIS Slim 米国株式(S&P500)
+    quantity: 44024
+    value_jpy: 173481
+    current_price: 39406
+    reference_symbol: VOO
+    reference_current_price: 618.43
+    recent_high_21d: 638.23
+    recent_high_63d: 639.7
+    drawdown_pct_from_recent_high: -3.32
+  - symbol: EMAXIS_SP500_2
+    name: eMAXIS Slim 米国株式(S&P500)
+    quantity: 348947
+    value_jpy: 1375061
+    current_price: 39406
+    reference_symbol: VOO
+    reference_current_price: 618.43
+    recent_high_21d: 638.23
+    recent_high_63d: 639.7
+    drawdown_pct_from_recent_high: -3.32
+  - symbol: EMAXIS_SP500_3
+    name: eMAXIS Slim 米国株式(S&P500)
+    quantity: 170193
+    value_jpy: 670663
+    current_price: 39406
+    reference_symbol: VOO
+    reference_current_price: 618.43
+    recent_high_21d: 638.23
+    recent_high_63d: 639.7
+    drawdown_pct_from_recent_high: -3.32
+  - symbol: EMAXIS_ALL_COUNTRY
+    name: eMAXIS Slim 全世界株式(オール・カントリー)
+    quantity: 55611
+    value_jpy: 188260
+    current_price: 33853
+    reference_symbol: VT
+    reference_current_price: 141.93
+    recent_high_21d: 148.91
+    recent_high_63d: 148.91
+    drawdown_pct_from_recent_high: -4.69
+exposure_breakdown:
+  semiconductor_exposure_total_pct: 0.1183
+  semiconductor_exposure_total_jpy: 3867660
+  breakdown:
+  - symbol: SMH
+    value_jpy: 62457
+    bucket: satellite_core
+    exposure_type: direct_semiconductor
+    included_in_semiconductor_exposure: 'yes'
+    inclusion_reason: matched_exposure_group_rule
+  - symbol: MSFT
+    value_jpy: 259516
+    bucket: jun_core
+    exposure_type: config_optional_symbol
+    included_in_semiconductor_exposure: 'no'
+    inclusion_reason: config_optional_excluded
+  - symbol: NISSEI_SOX_1
+    value_jpy: 2566263
+    bucket: satellite_core
+    exposure_type: direct_semiconductor
+    included_in_semiconductor_exposure: 'yes'
+    inclusion_reason: matched_exposure_group_rule
+  - symbol: NISSEI_SOX_2
+    value_jpy: 1238940
+    bucket: satellite_core
+    exposure_type: direct_semiconductor
+    included_in_semiconductor_exposure: 'yes'
+    inclusion_reason: matched_exposure_group_rule
+long_term_thesis_targets:
+- symbol: URA
+  bucket: satellite_core
+  current_value_jpy: 521959
+  portfolio_pct: 0.016
+  thesis_id: nuclear_revival
+  long_term_thesis_summary: '脱炭素、電力需要増、エネルギー安全保障を背景に、 原子力需要が中長期で再評価されるという仮説。
+
+    '
+  key_risk_if_thesis_breaks:
+  - 炭素回収技術の量産化・低コスト化
+  - 再エネ＋蓄電の経済性改善
+  - 政策転換
+  - 原子力新設の採算悪化
+  review_priority: high
+  web_review_required: 'yes'
+- symbol: CIBR
+  bucket: satellite_core
+  current_value_jpy: 914628
+  portfolio_pct: 0.028
+  thesis_id: persistent_cybersecurity_spending
+  long_term_thesis_summary: 'サイバーセキュリティ支出は構造的に維持・拡大するという仮説。
+
+    '
+  key_risk_if_thesis_breaks:
+  - 支出成長の鈍化
+  - バリュエーション過熱後の長期低迷
+  review_priority: medium
+  web_review_required: 'yes'
+- symbol: MSFT
+  bucket: jun_core
+  current_value_jpy: 259516
+  portfolio_pct: 0.0079
+  thesis_id: hyperscaler_ai_platform_compounding
+  long_term_thesis_summary: 'クラウド・AI基盤・企業ソフトウェアの複合優位により、 長期で利益成長が継続するという仮説。
+
+    '
+  key_risk_if_thesis_breaks:
+  - AI投資回収の停滞
+  - 規制強化
+  - 競争優位の低下
+  review_priority: medium
+  web_review_required: 'yes'
+- symbol: PLTR
+  bucket: satellite
+  current_value_jpy: 217069
+  portfolio_pct: 0.0066
+  thesis_id: defense_ai_gov_software_scaling
+  long_term_thesis_summary: '政府・防衛・大企業向けの高付加価値ソフトウェア需要が継続し、 AI時代のプラットフォーム企業として拡大するという仮説。
+
+    '
+  key_risk_if_thesis_breaks:
+  - 政府需要の鈍化
+  - 競争激化
+  - 収益化の鈍化
+  review_priority: medium
+  web_review_required: 'yes'
 metadata:
   snapshot_path: data/normalized/snapshot_2026_03.yaml
   resolved_buckets:

@@ -7,10 +7,18 @@ from pathlib import Path
 import pytest
 
 from monthly_limit_order_review.models import MarketReference, MonthlyComputation
-from monthly_limit_order_review.portfolio import analyze_portfolio
-from monthly_limit_order_review.rules import calculate_candidate_orders, calculate_sox_buy_signal
+from monthly_limit_order_review.candidate_metrics import compute_candidate_metrics
+from monthly_limit_order_review.exposure_metrics import build_exposure_breakdown
+from monthly_limit_order_review.portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics
+from monthly_limit_order_review.rules import calculate_sox_buy_signal
 from monthly_limit_order_review.snapshot_loader import load_snapshot
 from monthly_limit_order_review.storage import load_yaml
+from monthly_limit_order_review.thesis_metrics import build_long_term_thesis_targets
+from monthly_limit_order_review.validation import (
+    apply_candidate_validations,
+    build_exposure_validation_warnings,
+    build_validation_warnings,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -107,6 +115,7 @@ def sample_market_references() -> list[MarketReference]:
             yfinance_symbol="CIBR",
             current_price=Decimal("90"),
             mean_close_20d=Decimal("100"),
+            recent_high_21d=Decimal("110"),
             recent_high_63d=Decimal("120"),
             currency="USD",
             as_of=date(2026, 3, 7),
@@ -116,6 +125,7 @@ def sample_market_references() -> list[MarketReference]:
             yfinance_symbol="URA",
             current_price=Decimal("80"),
             mean_close_20d=Decimal("100"),
+            recent_high_21d=Decimal("105"),
             recent_high_63d=Decimal("120"),
             currency="USD",
             as_of=date(2026, 3, 7),
@@ -125,6 +135,7 @@ def sample_market_references() -> list[MarketReference]:
             yfinance_symbol="PLTR",
             current_price=Decimal("70"),
             mean_close_20d=Decimal("100"),
+            recent_high_21d=Decimal("95"),
             recent_high_63d=Decimal("120"),
             currency="USD",
             as_of=date(2026, 3, 7),
@@ -134,7 +145,18 @@ def sample_market_references() -> list[MarketReference]:
             yfinance_symbol="MSFT",
             current_price=Decimal("400"),
             mean_close_20d=Decimal("500"),
+            recent_high_21d=Decimal("520"),
             recent_high_63d=Decimal("550"),
+            currency="USD",
+            as_of=date(2026, 3, 7),
+        ),
+        MarketReference(
+            symbol="ALL_COUNTRY_FUND",
+            yfinance_symbol="VT",
+            current_price=Decimal("105"),
+            mean_close_20d=Decimal("100"),
+            recent_high_21d=Decimal("110"),
+            recent_high_63d=Decimal("120"),
             currency="USD",
             as_of=date(2026, 3, 7),
         ),
@@ -143,6 +165,7 @@ def sample_market_references() -> list[MarketReference]:
             yfinance_symbol="SMH",
             current_price=Decimal("230"),
             mean_close_20d=Decimal("240"),
+            recent_high_21d=Decimal("240"),
             recent_high_63d=Decimal("250"),
             currency="USD",
             as_of=date(2026, 3, 7),
@@ -152,6 +175,7 @@ def sample_market_references() -> list[MarketReference]:
             yfinance_symbol="USDJPY=X",
             current_price=Decimal("150"),
             mean_close_20d=Decimal("150"),
+            recent_high_21d=Decimal("151"),
             recent_high_63d=Decimal("151"),
             currency="JPY",
             as_of=date(2026, 3, 7),
@@ -161,7 +185,16 @@ def sample_market_references() -> list[MarketReference]:
 
 @pytest.fixture
 def sample_portfolio_analysis(sample_snapshot, portfolio_policy_config) -> dict:
-    return analyze_portfolio(sample_snapshot, portfolio_policy_config)
+    return compute_portfolio_metrics(sample_snapshot, portfolio_policy_config)
+
+
+@pytest.fixture
+def sample_exposure_breakdown(sample_snapshot, portfolio_policy_config, sample_portfolio_analysis) -> dict:
+    return build_exposure_breakdown(
+        sample_snapshot,
+        portfolio_policy_config,
+        sample_portfolio_analysis["resolved_buckets"],
+    )
 
 
 @pytest.fixture
@@ -172,13 +205,41 @@ def sample_candidate_orders(
     sample_market_references,
     sample_portfolio_analysis,
 ):
-    return calculate_candidate_orders(
+    raw_candidates = compute_candidate_metrics(
         sample_snapshot,
         buy_rules_config,
         portfolio_policy_config,
         sample_market_references,
-        liquidity_jpy=sample_portfolio_analysis["liquidity_jpy"],
-        symbol_weights=sample_portfolio_analysis["symbol_weights"],
+        sample_portfolio_analysis["resolved_buckets"],
+        sample_portfolio_analysis["bucket_allocations"],
+    )
+    validated_candidates, _ = apply_candidate_validations(raw_candidates, buy_rules_config)
+    return validated_candidates
+
+
+@pytest.fixture
+def sample_core_buy_materials(
+    sample_snapshot,
+    sample_portfolio_analysis,
+    sample_market_references,
+    buy_rules_config,
+):
+    return build_core_buy_materials(
+        sample_snapshot,
+        sample_portfolio_analysis["bucket_allocations"],
+        sample_portfolio_analysis["resolved_buckets"],
+        sample_market_references,
+        buy_rules_config,
+    )
+
+
+@pytest.fixture
+def sample_long_term_thesis_targets(sample_snapshot, portfolio_policy_config, sample_portfolio_analysis) -> list[dict]:
+    return build_long_term_thesis_targets(
+        sample_snapshot,
+        portfolio_policy_config,
+        sample_portfolio_analysis["resolved_buckets"],
+        sample_portfolio_analysis["symbol_weights"],
     )
 
 
@@ -188,19 +249,39 @@ def sample_computation(
     sample_portfolio_analysis,
     sample_market_references,
     sample_candidate_orders,
+    sample_exposure_breakdown,
+    sample_core_buy_materials,
+    sample_long_term_thesis_targets,
     buy_rules_config,
 ) -> MonthlyComputation:
+    core_buy_materials, core_warnings = sample_core_buy_materials
+    warnings = list(sample_portfolio_analysis["warnings"])
+    warnings.extend(build_validation_warnings(sample_snapshot.warnings))
+    warnings.extend(build_exposure_validation_warnings(sample_exposure_breakdown))
+    warnings.extend(core_warnings)
     return MonthlyComputation(
         snapshot=sample_snapshot,
         generated_at="2026-03-07T00:00:00Z",
         bucket_allocations=sample_portfolio_analysis["bucket_allocations"],
         market_references=sample_market_references,
         candidate_orders=sample_candidate_orders,
-        warnings=sample_portfolio_analysis["warnings"],
-        semi_exposure_pct=sample_portfolio_analysis["semi_exposure_pct"],
+        warnings=warnings,
+        semi_exposure_pct=sample_exposure_breakdown["semiconductor_exposure_total_pct"],
         liquidity_jpy=sample_portfolio_analysis["liquidity_jpy"],
-        sox_buy_signal=calculate_sox_buy_signal(buy_rules_config, sample_market_references),
-        metadata={"snapshot_path": str(ROOT / "data/normalized/snapshot_2026_03.yaml")},
+        sox_buy_signal=calculate_sox_buy_signal(
+            buy_rules_config,
+            sample_market_references,
+            bucket_allocations=sample_portfolio_analysis["bucket_allocations"],
+            exposure_breakdown=sample_exposure_breakdown,
+        ),
+        portfolio_summary=sample_portfolio_analysis["portfolio_summary"],
+        core_buy_materials=core_buy_materials,
+        exposure_breakdown=sample_exposure_breakdown,
+        long_term_thesis_targets=sample_long_term_thesis_targets,
+        metadata={
+            "snapshot_path": str(ROOT / "data/normalized/snapshot_2026_03.yaml"),
+            "resolved_buckets": sample_portfolio_analysis["resolved_buckets"],
+        },
     )
 
 
@@ -210,6 +291,10 @@ def sample_review_text() -> str:
 - MSFT: 指値 468.00 USD, 1株, 理由: 20日平均からの押し目として妥当
 - CIBR: 指値 94.00 USD, 1株, 理由: サイバーセキュリティ比率の補強
 - URA: 指値 92.00 USD, 2株, 理由: ボラティリティを踏まえて少額継続
+
+【コア定額買い方針レビュー】
+- core は今月最低 10 万円は買う
+- 今月は core を satellite より優先する
 
 【SOX投信判定】
 - 買う

@@ -6,17 +6,25 @@ import sys
 from datetime import UTC, datetime
 from pathlib import Path
 
+from .candidate_metrics import compute_candidate_metrics
 from .codex_patch_builder import build_codex_patch_prompt, build_codex_patch_request
 from .diff_analyzer import build_proposal_diffs
+from .exposure_metrics import build_exposure_breakdown
 from .market_data import fetch_market_references
-from .models import MonthlyComputation, PortfolioWarning
-from .portfolio import analyze_portfolio
-from .prompt_builder import build_monthly_review_prompt
+from .models import MonthlyComputation
+from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics
+from .prompt_renderer import render_chatgpt_prompt
 from .review_parser import parse_review_feedback
-from .rules import calculate_candidate_orders, calculate_sox_buy_signal
+from .rules import calculate_sox_buy_signal
 from .snapshot_loader import load_snapshot
 from .storage import default_output_paths, load_yaml, read_text, write_text, write_yaml
+from .thesis_metrics import build_long_term_thesis_targets
 from .utils import month_key
+from .validation import (
+    apply_candidate_validations,
+    build_exposure_validation_warnings,
+    build_validation_warnings,
+)
 
 LOGGER = logging.getLogger(__name__)
 
@@ -73,7 +81,7 @@ def handle_generate_review_prompt(args: argparse.Namespace) -> int:
     paths = default_output_paths(project_root, month_key(computation.snapshot.snapshot_date))
     output_path = Path(args.output) if args.output else paths["review_prompt"]
     template_text = read_text(project_root / "prompts/templates/monthly_review_template.md")
-    prompt = build_monthly_review_prompt(computation, template_text)
+    prompt = render_chatgpt_prompt(computation, template_text)
 
     write_yaml(paths["computation"], computation)
     write_text(output_path, prompt)
@@ -127,7 +135,7 @@ def handle_monthly_run(args: argparse.Namespace) -> int:
     computation = compute_monthly(Path(args.snapshot), project_root=project_root)
     paths = default_output_paths(project_root, month_key(computation.snapshot.snapshot_date))
     template_text = read_text(project_root / "prompts/templates/monthly_review_template.md")
-    prompt = build_monthly_review_prompt(computation, template_text)
+    prompt = render_chatgpt_prompt(computation, template_text)
     write_yaml(paths["computation"], computation)
     write_text(paths["review_prompt"], prompt)
     write_text(paths["review_prompt_history"], prompt)
@@ -142,24 +150,48 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     portfolio_policy = load_yaml(project_root / "config/portfolio_policy.yaml")
     tickers = load_yaml(project_root / "config/tickers.yaml")
 
-    portfolio_analysis = analyze_portfolio(snapshot, portfolio_policy)
-    requests = build_reference_requests(buy_rules, tickers)
+    portfolio_analysis = compute_portfolio_metrics(snapshot, portfolio_policy)
+    requests = build_reference_requests(snapshot, buy_rules, tickers, portfolio_analysis["resolved_buckets"])
     market_references = fetch_market_references(requests)
-    candidate_orders = calculate_candidate_orders(
+    exposure_breakdown = build_exposure_breakdown(
+        snapshot,
+        portfolio_policy,
+        portfolio_analysis["resolved_buckets"],
+    )
+    core_buy_materials, core_material_warnings = build_core_buy_materials(
+        snapshot,
+        portfolio_analysis["bucket_allocations"],
+        portfolio_analysis["resolved_buckets"],
+        market_references,
+        buy_rules,
+    )
+    raw_candidates = compute_candidate_metrics(
         snapshot,
         buy_rules,
         portfolio_policy,
         market_references,
-        liquidity_jpy=portfolio_analysis["liquidity_jpy"],
-        symbol_weights=portfolio_analysis["symbol_weights"],
+        portfolio_analysis["resolved_buckets"],
+        portfolio_analysis["bucket_allocations"],
     )
-    sox_buy_signal = calculate_sox_buy_signal(buy_rules, market_references)
+    candidate_orders, candidate_warnings = apply_candidate_validations(raw_candidates, buy_rules)
+    sox_buy_signal = calculate_sox_buy_signal(
+        buy_rules,
+        market_references,
+        bucket_allocations=portfolio_analysis["bucket_allocations"],
+        exposure_breakdown=exposure_breakdown,
+    )
+    long_term_thesis_targets = build_long_term_thesis_targets(
+        snapshot,
+        portfolio_policy,
+        portfolio_analysis["resolved_buckets"],
+        portfolio_analysis["symbol_weights"],
+    )
 
     warnings = list(portfolio_analysis["warnings"])
-    warnings.extend(
-        PortfolioWarning(code="snapshot_warning", severity="info", message=message)
-        for message in snapshot.warnings
-    )
+    warnings.extend(candidate_warnings)
+    warnings.extend(core_material_warnings)
+    warnings.extend(build_exposure_validation_warnings(exposure_breakdown))
+    warnings.extend(build_validation_warnings(snapshot.warnings))
     return MonthlyComputation(
         snapshot=snapshot,
         generated_at=datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
@@ -167,9 +199,13 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         market_references=market_references,
         candidate_orders=candidate_orders,
         warnings=warnings,
-        semi_exposure_pct=portfolio_analysis["semi_exposure_pct"],
+        semi_exposure_pct=exposure_breakdown["semiconductor_exposure_total_pct"],
         liquidity_jpy=portfolio_analysis["liquidity_jpy"],
         sox_buy_signal=sox_buy_signal,
+        portfolio_summary=portfolio_analysis["portfolio_summary"],
+        core_buy_materials=core_buy_materials,
+        exposure_breakdown=exposure_breakdown,
+        long_term_thesis_targets=long_term_thesis_targets,
         metadata={
             "snapshot_path": str(snapshot_path),
             "resolved_buckets": portfolio_analysis["resolved_buckets"],
@@ -177,16 +213,27 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     )
 
 
-def build_reference_requests(buy_rules: dict, tickers: dict) -> dict[str, dict[str, str]]:
+def build_reference_requests(
+    snapshot,
+    buy_rules: dict,
+    tickers: dict,
+    resolved_buckets: dict[str, str],
+) -> dict[str, dict[str, str]]:
     yfinance_symbols = tickers.get("yfinance_symbols", {})
-    request_symbols = list(buy_rules.get("limit_order_rules", {}).keys())
+    required_symbols = list(buy_rules.get("limit_order_rules", {}).keys())
     proxy_symbol = buy_rules.get("sox_buy_judgement", {}).get("proxy_symbol")
-    if proxy_symbol and proxy_symbol not in request_symbols:
-        request_symbols.append(proxy_symbol)
-    request_symbols.append("USDJPY")
+    if proxy_symbol and proxy_symbol not in required_symbols:
+        required_symbols.append(proxy_symbol)
+    required_symbols.append("USDJPY")
+
+    optional_core_symbols = [
+        holding.symbol
+        for holding in snapshot.holdings
+        if resolved_buckets.get(holding.symbol) == "core" and holding.symbol in yfinance_symbols
+    ]
 
     requests: dict[str, dict[str, str]] = {}
-    for symbol in request_symbols:
+    for symbol in required_symbols:
         lookup_key = symbol if symbol != "USDJPY" else "USDJPY"
         yfinance_symbol = yfinance_symbols.get(lookup_key)
         if yfinance_symbol is None:
@@ -194,6 +241,13 @@ def build_reference_requests(buy_rules: dict, tickers: dict) -> dict[str, dict[s
         requests[symbol] = {
             "yfinance_symbol": yfinance_symbol,
             "currency": "JPY" if symbol == "USDJPY" else "USD",
+        }
+    for symbol in optional_core_symbols:
+        if symbol in requests:
+            continue
+        requests[symbol] = {
+            "yfinance_symbol": yfinance_symbols[symbol],
+            "currency": "USD",
         }
     return requests
 

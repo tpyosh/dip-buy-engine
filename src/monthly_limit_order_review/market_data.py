@@ -36,12 +36,14 @@ class MarketDataFetcher:
         as_of = pd.Timestamp(closes.index[-1]).date()
         current_price = quantize(Decimal(str(closes.iloc[-1])), 4)
         mean_close_20d = quantize(Decimal(str(closes.tail(20).mean())), 4)
+        recent_high_21d = quantize(Decimal(str(closes.tail(21).max())), 4)
         recent_high_63d = quantize(Decimal(str(closes.tail(63).max())), 4)
         return MarketReference(
             symbol=symbol,
             yfinance_symbol=yfinance_symbol,
             current_price=current_price,
             mean_close_20d=mean_close_20d,
+            recent_high_21d=recent_high_21d,
             recent_high_63d=recent_high_63d,
             currency=currency,
             as_of=as_of,

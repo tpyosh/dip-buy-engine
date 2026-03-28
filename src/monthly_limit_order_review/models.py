@@ -42,8 +42,9 @@ class BucketAllocation:
 class MarketReference:
     symbol: str
     yfinance_symbol: str
-    current_price: Decimal
+    current_price: Decimal | None
     mean_close_20d: Decimal | None
+    recent_high_21d: Decimal | None
     recent_high_63d: Decimal | None
     currency: str
     as_of: date
@@ -58,16 +59,21 @@ class TrancheRule:
 @dataclass(slots=True)
 class CandidateOrder:
     symbol: str
-    base_price: Decimal
-    current_price: Decimal
-    limit_price: Decimal
+    bucket: str
+    base_price: Decimal | None
+    current_price: Decimal | None
+    limit_price: Decimal | None
     shares: int
-    estimated_cost: Decimal
+    estimated_cost: Decimal | None
     estimated_cost_jpy: Decimal | None
     currency: str
-    drawdown_pct: Decimal
+    drawdown_pct: Decimal | None
+    drawdown_rule: str
     reference_method: str
     suppressed: bool = False
+    suppressed_reason_code: str | None = None
+    suppressed_reason_text: str | None = None
+    note_for_chatgpt: str | None = None
     suppression_reasons: list[str] = field(default_factory=list)
 
 
@@ -90,6 +96,10 @@ class MonthlyComputation:
     semi_exposure_pct: Decimal
     liquidity_jpy: Decimal
     sox_buy_signal: dict
+    portfolio_summary: dict = field(default_factory=dict)
+    core_buy_materials: dict = field(default_factory=dict)
+    exposure_breakdown: dict = field(default_factory=dict)
+    long_term_thesis_targets: list[dict] = field(default_factory=list)
     metadata: dict = field(default_factory=dict)
 
 

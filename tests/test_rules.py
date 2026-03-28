@@ -20,12 +20,28 @@ def test_pltr_shallow_tranche_is_suppressed(sample_candidate_orders) -> None:
     pltr_first = next(candidate for candidate in sample_candidate_orders if candidate.symbol == "PLTR")
 
     assert pltr_first.suppressed is True
-    assert any("PLTR already exceeds policy cap" in reason for reason in pltr_first.suppression_reasons)
+    assert pltr_first.suppressed_reason_code == "limit_above_current"
+    assert pltr_first.suppressed_reason_text == "Calculated limit price is not below the current price."
+    assert "limit_above_current" in (pltr_first.note_for_chatgpt or "")
 
 
-def test_sox_buy_signal_uses_recent_high(buy_rules_config, sample_market_references) -> None:
-    signal = calculate_sox_buy_signal(buy_rules_config, sample_market_references)
+def test_sox_buy_signal_uses_recent_high(
+    buy_rules_config,
+    sample_market_references,
+    sample_portfolio_analysis,
+    sample_exposure_breakdown,
+) -> None:
+    signal = calculate_sox_buy_signal(
+        buy_rules_config,
+        sample_market_references,
+        bucket_allocations=sample_portfolio_analysis["bucket_allocations"],
+        exposure_breakdown=sample_exposure_breakdown,
+    )
 
     assert signal["drawdown_pct"] == Decimal("-8.00")
+    assert signal["drawdown_pct_from_21d_high"] == Decimal("-4.17")
     assert signal["within_buy_zone"] is True
-
+    assert signal["within_buy_zone_boolean"] is True
+    assert signal["near_boundary_boolean"] is False
+    assert signal["priority_lowered_boolean"] is True
+    assert signal["priority_lowered_reason"] == "related_bucket_over_target"

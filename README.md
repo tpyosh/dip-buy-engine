@@ -38,6 +38,39 @@ python -m pip install -r requirements.txt
 python -m pip install -e .
 ```
 
+## Quick Start (ユーザ向け)
+
+1. サンプル YAML をそのまま使って、まずは 1 回実行します
+
+```bash
+python -m monthly_limit_order_review.cli monthly-run \
+  --snapshot data/normalized/snapshot_2026_03.yaml
+```
+
+2. 生成されたレビュー用プロンプトを ChatGPT に貼り、回答を保存します
+
+- 保存先例: `data/history/reviews/chatgpt_review_2026_03.txt`
+
+3. ChatGPT の回答を取り込み、差分と Codex 向け修正プロンプトを作成します
+
+```bash
+python -m monthly_limit_order_review.cli ingest-review \
+  --snapshot data/normalized/snapshot_2026_03.yaml \
+  --review-text data/history/reviews/chatgpt_review_2026_03.txt
+
+python -m monthly_limit_order_review.cli generate-codex-patch \
+  --snapshot data/normalized/snapshot_2026_03.yaml \
+  --review-text data/history/reviews/chatgpt_review_2026_03.txt \
+  --output prompts/generated/codex_patch_prompt_2026_03.md
+```
+
+4. 出力を確認します
+
+- 月次レビュー用プロンプト: `prompts/generated/monthly_review_prompt_2026_03.md`
+- 計算結果: `data/history/computations/2026_03_computation.yaml`
+- 差分結果: `data/history/diffs/2026_03_python_vs_chatgpt.yaml`
+- Codex 向け修正プロンプト: `prompts/generated/codex_patch_prompt_2026_03.md`
+
 ## 入力 YAML の作り方
 
 - 画像 OCR は Python に入れず、ChatGPT に YAML 正規化だけをさせます

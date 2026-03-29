@@ -92,6 +92,11 @@ def build_exposure_breakdown(
         "direct_semiconductor_exposure_jpy": direct_total_jpy,
         "indirect_ai_infra_exposure_pct": percent(indirect_total_jpy, snapshot.total_assets_jpy),
         "indirect_ai_infra_exposure_jpy": indirect_total_jpy,
+        "combined_semiconductor_ai_infra_watch_pct": percent(
+            direct_total_jpy + indirect_total_jpy,
+            snapshot.total_assets_jpy,
+        ),
+        "combined_semiconductor_ai_infra_watch_jpy": direct_total_jpy + indirect_total_jpy,
         "semiconductor_exposure_total_pct": percent(direct_total_jpy, snapshot.total_assets_jpy),
         "semiconductor_exposure_total_jpy": direct_total_jpy,
         "breakdown": breakdown,

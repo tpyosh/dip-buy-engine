@@ -16,6 +16,13 @@ def test_candidate_prices_follow_rules(sample_candidate_orders) -> None:
     assert len(sample_candidate_orders) == 12
 
 
+def test_candidate_avg20_gap_pct_is_precomputed(sample_candidate_orders) -> None:
+    first_msft = next(candidate for candidate in sample_candidate_orders if candidate.symbol == "MSFT")
+
+    assert first_msft.avg20_base_price == Decimal("500")
+    assert first_msft.avg20_gap_pct == Decimal("-6.00")
+
+
 def test_pltr_shallow_tranche_is_suppressed(sample_candidate_orders) -> None:
     pltr_first = next(candidate for candidate in sample_candidate_orders if candidate.symbol == "PLTR")
 

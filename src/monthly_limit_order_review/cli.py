@@ -6,6 +6,7 @@ import sys
 from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
+from decimal import Decimal
 
 from .candidate_metrics import compute_candidate_metrics
 from .codex_patch_builder import build_codex_patch_prompt, build_codex_patch_request
@@ -263,6 +264,28 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         for item in portfolio_analysis["classification_audit"]
         if item["raw_bucket"] != item["resolved_bucket"]
     )
+    bucket_allocations_by_name = {allocation.bucket: allocation for allocation in portfolio_analysis["bucket_allocations"]}
+    tradable_core_pct = (
+        bucket_allocations_by_name["core"].actual_pct if "core" in bucket_allocations_by_name else None
+    )
+    pension_pct = (
+        bucket_allocations_by_name["pension"].actual_pct if "pension" in bucket_allocations_by_name else Decimal("0")
+    )
+    effective_core_including_pension_pct = (
+        quantize(tradable_core_pct + pension_pct, 4) if tradable_core_pct is not None else None
+    )
+    recurring_total_jpy = recurring_contributions.get("total_monthly_jpy")
+    recommended_spot_buy_jpy = core_buy_materials.get("recommended_monthly_core_buy_budget_jpy")
+    monthly_total_core_deployment_jpy = (
+        recurring_total_jpy + recommended_spot_buy_jpy
+        if recurring_total_jpy is not None and recommended_spot_buy_jpy is not None
+        else None
+    )
+    cash_normalization_months_estimate = estimate_cash_normalization_months(
+        liquidity_allocation=bucket_allocations_by_name.get("liquidity"),
+        total_assets_jpy=snapshot.total_assets_jpy,
+        monthly_total_core_deployment_jpy=monthly_total_core_deployment_jpy,
+    )
     quarterly_no_change = classification_override_count == 0 and not core_reference_missing_symbols
     return MonthlyComputation(
         snapshot=snapshot,
@@ -285,6 +308,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "recommended_monthly_core_buy_budget_jpy": core_buy_materials.get(
                 "recommended_monthly_core_buy_budget_jpy"
             ),
+            "monthly_total_core_deployment_jpy": monthly_total_core_deployment_jpy,
             "candidate_count": len(candidate_orders),
             "core_recurring_contributions_total_jpy": recurring_contributions.get("total_monthly_jpy"),
             "crypto_weekly_dca_total_jpy": crypto_weekly_total_jpy,
@@ -294,7 +318,13 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "classification_override_count": classification_override_count,
             "classification_audit": portfolio_analysis["classification_audit"],
             "core_reference_missing_symbols": core_reference_missing_symbols,
+            "tradable_core_pct": tradable_core_pct,
+            "effective_core_including_pension_pct": effective_core_including_pension_pct,
+            "cash_normalization_months_estimate": cash_normalization_months_estimate,
             "direct_semiconductor_exposure_pct": exposure_breakdown.get("direct_semiconductor_exposure_pct"),
+            "combined_semiconductor_ai_infra_watch_pct": exposure_breakdown.get(
+                "combined_semiconductor_ai_infra_watch_pct"
+            ),
             "indirect_ai_infra_exposure_pct": exposure_breakdown.get("indirect_ai_infra_exposure_pct"),
         },
         metadata={
@@ -307,6 +337,23 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "core_spot_buy_materials": core_spot_buy_materials,
         },
     )
+
+
+def estimate_cash_normalization_months(
+    *,
+    liquidity_allocation,
+    total_assets_jpy: Decimal,
+    monthly_total_core_deployment_jpy,
+):
+    if liquidity_allocation is None or liquidity_allocation.target_pct is None:
+        return None
+    if monthly_total_core_deployment_jpy in (None, 0):
+        return None
+    cash_excess_pct = liquidity_allocation.actual_pct - liquidity_allocation.target_pct
+    if cash_excess_pct <= 0:
+        return Decimal("0.0")
+    cash_excess_jpy = total_assets_jpy * cash_excess_pct
+    return quantize(cash_excess_jpy / Decimal(str(monthly_total_core_deployment_jpy)), 1)
 
 
 def build_reference_requests(

@@ -302,6 +302,7 @@ def sample_computation(
             "recommended_monthly_core_buy_budget_jpy": core_buy_materials.get(
                 "recommended_monthly_core_buy_budget_jpy"
             ),
+            "monthly_total_core_deployment_jpy": 850000,
             "candidate_count": len(sample_candidate_orders),
             "core_recurring_contributions_total_jpy": 750000,
             "crypto_weekly_dca_total_jpy": 5000,
@@ -310,7 +311,13 @@ def sample_computation(
             "classification_override_count": 0,
             "classification_audit": sample_portfolio_analysis.get("classification_audit", []),
             "core_reference_missing_symbols": [],
+            "tradable_core_pct": Decimal("0.3600"),
+            "effective_core_including_pension_pct": Decimal("0.3600"),
+            "cash_normalization_months_estimate": Decimal("0.8"),
             "direct_semiconductor_exposure_pct": sample_exposure_breakdown.get("direct_semiconductor_exposure_pct"),
+            "combined_semiconductor_ai_infra_watch_pct": sample_exposure_breakdown.get(
+                "combined_semiconductor_ai_infra_watch_pct"
+            ),
             "indirect_ai_infra_exposure_pct": sample_exposure_breakdown.get("indirect_ai_infra_exposure_pct"),
         },
         metadata={

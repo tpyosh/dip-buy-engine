@@ -22,10 +22,14 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             f"- total_assets_jpy: {snapshot.total_assets_jpy}",
             f"- liquidity_target_jpy: {snapshot.liquidity_target_jpy or 'null'}",
             f"- holdings_count: {len(snapshot.holdings)}",
+            "- 毎月の税引前キャッシュ流入はおおむね60万〜70万円ある前提で、生活防衛資金の必要水準を評価すること",
+            "- 名古屋市中区・金山駅近くの流動性が高いマンション（約6500万円）を住居兼資産として保有している",
+            "- 上記マンションはフルローンで購入しており、ローン返済はまだほとんど進んでいない",
+            "- そのため、日本国内不動産セクターに対して実質的な積立投資エクスポージャがある前提もポートフォリオ文脈に含めること",
             f"- 半導体エクスポージャ(Direct): {format_pct(computation.exposure_breakdown.get('direct_semiconductor_exposure_pct'))}",
             f"- AIインフラ感応度(Indirect): {format_pct(computation.exposure_breakdown.get('indirect_ai_infra_exposure_pct'))}",
             "- 指値設定は前月末または当月初に実施しうるため、snapshot_date が月末でも翌月の指値設定として解釈してよい",
-            "- 指値設定基準値は先月平均ではなく、直近30営業日の終値平均を使う",
+            "- 指値設定基準値は先月平均ではなく、スクリプト実行時点から直近20営業日（約1ヶ月）の終値平均を使う",
         ]
     )
 
@@ -108,11 +112,11 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 0段の場合は『今月は見送り』と明記する",
             "- Python 候補より段数を減らした場合は、その理由が『ルール上の判断』か『今月の裁量判断』かを明記する",
             "- Python 候補より段数を増やした場合も、その理由を明記する",
-            "- 指値設定基準値は直近30営業日の終値平均ベースとして扱うこと",
-            "- 指値を提案する各段で、直近30営業日の終値平均の実数値を必ず明示すること",
-            "- 指値を提案する各段で、その指値が直近30営業日の終値平均から何%下かを必ず明示すること",
-            "- 乖離率は `((指値 / 直近30営業日終値平均) - 1) * 100` で計算し、マイナス値で表記すること",
-            "- 推奨フォーマット例: `指値 450.00 USD（30営業日平均 500.00 USD, 平均比 -10.0%）`",
+            "- 指値設定基準値はスクリプト実行時点から直近20営業日（約1ヶ月）の終値平均ベースとして扱うこと",
+            "- 指値を提案する各段で、直近20営業日（約1ヶ月）の終値平均の実数値を必ず明示すること",
+            "- 指値を提案する各段で、その指値が直近20営業日終値平均から何%下かを必ず明示すること",
+            "- 乖離率は `((指値 / 直近20営業日終値平均) - 1) * 100` で計算し、マイナス値で表記すること",
+            "- 推奨フォーマット例: `指値 450.00 USD（20営業日平均 500.00 USD, 平均比 -10.0%）`",
             "- 減段理由テンプレートの例: `ルール上の判断: bucket_over_target のため浅い段を見送る`",
             "- 減段理由テンプレートの例: `今月の裁量判断: core 補強を優先するため段数を減らす`",
             "",
@@ -192,8 +196,8 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 半導体エクスポージャの合算管理が妥当か確認してください。",
             "- PLTR の浅い押し目候補抑制ロジックの是非を評価してください。",
             "- 指値段数は各銘柄 0段以上の任意とし、1段しか出さない場合はその理由を明記してください。",
-            "- 指値を出す場合は、各段で直近30営業日の終値平均と平均比の乖離率を併記してください。",
-            "- 乖離率は `((指値 / 直近30営業日終値平均) - 1) * 100` に基づくマイナス値で記述してください。",
+            "- 指値を出す場合は、各段で直近20営業日（約1ヶ月）の終値平均と平均比の乖離率を併記してください。",
+            "- 乖離率は `((指値 / 直近20営業日終値平均) - 1) * 100` に基づくマイナス値で記述してください。",
             "- コアについては『毎月一定額買う / 安ければ追加で厚く買う』という運用思想の妥当性も評価してください。",
             "- 月次レビューでは、毎回必ず core スポット買い額を提案してください。",
             "- core スポット買い額は 0円不可で、最初に単一の具体額を出してください。",
@@ -207,6 +211,9 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 債券や低リスク商品を提案する場合でも、core equity スポット買い額そのものは別で必ず提示してください。",
             "- `全部債券` `全部現金維持` は不可です。",
             "- 生活防衛資金や大口支出情報が不明なら、不明として保守的に扱ってください。",
+            "- 毎月の税引前キャッシュ流入が60万〜70万円ある前提を、生活防衛資金の残し方判断に反映してください。",
+            "- 名古屋市中区・金山駅近くの約6500万円のマンションを住居兼資産として保有し、しかもフルローンで返済初期である点を考慮してください。",
+            "- 上記不動産保有により、日本国内不動産セクターへの実質的なエクスポージャが既にある前提で配分やリスクを評価してください。",
             "- Core積立設定（毎月固定）は既に実行される前提として扱い、同じ強化提案の反復は避けてください。",
             "- ただし長期シナリオ悪化やリスク管理上の妥当性がある場合は、固定積立の減額・停止提案を明示してください。",
             "- 暗号資産の週次積立（BTC/ETH/XRP）も既に実行される前提で扱い、必要時のみ変更提案してください。",
@@ -271,13 +278,14 @@ def build_bucket_allocation_table(bucket_allocations: list) -> list[str]:
 
 def build_candidate_table(candidate_orders: list) -> list[str]:
     lines = [
-        "| symbol | bucket | current_price | base_price | drawdown_rule | limit_price | shares | est_cost_jpy | suppressed | suppressed_reason_code | suppressed_reason_text | note_for_chatgpt | explanation |",
-        "| --- | --- | ---: | ---: | --- | ---: | ---: | ---: | --- | --- | --- | --- | --- |",
+        "| symbol | bucket | current_price | base_price | avg20_base_price | drawdown_rule | limit_price | avg20_gap_pct | shares | est_cost_jpy | suppressed | suppressed_reason_code | suppressed_reason_text | note_for_chatgpt | explanation |",
+        "| --- | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | --- | --- | --- |",
     ]
     for candidate in candidate_orders:
         lines.append(
             f"| {candidate.symbol} | {candidate.bucket} | {format_value(candidate.current_price)} | "
-            f"{format_value(candidate.base_price)} | {candidate.drawdown_rule} | {format_value(candidate.limit_price)} | "
+            f"{format_value(candidate.base_price)} | {format_value(candidate.avg20_base_price)} | "
+            f"{candidate.drawdown_rule} | {format_value(candidate.limit_price)} | {format_value(candidate.avg20_gap_pct)} | "
             f"{candidate.shares} | {format_value(candidate.estimated_cost_jpy)} | "
             f"{'yes' if candidate.suppressed else 'no'} | {candidate.suppressed_reason_code or '-'} | "
             f"{candidate.suppressed_reason_text or '-'} | {candidate.note_for_chatgpt or '-'} | "
@@ -424,10 +432,14 @@ def build_sox_materials(sox_buy_signal: dict) -> list[str]:
 
 def build_exposure_breakdown(exposure_breakdown: dict) -> list[str]:
     lines = [
+        f"- direct_cap_monitor_pct: {format_pct(exposure_breakdown.get('direct_semiconductor_exposure_pct'))}",
+        f"- direct_cap_monitor_jpy: {exposure_breakdown.get('direct_semiconductor_exposure_jpy')}",
+        f"- direct_plus_indirect_watch_metric_pct: {format_pct(exposure_breakdown.get('combined_semiconductor_ai_infra_watch_pct'))}",
+        f"- direct_plus_indirect_watch_metric_jpy: {exposure_breakdown.get('combined_semiconductor_ai_infra_watch_jpy')}",
         f"- direct_semiconductor_exposure_pct: {format_pct(exposure_breakdown.get('direct_semiconductor_exposure_pct'))}",
-        f"- direct_semiconductor_exposure_jpy: {exposure_breakdown.get('direct_semiconductor_exposure_jpy')}",
         f"- indirect_ai_infra_exposure_pct: {format_pct(exposure_breakdown.get('indirect_ai_infra_exposure_pct'))}",
         f"- indirect_ai_infra_exposure_jpy: {exposure_breakdown.get('indirect_ai_infra_exposure_jpy')}",
+        f"- combined_semiconductor_ai_infra_watch_pct: {format_pct(exposure_breakdown.get('combined_semiconductor_ai_infra_watch_pct'))}",
         "| symbol | value_jpy | bucket | exposure_type | in_direct | in_indirect | inclusion_reason |",
         "| --- | ---: | --- | --- | --- | --- | --- |",
     ]
@@ -449,13 +461,20 @@ def build_review_partition_section(computation: MonthlyComputation) -> list[str]
         f"  - portfolio_management_mode: {monthly.get('portfolio_management_mode')}",
         f"  - monthly_core_budget_tier: {monthly.get('monthly_core_budget_tier')}",
         f"  - recommended_monthly_core_buy_budget_jpy: {monthly.get('recommended_monthly_core_buy_budget_jpy')}",
+        f"  - monthly_total_core_deployment_jpy: {monthly.get('monthly_total_core_deployment_jpy')}",
         f"  - candidate_count: {monthly.get('candidate_count')}",
         f"  - crypto_weekly_dca_total_jpy: {monthly.get('crypto_weekly_dca_total_jpy')}",
         "- quarterly_rule_review_outputs:",
         f"  - no_change: {quarterly.get('no_change')}",
         f"  - classification_override_count: {quarterly.get('classification_override_count')}",
         f"  - core_reference_missing_symbols: {quarterly.get('core_reference_missing_symbols')}",
+        f"  - tradable_core_pct: {format_pct(quarterly.get('tradable_core_pct'))}",
+        f"  - effective_core_including_pension_pct: {format_pct(quarterly.get('effective_core_including_pension_pct'))}",
+        f"  - cash_normalization_months_estimate: {quarterly.get('cash_normalization_months_estimate')}",
+        f"  - direct_cap_monitor_pct: {format_pct(quarterly.get('direct_semiconductor_exposure_pct'))}",
+        f"  - direct_plus_indirect_watch_metric_pct: {format_pct(quarterly.get('combined_semiconductor_ai_infra_watch_pct'))}",
         f"  - direct_semiconductor_exposure_pct: {format_pct(quarterly.get('direct_semiconductor_exposure_pct'))}",
+        f"  - combined_semiconductor_ai_infra_watch_pct: {format_pct(quarterly.get('combined_semiconductor_ai_infra_watch_pct'))}",
         f"  - indirect_ai_infra_exposure_pct: {format_pct(quarterly.get('indirect_ai_infra_exposure_pct'))}",
     ]
 

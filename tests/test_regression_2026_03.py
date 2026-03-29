@@ -111,9 +111,15 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert computation.monthly_execution_outputs["candidate_count"] == len(computation.candidate_orders)
     assert computation.monthly_execution_outputs["core_recurring_contributions_total_jpy"] == 750000
     assert computation.monthly_execution_outputs["crypto_weekly_dca_total_jpy"] == 5000
+    assert computation.monthly_execution_outputs["monthly_total_core_deployment_jpy"] == 1450000
     assert "classification_audit" in computation.quarterly_rule_review_outputs
     assert "candidate_count" not in computation.quarterly_rule_review_outputs
     assert "no_change" in computation.quarterly_rule_review_outputs
+    assert computation.quarterly_rule_review_outputs["tradable_core_pct"] == Decimal("0.1688")
+    assert computation.quarterly_rule_review_outputs["effective_core_including_pension_pct"] == Decimal("0.2740")
+    assert computation.quarterly_rule_review_outputs["cash_normalization_months_estimate"] == Decimal("7.8")
+    assert computation.quarterly_rule_review_outputs["combined_semiconductor_ai_infra_watch_pct"] == Decimal("0.1262")
+    assert ura_candidate.avg20_gap_pct == Decimal("-6.00")
     assert "【要約】" in prompt
     assert "【今月のcoreスポット買い提案】" in prompt
     assert "## 5. コア定額買い判定材料" in prompt
@@ -131,6 +137,12 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
     assert "monthly_core_budget_tier: rebalance" in prompt
     assert "recommended_monthly_core_buy_budget_jpy: 700000" in prompt
+    assert "monthly_total_core_deployment_jpy: 1450000" in prompt
+    assert "tradable_core_pct: 16.88%" in prompt
+    assert "effective_core_including_pension_pct: 27.40%" in prompt
+    assert "cash_normalization_months_estimate: 7.8" in prompt
+    assert "direct_cap_monitor_pct: 11.83%" in prompt
+    assert "direct_plus_indirect_watch_metric_pct: 12.62%" in prompt
     assert "0円は禁止" in prompt
     assert "単一具体額" in prompt
     assert "current_monthly_core_auto_invest_amount_jpy: 750000" in prompt
@@ -140,9 +152,9 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "## 11. 生成ロジック上の分離データ" in prompt
     assert "## 13. 必須の月次・四半期レビュー観点" in prompt
     assert "review_target_month: 2026_03" in prompt
-    assert "指値設定基準値は直近30営業日の終値平均" in prompt
-    assert "その指値が直近30営業日の終値平均から何%下かを必ず明示すること" in prompt
-    assert "((指値 / 直近30営業日終値平均) - 1) * 100" in prompt
+    assert "指値設定基準値はスクリプト実行時点から直近20営業日（約1ヶ月）の終値平均" in prompt
+    assert "その指値が直近20営業日終値平均から何%下かを必ず明示すること" in prompt
+    assert "((指値 / 直近20営業日終値平均) - 1) * 100" in prompt
     assert "指値設定対象月キー: 2026_03" in prompt
     assert "## 5-2. Core積立設定（毎月固定）" in prompt
     assert "## 5-3. 暗号資産積立設定（毎週固定）" in prompt

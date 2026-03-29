@@ -64,6 +64,7 @@ class CandidateOrder:
     symbol: str
     bucket: str
     base_price: Decimal | None
+    avg20_base_price: Decimal | None
     current_price: Decimal | None
     limit_price: Decimal | None
     shares: int
@@ -77,6 +78,7 @@ class CandidateOrder:
     suppressed_reason_code: str | None = None
     suppressed_reason_text: str | None = None
     note_for_chatgpt: str | None = None
+    avg20_gap_pct: Decimal | None = None
     suppression_reasons: list[str] = field(default_factory=list)
     explanation: dict = field(default_factory=dict)
 

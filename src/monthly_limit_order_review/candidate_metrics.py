@@ -36,6 +36,7 @@ def compute_candidate_metrics(
         currency = reference.currency if reference is not None else (current_holding.currency if current_holding else "USD")
         digits = int(round_rules.get("jpy_decimals" if currency == "JPY" else "usd_decimals", 2))
         base_price = (reference.mean_close_30d or reference.mean_close_20d) if reference is not None else None
+        avg20_base_price = reference.mean_close_20d if reference is not None else None
         current_price = reference.current_price if reference is not None else None
 
         for tranche in rule_config.get("tranches", []):
@@ -44,11 +45,14 @@ def compute_candidate_metrics(
             limit_price = None
             estimated_cost = None
             estimated_cost_jpy = None
+            avg20_gap_pct = None
             if base_price is not None:
                 limit_price = quantize(
                     base_price * (Decimal("1") + (drawdown_pct / Decimal("100"))),
                     digits,
                 )
+            if limit_price is not None and avg20_base_price not in (None, Decimal("0")):
+                avg20_gap_pct = quantize(((limit_price / avg20_base_price) - Decimal("1")) * Decimal("100"), 2)
             if limit_price is not None:
                 estimated_cost = quantize(limit_price * Decimal(shares), digits)
                 estimated_cost_jpy = estimate_cost_jpy(estimated_cost, currency, usd_jpy)
@@ -89,6 +93,7 @@ def compute_candidate_metrics(
                     symbol=symbol,
                     bucket=bucket,
                     base_price=base_price,
+                    avg20_base_price=avg20_base_price,
                     current_price=current_price,
                     limit_price=limit_price,
                     shares=shares,
@@ -102,6 +107,7 @@ def compute_candidate_metrics(
                     suppressed_reason_code=policy_outcome["suppressed_reason_code"],
                     suppressed_reason_text=policy_outcome["suppressed_reason_text"],
                     note_for_chatgpt=",".join(unique_notes(notes)) if notes else None,
+                    avg20_gap_pct=avg20_gap_pct,
                     suppression_reasons=(
                         [policy_outcome["suppressed_reason_text"]]
                         if policy_outcome["suppressed_reason_text"] is not None

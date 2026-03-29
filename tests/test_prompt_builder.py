@@ -39,24 +39,35 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
     assert "monthly_core_budget_tier" in prompt
     assert "recommended_monthly_core_buy_budget_jpy" in prompt
+    assert "monthly_total_core_deployment_jpy" in prompt
     assert "current_monthly_core_auto_invest_amount_jpy" in prompt
     assert "annualized_core_auto_invest_amount_jpy" in prompt
     assert "review_target_month" in prompt
-    assert "直近30営業日の終値平均" in prompt
-    assert "その指値が直近30営業日の終値平均から何%下かを必ず明示すること" in prompt
-    assert "((指値 / 直近30営業日終値平均) - 1) * 100" in prompt
+    assert "直近20営業日（約1ヶ月）の終値平均" in prompt
+    assert "その指値が直近20営業日終値平均から何%下かを必ず明示すること" in prompt
+    assert "((指値 / 直近20営業日終値平均) - 1) * 100" in prompt
     assert "0円は禁止" in prompt
     assert "単一具体額" in prompt
     assert "積立しているからスポット買いは不要" in prompt
     assert "total_monthly_jpy: 750000" in prompt
+    assert "毎月の税引前キャッシュ流入はおおむね60万〜70万円ある前提" in prompt
+    assert "名古屋市中区・金山駅近くの流動性が高いマンション（約6500万円）" in prompt
+    assert "フルローンで購入しており、ローン返済はまだほとんど進んでいない" in prompt
+    assert "日本国内不動産セクターに対して実質的な積立投資エクスポージャがある前提" in prompt
     assert "既存の毎月固定積立（Core積立設定）を前提に評価すること" in prompt
     assert "| BTC | 2000 |" in prompt
     assert "| ETH | 2000 |" in prompt
     assert "| XRP | 1000 |" in prompt
     assert "暗号資産の週次積立（BTC/ETH/XRP）も既に実行される前提で扱い" in prompt
     assert "rebalance_mode_active" in prompt
+    assert "tradable_core_pct" in prompt
+    assert "effective_core_including_pension_pct" in prompt
+    assert "cash_normalization_months_estimate" in prompt
     assert "in_direct" in prompt
     assert "in_indirect" in prompt
+    assert "avg20_gap_pct" in prompt
+    assert "direct_cap_monitor_pct" in prompt
+    assert "direct_plus_indirect_watch_metric_pct" in prompt
     assert "priority_lowered_boolean" in prompt
     assert "月次の執行判断と、四半期単位のルール見直し提案は明確に分離してください。" in prompt
     assert "指値設定対象月キー" in prompt

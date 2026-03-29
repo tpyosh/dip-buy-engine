@@ -17,6 +17,7 @@ def test_exposure_breakdown_total_matches_included_rows(sample_exposure_breakdow
     assert sample_exposure_breakdown["semiconductor_exposure_total_pct"] == Decimal("0.1600")
     assert sample_exposure_breakdown["direct_semiconductor_exposure_pct"] == Decimal("0.1600")
     assert sample_exposure_breakdown["indirect_ai_infra_exposure_pct"] == Decimal("0.1600")
+    assert sample_exposure_breakdown["combined_semiconductor_ai_infra_watch_pct"] == Decimal("0.3200")
 
 
 def test_optional_symbols_can_be_listed_but_excluded(sample_exposure_breakdown) -> None:

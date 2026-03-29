@@ -141,6 +141,8 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "## 13. 必須の月次・四半期レビュー観点" in prompt
     assert "review_target_month: 2026_03" in prompt
     assert "指値設定基準値は直近30営業日の終値平均" in prompt
+    assert "その指値が直近30営業日の終値平均から何%下かを必ず明示すること" in prompt
+    assert "((指値 / 直近30営業日終値平均) - 1) * 100" in prompt
     assert "指値設定対象月キー: 2026_03" in prompt
     assert "## 5-2. Core積立設定（毎月固定）" in prompt
     assert "## 5-3. 暗号資産積立設定（毎週固定）" in prompt

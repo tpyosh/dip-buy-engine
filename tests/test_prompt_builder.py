@@ -9,6 +9,7 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     template_path = Path(__file__).resolve().parents[1] / "prompts/templates/monthly_review_template.md"
     prompt = build_monthly_review_prompt(sample_computation, template_path.read_text(encoding="utf-8"))
 
+    assert prompt.startswith("対象月: 2026_03\n")
     assert "## 1. 前提" in prompt
     assert "【要約】" in prompt
     assert "## 5. コア定額買い判定材料" in prompt
@@ -42,6 +43,8 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "annualized_core_auto_invest_amount_jpy" in prompt
     assert "review_target_month" in prompt
     assert "直近30営業日の終値平均" in prompt
+    assert "その指値が直近30営業日の終値平均から何%下かを必ず明示すること" in prompt
+    assert "((指値 / 直近30営業日終値平均) - 1) * 100" in prompt
     assert "0円は禁止" in prompt
     assert "単一具体額" in prompt
     assert "積立しているからスポット買いは不要" in prompt

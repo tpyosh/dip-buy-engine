@@ -6,12 +6,13 @@ from .utils import month_key
 
 
 def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -> str:
-    lines: list[str] = [template_text.strip(), "", "## 1. 前提"]
     snapshot = computation.snapshot
     resolved_buckets = computation.metadata.get("resolved_buckets", {})
     classification_audit = computation.metadata.get("classification_audit", [])
     classification_reason_map = {item["symbol"]: item.get("reason") for item in classification_audit}
     review_target_month = computation.metadata.get("review_target_month", month_key(snapshot.snapshot_date))
+    rendered_template = template_text.replace("{{REVIEW_TARGET_MONTH}}", review_target_month)
+    lines: list[str] = [rendered_template.strip(), "", "## 1. 前提"]
 
     lines.extend(
         [
@@ -108,6 +109,10 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- Python 候補より段数を減らした場合は、その理由が『ルール上の判断』か『今月の裁量判断』かを明記する",
             "- Python 候補より段数を増やした場合も、その理由を明記する",
             "- 指値設定基準値は直近30営業日の終値平均ベースとして扱うこと",
+            "- 指値を提案する各段で、直近30営業日の終値平均の実数値を必ず明示すること",
+            "- 指値を提案する各段で、その指値が直近30営業日の終値平均から何%下かを必ず明示すること",
+            "- 乖離率は `((指値 / 直近30営業日終値平均) - 1) * 100` で計算し、マイナス値で表記すること",
+            "- 推奨フォーマット例: `指値 450.00 USD（30営業日平均 500.00 USD, 平均比 -10.0%）`",
             "- 減段理由テンプレートの例: `ルール上の判断: bucket_over_target のため浅い段を見送る`",
             "- 減段理由テンプレートの例: `今月の裁量判断: core 補強を優先するため段数を減らす`",
             "",
@@ -187,6 +192,8 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 半導体エクスポージャの合算管理が妥当か確認してください。",
             "- PLTR の浅い押し目候補抑制ロジックの是非を評価してください。",
             "- 指値段数は各銘柄 0段以上の任意とし、1段しか出さない場合はその理由を明記してください。",
+            "- 指値を出す場合は、各段で直近30営業日の終値平均と平均比の乖離率を併記してください。",
+            "- 乖離率は `((指値 / 直近30営業日終値平均) - 1) * 100` に基づくマイナス値で記述してください。",
             "- コアについては『毎月一定額買う / 安ければ追加で厚く買う』という運用思想の妥当性も評価してください。",
             "- 月次レビューでは、毎回必ず core スポット買い額を提案してください。",
             "- core スポット買い額は 0円不可で、最初に単一の具体額を出してください。",

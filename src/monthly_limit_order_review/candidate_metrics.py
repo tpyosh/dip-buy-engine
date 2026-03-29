@@ -135,6 +135,9 @@ def build_candidate_policy_outcome(
     bucket_policy = candidate_policy.get("bucket_over_target", {})
     if actual_pct is not None and target_pct is not None and actual_pct > target_pct:
         behavior = str(bucket_policy.get("default_behavior", "deprioritize"))
+        deviation = actual_pct - target_pct
+        deviation_level = "high" if deviation >= Decimal("0.10") else "medium" if deviation >= Decimal("0.05") else "low"
+        notes.append(f"auto_tranche_adjustment_bucket_over_target:{deviation_level}")
         deep_threshold = to_decimal(
             bucket_policy.get("deep_drawdown_threshold_pct", -15),
             field_name="candidate_policy.bucket_over_target.deep_drawdown_threshold_pct",

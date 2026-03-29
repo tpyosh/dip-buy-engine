@@ -100,6 +100,8 @@ class MonthlyComputation:
     core_buy_materials: dict = field(default_factory=dict)
     exposure_breakdown: dict = field(default_factory=dict)
     long_term_thesis_targets: list[dict] = field(default_factory=list)
+    monthly_execution_outputs: dict = field(default_factory=dict)
+    quarterly_rule_review_outputs: dict = field(default_factory=dict)
     metadata: dict = field(default_factory=dict)
 
 

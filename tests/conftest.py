@@ -25,7 +25,11 @@ ROOT = Path(__file__).resolve().parents[1]
 
 @pytest.fixture
 def buy_rules_config() -> dict:
-    return load_yaml(ROOT / "config/buy_rules.yaml")
+    buy_rules = load_yaml(ROOT / "config/buy_rules.yaml")
+    allocation_rules = load_yaml(ROOT / "config/allocation_rules.yaml")
+    if "core_budget_policy" in allocation_rules:
+        buy_rules["core_budget_policy"] = allocation_rules["core_budget_policy"]
+    return buy_rules
 
 
 @pytest.fixture
@@ -278,9 +282,25 @@ def sample_computation(
         core_buy_materials=core_buy_materials,
         exposure_breakdown=sample_exposure_breakdown,
         long_term_thesis_targets=sample_long_term_thesis_targets,
+        monthly_execution_outputs={
+            "portfolio_management_mode": core_buy_materials.get("portfolio_management_mode"),
+            "monthly_core_budget_tier": core_buy_materials.get("monthly_core_budget_tier"),
+            "recommended_monthly_core_buy_budget_jpy": core_buy_materials.get(
+                "recommended_monthly_core_buy_budget_jpy"
+            ),
+            "candidate_count": len(sample_candidate_orders),
+        },
+        quarterly_rule_review_outputs={
+            "classification_override_count": 0,
+            "classification_audit": sample_portfolio_analysis.get("classification_audit", []),
+            "core_reference_missing_symbols": [],
+            "direct_semiconductor_exposure_pct": sample_exposure_breakdown.get("direct_semiconductor_exposure_pct"),
+            "indirect_ai_infra_exposure_pct": sample_exposure_breakdown.get("indirect_ai_infra_exposure_pct"),
+        },
         metadata={
             "snapshot_path": str(ROOT / "data/normalized/snapshot_2026_03.yaml"),
             "resolved_buckets": sample_portfolio_analysis["resolved_buckets"],
+            "classification_audit": sample_portfolio_analysis.get("classification_audit", []),
         },
     )
 

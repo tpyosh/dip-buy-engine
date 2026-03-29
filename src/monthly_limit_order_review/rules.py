@@ -89,6 +89,33 @@ def calculate_sox_buy_signal(
         "semiconductor_exposure_total_pct": (
             exposure_breakdown.get("semiconductor_exposure_total_pct") if exposure_breakdown else None
         ),
+        "direct_semiconductor_exposure_pct": (
+            exposure_breakdown.get("direct_semiconductor_exposure_pct") if exposure_breakdown else None
+        ),
+        "indirect_ai_infra_exposure_pct": (
+            exposure_breakdown.get("indirect_ai_infra_exposure_pct") if exposure_breakdown else None
+        ),
+        "explanation": {
+            "buy_zone_assessment": {
+                "within_buy_zone": within_buy_zone,
+                "near_boundary": near_boundary,
+                "drawdown_pct_from_63d_high": drawdown_63d,
+                "rule": f"{buy_zone_min}% <= drawdown <= {buy_zone_max}%",
+            },
+            "bucket_context": {
+                "related_bucket": "satellite_core",
+                "related_bucket_actual_pct": related_bucket.actual_pct if related_bucket is not None else None,
+                "related_bucket_target_pct": related_bucket.target_pct if related_bucket is not None else None,
+            },
+            "exposure_context": {
+                "direct_semiconductor_exposure_pct": (
+                    exposure_breakdown.get("direct_semiconductor_exposure_pct") if exposure_breakdown else None
+                ),
+                "indirect_ai_infra_exposure_pct": (
+                    exposure_breakdown.get("indirect_ai_infra_exposure_pct") if exposure_breakdown else None
+                ),
+            },
+        },
         "priority_lowered_boolean": priority_lowered,
         "priority_lowered_reason": priority_lowered_reason,
     }

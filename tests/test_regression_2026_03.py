@@ -45,6 +45,7 @@ def fake_references(requests: dict[str, dict[str, str]]) -> list[MarketReference
         "RAKUTEN_ALL_COUNTRY_1": dict(current_price="110.00", mean_close_20d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", currency="USD"),
         "RAKUTEN_ALL_COUNTRY_2": dict(current_price="110.00", mean_close_20d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", currency="USD"),
         "EMAXIS_ALL_COUNTRY": dict(current_price="110.00", mean_close_20d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", currency="USD"),
+        "EMAXIS_ALL_COUNTRY_TAXABLE": dict(current_price="110.00", mean_close_20d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", currency="USD"),
         "RAKUTEN_SP500": dict(current_price="500.00", mean_close_20d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", currency="USD"),
         "EMAXIS_SP500_1": dict(current_price="500.00", mean_close_20d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", currency="USD"),
         "EMAXIS_SP500_2": dict(current_price="500.00", mean_close_20d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", currency="USD"),
@@ -80,15 +81,25 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     exposure_symbols = {item["symbol"] for item in computation.exposure_breakdown["breakdown"]}
     thesis_symbols = {item["symbol"] for item in computation.long_term_thesis_targets}
     ura_candidate = next(candidate for candidate in computation.candidate_orders if candidate.symbol == "URA")
+    msft_exposure = next(item for item in computation.exposure_breakdown["breakdown"] if item["symbol"] == "MSFT")
+    all_country_constituent = next(
+        item for item in computation.core_buy_materials["core_constituents"] if item["symbol"] == "EMAXIS_ALL_COUNTRY"
+    )
 
     assert "liquidity_above_range" in warning_codes
     assert "core_below_range" in warning_codes
     assert ura_candidate.suppressed_reason_code == "limit_above_current"
     assert {"SMH", "NISSEI_SOX_1", "NISSEI_SOX_2"} <= exposure_symbols
+    assert msft_exposure["included_in_direct_semiconductor_exposure"] == "no"
+    assert msft_exposure["included_in_indirect_ai_infra_exposure"] == "yes"
     assert {"URA", "PLTR", "CIBR", "MSFT"} <= thesis_symbols
     assert computation.core_buy_materials["core_constituents"]
-    assert computation.core_buy_materials["monthly_core_budget_tier"] == "aggressive"
-    assert computation.core_buy_materials["recommended_monthly_core_buy_budget_jpy"] == 300000
+    assert all_country_constituent["reference_symbol"] in {"VT", "ACWI"}
+    assert computation.core_buy_materials["monthly_core_budget_tier"] == "rebalance"
+    assert computation.core_buy_materials["recommended_monthly_core_buy_budget_jpy"] == 700000
+    assert computation.monthly_execution_outputs["candidate_count"] == len(computation.candidate_orders)
+    assert "classification_audit" in computation.quarterly_rule_review_outputs
+    assert "candidate_count" not in computation.quarterly_rule_review_outputs
     assert "【要約】" in prompt
     assert "## 5. コア定額買い判定材料" in prompt
     assert "## 7. 半導体エクスポージャ内訳" in prompt
@@ -102,7 +113,9 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "ハルシネーション防止" in prompt
     assert "`must: なし`" in prompt
     assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
-    assert "monthly_core_budget_tier: aggressive" in prompt
-    assert "recommended_monthly_core_buy_budget_jpy: 300000" in prompt
+    assert "monthly_core_budget_tier: rebalance" in prompt
+    assert "recommended_monthly_core_buy_budget_jpy: 700000" in prompt
+    assert "## 11. 生成ロジック上の分離データ" in prompt
+    assert "## 13. 必須の月次・四半期レビュー観点" in prompt
     assert "priority_lowered_boolean: True" in prompt
     assert "四半期単位のルール見直し提案は明確に分離してください。" in prompt

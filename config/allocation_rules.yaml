@@ -1,0 +1,22 @@
+core_budget_policy:
+  base_monthly_buy_amount_jpy: 100000
+  monthly_core_buy_budget_min_jpy: 100000
+  monthly_core_buy_budget_max_jpy: 300000
+  budget_tiers:
+    standard:
+      budget_jpy: 100000
+    aggressive:
+      budget_jpy: 300000
+    rebalance:
+      budget_jpy: 700000
+  override_conditions:
+    core_shortfall_pct_gte: 0.15
+    cash_excess_pct_gte: 0.15
+    budget_tier: "aggressive"
+    reason_code: "core_underweight_and_cash_overweight"
+  rebalance_mode:
+    enabled: true
+    core_shortfall_pct_gte: 0.25
+    cash_excess_pct_gte: 0.25
+    budget_tier: "rebalance"
+    reason_code: "rebalance_mode_core_underweight_and_cash_overweight"

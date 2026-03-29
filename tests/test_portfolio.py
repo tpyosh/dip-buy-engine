@@ -85,8 +85,8 @@ def test_core_budget_shifts_to_upper_tier_when_core_low_and_cash_high(
     buy_rules_config,
 ) -> None:
     rebalanced_holdings = list(sample_snapshot.holdings)
-    rebalanced_holdings[0] = replace(rebalanced_holdings[0], market_value_jpy=Decimal("2400000"))
-    rebalanced_holdings[1] = replace(rebalanced_holdings[1], market_value_jpy=Decimal("600000"))
+    rebalanced_holdings[0] = replace(rebalanced_holdings[0], market_value_jpy=Decimal("1800000"))
+    rebalanced_holdings[1] = replace(rebalanced_holdings[1], market_value_jpy=Decimal("1200000"))
     stressed_snapshot = replace(sample_snapshot, holdings=rebalanced_holdings)
     stressed_analysis = analyze_portfolio(stressed_snapshot, portfolio_policy_config)
     core_buy_materials, _ = build_core_buy_materials(
@@ -101,3 +101,29 @@ def test_core_budget_shifts_to_upper_tier_when_core_low_and_cash_high(
     assert core_buy_materials["recommended_monthly_core_buy_budget_jpy"] == 300000
     assert core_buy_materials["monthly_core_budget_override_active"] is True
     assert core_buy_materials["monthly_core_budget_override_reason"] == "core_underweight_and_cash_overweight"
+    assert core_buy_materials["rebalance_mode_active"] is False
+
+
+def test_core_budget_enters_rebalance_mode_when_dual_imbalance_is_extreme(
+    sample_snapshot,
+    portfolio_policy_config,
+    sample_market_references,
+    buy_rules_config,
+) -> None:
+    stressed_holdings = list(sample_snapshot.holdings)
+    stressed_holdings[0] = replace(stressed_holdings[0], market_value_jpy=Decimal("2800000"))
+    stressed_holdings[1] = replace(stressed_holdings[1], market_value_jpy=Decimal("400000"))
+    stressed_snapshot = replace(sample_snapshot, holdings=stressed_holdings)
+    stressed_analysis = analyze_portfolio(stressed_snapshot, portfolio_policy_config)
+    core_buy_materials, _ = build_core_buy_materials(
+        stressed_snapshot,
+        stressed_analysis["bucket_allocations"],
+        stressed_analysis["resolved_buckets"],
+        sample_market_references,
+        buy_rules_config,
+    )
+
+    assert core_buy_materials["monthly_core_budget_tier"] == "rebalance"
+    assert core_buy_materials["recommended_monthly_core_buy_budget_jpy"] == 700000
+    assert core_buy_materials["rebalance_mode_active"] is True
+    assert core_buy_materials["portfolio_management_mode"] == "rebalance"

@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import logging
 import sys
+from copy import deepcopy
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -149,13 +150,31 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     buy_rules = load_yaml(project_root / "config/buy_rules.yaml")
     portfolio_policy = load_yaml(project_root / "config/portfolio_policy.yaml")
     tickers = load_yaml(project_root / "config/tickers.yaml")
+    allocation_rules_path = project_root / "config/allocation_rules.yaml"
+    market_reference_path = project_root / "config/market_reference.yaml"
+    classification_overrides_path = project_root / "config/classification_overrides.yaml"
 
-    portfolio_analysis = compute_portfolio_metrics(snapshot, portfolio_policy)
-    requests = build_reference_requests(snapshot, buy_rules, tickers, portfolio_analysis["resolved_buckets"])
+    merged_buy_rules = deepcopy(buy_rules)
+    if allocation_rules_path.exists():
+        allocation_rules = load_yaml(allocation_rules_path)
+        if "core_budget_policy" in allocation_rules:
+            merged_buy_rules["core_budget_policy"] = allocation_rules["core_budget_policy"]
+
+    merged_tickers = deepcopy(tickers)
+    if market_reference_path.exists():
+        market_reference = load_yaml(market_reference_path)
+        merged_tickers.setdefault("yfinance_symbols", {}).update(market_reference.get("yfinance_symbols", {}))
+
+    merged_policy = deepcopy(portfolio_policy)
+    if classification_overrides_path.exists():
+        merged_policy["classification_overrides"] = load_yaml(classification_overrides_path)
+
+    portfolio_analysis = compute_portfolio_metrics(snapshot, merged_policy)
+    requests = build_reference_requests(snapshot, merged_buy_rules, merged_tickers, portfolio_analysis["resolved_buckets"])
     market_references = fetch_market_references(requests)
     exposure_breakdown = build_exposure_breakdown(
         snapshot,
-        portfolio_policy,
+        merged_policy,
         portfolio_analysis["resolved_buckets"],
     )
     core_buy_materials, core_material_warnings = build_core_buy_materials(
@@ -163,26 +182,26 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         portfolio_analysis["bucket_allocations"],
         portfolio_analysis["resolved_buckets"],
         market_references,
-        buy_rules,
+        merged_buy_rules,
     )
     raw_candidates = compute_candidate_metrics(
         snapshot,
-        buy_rules,
-        portfolio_policy,
+        merged_buy_rules,
+        merged_policy,
         market_references,
         portfolio_analysis["resolved_buckets"],
         portfolio_analysis["bucket_allocations"],
     )
-    candidate_orders, candidate_warnings = apply_candidate_validations(raw_candidates, buy_rules)
+    candidate_orders, candidate_warnings = apply_candidate_validations(raw_candidates, merged_buy_rules)
     sox_buy_signal = calculate_sox_buy_signal(
-        buy_rules,
+        merged_buy_rules,
         market_references,
         bucket_allocations=portfolio_analysis["bucket_allocations"],
         exposure_breakdown=exposure_breakdown,
     )
     long_term_thesis_targets = build_long_term_thesis_targets(
         snapshot,
-        portfolio_policy,
+        merged_policy,
         portfolio_analysis["resolved_buckets"],
         portfolio_analysis["symbol_weights"],
     )
@@ -192,6 +211,19 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     warnings.extend(core_material_warnings)
     warnings.extend(build_exposure_validation_warnings(exposure_breakdown))
     warnings.extend(build_validation_warnings(snapshot.warnings))
+    core_reference_missing_symbols = sorted(
+        {
+            symbol
+            for warning in core_material_warnings
+            if warning.code in {"missing_core_market_reference", "missing_core_drawdown_reference"}
+            for symbol in warning.related_symbols
+        }
+    )
+    classification_override_count = sum(
+        1
+        for item in portfolio_analysis["classification_audit"]
+        if item["raw_bucket"] != item["resolved_bucket"]
+    )
     return MonthlyComputation(
         snapshot=snapshot,
         generated_at=datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
@@ -206,9 +238,25 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         core_buy_materials=core_buy_materials,
         exposure_breakdown=exposure_breakdown,
         long_term_thesis_targets=long_term_thesis_targets,
+        monthly_execution_outputs={
+            "portfolio_management_mode": core_buy_materials.get("portfolio_management_mode"),
+            "monthly_core_budget_tier": core_buy_materials.get("monthly_core_budget_tier"),
+            "recommended_monthly_core_buy_budget_jpy": core_buy_materials.get(
+                "recommended_monthly_core_buy_budget_jpy"
+            ),
+            "candidate_count": len(candidate_orders),
+        },
+        quarterly_rule_review_outputs={
+            "classification_override_count": classification_override_count,
+            "classification_audit": portfolio_analysis["classification_audit"],
+            "core_reference_missing_symbols": core_reference_missing_symbols,
+            "direct_semiconductor_exposure_pct": exposure_breakdown.get("direct_semiconductor_exposure_pct"),
+            "indirect_ai_infra_exposure_pct": exposure_breakdown.get("indirect_ai_infra_exposure_pct"),
+        },
         metadata={
             "snapshot_path": str(snapshot_path),
             "resolved_buckets": portfolio_analysis["resolved_buckets"],
+            "classification_audit": portfolio_analysis["classification_audit"],
         },
     )
 

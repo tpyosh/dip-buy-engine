@@ -35,40 +35,64 @@ def build_exposure_breakdown(
     policy_config: dict,
     resolved_buckets: dict[str, str],
 ) -> dict:
-    semiconductor_group = get_exposure_group(policy_config, "semiconductor")
+    semiconductor_group = get_exposure_group(policy_config, "direct_semiconductor")
+    if not semiconductor_group:
+        semiconductor_group = get_exposure_group(policy_config, "semiconductor")
+    indirect_group = get_exposure_group(policy_config, "indirect_ai_infra")
     optional_symbols = get_optional_exposure_symbols(semiconductor_group)
+    indirect_symbols = {item.upper() for item in indirect_group.get("symbols", [])}
     breakdown: list[dict] = []
-    total_jpy = Decimal("0")
+    direct_total_jpy = Decimal("0")
+    indirect_total_jpy = Decimal("0")
 
     for holding in snapshot.holdings:
         symbol_upper = holding.symbol.upper()
         matches_group = holding_matches_exposure_group(holding, semiconductor_group)
+        is_indirect = symbol_upper in indirect_symbols
+        if not matches_group and symbol_upper not in optional_symbols and not is_indirect:
+            continue
+
+        include_direct = False
+        include_indirect = False
+        reason = "matched_exposure_group_rule"
+        exposure_type = "direct_semiconductor"
         if matches_group:
-            included = True
+            include_direct = True
             reason = "matched_exposure_group_rule"
             exposure_type = "direct_semiconductor"
         elif symbol_upper in optional_symbols:
-            included = optional_symbols[symbol_upper]
-            reason = "config_optional_included" if included else "config_optional_excluded"
+            include_direct = optional_symbols[symbol_upper]
+            reason = "config_optional_included" if include_direct else "config_optional_excluded"
             exposure_type = "config_optional_symbol"
-        else:
-            continue
+        if is_indirect:
+            include_indirect = True
+            if not matches_group and symbol_upper not in optional_symbols:
+                reason = "matched_indirect_ai_infra_rule"
+                exposure_type = "indirect_ai_infra"
 
-        if included:
-            total_jpy += holding.market_value_jpy
+        if include_direct:
+            direct_total_jpy += holding.market_value_jpy
+        if include_indirect:
+            indirect_total_jpy += holding.market_value_jpy
         breakdown.append(
             {
                 "symbol": holding.symbol,
                 "value_jpy": holding.market_value_jpy,
                 "bucket": resolved_buckets.get(holding.symbol, holding.asset_class),
                 "exposure_type": exposure_type,
-                "included_in_semiconductor_exposure": "yes" if included else "no",
+                "included_in_semiconductor_exposure": "yes" if include_direct else "no",
+                "included_in_direct_semiconductor_exposure": "yes" if include_direct else "no",
+                "included_in_indirect_ai_infra_exposure": "yes" if include_indirect else "no",
                 "inclusion_reason": reason,
             }
         )
 
     return {
-        "semiconductor_exposure_total_pct": percent(total_jpy, snapshot.total_assets_jpy),
-        "semiconductor_exposure_total_jpy": total_jpy,
+        "direct_semiconductor_exposure_pct": percent(direct_total_jpy, snapshot.total_assets_jpy),
+        "direct_semiconductor_exposure_jpy": direct_total_jpy,
+        "indirect_ai_infra_exposure_pct": percent(indirect_total_jpy, snapshot.total_assets_jpy),
+        "indirect_ai_infra_exposure_jpy": indirect_total_jpy,
+        "semiconductor_exposure_total_pct": percent(direct_total_jpy, snapshot.total_assets_jpy),
+        "semiconductor_exposure_total_jpy": direct_total_jpy,
         "breakdown": breakdown,
     }

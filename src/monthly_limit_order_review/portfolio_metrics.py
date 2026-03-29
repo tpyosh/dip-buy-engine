@@ -12,12 +12,22 @@ def compute_portfolio_metrics(snapshot: PortfolioSnapshot, policy_config: dict) 
     bucket_values: dict[str, Decimal] = defaultdict(lambda: Decimal("0"))
     symbol_weights: dict[str, Decimal] = {}
     resolved_buckets: dict[str, str] = {}
+    classification_audit: list[dict] = []
 
     for holding in snapshot.holdings:
-        bucket = resolve_bucket(holding, policy_config)
+        bucket_info = resolve_bucket_with_reason(holding, policy_config)
+        bucket = bucket_info["bucket"]
         resolved_buckets[holding.symbol] = bucket
         bucket_values[bucket] += holding.market_value_jpy
         symbol_weights[holding.symbol] = percent(holding.market_value_jpy, snapshot.total_assets_jpy)
+        classification_audit.append(
+            {
+                "symbol": holding.symbol,
+                "raw_bucket": holding.asset_class,
+                "resolved_bucket": bucket,
+                "reason": bucket_info["reason"],
+            }
+        )
 
     bucket_allocations = compute_bucket_allocations(snapshot, policy_config, bucket_values)
     exposure_breakdown = build_exposure_breakdown(snapshot, policy_config, resolved_buckets)
@@ -41,17 +51,29 @@ def compute_portfolio_metrics(snapshot: PortfolioSnapshot, policy_config: dict) 
         "semi_exposure_jpy": exposure_breakdown["semiconductor_exposure_total_jpy"],
         "exposure_breakdown": exposure_breakdown,
         "portfolio_summary": build_portfolio_summary(snapshot, bucket_allocations, policy_config),
+        "classification_audit": classification_audit,
     }
 
 
 def resolve_bucket(holding: Holding, policy_config: dict) -> str:
+    return resolve_bucket_with_reason(holding, policy_config)["bucket"]
+
+
+def resolve_bucket_with_reason(holding: Holding, policy_config: dict) -> dict[str, str]:
+    classification_overrides = policy_config.get("classification_overrides", {}).get("overrides", {})
+    override = classification_overrides.get(holding.symbol)
+    if override is not None:
+        override_bucket = str(override.get("override_bucket", holding.asset_class))
+        reason = str(override.get("reason", "classification_override"))
+        return {"bucket": override_bucket, "reason": reason}
+
     explicit_bucket = policy_config.get("symbol_to_bucket", {}).get(holding.symbol)
     if explicit_bucket is not None:
-        return explicit_bucket
+        return {"bucket": explicit_bucket, "reason": "symbol_to_bucket"}
 
     if holding_matches_exposure_group(holding, get_exposure_group(policy_config, "semiconductor")):
-        return "satellite_core"
-    return holding.asset_class
+        return {"bucket": "satellite_core", "reason": "semiconductor_auto_classification"}
+    return {"bucket": holding.asset_class, "reason": "raw_bucket"}
 
 
 def compute_bucket_allocations(
@@ -204,6 +226,9 @@ def build_core_buy_materials(
             "monthly_core_budget_tier": budget_plan["monthly_core_budget_tier"],
             "monthly_core_budget_override_active": budget_plan["monthly_core_budget_override_active"],
             "monthly_core_budget_override_reason": budget_plan["monthly_core_budget_override_reason"],
+            "portfolio_management_mode": budget_plan["portfolio_management_mode"],
+            "rebalance_mode_active": budget_plan["rebalance_mode_active"],
+            "rebalance_mode_reason": budget_plan["rebalance_mode_reason"],
             "core_constituents": core_constituents,
         },
         warnings,
@@ -222,6 +247,9 @@ def determine_core_budget_plan(
     selected_budget = standard_budget
     override_active = False
     override_reason = None
+    rebalance_active = False
+    rebalance_reason = None
+    portfolio_management_mode = "normal"
 
     if core_allocation is not None and liquidity_allocation is not None:
         override_conditions = budget_policy.get("override_conditions", {})
@@ -250,11 +278,35 @@ def determine_core_budget_plan(
             override_active = True
             override_reason = str(override_conditions.get("reason_code", "core_budget_override"))
 
+        rebalance_mode = budget_policy.get("rebalance_mode", {})
+        rebalance_enabled = bool(rebalance_mode.get("enabled", False))
+        rebalance_core_shortfall = to_optional_decimal(rebalance_mode.get("core_shortfall_pct_gte")) or Decimal("0")
+        rebalance_cash_excess = to_optional_decimal(rebalance_mode.get("cash_excess_pct_gte")) or Decimal("0")
+        if rebalance_enabled and core_shortfall >= rebalance_core_shortfall and cash_excess >= rebalance_cash_excess:
+            rebalance_tier = str(rebalance_mode.get("budget_tier", "rebalance"))
+            selected_tier = rebalance_tier
+            selected_budget = budget_tiers.get(rebalance_tier, {}).get(
+                "budget_jpy",
+                budget_policy.get("monthly_core_buy_budget_max_jpy"),
+            )
+            rebalance_active = True
+            rebalance_reason = str(
+                rebalance_mode.get("reason_code", "rebalance_mode_core_underweight_and_cash_overweight")
+            )
+            override_active = True
+            override_reason = rebalance_reason
+            portfolio_management_mode = "rebalance"
+        elif override_active:
+            portfolio_management_mode = "normal_with_override"
+
     return {
         "recommended_monthly_core_buy_budget_jpy": selected_budget,
         "monthly_core_budget_tier": selected_tier,
         "monthly_core_budget_override_active": override_active,
         "monthly_core_budget_override_reason": override_reason,
+        "portfolio_management_mode": portfolio_management_mode,
+        "rebalance_mode_active": rebalance_active,
+        "rebalance_mode_reason": rebalance_reason,
     }
 
 

@@ -9,6 +9,8 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
     lines: list[str] = [template_text.strip(), "", "## 1. 前提"]
     snapshot = computation.snapshot
     resolved_buckets = computation.metadata.get("resolved_buckets", {})
+    classification_audit = computation.metadata.get("classification_audit", [])
+    classification_reason_map = {item["symbol"]: item.get("reason") for item in classification_audit}
 
     lines.extend(
         [
@@ -17,12 +19,13 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             f"- total_assets_jpy: {snapshot.total_assets_jpy}",
             f"- liquidity_target_jpy: {snapshot.liquidity_target_jpy or 'null'}",
             f"- holdings_count: {len(snapshot.holdings)}",
-            f"- 半導体エクスポージャ: {format_pct(computation.exposure_breakdown.get('semiconductor_exposure_total_pct'))}",
+            f"- 半導体エクスポージャ(Direct): {format_pct(computation.exposure_breakdown.get('direct_semiconductor_exposure_pct'))}",
+            f"- AIインフラ感応度(Indirect): {format_pct(computation.exposure_breakdown.get('indirect_ai_infra_exposure_pct'))}",
         ]
     )
 
     lines.extend(["", "## 2. この月の snapshot 要約"])
-    lines.extend(build_portfolio_summary(snapshot.holdings, resolved_buckets))
+    lines.extend(build_portfolio_summary(snapshot.holdings, resolved_buckets, classification_reason_map))
 
     lines.extend(["", "## 3. 現在の資産配分"])
     lines.extend(build_bucket_allocation_table(computation.bucket_allocations))
@@ -51,7 +54,15 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
     lines.extend(
         [
             "",
-            "## 11. ChatGPT に期待する出力形式",
+            "## 11. 生成ロジック上の分離データ",
+        ]
+    )
+    lines.extend(build_review_partition_section(computation))
+
+    lines.extend(
+        [
+            "",
+            "## 12. ChatGPT に期待する出力形式",
             "以下の見出しを維持してください。",
             "月次の執行判断と、四半期単位のルール見直し提案は明確に分離してください。",
             "月次の注文判断・資金配分判断を、四半期ルール見直しセクションに混ぜないでください。",
@@ -136,7 +147,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
     lines.extend(
         [
             "",
-            "## 12. 必須の月次・四半期レビュー観点",
+            "## 13. 必須の月次・四半期レビュー観点",
             "- 毎月の運用レビューと四半期ごとのルール変更レビューを分離して評価してください。",
             "- 四半期ルール見直しセクションには、月次の執行判断を混ぜないでください。",
             "- 半導体エクスポージャの合算管理が妥当か確認してください。",
@@ -154,7 +165,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- Codex向け修正要約は必ず md コードブロックで出力してください。",
             "- ルール改善が不要な場合は、その旨を明記してください。",
             "",
-            "## 13. 必須の Codex 向け修正要約観点",
+            "## 14. 必須の Codex 向け修正要約観点",
             "- must / should / nice_to_have は必ず埋めてください。",
             "- 空欄は不可ですが、該当なしの場合は `なし` と明記してください。",
             "- 【Codex向け修正要約】 全体を単一の ```md コードブロックで出力してください。",
@@ -167,13 +178,18 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
     return "\n".join(lines).strip() + "\n"
 
 
-def build_portfolio_summary(holdings: list, resolved_buckets: dict[str, str]) -> list[str]:
+def build_portfolio_summary(
+    holdings: list,
+    resolved_buckets: dict[str, str],
+    classification_reason_map: dict[str, str | None],
+) -> list[str]:
     lines: list[str] = []
     for holding in holdings:
         effective_bucket = resolved_buckets.get(holding.symbol, holding.asset_class)
         bucket_label = effective_bucket
         if effective_bucket != holding.asset_class:
-            bucket_label = f"{effective_bucket} (raw={holding.asset_class})"
+            reason = classification_reason_map.get(holding.symbol, "-")
+            bucket_label = f"{effective_bucket} (raw={holding.asset_class}, reason={reason})"
         lines.append(
             "- "
             f"{holding.symbol} | {bucket_label} | value_jpy={holding.market_value_jpy} | "
@@ -229,6 +245,9 @@ def build_core_buy_materials(core_buy_materials: dict) -> list[str]:
         f"- recommended_monthly_core_buy_budget_jpy: {core_buy_materials.get('recommended_monthly_core_buy_budget_jpy')}",
         f"- monthly_core_budget_override_active: {core_buy_materials.get('monthly_core_budget_override_active')}",
         f"- monthly_core_budget_override_reason: {core_buy_materials.get('monthly_core_budget_override_reason') or '-'}",
+        f"- portfolio_management_mode: {core_buy_materials.get('portfolio_management_mode')}",
+        f"- rebalance_mode_active: {core_buy_materials.get('rebalance_mode_active')}",
+        f"- rebalance_mode_reason: {core_buy_materials.get('rebalance_mode_reason') or '-'}",
         "| symbol | quantity | value_jpy | current_price | reference_symbol | reference_current_price | recent_high_21d | recent_high_63d | drawdown_pct_from_recent_high |",
         "| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: |",
     ]
@@ -264,17 +283,38 @@ def build_sox_materials(sox_buy_signal: dict) -> list[str]:
 
 def build_exposure_breakdown(exposure_breakdown: dict) -> list[str]:
     lines = [
-        f"- semiconductor_exposure_total_pct: {format_pct(exposure_breakdown.get('semiconductor_exposure_total_pct'))}",
-        f"- semiconductor_exposure_total_jpy: {exposure_breakdown.get('semiconductor_exposure_total_jpy')}",
-        "| symbol | value_jpy | bucket | exposure_type | included_in_semiconductor_exposure | inclusion_reason |",
-        "| --- | ---: | --- | --- | --- | --- |",
+        f"- direct_semiconductor_exposure_pct: {format_pct(exposure_breakdown.get('direct_semiconductor_exposure_pct'))}",
+        f"- direct_semiconductor_exposure_jpy: {exposure_breakdown.get('direct_semiconductor_exposure_jpy')}",
+        f"- indirect_ai_infra_exposure_pct: {format_pct(exposure_breakdown.get('indirect_ai_infra_exposure_pct'))}",
+        f"- indirect_ai_infra_exposure_jpy: {exposure_breakdown.get('indirect_ai_infra_exposure_jpy')}",
+        "| symbol | value_jpy | bucket | exposure_type | in_direct | in_indirect | inclusion_reason |",
+        "| --- | ---: | --- | --- | --- | --- | --- |",
     ]
     for item in exposure_breakdown.get("breakdown", []):
         lines.append(
             f"| {item['symbol']} | {item['value_jpy']} | {item['bucket']} | {item['exposure_type']} | "
-            f"{item['included_in_semiconductor_exposure']} | {item['inclusion_reason']} |"
+            f"{item['included_in_direct_semiconductor_exposure']} | "
+            f"{item['included_in_indirect_ai_infra_exposure']} | "
+            f"{item['inclusion_reason']} |"
         )
     return lines
+
+
+def build_review_partition_section(computation: MonthlyComputation) -> list[str]:
+    monthly = computation.monthly_execution_outputs or {}
+    quarterly = computation.quarterly_rule_review_outputs or {}
+    return [
+        "- monthly_execution_outputs:",
+        f"  - portfolio_management_mode: {monthly.get('portfolio_management_mode')}",
+        f"  - monthly_core_budget_tier: {monthly.get('monthly_core_budget_tier')}",
+        f"  - recommended_monthly_core_buy_budget_jpy: {monthly.get('recommended_monthly_core_buy_budget_jpy')}",
+        f"  - candidate_count: {monthly.get('candidate_count')}",
+        "- quarterly_rule_review_outputs:",
+        f"  - classification_override_count: {quarterly.get('classification_override_count')}",
+        f"  - core_reference_missing_symbols: {quarterly.get('core_reference_missing_symbols')}",
+        f"  - direct_semiconductor_exposure_pct: {format_pct(quarterly.get('direct_semiconductor_exposure_pct'))}",
+        f"  - indirect_ai_infra_exposure_pct: {format_pct(quarterly.get('indirect_ai_infra_exposure_pct'))}",
+    ]
 
 
 def build_long_term_thesis_targets_table(long_term_thesis_targets: list[dict]) -> list[str]:

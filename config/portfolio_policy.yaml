@@ -63,6 +63,20 @@ exposure_groups:
       - "semiconductor"
     optional_symbols:
       MSFT: false
+  direct_semiconductor:
+    symbols:
+      - "SMH"
+      - "NIKKO_SOX_FUND"
+    symbol_prefixes:
+      - "NISSEI_SOX_"
+      - "NIKKO_SOX_"
+    name_keywords:
+      - "SOX"
+      - "半導体"
+      - "semiconductor"
+  indirect_ai_infra:
+    symbols:
+      - "MSFT"
 
 long_term_thesis:
   URA:

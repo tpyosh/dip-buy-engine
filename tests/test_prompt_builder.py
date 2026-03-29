@@ -16,7 +16,8 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "## 7. 半導体エクスポージャ内訳" in prompt
     assert "## 8. 長期シナリオ点検対象" in prompt
     assert "## 9. ChatGPTへの長期シナリオレビュー依頼" in prompt
-    assert "## 12. 必須の月次・四半期レビュー観点" in prompt
+    assert "## 11. 生成ロジック上の分離データ" in prompt
+    assert "## 13. 必須の月次・四半期レビュー観点" in prompt
     assert "【Codex向け修正要約】" in prompt
     assert "【コア定額買い方針レビュー】" in prompt
     assert "【長期シナリオレビュー】" in prompt
@@ -33,5 +34,8 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
     assert "monthly_core_budget_tier" in prompt
     assert "recommended_monthly_core_buy_budget_jpy" in prompt
+    assert "rebalance_mode_active" in prompt
+    assert "in_direct" in prompt
+    assert "in_indirect" in prompt
     assert "priority_lowered_boolean" in prompt
     assert "月次の執行判断と、四半期単位のルール見直し提案は明確に分離してください。" in prompt

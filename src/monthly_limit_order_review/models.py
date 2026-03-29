@@ -48,6 +48,8 @@ class MarketReference:
     recent_high_63d: Decimal | None
     currency: str
     as_of: date
+    prior_close_21d: Decimal | None = None
+    prior_close_63d: Decimal | None = None
 
 
 @dataclass(slots=True)

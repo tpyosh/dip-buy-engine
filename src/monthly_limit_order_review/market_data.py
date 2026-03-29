@@ -38,6 +38,8 @@ class MarketDataFetcher:
         mean_close_20d = quantize(Decimal(str(closes.tail(20).mean())), 4)
         recent_high_21d = quantize(Decimal(str(closes.tail(21).max())), 4)
         recent_high_63d = quantize(Decimal(str(closes.tail(63).max())), 4)
+        prior_close_21d = quantize(Decimal(str(closes.iloc[-22])), 4)
+        prior_close_63d = quantize(Decimal(str(closes.iloc[-64])), 4)
         return MarketReference(
             symbol=symbol,
             yfinance_symbol=yfinance_symbol,
@@ -47,6 +49,8 @@ class MarketDataFetcher:
             recent_high_63d=recent_high_63d,
             currency=currency,
             as_of=as_of,
+            prior_close_21d=prior_close_21d,
+            prior_close_63d=prior_close_63d,
         )
 
     @staticmethod

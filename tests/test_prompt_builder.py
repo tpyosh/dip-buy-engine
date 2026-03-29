@@ -12,6 +12,7 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "## 1. 前提" in prompt
     assert "【要約】" in prompt
     assert "## 5. コア定額買い判定材料" in prompt
+    assert "## 5-1. Coreスポット買い判断材料" in prompt
     assert "## 5-2. Core積立設定（毎月固定）" in prompt
     assert "## 5-3. 暗号資産積立設定（毎週固定）" in prompt
     assert "## 6. SOX 判定材料" in prompt
@@ -21,6 +22,7 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "## 11. 生成ロジック上の分離データ" in prompt
     assert "## 13. 必須の月次・四半期レビュー観点" in prompt
     assert "【Codex向け修正要約】" in prompt
+    assert "【今月のcoreスポット買い提案】" in prompt
     assert "【コア定額買い方針レビュー】" in prompt
     assert "【長期シナリオレビュー】" in prompt
     assert "【四半期ルール見直し】" in prompt
@@ -36,6 +38,11 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
     assert "monthly_core_budget_tier" in prompt
     assert "recommended_monthly_core_buy_budget_jpy" in prompt
+    assert "current_monthly_core_auto_invest_amount_jpy" in prompt
+    assert "annualized_core_auto_invest_amount_jpy" in prompt
+    assert "0円は禁止" in prompt
+    assert "単一具体額" in prompt
+    assert "積立しているからスポット買いは不要" in prompt
     assert "total_monthly_jpy: 750000" in prompt
     assert "既存の毎月固定積立（Core積立設定）を前提に評価すること" in prompt
     assert "| BTC | 2000 |" in prompt

@@ -15,12 +15,13 @@ from .market_data import fetch_market_references
 from .models import MonthlyComputation
 from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics
 from .prompt_renderer import render_chatgpt_prompt
+from .readme_portfolio import refresh_readme_portfolio
 from .review_parser import parse_review_feedback
 from .rules import calculate_sox_buy_signal
 from .snapshot_loader import load_snapshot
 from .storage import default_output_paths, load_yaml, read_text, write_text, write_yaml
 from .thesis_metrics import build_long_term_thesis_targets
-from .utils import month_key
+from .utils import month_key, quantize
 from .validation import (
     apply_candidate_validations,
     build_exposure_validation_warnings,
@@ -87,8 +88,15 @@ def handle_generate_review_prompt(args: argparse.Namespace) -> int:
     write_yaml(paths["computation"], computation)
     write_text(output_path, prompt)
     write_text(paths["review_prompt_history"], prompt)
+    refresh_readme_portfolio(
+        readme_path=project_root / "README.md",
+        snapshot_date=computation.snapshot.snapshot_date.isoformat(),
+        total_assets_jpy=computation.snapshot.total_assets_jpy,
+        bucket_allocations=computation.bucket_allocations,
+    )
     LOGGER.info("Saved computation to %s", paths["computation"])
     LOGGER.info("Saved review prompt to %s", output_path)
+    LOGGER.info("Updated README portfolio section at %s", project_root / "README.md")
     return 0
 
 
@@ -140,8 +148,15 @@ def handle_monthly_run(args: argparse.Namespace) -> int:
     write_yaml(paths["computation"], computation)
     write_text(paths["review_prompt"], prompt)
     write_text(paths["review_prompt_history"], prompt)
+    refresh_readme_portfolio(
+        readme_path=project_root / "README.md",
+        snapshot_date=computation.snapshot.snapshot_date.isoformat(),
+        total_assets_jpy=computation.snapshot.total_assets_jpy,
+        bucket_allocations=computation.bucket_allocations,
+    )
     LOGGER.info("Saved computation to %s", paths["computation"])
     LOGGER.info("Saved review prompt to %s", paths["review_prompt"])
+    LOGGER.info("Updated README portfolio section at %s", project_root / "README.md")
     return 0
 
 
@@ -216,6 +231,13 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         portfolio_analysis["resolved_buckets"],
         portfolio_analysis["symbol_weights"],
     )
+    core_spot_buy_materials = build_core_spot_buy_materials(
+        snapshot=snapshot,
+        portfolio_analysis=portfolio_analysis,
+        core_buy_materials=core_buy_materials,
+        market_references=market_references,
+        recurring_contributions=recurring_contributions,
+    )
 
     warnings = list(portfolio_analysis["warnings"])
     warnings.extend(candidate_warnings)
@@ -273,6 +295,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "resolved_buckets": portfolio_analysis["resolved_buckets"],
             "classification_audit": portfolio_analysis["classification_audit"],
             "core_recurring_contributions": recurring_contributions,
+            "core_spot_buy_materials": core_spot_buy_materials,
         },
     )
 
@@ -318,6 +341,102 @@ def build_reference_requests(
 
 def get_project_root() -> Path:
     return Path(__file__).resolve().parents[2]
+
+
+def build_core_spot_buy_materials(
+    *,
+    snapshot,
+    portfolio_analysis: dict,
+    core_buy_materials: dict,
+    market_references: list,
+    recurring_contributions: dict,
+) -> dict:
+    allocation_map = {allocation.bucket: allocation for allocation in portfolio_analysis["bucket_allocations"]}
+    reference_map = {reference.symbol: reference for reference in market_references}
+    current_monthly_core_auto_invest = recurring_contributions.get("total_monthly_jpy")
+    annualized_core_auto_invest = (
+        int(current_monthly_core_auto_invest) * 12 if current_monthly_core_auto_invest is not None else None
+    )
+    liquidity_jpy = portfolio_analysis["liquidity_jpy"]
+
+    major_core_proxy_stats: list[dict] = []
+    seen_reference_symbols: set[str] = set()
+    for constituent in core_buy_materials.get("core_constituents", []):
+        reference_symbol = constituent.get("reference_symbol")
+        symbol = constituent.get("symbol")
+        reference = reference_map.get(symbol)
+        if reference_symbol is None or reference is None or reference_symbol in seen_reference_symbols:
+            continue
+        seen_reference_symbols.add(reference_symbol)
+        major_core_proxy_stats.append(
+            {
+                "reference_symbol": reference_symbol,
+                "one_month_return_pct": percent_change(reference.current_price, reference.prior_close_21d),
+                "three_month_return_pct": percent_change(reference.current_price, reference.prior_close_63d),
+                "one_month_drawdown_from_high_pct": drawdown_pct(reference.current_price, reference.recent_high_21d),
+                "three_month_drawdown_from_high_pct": drawdown_pct(reference.current_price, reference.recent_high_63d),
+            }
+        )
+
+    jun_core_allocation = allocation_map.get("jun_core")
+    bond_like_holdings = detect_bond_like_holdings(snapshot.holdings)
+    return {
+        "liquidity_actual_pct": core_buy_materials.get("liquidity_actual_pct"),
+        "liquidity_target_pct": core_buy_materials.get("liquidity_target_pct"),
+        "cash_excess_pct": core_buy_materials.get("cash_excess_pct"),
+        "core_actual_pct": core_buy_materials.get("core_actual_pct"),
+        "core_target_pct": core_buy_materials.get("core_target_pct"),
+        "core_delta_pct": core_buy_materials.get("core_delta_pct"),
+        "jun_core_actual_pct": jun_core_allocation.actual_pct if jun_core_allocation is not None else None,
+        "jun_core_target_pct": jun_core_allocation.target_pct if jun_core_allocation is not None else None,
+        "jun_core_delta_pct": jun_core_allocation.delta_pct if jun_core_allocation is not None else None,
+        "current_monthly_core_auto_invest_amount_jpy": current_monthly_core_auto_invest,
+        "annualized_core_auto_invest_amount_jpy": annualized_core_auto_invest,
+        "major_core_proxy_stats": major_core_proxy_stats,
+        "portfolio_risk_bucket_summary": [
+            {
+                "bucket": allocation.bucket,
+                "actual_pct": allocation.actual_pct,
+                "target_pct": allocation.target_pct,
+                "delta_pct": allocation.delta_pct,
+            }
+            for allocation in portfolio_analysis["bucket_allocations"]
+        ],
+        "current_cash_jpy": liquidity_jpy,
+        "bond_like_holdings_present": bool(bond_like_holdings),
+        "bond_like_holdings": bond_like_holdings or None,
+        "emergency_fund_managed_separately": None,
+        "near_term_large_expense": None,
+    }
+
+
+def percent_change(current_value, prior_value):
+    if current_value in (None, 0) or prior_value in (None, 0):
+        return None
+    return quantize((current_value - prior_value) / prior_value * 100, 2)
+
+
+def drawdown_pct(current_value, high_value):
+    if current_value in (None, 0) or high_value in (None, 0):
+        return None
+    return quantize((current_value - high_value) / high_value * 100, 2)
+
+
+def detect_bond_like_holdings(holdings) -> list[dict]:
+    keywords = ("bond", "債券", "mmf", "国債", "treasury")
+    matches: list[dict] = []
+    for holding in holdings:
+        symbol = str(holding.symbol).lower()
+        name = str(holding.name).lower()
+        if any(keyword in symbol or keyword in name for keyword in keywords):
+            matches.append(
+                {
+                    "symbol": holding.symbol,
+                    "name": holding.name,
+                    "market_value_jpy": holding.market_value_jpy,
+                }
+            )
+    return matches
 
 
 if __name__ == "__main__":

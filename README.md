@@ -4,6 +4,25 @@
 
 本ツールは自動売買ツールではありません。Python が数値計算と履歴保存を担当し、ChatGPT が月次レビューと改善提案を担当し、最終判断と発注はユーザが手動で行います。
 
+<!-- portfolio-piechart:start -->
+## Latest Portfolio Snapshot
+
+- snapshot_date: 2026-03-29
+- total_assets_jpy: 33028136
+
+![Portfolio Allocation](docs/portfolio_allocation_latest.svg)
+
+| bucket | market_value_jpy | pct |
+| --- | ---: | ---: |
+| core | 5419420 | 16.41% |
+| jun_core | 3086731 | 9.35% |
+| satellite_core | 5143392 | 15.57% |
+| satellite | 206392 | 0.62% |
+| pension | 3381281 | 10.24% |
+| liquidity | 14942636 | 45.24% |
+| other | 848281 | 2.57% |
+<!-- portfolio-piechart:end -->
+
 ## 目的
 
 - 月初の指値設定を一貫したルールでレビューする

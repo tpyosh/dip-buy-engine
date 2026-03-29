@@ -26,6 +26,8 @@ def test_market_data_computes_mean_and_recent_high() -> None:
     assert reference.mean_close_20d == Decimal("159.5000")
     assert reference.recent_high_21d == Decimal("169.0000")
     assert reference.recent_high_63d == Decimal("169.0000")
+    assert reference.prior_close_21d == Decimal("148.0000")
+    assert reference.prior_close_63d == Decimal("106.0000")
 
 
 def test_market_data_raises_when_history_is_too_short() -> None:

@@ -123,6 +123,8 @@ def sample_market_references() -> list[MarketReference]:
             recent_high_63d=Decimal("120"),
             currency="USD",
             as_of=date(2026, 3, 7),
+            prior_close_21d=Decimal("95"),
+            prior_close_63d=Decimal("100"),
         ),
         MarketReference(
             symbol="URA",
@@ -133,6 +135,8 @@ def sample_market_references() -> list[MarketReference]:
             recent_high_63d=Decimal("120"),
             currency="USD",
             as_of=date(2026, 3, 7),
+            prior_close_21d=Decimal("90"),
+            prior_close_63d=Decimal("98"),
         ),
         MarketReference(
             symbol="PLTR",
@@ -143,6 +147,8 @@ def sample_market_references() -> list[MarketReference]:
             recent_high_63d=Decimal("120"),
             currency="USD",
             as_of=date(2026, 3, 7),
+            prior_close_21d=Decimal("80"),
+            prior_close_63d=Decimal("92"),
         ),
         MarketReference(
             symbol="MSFT",
@@ -153,6 +159,8 @@ def sample_market_references() -> list[MarketReference]:
             recent_high_63d=Decimal("550"),
             currency="USD",
             as_of=date(2026, 3, 7),
+            prior_close_21d=Decimal("420"),
+            prior_close_63d=Decimal("430"),
         ),
         MarketReference(
             symbol="ALL_COUNTRY_FUND",
@@ -163,6 +171,8 @@ def sample_market_references() -> list[MarketReference]:
             recent_high_63d=Decimal("120"),
             currency="USD",
             as_of=date(2026, 3, 7),
+            prior_close_21d=Decimal("108"),
+            prior_close_63d=Decimal("115"),
         ),
         MarketReference(
             symbol="SMH",
@@ -173,6 +183,8 @@ def sample_market_references() -> list[MarketReference]:
             recent_high_63d=Decimal("250"),
             currency="USD",
             as_of=date(2026, 3, 7),
+            prior_close_21d=Decimal("235"),
+            prior_close_63d=Decimal("240"),
         ),
         MarketReference(
             symbol="USDJPY",
@@ -183,6 +195,8 @@ def sample_market_references() -> list[MarketReference]:
             recent_high_63d=Decimal("151"),
             currency="JPY",
             as_of=date(2026, 3, 7),
+            prior_close_21d=Decimal("149"),
+            prior_close_63d=Decimal("148"),
         ),
     ]
 
@@ -326,6 +340,36 @@ def sample_computation(
                 "crypto_review_guidance": [
                     "暗号資産の週次積立は既存で実行中の前提で評価する",
                 ],
+            },
+            "core_spot_buy_materials": {
+                "liquidity_actual_pct": Decimal("0.2400"),
+                "liquidity_target_pct": Decimal("0.1000"),
+                "cash_excess_pct": Decimal("0.1400"),
+                "core_actual_pct": Decimal("0.3600"),
+                "core_target_pct": Decimal("0.4500"),
+                "core_delta_pct": Decimal("-0.0900"),
+                "jun_core_actual_pct": Decimal("0.1600"),
+                "jun_core_target_pct": Decimal("0.2000"),
+                "jun_core_delta_pct": Decimal("-0.0400"),
+                "current_monthly_core_auto_invest_amount_jpy": 750000,
+                "annualized_core_auto_invest_amount_jpy": 9000000,
+                "major_core_proxy_stats": [
+                    {
+                        "reference_symbol": "VT",
+                        "one_month_return_pct": Decimal("-2.78"),
+                        "three_month_return_pct": Decimal("-8.70"),
+                        "one_month_drawdown_from_high_pct": Decimal("-4.55"),
+                        "three_month_drawdown_from_high_pct": Decimal("-12.50"),
+                    }
+                ],
+                "portfolio_risk_bucket_summary": [
+                    {"bucket": "core", "actual_pct": Decimal("0.3600"), "target_pct": Decimal("0.4500"), "delta_pct": Decimal("-0.0900")}
+                ],
+                "current_cash_jpy": 1200000,
+                "bond_like_holdings_present": False,
+                "bond_like_holdings": None,
+                "emergency_fund_managed_separately": None,
+                "near_term_large_expense": None,
             },
         },
     )

@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="440" viewBox="0 0 720 440" role="img" aria-labelledby="title desc">
+<title id="title">Portfolio Allocation</title>
+<desc id="desc">Bucket-level portfolio allocation pie chart.</desc>
+<rect width="100%" height="100%" fill="#ffffff" />
+<text x="32" y="44" font-family="Arial, sans-serif" font-size="26" font-weight="700" fill="#111827">Portfolio Allocation</text>
+<path d="M 220 210 L 220.0000 70.0000 A 140 140 0 0 1 340.0922 138.0426 Z" fill="#2E86AB" stroke="#ffffff" stroke-width="2" />
+<path d="M 220 210 L 340.0922 138.0426 A 140 140 0 0 1 359.8428 216.6323 Z" fill="#F6C85F" stroke="#ffffff" stroke-width="2" />
+<path d="M 220 210 L 359.8428 216.6323 A 140 140 0 0 1 292.5713 329.7222 Z" fill="#6F4E7C" stroke="#ffffff" stroke-width="2" />
+<path d="M 220 210 L 292.5713 329.7222 A 140 140 0 0 1 287.8158 332.4786 Z" fill="#CA472F" stroke="#ffffff" stroke-width="2" />
+<path d="M 220 210 L 287.8158 332.4786 A 140 140 0 0 1 200.8009 348.6773 Z" fill="#45A29E" stroke="#ffffff" stroke-width="2" />
+<path d="M 220 210 L 200.8009 348.6773 A 140 140 0 0 1 197.5055 71.8190 Z" fill="#7FBC41" stroke="#ffffff" stroke-width="2" />
+<path d="M 220 210 L 197.5055 71.8190 A 140 140 0 0 1 220.0000 70.0000 Z" fill="#9E9E9E" stroke="#ffffff" stroke-width="2" />
+<rect x="420" y="78" width="16" height="16" rx="3" fill="#2E86AB" />
+<text x="446" y="92" font-family="Arial, sans-serif" font-size="15" fill="#111827">core (16.41%)</text>
+<rect x="420" y="116" width="16" height="16" rx="3" fill="#F6C85F" />
+<text x="446" y="130" font-family="Arial, sans-serif" font-size="15" fill="#111827">jun_core (9.35%)</text>
+<rect x="420" y="154" width="16" height="16" rx="3" fill="#6F4E7C" />
+<text x="446" y="168" font-family="Arial, sans-serif" font-size="15" fill="#111827">satellite_core (15.57%)</text>
+<rect x="420" y="192" width="16" height="16" rx="3" fill="#CA472F" />
+<text x="446" y="206" font-family="Arial, sans-serif" font-size="15" fill="#111827">satellite (0.62%)</text>
+<rect x="420" y="230" width="16" height="16" rx="3" fill="#45A29E" />
+<text x="446" y="244" font-family="Arial, sans-serif" font-size="15" fill="#111827">pension (10.24%)</text>
+<rect x="420" y="268" width="16" height="16" rx="3" fill="#7FBC41" />
+<text x="446" y="282" font-family="Arial, sans-serif" font-size="15" fill="#111827">liquidity (45.24%)</text>
+<rect x="420" y="306" width="16" height="16" rx="3" fill="#9E9E9E" />
+<text x="446" y="320" font-family="Arial, sans-serif" font-size="15" fill="#111827">other (2.57%)</text>
+</svg>

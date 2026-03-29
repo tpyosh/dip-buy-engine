@@ -21,7 +21,7 @@ from .rules import calculate_sox_buy_signal
 from .snapshot_loader import load_snapshot
 from .storage import default_output_paths, load_yaml, read_text, write_text, write_yaml
 from .thesis_metrics import build_long_term_thesis_targets
-from .utils import month_key, quantize
+from .utils import infer_target_month_start, month_key, quantize, target_month_key
 from .validation import (
     apply_candidate_validations,
     build_exposure_validation_warnings,
@@ -79,8 +79,9 @@ def configure_logging(*, verbose: bool) -> None:
 
 def handle_generate_review_prompt(args: argparse.Namespace) -> int:
     project_root = get_project_root()
-    computation = compute_monthly(Path(args.snapshot), project_root=project_root)
-    paths = default_output_paths(project_root, month_key(computation.snapshot.snapshot_date))
+    snapshot_path = Path(args.snapshot)
+    computation = compute_monthly(snapshot_path, project_root=project_root)
+    paths = default_output_paths(project_root, target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path))
     output_path = Path(args.output) if args.output else paths["review_prompt"]
     template_text = read_text(project_root / "prompts/templates/monthly_review_template.md")
     prompt = render_chatgpt_prompt(computation, template_text)
@@ -102,11 +103,12 @@ def handle_generate_review_prompt(args: argparse.Namespace) -> int:
 
 def handle_ingest_review(args: argparse.Namespace) -> int:
     project_root = get_project_root()
-    computation = compute_monthly(Path(args.snapshot), project_root=project_root)
+    snapshot_path = Path(args.snapshot)
+    computation = compute_monthly(snapshot_path, project_root=project_root)
     review_text = read_text(args.review_text)
     review_feedback = parse_review_feedback(review_text)
     diffs = build_proposal_diffs(computation.candidate_orders, review_feedback, computation.warnings)
-    paths = default_output_paths(project_root, month_key(computation.snapshot.snapshot_date))
+    paths = default_output_paths(project_root, target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path))
 
     write_yaml(paths["computation"], computation)
     write_yaml(paths["review_structured"], review_feedback)
@@ -118,11 +120,12 @@ def handle_ingest_review(args: argparse.Namespace) -> int:
 
 def handle_generate_codex_patch(args: argparse.Namespace) -> int:
     project_root = get_project_root()
-    computation = compute_monthly(Path(args.snapshot), project_root=project_root)
+    snapshot_path = Path(args.snapshot)
+    computation = compute_monthly(snapshot_path, project_root=project_root)
     review_text = read_text(args.review_text)
     review_feedback = parse_review_feedback(review_text)
     diffs = build_proposal_diffs(computation.candidate_orders, review_feedback, computation.warnings)
-    month = month_key(computation.snapshot.snapshot_date)
+    month = target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path)
     patch_request = build_codex_patch_request(month, review_feedback, diffs)
     paths = default_output_paths(project_root, month)
     output_path = Path(args.output) if args.output else paths["patch_prompt"]
@@ -141,8 +144,9 @@ def handle_generate_codex_patch(args: argparse.Namespace) -> int:
 
 def handle_monthly_run(args: argparse.Namespace) -> int:
     project_root = get_project_root()
-    computation = compute_monthly(Path(args.snapshot), project_root=project_root)
-    paths = default_output_paths(project_root, month_key(computation.snapshot.snapshot_date))
+    snapshot_path = Path(args.snapshot)
+    computation = compute_monthly(snapshot_path, project_root=project_root)
+    paths = default_output_paths(project_root, target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path))
     template_text = read_text(project_root / "prompts/templates/monthly_review_template.md")
     prompt = render_chatgpt_prompt(computation, template_text)
     write_yaml(paths["computation"], computation)
@@ -162,6 +166,8 @@ def handle_monthly_run(args: argparse.Namespace) -> int:
 
 def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComputation:
     snapshot = load_snapshot(snapshot_path)
+    review_target_month_start = infer_target_month_start(snapshot.snapshot_date, snapshot_path=snapshot_path)
+    review_target_month = month_key(review_target_month_start)
     buy_rules = load_yaml(project_root / "config/buy_rules.yaml")
     portfolio_policy = load_yaml(project_root / "config/portfolio_policy.yaml")
     tickers = load_yaml(project_root / "config/tickers.yaml")
@@ -273,6 +279,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         exposure_breakdown=exposure_breakdown,
         long_term_thesis_targets=long_term_thesis_targets,
         monthly_execution_outputs={
+            "review_target_month": review_target_month,
             "portfolio_management_mode": core_buy_materials.get("portfolio_management_mode"),
             "monthly_core_budget_tier": core_buy_materials.get("monthly_core_budget_tier"),
             "recommended_monthly_core_buy_budget_jpy": core_buy_materials.get(
@@ -292,6 +299,8 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         },
         metadata={
             "snapshot_path": str(snapshot_path),
+            "review_target_month": review_target_month,
+            "review_target_month_start": review_target_month_start.isoformat(),
             "resolved_buckets": portfolio_analysis["resolved_buckets"],
             "classification_audit": portfolio_analysis["classification_audit"],
             "core_recurring_contributions": recurring_contributions,

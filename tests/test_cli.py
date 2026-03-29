@@ -85,3 +85,5 @@ def test_generate_review_prompt_updates_readme(monkeypatch, tmp_path: Path) -> N
     assert "<!-- portfolio-piechart:start -->" in updated_readme
     assert "## Latest Portfolio Snapshot" in updated_readme
     assert "snapshot_date: 2026-03-29" in updated_readme
+    assert (project_root / "data/history/computations/2026_04_computation.yaml").exists()
+    assert (project_root / "data/history/prompts/2026_04_monthly_review_prompt.md").exists()

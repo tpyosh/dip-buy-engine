@@ -19,7 +19,7 @@ def build_candidate(**overrides) -> CandidateOrder:
         currency="USD",
         drawdown_pct=Decimal("-15"),
         drawdown_rule="-15% x 2",
-        reference_method="mean_close_20d",
+        reference_method="mean_close_30d",
     )
     for key, value in overrides.items():
         setattr(candidate, key, value)
@@ -50,4 +50,3 @@ def test_missing_current_price_is_reported_as_calculation_blocker(buy_rules_conf
     assert candidate.suppressed_reason_code == "missing_current_price"
     assert candidate.suppression_reasons == ["Current price is unavailable."]
     assert warnings[0].code == "missing_current_price"
-

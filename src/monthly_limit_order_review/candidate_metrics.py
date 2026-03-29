@@ -35,7 +35,7 @@ def compute_candidate_metrics(
 
         currency = reference.currency if reference is not None else (current_holding.currency if current_holding else "USD")
         digits = int(round_rules.get("jpy_decimals" if currency == "JPY" else "usd_decimals", 2))
-        base_price = reference.mean_close_20d if reference is not None else None
+        base_price = (reference.mean_close_30d or reference.mean_close_20d) if reference is not None else None
         current_price = reference.current_price if reference is not None else None
 
         for tranche in rule_config.get("tranches", []):
@@ -97,7 +97,7 @@ def compute_candidate_metrics(
                     currency=currency,
                     drawdown_pct=drawdown_pct,
                     drawdown_rule=f"{drawdown_pct}% x {shares}",
-                    reference_method="mean_close_20d",
+                    reference_method="mean_close_30d",
                     suppressed=policy_outcome["suppressed"],
                     suppressed_reason_code=policy_outcome["suppressed_reason_code"],
                     suppressed_reason_text=policy_outcome["suppressed_reason_text"],

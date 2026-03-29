@@ -11,16 +11,20 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
     resolved_buckets = computation.metadata.get("resolved_buckets", {})
     classification_audit = computation.metadata.get("classification_audit", [])
     classification_reason_map = {item["symbol"]: item.get("reason") for item in classification_audit}
+    review_target_month = computation.metadata.get("review_target_month", month_key(snapshot.snapshot_date))
 
     lines.extend(
         [
             f"- snapshot_date: {snapshot.snapshot_date.isoformat()}",
+            f"- review_target_month: {review_target_month}",
             f"- currency_base: {snapshot.currency_base}",
             f"- total_assets_jpy: {snapshot.total_assets_jpy}",
             f"- liquidity_target_jpy: {snapshot.liquidity_target_jpy or 'null'}",
             f"- holdings_count: {len(snapshot.holdings)}",
             f"- 半導体エクスポージャ(Direct): {format_pct(computation.exposure_breakdown.get('direct_semiconductor_exposure_pct'))}",
             f"- AIインフラ感応度(Indirect): {format_pct(computation.exposure_breakdown.get('indirect_ai_infra_exposure_pct'))}",
+            "- 指値設定は前月末または当月初に実施しうるため、snapshot_date が月末でも翌月の指値設定として解釈してよい",
+            "- 指値設定基準値は先月平均ではなく、直近30営業日の終値平均を使う",
         ]
     )
 
@@ -35,6 +39,9 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
 
     lines.extend(["", "## 5. コア定額買い判定材料"])
     lines.extend(build_core_buy_materials(computation.core_buy_materials))
+
+    lines.extend(["", "## 5-1. Coreスポット買い判断材料"])
+    lines.extend(build_core_spot_buy_materials(computation.metadata.get("core_spot_buy_materials", {})))
 
     lines.extend(["", "## 5-2. Core積立設定（毎月固定）"])
     lines.extend(build_core_recurring_contributions(computation.metadata.get("core_recurring_contributions", {})))
@@ -75,16 +82,32 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "【要約】",
             "- 3〜6行程度で短くまとめる",
             "- 今月の最重要判断",
+            "- 今月の core スポット買い執行額",
             "- コア / サテライトの優先順位",
             "- SOXの判定",
             "- ルール改善の要否",
             "- 『今月何をする月か』が一目で分かる内容にする",
             "",
+            "【今月のcoreスポット買い提案】",
+            "- このセクションは毎回必須とする",
+            "- 今月の推奨スポット買い総額を、JPY の単一具体額で最初に明示すること",
+            "- 0円は禁止。必ず non-zero の執行額を出すこと",
+            "- `多めに` `厚めに` `数十万円` `50〜100万円` のような曖昧表現は禁止",
+            "- 配分先内訳を明示すること",
+            "- 実行方法を `一括` / `2〜4分割` / `押し目待ち併用` のいずれかで明示すること",
+            "- 判断根拠は `相場面` / `ポートフォリオ歪み` / `流動性水準` を分けて書くこと",
+            "- その判断が `ルール上の判断` か `今月の裁量判断` かを分離すること",
+            "- broad market core 商品を優先し、むやみに新規商品を増やさないこと",
+            "- 債券や低リスク商品を提案してもよいが、core equity のスポット買い額は必ず別途提示すること",
+            "- `積立しているからスポット買いは不要` とは結論しないこと",
+            "",
             "【今月の指値提案】",
+            "- この『今月』は review_target_month を指す。snapshot_date が前月末でも、対象月を取り違えないこと",
             "- 各銘柄について 0段以上の任意段数で提案してよい",
             "- 0段の場合は『今月は見送り』と明記する",
             "- Python 候補より段数を減らした場合は、その理由が『ルール上の判断』か『今月の裁量判断』かを明記する",
             "- Python 候補より段数を増やした場合も、その理由を明記する",
+            "- 指値設定基準値は直近30営業日の終値平均ベースとして扱うこと",
             "- 減段理由テンプレートの例: `ルール上の判断: bucket_over_target のため浅い段を見送る`",
             "- 減段理由テンプレートの例: `今月の裁量判断: core 補強を優先するため段数を減らす`",
             "",
@@ -93,6 +116,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 安ければ追加でどの程度厚くする考え方が妥当か",
             "- コアとサテライトの資金配分優先順位",
             "- 既存の毎月固定積立（Core積立設定）を前提に評価すること",
+            "- 積立設定が大きくても、それだけでスポット買い免除にしないこと",
             "- 固定積立を維持するか、減額/停止すべきかを明示すること（必要な場合のみ）",
             "- ルール上の判断と今月の裁量判断を分けて説明すること",
             "",
@@ -158,11 +182,24 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "",
             "## 13. 必須の月次・四半期レビュー観点",
             "- 毎月の運用レビューと四半期ごとのルール変更レビューを分離して評価してください。",
+            "- 指値設定は前月末または当月初に実施されるため、snapshot_date が月末なら翌月の指値設定として扱ってください。",
             "- 四半期ルール見直しセクションには、月次の執行判断を混ぜないでください。",
             "- 半導体エクスポージャの合算管理が妥当か確認してください。",
             "- PLTR の浅い押し目候補抑制ロジックの是非を評価してください。",
             "- 指値段数は各銘柄 0段以上の任意とし、1段しか出さない場合はその理由を明記してください。",
             "- コアについては『毎月一定額買う / 安ければ追加で厚く買う』という運用思想の妥当性も評価してください。",
+            "- 月次レビューでは、毎回必ず core スポット買い額を提案してください。",
+            "- core スポット買い額は 0円不可で、最初に単一の具体額を出してください。",
+            "- 金額はその月の portfolio 歪み、相場状況、流動性水準で変動してよいです。",
+            "- cash_excess_pct が大きいほど、core スポット買い額を増やしてください。",
+            "- core_delta_pct が大きいほど、core スポット買い額を増やしてください。",
+            "- broad market ベースで明確に下落している月は、core スポット買い額を増やしてください。",
+            "- 高値圏でも cash_excess と core不足が大きい場合は、一定額は必ず実行してください。",
+            "- satellite_core が過大でも、core不足是正を優先してください。",
+            "- 既存の broad market core 商品を優先し、新規商品追加は最小限にしてください。",
+            "- 債券や低リスク商品を提案する場合でも、core equity スポット買い額そのものは別で必ず提示してください。",
+            "- `全部債券` `全部現金維持` は不可です。",
+            "- 生活防衛資金や大口支出情報が不明なら、不明として保守的に扱ってください。",
             "- Core積立設定（毎月固定）は既に実行される前提として扱い、同じ強化提案の反復は避けてください。",
             "- ただし長期シナリオ悪化やリスク管理上の妥当性がある場合は、固定積立の減額・停止提案を明示してください。",
             "- 暗号資産の週次積立（BTC/ETH/XRP）も既に実行される前提で扱い、必要時のみ変更提案してください。",
@@ -184,7 +221,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- monthly review と quarterly rule review を分けて整理してください。",
             "- 修正対象ファイルと必要テストを、Codex が編集に入れる粒度で書いてください。",
             "",
-            f"月次キー: {month_key(snapshot.snapshot_date)}",
+            f"指値設定対象月キー: {review_target_month}",
         ]
     )
     return "\n".join(lines).strip() + "\n"
@@ -271,6 +308,46 @@ def build_core_buy_materials(core_buy_materials: dict) -> list[str]:
             f"{format_value(item['current_price'])} | {item['reference_symbol'] or '-'} | "
             f"{format_value(item['reference_current_price'])} | {format_value(item['recent_high_21d'])} | "
             f"{format_value(item['recent_high_63d'])} | {format_value(item['drawdown_pct_from_recent_high'])} |"
+        )
+    return lines
+
+
+def build_core_spot_buy_materials(spot_buy_materials: dict) -> list[str]:
+    lines = [
+        f"- liquidity_actual_pct: {format_pct(spot_buy_materials.get('liquidity_actual_pct'))}",
+        f"- liquidity_target_pct: {format_pct(spot_buy_materials.get('liquidity_target_pct'))}",
+        f"- cash_excess_pct: {format_pct(spot_buy_materials.get('cash_excess_pct'))}",
+        f"- core_actual_pct: {format_pct(spot_buy_materials.get('core_actual_pct'))}",
+        f"- core_target_pct: {format_pct(spot_buy_materials.get('core_target_pct'))}",
+        f"- core_delta_pct: {format_pct(spot_buy_materials.get('core_delta_pct'))}",
+        f"- jun_core_actual_pct: {format_pct(spot_buy_materials.get('jun_core_actual_pct'))}",
+        f"- jun_core_target_pct: {format_pct(spot_buy_materials.get('jun_core_target_pct'))}",
+        f"- jun_core_delta_pct: {format_pct(spot_buy_materials.get('jun_core_delta_pct'))}",
+        f"- current_monthly_core_auto_invest_amount_jpy: {spot_buy_materials.get('current_monthly_core_auto_invest_amount_jpy')}",
+        f"- annualized_core_auto_invest_amount_jpy: {spot_buy_materials.get('annualized_core_auto_invest_amount_jpy')}",
+        f"- current_cash_jpy: {spot_buy_materials.get('current_cash_jpy')}",
+        f"- bond_like_holdings_present: {spot_buy_materials.get('bond_like_holdings_present')}",
+        f"- bond_like_holdings: {spot_buy_materials.get('bond_like_holdings')}",
+        f"- emergency_fund_managed_separately: {spot_buy_materials.get('emergency_fund_managed_separately')}",
+        f"- near_term_large_expense: {spot_buy_materials.get('near_term_large_expense')}",
+        "| reference_symbol | one_month_return_pct | three_month_return_pct | one_month_drawdown_from_high_pct | three_month_drawdown_from_high_pct |",
+        "| --- | ---: | ---: | ---: | ---: |",
+    ]
+    stats = spot_buy_materials.get("major_core_proxy_stats", [])
+    if not stats:
+        lines.append("| - | null | null | null | null |")
+    for item in stats:
+        lines.append(
+            f"| {item.get('reference_symbol', '-')} | {format_value(item.get('one_month_return_pct'))} | "
+            f"{format_value(item.get('three_month_return_pct'))} | "
+            f"{format_value(item.get('one_month_drawdown_from_high_pct'))} | "
+            f"{format_value(item.get('three_month_drawdown_from_high_pct'))} |"
+        )
+    lines.append("- portfolio_risk_bucket_summary:")
+    for item in spot_buy_materials.get("portfolio_risk_bucket_summary", []):
+        lines.append(
+            f"  - {item.get('bucket')}: actual_pct={format_pct(item.get('actual_pct'))}, "
+            f"target_pct={format_pct(item.get('target_pct'))}, delta_pct={format_pct(item.get('delta_pct'))}"
         )
     return lines
 

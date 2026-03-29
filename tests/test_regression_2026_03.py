@@ -17,7 +17,7 @@ def make_reference(
     yfinance_symbol: str,
     *,
     current_price: str,
-    mean_close_20d: str,
+    mean_close_30d: str,
     recent_high_21d: str,
     recent_high_63d: str,
     prior_close_21d: str,
@@ -28,11 +28,12 @@ def make_reference(
         symbol=symbol,
         yfinance_symbol=yfinance_symbol,
         current_price=Decimal(current_price),
-        mean_close_20d=Decimal(mean_close_20d),
+        mean_close_20d=Decimal(mean_close_30d),
         recent_high_21d=Decimal(recent_high_21d),
         recent_high_63d=Decimal(recent_high_63d),
         currency=currency,
         as_of=date(2026, 3, 7),
+        mean_close_30d=Decimal(mean_close_30d),
         prior_close_21d=Decimal(prior_close_21d),
         prior_close_63d=Decimal(prior_close_63d),
     )
@@ -40,20 +41,20 @@ def make_reference(
 
 def fake_references(requests: dict[str, dict[str, str]]) -> list[MarketReference]:
     defaults = {
-        "CIBR": dict(current_price="66.00", mean_close_20d="65.0615", recent_high_21d="70.50", recent_high_63d="76.00", prior_close_21d="68.00", prior_close_63d="71.00", currency="USD"),
-        "URA": dict(current_price="48.78", mean_close_20d="53.1685", recent_high_21d="55.00", recent_high_63d="58.00", prior_close_21d="50.00", prior_close_63d="54.00", currency="USD"),
-        "PLTR": dict(current_price="157.16", mean_close_20d="138.7620", recent_high_21d="175.00", recent_high_63d="200.00", prior_close_21d="165.00", prior_close_63d="170.00", currency="USD"),
-        "MSFT": dict(current_price="408.96", mean_close_20d="401.1770", recent_high_21d="430.00", recent_high_63d="450.00", prior_close_21d="420.00", prior_close_63d="430.00", currency="USD"),
-        "SMH": dict(current_price="380.56", mean_close_20d="390.00", recent_high_21d="403.00", recent_high_63d="426.16", prior_close_21d="392.00", prior_close_63d="410.00", currency="USD"),
-        "USDJPY": dict(current_price="157.54", mean_close_20d="157.00", recent_high_21d="158.00", recent_high_63d="159.00", prior_close_21d="156.00", prior_close_63d="155.00", currency="JPY"),
-        "RAKUTEN_ALL_COUNTRY_1": dict(current_price="110.00", mean_close_20d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
-        "RAKUTEN_ALL_COUNTRY_2": dict(current_price="110.00", mean_close_20d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
-        "EMAXIS_ALL_COUNTRY": dict(current_price="110.00", mean_close_20d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
-        "EMAXIS_ALL_COUNTRY_TAXABLE": dict(current_price="110.00", mean_close_20d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
-        "RAKUTEN_SP500": dict(current_price="500.00", mean_close_20d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
-        "EMAXIS_SP500_1": dict(current_price="500.00", mean_close_20d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
-        "EMAXIS_SP500_2": dict(current_price="500.00", mean_close_20d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
-        "EMAXIS_SP500_3": dict(current_price="500.00", mean_close_20d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
+        "CIBR": dict(current_price="66.00", mean_close_30d="65.0615", recent_high_21d="70.50", recent_high_63d="76.00", prior_close_21d="68.00", prior_close_63d="71.00", currency="USD"),
+        "URA": dict(current_price="48.78", mean_close_30d="53.1685", recent_high_21d="55.00", recent_high_63d="58.00", prior_close_21d="50.00", prior_close_63d="54.00", currency="USD"),
+        "PLTR": dict(current_price="157.16", mean_close_30d="138.7620", recent_high_21d="175.00", recent_high_63d="200.00", prior_close_21d="165.00", prior_close_63d="170.00", currency="USD"),
+        "MSFT": dict(current_price="408.96", mean_close_30d="401.1770", recent_high_21d="430.00", recent_high_63d="450.00", prior_close_21d="420.00", prior_close_63d="430.00", currency="USD"),
+        "SMH": dict(current_price="380.56", mean_close_30d="390.00", recent_high_21d="403.00", recent_high_63d="426.16", prior_close_21d="392.00", prior_close_63d="410.00", currency="USD"),
+        "USDJPY": dict(current_price="157.54", mean_close_30d="157.00", recent_high_21d="158.00", recent_high_63d="159.00", prior_close_21d="156.00", prior_close_63d="155.00", currency="JPY"),
+        "RAKUTEN_ALL_COUNTRY_1": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
+        "RAKUTEN_ALL_COUNTRY_2": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
+        "EMAXIS_ALL_COUNTRY": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
+        "EMAXIS_ALL_COUNTRY_TAXABLE": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
+        "RAKUTEN_SP500": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
+        "EMAXIS_SP500_1": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
+        "EMAXIS_SP500_2": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
+        "EMAXIS_SP500_3": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
     }
 
     references: list[MarketReference] = []
@@ -64,7 +65,7 @@ def fake_references(requests: dict[str, dict[str, str]]) -> list[MarketReference
                 symbol,
                 params["yfinance_symbol"],
                 current_price=reference_params["current_price"],
-                mean_close_20d=reference_params["mean_close_20d"],
+                mean_close_30d=reference_params["mean_close_30d"],
                 recent_high_21d=reference_params["recent_high_21d"],
                 recent_high_63d=reference_params["recent_high_63d"],
                 prior_close_21d=reference_params["prior_close_21d"],
@@ -138,6 +139,9 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "bond_like_holdings_present:" in prompt
     assert "## 11. 生成ロジック上の分離データ" in prompt
     assert "## 13. 必須の月次・四半期レビュー観点" in prompt
+    assert "review_target_month: 2026_03" in prompt
+    assert "指値設定基準値は直近30営業日の終値平均" in prompt
+    assert "指値設定対象月キー: 2026_03" in prompt
     assert "## 5-2. Core積立設定（毎月固定）" in prompt
     assert "## 5-3. 暗号資産積立設定（毎週固定）" in prompt
     assert "total_monthly_jpy: 750000" in prompt
@@ -159,3 +163,17 @@ def test_taxable_all_country_drawdown_is_not_null_after_reference_mapping(monkey
 
     assert taxable["reference_symbol"] == "ACWI"
     assert taxable["drawdown_pct_from_recent_high"] is not None
+
+
+def test_snapshot_2026_04_is_treated_as_april_limit_order_cycle(monkeypatch) -> None:
+    monkeypatch.setattr("monthly_limit_order_review.cli.fetch_market_references", fake_references)
+
+    snapshot_path = ROOT / "data/normalized/snapshot_2026_04.yaml"
+    computation = compute_monthly(snapshot_path, project_root=ROOT)
+    template_text = read_text(ROOT / "prompts/templates/monthly_review_template.md")
+    prompt = build_monthly_review_prompt(computation, template_text)
+
+    assert computation.metadata["review_target_month"] == "2026_04"
+    assert computation.monthly_execution_outputs["review_target_month"] == "2026_04"
+    assert "review_target_month: 2026_04" in prompt
+    assert "指値設定対象月キー: 2026_04" in prompt

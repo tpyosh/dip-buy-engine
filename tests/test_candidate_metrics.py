@@ -86,3 +86,4 @@ def test_candidate_mode_switch_boosts_core_and_jun_core(
     assert "mode_rebalance_relative_deprioritization" in (cibr.note_for_chatgpt or "")
     assert msft.explanation["mode_context"]["active_mode"] == "rebalance"
     assert "rule_based_reason" in msft.explanation
+    assert msft.reference_method == "mean_close_30d"

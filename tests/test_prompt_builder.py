@@ -40,6 +40,8 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "recommended_monthly_core_buy_budget_jpy" in prompt
     assert "current_monthly_core_auto_invest_amount_jpy" in prompt
     assert "annualized_core_auto_invest_amount_jpy" in prompt
+    assert "review_target_month" in prompt
+    assert "直近30営業日の終値平均" in prompt
     assert "0円は禁止" in prompt
     assert "単一具体額" in prompt
     assert "積立しているからスポット買いは不要" in prompt
@@ -54,3 +56,4 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "in_indirect" in prompt
     assert "priority_lowered_boolean" in prompt
     assert "月次の執行判断と、四半期単位のルール見直し提案は明確に分離してください。" in prompt
+    assert "指値設定対象月キー" in prompt

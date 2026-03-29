@@ -13,6 +13,7 @@ def compute_candidate_metrics(
     market_references: list[MarketReference],
     resolved_buckets: dict[str, str],
     bucket_allocations: list,
+    mode_context: dict | None = None,
 ) -> list[CandidateOrder]:
     reference_map = {reference.symbol: reference for reference in market_references}
     round_rules = buy_rules_config.get("execution", {}).get("round_price", {})
@@ -20,6 +21,7 @@ def compute_candidate_metrics(
     target_pct_by_bucket = {allocation.bucket: allocation.target_pct for allocation in bucket_allocations}
     usd_jpy = reference_map.get("USDJPY")
     candidate_policy = buy_rules_config.get("candidate_policy", {})
+    active_mode = resolve_candidate_mode(mode_context)
     candidates: list[CandidateOrder] = []
 
     for symbol, rule_config in buy_rules_config.get("limit_order_rules", {}).items():
@@ -65,8 +67,23 @@ def compute_candidate_metrics(
                 actual_pct=actual_pct_by_bucket.get(bucket),
                 target_pct=target_pct_by_bucket.get(bucket),
                 candidate_policy=candidate_policy,
+                active_mode=active_mode,
             )
             notes.extend(policy_outcome["notes"])
+            mode_priority_weight = get_mode_priority_weight(
+                active_mode=active_mode,
+                bucket=bucket,
+                candidate_policy=candidate_policy,
+            )
+            notes.extend(build_mode_notes(active_mode=active_mode, bucket=bucket, priority_weight=mode_priority_weight))
+            explanation = build_candidate_explanation(
+                policy_outcome=policy_outcome,
+                active_mode=active_mode,
+                bucket=bucket,
+                actual_pct=actual_pct_by_bucket.get(bucket),
+                target_pct=target_pct_by_bucket.get(bucket),
+                mode_priority_weight=mode_priority_weight,
+            )
             candidates.append(
                 CandidateOrder(
                     symbol=symbol,
@@ -90,6 +107,7 @@ def compute_candidate_metrics(
                         if policy_outcome["suppressed_reason_text"] is not None
                         else []
                     ),
+                    explanation=explanation,
                 )
             )
 
@@ -126,6 +144,7 @@ def build_candidate_policy_outcome(
     actual_pct: Decimal | None,
     target_pct: Decimal | None,
     candidate_policy: dict,
+    active_mode: str,
 ) -> dict:
     notes: list[str] = []
     suppressed = False
@@ -145,10 +164,25 @@ def build_candidate_policy_outcome(
         if behavior == "deep_only":
             if drawdown_pct > deep_threshold:
                 notes.append(str(bucket_policy.get("deep_only_note", "default_deep_only_due_to_bucket_over_target")))
+                suppressed = True
+                suppressed_reason_code = str(
+                    bucket_policy.get("suppressed_reason_code", "bucket_over_target_shallow_suppressed")
+                )
+                suppressed_reason_text = str(
+                    bucket_policy.get(
+                        "suppressed_reason_text",
+                        "Shallow candidate suppressed because related bucket is over target.",
+                    )
+                )
             else:
                 notes.append(str(bucket_policy.get("allow_note", "default_allow_deep_drawdown_even_if_bucket_over_target")))
         elif behavior == "skip":
             notes.append(str(bucket_policy.get("skip_note", "default_skip_due_to_bucket_over_target")))
+            suppressed = True
+            suppressed_reason_code = str(bucket_policy.get("suppressed_reason_code", "bucket_over_target_suppressed"))
+            suppressed_reason_text = str(
+                bucket_policy.get("suppressed_reason_text", "Candidate suppressed because related bucket is over target.")
+            )
         else:
             notes.append("default_deprioritize_due_to_bucket_over_target")
 
@@ -177,6 +211,71 @@ def build_candidate_policy_outcome(
         "suppressed": suppressed,
         "suppressed_reason_code": suppressed_reason_code,
         "suppressed_reason_text": suppressed_reason_text,
+        "active_mode": active_mode,
+    }
+
+
+def resolve_candidate_mode(mode_context: dict | None) -> str:
+    if not mode_context:
+        return "normal"
+    mode = str(mode_context.get("portfolio_management_mode") or "normal")
+    if mode == "rebalance":
+        return "rebalance"
+    if mode == "risk_off":
+        return "risk_off"
+    return "normal"
+
+
+def get_mode_priority_weight(*, active_mode: str, bucket: str, candidate_policy: dict) -> int:
+    mode_priority = candidate_policy.get("mode_priority", {})
+    weights = mode_priority.get(active_mode, mode_priority.get("normal", {}))
+    raw_weight = weights.get(bucket, 0)
+    return int(raw_weight)
+
+
+def build_mode_notes(*, active_mode: str, bucket: str, priority_weight: int) -> list[str]:
+    notes: list[str] = []
+    notes.append(f"mode_context:{active_mode}")
+    notes.append(f"mode_priority_weight:{priority_weight}")
+    if active_mode == "rebalance" and bucket in {"core", "jun_core"}:
+        notes.append("mode_rebalance_priority_boost")
+    if active_mode == "rebalance" and bucket not in {"core", "jun_core"} and priority_weight < 0:
+        notes.append("mode_rebalance_relative_deprioritization")
+    return notes
+
+
+def build_candidate_explanation(
+    *,
+    policy_outcome: dict,
+    active_mode: str,
+    bucket: str,
+    actual_pct: Decimal | None,
+    target_pct: Decimal | None,
+    mode_priority_weight: int,
+) -> dict:
+    related_bucket_status = {
+        "bucket": bucket,
+        "actual_pct": actual_pct,
+        "target_pct": target_pct,
+        "is_over_target": (
+            bool(actual_pct is not None and target_pct is not None and actual_pct > target_pct)
+            if actual_pct is not None and target_pct is not None
+            else False
+        ),
+    }
+    return {
+        "rule_based_reason": policy_outcome.get("notes", []),
+        "discretionary_reason": None,
+        "related_bucket_status": related_bucket_status,
+        "mode_context": {
+            "active_mode": active_mode,
+            "priority_weight": mode_priority_weight,
+        },
+        "suppression": {
+            "suppressed": policy_outcome.get("suppressed", False),
+            "reason_code": policy_outcome.get("suppressed_reason_code"),
+            "reason_text": policy_outcome.get("suppressed_reason_text"),
+        },
     }
 
 

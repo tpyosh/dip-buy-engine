@@ -26,6 +26,7 @@ def compute_portfolio_metrics(snapshot: PortfolioSnapshot, policy_config: dict) 
                 "raw_bucket": holding.asset_class,
                 "resolved_bucket": bucket,
                 "reason": bucket_info["reason"],
+                "note": bucket_info.get("note"),
             }
         )
 
@@ -63,9 +64,13 @@ def resolve_bucket_with_reason(holding: Holding, policy_config: dict) -> dict[st
     classification_overrides = policy_config.get("classification_overrides", {}).get("overrides", {})
     override = classification_overrides.get(holding.symbol)
     if override is not None:
-        override_bucket = str(override.get("override_bucket", holding.asset_class))
+        override_bucket = str(override.get("overridden_bucket", override.get("override_bucket", holding.asset_class)))
         reason = str(override.get("reason", "classification_override"))
-        return {"bucket": override_bucket, "reason": reason}
+        note = override.get("note")
+        response = {"bucket": override_bucket, "reason": reason}
+        if note is not None:
+            response["note"] = str(note)
+        return response
 
     explicit_bucket = policy_config.get("symbol_to_bucket", {}).get(holding.symbol)
     if explicit_bucket is not None:
@@ -229,6 +234,7 @@ def build_core_buy_materials(
             "portfolio_management_mode": budget_plan["portfolio_management_mode"],
             "rebalance_mode_active": budget_plan["rebalance_mode_active"],
             "rebalance_mode_reason": budget_plan["rebalance_mode_reason"],
+            "explanation": budget_plan["explanation"],
             "core_constituents": core_constituents,
         },
         warnings,
@@ -287,7 +293,7 @@ def determine_core_budget_plan(
             selected_tier = rebalance_tier
             selected_budget = budget_tiers.get(rebalance_tier, {}).get(
                 "budget_jpy",
-                budget_policy.get("monthly_core_buy_budget_max_jpy"),
+                rebalance_mode.get("monthly_core_buy_budget_max_jpy", budget_policy.get("monthly_core_buy_budget_max_jpy")),
             )
             rebalance_active = True
             rebalance_reason = str(
@@ -307,6 +313,24 @@ def determine_core_budget_plan(
         "portfolio_management_mode": portfolio_management_mode,
         "rebalance_mode_active": rebalance_active,
         "rebalance_mode_reason": rebalance_reason,
+        "explanation": {
+            "rule_based_reason": override_reason,
+            "discretionary_reason": None,
+            "related_bucket_status": {
+                "core_actual_pct": core_allocation.actual_pct if core_allocation is not None else None,
+                "core_target_pct": core_allocation.target_pct if core_allocation is not None else None,
+                "liquidity_actual_pct": liquidity_allocation.actual_pct if liquidity_allocation is not None else None,
+                "liquidity_target_pct": liquidity_allocation.target_pct if liquidity_allocation is not None else None,
+            },
+            "mode_context": {
+                "active_mode": portfolio_management_mode,
+                "rebalance_mode_active": rebalance_active,
+                "rebalance_mode_reason": rebalance_reason,
+                "rebalance_mode_description": (
+                    budget_policy.get("rebalance_mode", {}).get("description") if rebalance_active else None
+                ),
+            },
+        },
     }
 
 

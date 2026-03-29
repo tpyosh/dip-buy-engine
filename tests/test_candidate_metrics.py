@@ -28,6 +28,8 @@ def test_bucket_over_target_candidates_get_default_behavior_notes(
 
     assert "default_deep_only_due_to_bucket_over_target" in (cibr_first.note_for_chatgpt or "")
     assert "default_allow_deep_drawdown_even_if_bucket_over_target" in (ura_deep.note_for_chatgpt or "")
+    assert cibr_first.suppressed is True
+    assert cibr_first.suppressed_reason_code == "bucket_over_target_shallow_suppressed"
 
 
 def test_high_volatility_shallow_candidate_is_policy_suppressed(
@@ -59,3 +61,28 @@ def test_high_volatility_shallow_candidate_is_policy_suppressed(
     assert pltr_first.suppressed_reason_code == "high_volatility_shallow_suppressed"
     assert "rule_based_high_volatility_shallow_suppression" in (pltr_first.note_for_chatgpt or "")
     assert any(warning.code == "high_volatility_shallow_suppressed" for warning in warnings)
+
+
+def test_candidate_mode_switch_boosts_core_and_jun_core(
+    sample_snapshot,
+    buy_rules_config,
+    portfolio_policy_config,
+    sample_market_references,
+    sample_portfolio_analysis,
+) -> None:
+    candidates = compute_candidate_metrics(
+        sample_snapshot,
+        buy_rules_config,
+        portfolio_policy_config,
+        sample_market_references,
+        sample_portfolio_analysis["resolved_buckets"],
+        sample_portfolio_analysis["bucket_allocations"],
+        mode_context={"portfolio_management_mode": "rebalance"},
+    )
+    msft = next(candidate for candidate in candidates if candidate.symbol == "MSFT" and candidate.drawdown_pct == Decimal("-10"))
+    cibr = next(candidate for candidate in candidates if candidate.symbol == "CIBR" and candidate.drawdown_pct == Decimal("-8"))
+
+    assert "mode_rebalance_priority_boost" in (msft.note_for_chatgpt or "")
+    assert "mode_rebalance_relative_deprioritization" in (cibr.note_for_chatgpt or "")
+    assert msft.explanation["mode_context"]["active_mode"] == "rebalance"
+    assert "rule_based_reason" in msft.explanation

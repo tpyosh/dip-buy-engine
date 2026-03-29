@@ -68,12 +68,33 @@ core_budget_policy:
     reason_code: "core_underweight_and_cash_overweight"
 
 candidate_policy:
+  mode_priority:
+    normal:
+      core: 2
+      jun_core: 1
+      satellite_core: 0
+      satellite: -1
+      other: -1
+    rebalance:
+      core: 4
+      jun_core: 3
+      satellite_core: -1
+      satellite: -2
+      other: -2
+    risk_off:
+      core: 1
+      jun_core: 0
+      satellite_core: -2
+      satellite: -3
+      other: -2
   bucket_over_target:
     default_behavior: "deep_only"
     deep_drawdown_threshold_pct: -15
     skip_note: "default_skip_due_to_bucket_over_target"
     deep_only_note: "default_deep_only_due_to_bucket_over_target"
     allow_note: "default_allow_deep_drawdown_even_if_bucket_over_target"
+    suppressed_reason_code: "bucket_over_target_shallow_suppressed"
+    suppressed_reason_text: "Shallow candidate suppressed because related bucket is over target."
   high_volatility:
     symbols:
       - "PLTR"
@@ -98,6 +119,8 @@ validation:
     non_positive_est_cost: "Estimated cost must be positive."
     calculation_unavailable: "Candidate calculation could not be completed."
     high_volatility_shallow_suppressed: "High-volatility names default to deeper pullbacks before adding."
+    bucket_over_target_shallow_suppressed: "Shallow candidate suppressed because related bucket is over target."
+    bucket_over_target_suppressed: "Candidate suppressed because related bucket is over target."
 
 execution:
   order_expiration: "month_end"

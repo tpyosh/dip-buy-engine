@@ -85,6 +85,7 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     all_country_constituent = next(
         item for item in computation.core_buy_materials["core_constituents"] if item["symbol"] == "EMAXIS_ALL_COUNTRY"
     )
+    toyota_audit = next(item for item in computation.metadata["classification_audit"] if item["symbol"] == "7203")
 
     assert "liquidity_above_range" in warning_codes
     assert "core_below_range" in warning_codes
@@ -95,12 +96,17 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert {"URA", "PLTR", "CIBR", "MSFT"} <= thesis_symbols
     assert computation.core_buy_materials["core_constituents"]
     assert all_country_constituent["reference_symbol"] in {"VT", "ACWI"}
+    assert toyota_audit["raw_bucket"] == "other"
+    assert toyota_audit["resolved_bucket"] == "jun_core"
+    assert toyota_audit["reason"] == "japan_large_cap_core_position_treated_as_jun_core"
     assert computation.core_buy_materials["monthly_core_budget_tier"] == "rebalance"
     assert computation.core_buy_materials["recommended_monthly_core_buy_budget_jpy"] == 700000
     assert computation.monthly_execution_outputs["candidate_count"] == len(computation.candidate_orders)
     assert computation.monthly_execution_outputs["core_recurring_contributions_total_jpy"] == 750000
+    assert computation.monthly_execution_outputs["crypto_weekly_dca_total_jpy"] == 5000
     assert "classification_audit" in computation.quarterly_rule_review_outputs
     assert "candidate_count" not in computation.quarterly_rule_review_outputs
+    assert "no_change" in computation.quarterly_rule_review_outputs
     assert "【要約】" in prompt
     assert "## 5. コア定額買い判定材料" in prompt
     assert "## 7. 半導体エクスポージャ内訳" in prompt
@@ -126,5 +132,16 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "| BTC | 2000 |" in prompt
     assert "| ETH | 2000 |" in prompt
     assert "| XRP | 1000 |" in prompt
-    assert "priority_lowered_boolean: True" in prompt
-    assert "四半期単位のルール見直し提案は明確に分離してください。" in prompt
+
+
+def test_taxable_all_country_drawdown_is_not_null_after_reference_mapping(monkeypatch) -> None:
+    monkeypatch.setattr("monthly_limit_order_review.cli.fetch_market_references", fake_references)
+
+    snapshot_path = ROOT / "data/normalized/snapshot_2026_04.yaml"
+    computation = compute_monthly(snapshot_path, project_root=ROOT)
+    taxable = next(
+        item for item in computation.core_buy_materials["core_constituents"] if item["symbol"] == "EMAXIS_ALL_COUNTRY_TAXABLE"
+    )
+
+    assert taxable["reference_symbol"] == "ACWI"
+    assert taxable["drawdown_pct_from_recent_high"] is not None

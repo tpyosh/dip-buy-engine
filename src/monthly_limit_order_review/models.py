@@ -75,6 +75,7 @@ class CandidateOrder:
     suppressed_reason_text: str | None = None
     note_for_chatgpt: str | None = None
     suppression_reasons: list[str] = field(default_factory=list)
+    explanation: dict = field(default_factory=dict)
 
 
 @dataclass(slots=True)

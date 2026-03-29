@@ -92,6 +92,9 @@ def calculate_sox_buy_signal(
         "direct_semiconductor_exposure_pct": (
             exposure_breakdown.get("direct_semiconductor_exposure_pct") if exposure_breakdown else None
         ),
+        "semiconductor_direct_exposure_pct": (
+            exposure_breakdown.get("direct_semiconductor_exposure_pct") if exposure_breakdown else None
+        ),
         "indirect_ai_infra_exposure_pct": (
             exposure_breakdown.get("indirect_ai_infra_exposure_pct") if exposure_breakdown else None
         ),
@@ -108,7 +111,7 @@ def calculate_sox_buy_signal(
                 "related_bucket_target_pct": related_bucket.target_pct if related_bucket is not None else None,
             },
             "exposure_context": {
-                "direct_semiconductor_exposure_pct": (
+                "semiconductor_direct_exposure_pct": (
                     exposure_breakdown.get("direct_semiconductor_exposure_pct") if exposure_breakdown else None
                 ),
                 "indirect_ai_infra_exposure_pct": (

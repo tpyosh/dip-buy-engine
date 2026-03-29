@@ -43,7 +43,10 @@ def test_sox_buy_signal_uses_recent_high(
     assert signal["within_buy_zone"] is True
     assert signal["within_buy_zone_boolean"] is True
     assert signal["near_boundary_boolean"] is False
+    assert "semiconductor_direct_exposure_pct" in signal
+    assert "indirect_ai_infra_exposure_pct" in signal
     assert signal["priority_lowered_boolean"] is True
     assert signal["priority_lowered_reason"] == "related_bucket_over_target"
     assert "explanation" in signal
     assert signal["explanation"]["bucket_context"]["related_bucket"] == "satellite_core"
+    assert "semiconductor_direct_exposure_pct" in signal["explanation"]["exposure_context"]

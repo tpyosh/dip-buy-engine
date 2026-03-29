@@ -201,6 +201,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         market_references,
         portfolio_analysis["resolved_buckets"],
         portfolio_analysis["bucket_allocations"],
+        mode_context={"portfolio_management_mode": core_buy_materials.get("portfolio_management_mode")},
     )
     candidate_orders, candidate_warnings = apply_candidate_validations(raw_candidates, merged_buy_rules)
     sox_buy_signal = calculate_sox_buy_signal(
@@ -234,6 +235,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         for item in portfolio_analysis["classification_audit"]
         if item["raw_bucket"] != item["resolved_bucket"]
     )
+    quarterly_no_change = classification_override_count == 0 and not core_reference_missing_symbols
     return MonthlyComputation(
         snapshot=snapshot,
         generated_at=datetime.now(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
@@ -259,6 +261,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "crypto_weekly_dca_total_jpy": crypto_weekly_total_jpy,
         },
         quarterly_rule_review_outputs={
+            "no_change": quarterly_no_change,
             "classification_override_count": classification_override_count,
             "classification_audit": portfolio_analysis["classification_audit"],
             "core_reference_missing_symbols": core_reference_missing_symbols,

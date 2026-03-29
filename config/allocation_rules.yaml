@@ -18,5 +18,7 @@ core_budget_policy:
     enabled: true
     core_shortfall_pct_gte: 0.25
     cash_excess_pct_gte: 0.25
+    monthly_core_buy_budget_max_jpy: 700000
     budget_tier: "rebalance"
     reason_code: "rebalance_mode_core_underweight_and_cash_overweight"
+    description: "core不足と現金過多が大きい局面で、月次の配分是正速度を上げる補助モード"

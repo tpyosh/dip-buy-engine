@@ -1,9 +1,10 @@
 overrides:
   "7203":
     raw_bucket: "other"
-    override_bucket: "jun_core"
+    overridden_bucket: "jun_core"
     reason: "japan_large_cap_core_position_treated_as_jun_core"
+    note: "トヨタは運用上、準コア株式として管理"
   "MSFT":
     raw_bucket: "jun_core"
-    override_bucket: "jun_core"
+    overridden_bucket: "jun_core"
     reason: "explicit_bucket_lock_for_ai_infra_compounder"

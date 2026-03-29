@@ -227,8 +227,8 @@ def build_bucket_allocation_table(bucket_allocations: list) -> list[str]:
 
 def build_candidate_table(candidate_orders: list) -> list[str]:
     lines = [
-        "| symbol | bucket | current_price | base_price | drawdown_rule | limit_price | shares | est_cost_jpy | suppressed | suppressed_reason_code | suppressed_reason_text | note_for_chatgpt |",
-        "| --- | --- | ---: | ---: | --- | ---: | ---: | ---: | --- | --- | --- | --- |",
+        "| symbol | bucket | current_price | base_price | drawdown_rule | limit_price | shares | est_cost_jpy | suppressed | suppressed_reason_code | suppressed_reason_text | note_for_chatgpt | explanation |",
+        "| --- | --- | ---: | ---: | --- | ---: | ---: | ---: | --- | --- | --- | --- | --- |",
     ]
     for candidate in candidate_orders:
         lines.append(
@@ -236,7 +236,8 @@ def build_candidate_table(candidate_orders: list) -> list[str]:
             f"{format_value(candidate.base_price)} | {candidate.drawdown_rule} | {format_value(candidate.limit_price)} | "
             f"{candidate.shares} | {format_value(candidate.estimated_cost_jpy)} | "
             f"{'yes' if candidate.suppressed else 'no'} | {candidate.suppressed_reason_code or '-'} | "
-            f"{candidate.suppressed_reason_text or '-'} | {candidate.note_for_chatgpt or '-'} |"
+            f"{candidate.suppressed_reason_text or '-'} | {candidate.note_for_chatgpt or '-'} | "
+            f"{normalize_text(str(candidate.explanation) if candidate.explanation else '-')} |"
         )
     return lines
 
@@ -260,6 +261,7 @@ def build_core_buy_materials(core_buy_materials: dict) -> list[str]:
         f"- portfolio_management_mode: {core_buy_materials.get('portfolio_management_mode')}",
         f"- rebalance_mode_active: {core_buy_materials.get('rebalance_mode_active')}",
         f"- rebalance_mode_reason: {core_buy_materials.get('rebalance_mode_reason') or '-'}",
+        f"- core_budget_explanation: {core_buy_materials.get('explanation')}",
         "| symbol | quantity | value_jpy | current_price | reference_symbol | reference_current_price | recent_high_21d | recent_high_63d | drawdown_pct_from_recent_high |",
         "| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: |",
     ]
@@ -332,6 +334,7 @@ def build_sox_materials(sox_buy_signal: dict) -> list[str]:
         f"- semiconductor_exposure_total_pct: {format_pct(sox_buy_signal.get('semiconductor_exposure_total_pct'))}",
         f"- priority_lowered_boolean: {sox_buy_signal.get('priority_lowered_boolean')}",
         f"- priority_lowered_reason: {sox_buy_signal.get('priority_lowered_reason') or '-'}",
+        f"- explanation: {sox_buy_signal.get('explanation')}",
     ]
 
 
@@ -365,6 +368,7 @@ def build_review_partition_section(computation: MonthlyComputation) -> list[str]
         f"  - candidate_count: {monthly.get('candidate_count')}",
         f"  - crypto_weekly_dca_total_jpy: {monthly.get('crypto_weekly_dca_total_jpy')}",
         "- quarterly_rule_review_outputs:",
+        f"  - no_change: {quarterly.get('no_change')}",
         f"  - classification_override_count: {quarterly.get('classification_override_count')}",
         f"  - core_reference_missing_symbols: {quarterly.get('core_reference_missing_symbols')}",
         f"  - direct_semiconductor_exposure_pct: {format_pct(quarterly.get('direct_semiconductor_exposure_pct'))}",

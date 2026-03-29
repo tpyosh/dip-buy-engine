@@ -36,6 +36,12 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
     lines.extend(["", "## 5. コア定額買い判定材料"])
     lines.extend(build_core_buy_materials(computation.core_buy_materials))
 
+    lines.extend(["", "## 5-2. Core積立設定（毎月固定）"])
+    lines.extend(build_core_recurring_contributions(computation.metadata.get("core_recurring_contributions", {})))
+
+    lines.extend(["", "## 5-3. 暗号資産積立設定（毎週固定）"])
+    lines.extend(build_crypto_weekly_dca(computation.metadata.get("core_recurring_contributions", {})))
+
     lines.extend(["", "## 6. SOX 判定材料"])
     lines.extend(build_sox_materials(computation.sox_buy_signal))
 
@@ -86,6 +92,8 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- コアは今月最低いくら買うべきか",
             "- 安ければ追加でどの程度厚くする考え方が妥当か",
             "- コアとサテライトの資金配分優先順位",
+            "- 既存の毎月固定積立（Core積立設定）を前提に評価すること",
+            "- 固定積立を維持するか、減額/停止すべきかを明示すること（必要な場合のみ）",
             "- ルール上の判断と今月の裁量判断を分けて説明すること",
             "",
             "【SOX投信判定】",
@@ -96,6 +104,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 現在の偏り",
             "- 注意点",
             "- 今月の補強優先順位",
+            "- 暗号資産の週次積立（BTC/ETH/XRP）を前提に、維持/減額/停止の要否を明示すること",
             "",
             "【長期シナリオレビュー】",
             "- 対象銘柄ごとに、現在の長期仮説に大きな変化があるかを書く",
@@ -154,6 +163,9 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- PLTR の浅い押し目候補抑制ロジックの是非を評価してください。",
             "- 指値段数は各銘柄 0段以上の任意とし、1段しか出さない場合はその理由を明記してください。",
             "- コアについては『毎月一定額買う / 安ければ追加で厚く買う』という運用思想の妥当性も評価してください。",
+            "- Core積立設定（毎月固定）は既に実行される前提として扱い、同じ強化提案の反復は避けてください。",
+            "- ただし長期シナリオ悪化やリスク管理上の妥当性がある場合は、固定積立の減額・停止提案を明示してください。",
+            "- 暗号資産の週次積立（BTC/ETH/XRP）も既に実行される前提で扱い、必要時のみ変更提案してください。",
             "- コア不足と現金過多が同時発生している場合、押し目買いルール設計に問題がないかもレビューしてください。",
             "- 中長期投資前提のため、短期トレンドやテクニカル悪化を売却理由にしない前提でレビューしてください。",
             "- ただし、長期シナリオ・政策前提・技術前提・競争優位の前提が崩れた可能性がある場合は、その有無をWebベースで点検してください。",
@@ -261,6 +273,48 @@ def build_core_buy_materials(core_buy_materials: dict) -> list[str]:
     return lines
 
 
+def build_core_recurring_contributions(recurring_config: dict) -> list[str]:
+    plans = recurring_config.get("plans", [])
+    lines = [
+        f"- total_monthly_jpy: {recurring_config.get('total_monthly_jpy', 'null')}",
+        "| day_of_month | fund_name | amount_jpy | settlement_type | account_type | distribution_course |",
+        "| ---: | --- | ---: | --- | --- | --- |",
+    ]
+    if not plans:
+        lines.append("| - | - | - | - | - | - |")
+    for plan in plans:
+        lines.append(
+            f"| {plan.get('day_of_month', '-')} | {plan.get('fund_name', '-')} | {plan.get('amount_jpy', '-')} | "
+            f"{plan.get('settlement_type', '-')} | {plan.get('account_type', '-')} | {plan.get('distribution_course', '-')} |"
+        )
+
+    guidance = recurring_config.get("review_guidance", [])
+    if guidance:
+        lines.append("- review_guidance:")
+        for item in guidance:
+            lines.append(f"  - {item}")
+    return lines
+
+
+def build_crypto_weekly_dca(recurring_config: dict) -> list[str]:
+    plans = recurring_config.get("crypto_weekly_dca", [])
+    lines = [
+        "| symbol | amount_jpy_per_week |",
+        "| --- | ---: |",
+    ]
+    if not plans:
+        lines.append("| - | - |")
+    for plan in plans:
+        lines.append(f"| {plan.get('symbol', '-')} | {plan.get('amount_jpy_per_week', '-')} |")
+
+    guidance = recurring_config.get("crypto_review_guidance", [])
+    if guidance:
+        lines.append("- crypto_review_guidance:")
+        for item in guidance:
+            lines.append(f"  - {item}")
+    return lines
+
+
 def build_sox_materials(sox_buy_signal: dict) -> list[str]:
     return [
         f"- proxy_symbol: {sox_buy_signal.get('proxy_symbol')}",
@@ -309,6 +363,7 @@ def build_review_partition_section(computation: MonthlyComputation) -> list[str]
         f"  - monthly_core_budget_tier: {monthly.get('monthly_core_budget_tier')}",
         f"  - recommended_monthly_core_buy_budget_jpy: {monthly.get('recommended_monthly_core_buy_budget_jpy')}",
         f"  - candidate_count: {monthly.get('candidate_count')}",
+        f"  - crypto_weekly_dca_total_jpy: {monthly.get('crypto_weekly_dca_total_jpy')}",
         "- quarterly_rule_review_outputs:",
         f"  - classification_override_count: {quarterly.get('classification_override_count')}",
         f"  - core_reference_missing_symbols: {quarterly.get('core_reference_missing_symbols')}",

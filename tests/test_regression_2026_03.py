@@ -98,6 +98,7 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert computation.core_buy_materials["monthly_core_budget_tier"] == "rebalance"
     assert computation.core_buy_materials["recommended_monthly_core_buy_budget_jpy"] == 700000
     assert computation.monthly_execution_outputs["candidate_count"] == len(computation.candidate_orders)
+    assert computation.monthly_execution_outputs["core_recurring_contributions_total_jpy"] == 750000
     assert "classification_audit" in computation.quarterly_rule_review_outputs
     assert "candidate_count" not in computation.quarterly_rule_review_outputs
     assert "【要約】" in prompt
@@ -117,5 +118,13 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "recommended_monthly_core_buy_budget_jpy: 700000" in prompt
     assert "## 11. 生成ロジック上の分離データ" in prompt
     assert "## 13. 必須の月次・四半期レビュー観点" in prompt
+    assert "## 5-2. Core積立設定（毎月固定）" in prompt
+    assert "## 5-3. 暗号資産積立設定（毎週固定）" in prompt
+    assert "total_monthly_jpy: 750000" in prompt
+    assert "eMAXIS Slim 米国株式(S&P500)" in prompt
+    assert "楽天・プラス・オールカントリー株式インデックス・ファンド" in prompt
+    assert "| BTC | 2000 |" in prompt
+    assert "| ETH | 2000 |" in prompt
+    assert "| XRP | 1000 |" in prompt
     assert "priority_lowered_boolean: True" in prompt
     assert "四半期単位のルール見直し提案は明確に分離してください。" in prompt

@@ -153,6 +153,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     allocation_rules_path = project_root / "config/allocation_rules.yaml"
     market_reference_path = project_root / "config/market_reference.yaml"
     classification_overrides_path = project_root / "config/classification_overrides.yaml"
+    recurring_contributions_path = project_root / "config/core_recurring_contributions.yaml"
 
     merged_buy_rules = deepcopy(buy_rules)
     if allocation_rules_path.exists():
@@ -168,6 +169,15 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     merged_policy = deepcopy(portfolio_policy)
     if classification_overrides_path.exists():
         merged_policy["classification_overrides"] = load_yaml(classification_overrides_path)
+    recurring_contributions = (
+        load_yaml(recurring_contributions_path).get("core_recurring_contributions", {})
+        if recurring_contributions_path.exists()
+        else {}
+    )
+    crypto_weekly_total_jpy = sum(
+        int(item.get("amount_jpy_per_week", 0))
+        for item in recurring_contributions.get("crypto_weekly_dca", [])
+    )
 
     portfolio_analysis = compute_portfolio_metrics(snapshot, merged_policy)
     requests = build_reference_requests(snapshot, merged_buy_rules, merged_tickers, portfolio_analysis["resolved_buckets"])
@@ -245,6 +255,8 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
                 "recommended_monthly_core_buy_budget_jpy"
             ),
             "candidate_count": len(candidate_orders),
+            "core_recurring_contributions_total_jpy": recurring_contributions.get("total_monthly_jpy"),
+            "crypto_weekly_dca_total_jpy": crypto_weekly_total_jpy,
         },
         quarterly_rule_review_outputs={
             "classification_override_count": classification_override_count,
@@ -257,6 +269,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "snapshot_path": str(snapshot_path),
             "resolved_buckets": portfolio_analysis["resolved_buckets"],
             "classification_audit": portfolio_analysis["classification_audit"],
+            "core_recurring_contributions": recurring_contributions,
         },
     )
 

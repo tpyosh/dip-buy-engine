@@ -289,6 +289,8 @@ def sample_computation(
                 "recommended_monthly_core_buy_budget_jpy"
             ),
             "candidate_count": len(sample_candidate_orders),
+            "core_recurring_contributions_total_jpy": 750000,
+            "crypto_weekly_dca_total_jpy": 5000,
         },
         quarterly_rule_review_outputs={
             "classification_override_count": 0,
@@ -301,6 +303,30 @@ def sample_computation(
             "snapshot_path": str(ROOT / "data/normalized/snapshot_2026_03.yaml"),
             "resolved_buckets": sample_portfolio_analysis["resolved_buckets"],
             "classification_audit": sample_portfolio_analysis.get("classification_audit", []),
+            "core_recurring_contributions": {
+                "total_monthly_jpy": 750000,
+                "plans": [
+                    {
+                        "day_of_month": 1,
+                        "fund_name": "eMAXIS Slim 米国株式(S&P500)",
+                        "amount_jpy": 225000,
+                        "settlement_type": "証券口座",
+                        "account_type": "NISA成長投資枠",
+                        "distribution_course": "再投資型",
+                    }
+                ],
+                "review_guidance": [
+                    "この固定積立は毎月すでに執行される前提で評価する",
+                ],
+                "crypto_weekly_dca": [
+                    {"symbol": "BTC", "amount_jpy_per_week": 2000},
+                    {"symbol": "ETH", "amount_jpy_per_week": 2000},
+                    {"symbol": "XRP", "amount_jpy_per_week": 1000},
+                ],
+                "crypto_review_guidance": [
+                    "暗号資産の週次積立は既存で実行中の前提で評価する",
+                ],
+            },
         },
     )
 

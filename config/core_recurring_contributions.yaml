@@ -1,0 +1,41 @@
+core_recurring_contributions:
+  total_monthly_jpy: 750000
+  plans:
+    - day_of_month: 1
+      fund_name: "eMAXIS Slim 米国株式(S&P500)"
+      amount_jpy: 225000
+      settlement_type: "証券口座"
+      account_type: "NISA成長投資枠"
+      distribution_course: "再投資型"
+    - day_of_month: 1
+      fund_name: "楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)"
+      amount_jpy: 425000
+      settlement_type: "証券口座"
+      account_type: "NISA成長投資枠"
+      distribution_course: "再投資型"
+    - day_of_month: 8
+      fund_name: "eMAXIS Slim 米国株式(S&P500)"
+      amount_jpy: 50000
+      settlement_type: "クレジットカード決済"
+      account_type: "NISAつみたて投資枠"
+      distribution_course: "再投資型"
+    - day_of_month: 8
+      fund_name: "楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)"
+      amount_jpy: 50000
+      settlement_type: "クレジットカード決済"
+      account_type: "NISAつみたて投資枠"
+      distribution_course: "再投資型"
+  review_guidance:
+    - "この固定積立は毎月すでに執行される前提で評価する"
+    - "core不足の指摘は、固定積立の寄与を織り込んだうえで必要時のみ行う"
+    - "長期シナリオ悪化やリスク管理上の理由がある場合は、固定積立の減額・停止提案を明示する"
+  crypto_weekly_dca:
+    - symbol: "BTC"
+      amount_jpy_per_week: 2000
+    - symbol: "ETH"
+      amount_jpy_per_week: 2000
+    - symbol: "XRP"
+      amount_jpy_per_week: 1000
+  crypto_review_guidance:
+    - "暗号資産の週次積立は既存で実行中の前提で評価する"
+    - "継続・減額・停止の提案が必要な場合は、理由とトリガー条件を明示する"

@@ -215,7 +215,7 @@ snapshot:
   - Holding POINTS_MILES is missing quantity; stored as null.
   - Holding POINTS_MILES is missing avg_cost; stored as null.
   - Holding POINTS_MILES is missing current_price; stored as null.
-generated_at: '2026-03-29T00:55:05Z'
+generated_at: '2026-03-29T13:01:57Z'
 bucket_allocations:
 - bucket: core
   market_value_jpy: 5419420
@@ -270,150 +270,165 @@ market_references:
 - symbol: CIBR
   yfinance_symbol: CIBR
   current_price: 60.76
-  mean_close_20d: 64.5535
+  mean_close_20d: 64.384
   recent_high_21d: 66.28
   recent_high_63d: 73.45
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 64.384
   prior_close_21d: 63.87
   prior_close_63d: 72.85
 - symbol: URA
   yfinance_symbol: URA
   current_price: 46.63
-  mean_close_20d: 49.8865
+  mean_close_20d: 51.1673
   recent_high_21d: 56.45
   recent_high_63d: 61.81
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 51.1673
   prior_close_21d: 54.87
   prior_close_63d: 46.56
 - symbol: PLTR
   yfinance_symbol: PLTR
   current_price: 143.06
-  mean_close_20d: 152.358
+  mean_close_20d: 146.1287
   recent_high_21d: 160.84
   recent_high_63d: 188.71
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 146.1287
   prior_close_21d: 135.94
   prior_close_63d: 194.17
 - symbol: MSFT
   yfinance_symbol: MSFT
   current_price: 356.77
-  mean_close_20d: 392.817
+  mean_close_20d: 393.9447
   recent_high_21d: 410.68
   recent_high_63d: 487.71
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 393.9447
   prior_close_21d: 401.72
   prior_close_63d: 488.02
 - symbol: SMH
   yfinance_symbol: SMH
   current_price: 374.25
-  mean_close_20d: 392.242
+  mean_close_20d: 399.1477
   recent_high_21d: 406.39
   recent_high_63d: 426.16
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 399.1477
   prior_close_21d: 412.01
   prior_close_63d: 364.17
 - symbol: USDJPY
   yfinance_symbol: USDJPY=X
   current_price: 159.704
-  mean_close_20d: 158.4825
+  mean_close_20d: 157.1984
   recent_high_21d: 159.795
   recent_high_63d: 159.795
   currency: JPY
   as_of: '2026-03-27'
+  mean_close_30d: 157.1984
   prior_close_21d: 156.2
   prior_close_63d: 156.463
 - symbol: RAKUTEN_ALL_COUNTRY_1
   yfinance_symbol: VT
   current_price: 134.62
-  mean_close_20d: 140.8625
+  mean_close_20d: 143.034
   recent_high_21d: 147.84
   recent_high_63d: 148.91
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 143.034
   prior_close_21d: 148.4
   prior_close_63d: 142.36
 - symbol: RAKUTEN_ALL_COUNTRY_2
   yfinance_symbol: VT
   current_price: 134.62
-  mean_close_20d: 140.8625
+  mean_close_20d: 143.034
   recent_high_21d: 147.84
   recent_high_63d: 148.91
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 143.034
   prior_close_21d: 148.4
   prior_close_63d: 142.36
 - symbol: RAKUTEN_SP500
   yfinance_symbol: VOO
   current_price: 582.96
-  mean_close_20d: 612.903
+  mean_close_20d: 619
   recent_high_21d: 631.28
   recent_high_63d: 639.7
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 619
   prior_close_21d: 633.95
   prior_close_63d: 634.78
 - symbol: EMAXIS_SP500_1
   yfinance_symbol: VOO
   current_price: 582.96
-  mean_close_20d: 612.903
+  mean_close_20d: 619
   recent_high_21d: 631.28
   recent_high_63d: 639.7
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 619
   prior_close_21d: 633.95
   prior_close_63d: 634.78
 - symbol: EMAXIS_SP500_2
   yfinance_symbol: VOO
   current_price: 582.96
-  mean_close_20d: 612.903
+  mean_close_20d: 619
   recent_high_21d: 631.28
   recent_high_63d: 639.7
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 619
   prior_close_21d: 633.95
   prior_close_63d: 634.78
 - symbol: EMAXIS_SP500_3
   yfinance_symbol: VOO
   current_price: 582.96
-  mean_close_20d: 612.903
+  mean_close_20d: 619
   recent_high_21d: 631.28
   recent_high_63d: 639.7
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 619
   prior_close_21d: 633.95
   prior_close_63d: 634.78
 - symbol: EMAXIS_ALL_COUNTRY_TAXABLE
   yfinance_symbol: ACWI
   current_price: 134.55
-  mean_close_20d: 140.7685
+  mean_close_20d: 142.8493
   recent_high_21d: 147.38
   recent_high_63d: 148.65
   currency: USD
   as_of: '2026-03-27'
+  mean_close_30d: 142.8493
   prior_close_21d: 147.95
   prior_close_63d: 142.71
 candidate_orders:
 - symbol: CIBR
   bucket: satellite_core
-  base_price: 64.5535
+  base_price: 64.384
+  avg20_base_price: 64.384
   current_price: 60.76
-  limit_price: 61.33
+  limit_price: 61.16
   shares: 1
-  estimated_cost: 61.33
-  estimated_cost_jpy: 9795
+  estimated_cost: 61.16
+  estimated_cost_jpy: 9767
   currency: USD
   drawdown_pct: -5
   drawdown_rule: -5% x 1
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: limit_above_current
   suppressed_reason_text: Calculated limit price is not below the current price.
   note_for_chatgpt: shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,limit_above_current
+  avg20_gap_pct: -5.01
   suppression_reasons:
   - Shallow candidate suppressed because related bucket is over target.
   - Calculated limit price is not below the current price.
@@ -436,21 +451,23 @@ candidate_orders:
       reason_text: Shallow candidate suppressed because related bucket is over target.
 - symbol: CIBR
   bucket: satellite_core
-  base_price: 64.5535
+  base_price: 64.384
+  avg20_base_price: 64.384
   current_price: 60.76
-  limit_price: 59.39
+  limit_price: 59.23
   shares: 1
-  estimated_cost: 59.39
-  estimated_cost_jpy: 9485
+  estimated_cost: 59.23
+  estimated_cost_jpy: 9459
   currency: USD
   drawdown_pct: -8
   drawdown_rule: -8% x 1
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: bucket_over_target_shallow_suppressed
   suppressed_reason_text: Shallow candidate suppressed because related bucket is over
     target.
   note_for_chatgpt: bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -8.01
   suppression_reasons:
   - Shallow candidate suppressed because related bucket is over target.
   explanation:
@@ -472,21 +489,23 @@ candidate_orders:
       reason_text: Shallow candidate suppressed because related bucket is over target.
 - symbol: CIBR
   bucket: satellite_core
-  base_price: 64.5535
+  base_price: 64.384
+  avg20_base_price: 64.384
   current_price: 60.76
-  limit_price: 56.81
+  limit_price: 56.66
   shares: 1
-  estimated_cost: 56.81
-  estimated_cost_jpy: 9073
+  estimated_cost: 56.66
+  estimated_cost_jpy: 9049
   currency: USD
   drawdown_pct: -12
   drawdown_rule: -12% x 1
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: bucket_over_target_shallow_suppressed
   suppressed_reason_text: Shallow candidate suppressed because related bucket is over
     target.
   note_for_chatgpt: bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -12
   suppression_reasons:
   - Shallow candidate suppressed because related bucket is over target.
   explanation:
@@ -508,20 +527,22 @@ candidate_orders:
       reason_text: Shallow candidate suppressed because related bucket is over target.
 - symbol: URA
   bucket: satellite_core
-  base_price: 49.8865
+  base_price: 51.1673
+  avg20_base_price: 51.1673
   current_price: 46.63
-  limit_price: 46.89
+  limit_price: 48.1
   shares: 2
-  estimated_cost: 93.78
-  estimated_cost_jpy: 14977
+  estimated_cost: 96.2
+  estimated_cost_jpy: 15364
   currency: USD
   drawdown_pct: -6
   drawdown_rule: -6% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: limit_above_current
   suppressed_reason_text: Calculated limit price is not below the current price.
   note_for_chatgpt: shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,limit_above_current
+  avg20_gap_pct: -5.99
   suppression_reasons:
   - Shallow candidate suppressed because related bucket is over target.
   - Calculated limit price is not below the current price.
@@ -544,21 +565,23 @@ candidate_orders:
       reason_text: Shallow candidate suppressed because related bucket is over target.
 - symbol: URA
   bucket: satellite_core
-  base_price: 49.8865
+  base_price: 51.1673
+  avg20_base_price: 51.1673
   current_price: 46.63
-  limit_price: 44.9
+  limit_price: 46.05
   shares: 2
-  estimated_cost: 89.8
-  estimated_cost_jpy: 14341
+  estimated_cost: 92.1
+  estimated_cost_jpy: 14709
   currency: USD
   drawdown_pct: -10
   drawdown_rule: -10% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: bucket_over_target_shallow_suppressed
   suppressed_reason_text: Shallow candidate suppressed because related bucket is over
     target.
   note_for_chatgpt: bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -10
   suppression_reasons:
   - Shallow candidate suppressed because related bucket is over target.
   explanation:
@@ -580,20 +603,22 @@ candidate_orders:
       reason_text: Shallow candidate suppressed because related bucket is over target.
 - symbol: URA
   bucket: satellite_core
-  base_price: 49.8865
+  base_price: 51.1673
+  avg20_base_price: 51.1673
   current_price: 46.63
-  limit_price: 42.4
+  limit_price: 43.49
   shares: 2
-  estimated_cost: 84.8
-  estimated_cost_jpy: 13543
+  estimated_cost: 86.98
+  estimated_cost_jpy: 13891
   currency: USD
   drawdown_pct: -15
   drawdown_rule: -15% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: false
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: deep_drawdown_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_allow_deep_drawdown_even_if_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization
+  avg20_gap_pct: -15
   suppression_reasons: []
   explanation:
     rule_based_reason:
@@ -614,21 +639,23 @@ candidate_orders:
       reason_text: null
 - symbol: PLTR
   bucket: satellite
-  base_price: 152.358
+  base_price: 146.1287
+  avg20_base_price: 146.1287
   current_price: 143.06
-  limit_price: 137.12
+  limit_price: 131.52
   shares: 1
-  estimated_cost: 137.12
-  estimated_cost_jpy: 21899
+  estimated_cost: 131.52
+  estimated_cost_jpy: 21004
   currency: USD
   drawdown_pct: -10
   drawdown_rule: -10% x 1
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: high_volatility_shallow_suppressed
   suppressed_reason_text: High-volatility names default to deeper pullbacks before
     adding.
   note_for_chatgpt: high_volatility_name,rule_based_high_volatility_shallow_suppression,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization,high_volatility_shallow_suppressed
+  avg20_gap_pct: -10
   suppression_reasons:
   - High-volatility names default to deeper pullbacks before adding.
   explanation:
@@ -649,20 +676,22 @@ candidate_orders:
       reason_text: High-volatility names default to deeper pullbacks before adding.
 - symbol: PLTR
   bucket: satellite
-  base_price: 152.358
+  base_price: 146.1287
+  avg20_base_price: 146.1287
   current_price: 143.06
-  limit_price: 129.5
+  limit_price: 124.21
   shares: 2
-  estimated_cost: 259
-  estimated_cost_jpy: 41363
+  estimated_cost: 248.42
+  estimated_cost_jpy: 39674
   currency: USD
   drawdown_pct: -15
   drawdown_rule: -15% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: false
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: deep_drawdown_candidate,high_volatility_name,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization
+  avg20_gap_pct: -15
   suppression_reasons: []
   explanation:
     rule_based_reason: []
@@ -681,20 +710,22 @@ candidate_orders:
       reason_text: null
 - symbol: PLTR
   bucket: satellite
-  base_price: 152.358
+  base_price: 146.1287
+  avg20_base_price: 146.1287
   current_price: 143.06
-  limit_price: 118.84
+  limit_price: 113.98
   shares: 2
-  estimated_cost: 237.68
-  estimated_cost_jpy: 37958
+  estimated_cost: 227.96
+  estimated_cost_jpy: 36406
   currency: USD
   drawdown_pct: -22
   drawdown_rule: -22% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: false
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: deep_drawdown_candidate,high_volatility_name,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization
+  avg20_gap_pct: -22
   suppression_reasons: []
   explanation:
     rule_based_reason: []
@@ -713,20 +744,22 @@ candidate_orders:
       reason_text: null
 - symbol: MSFT
   bucket: jun_core
-  base_price: 392.817
+  base_price: 393.9447
+  avg20_base_price: 393.9447
   current_price: 356.77
-  limit_price: 369.25
+  limit_price: 370.31
   shares: 1
-  estimated_cost: 369.25
-  estimated_cost_jpy: 58971
+  estimated_cost: 370.31
+  estimated_cost_jpy: 59140
   currency: USD
   drawdown_pct: -6
   drawdown_rule: -6% x 1
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: limit_above_current
   suppressed_reason_text: Calculated limit price is not below the current price.
   note_for_chatgpt: shallow_candidate,mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost,limit_above_current
+  avg20_gap_pct: -6
   suppression_reasons:
   - Calculated limit price is not below the current price.
   explanation:
@@ -746,20 +779,22 @@ candidate_orders:
       reason_text: null
 - symbol: MSFT
   bucket: jun_core
-  base_price: 392.817
+  base_price: 393.9447
+  avg20_base_price: 393.9447
   current_price: 356.77
-  limit_price: 353.54
+  limit_price: 354.55
   shares: 2
-  estimated_cost: 707.08
-  estimated_cost_jpy: 112924
+  estimated_cost: 709.1
+  estimated_cost_jpy: 113246
   currency: USD
   drawdown_pct: -10
   drawdown_rule: -10% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: false
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost
+  avg20_gap_pct: -10
   suppression_reasons: []
   explanation:
     rule_based_reason: []
@@ -778,20 +813,22 @@ candidate_orders:
       reason_text: null
 - symbol: MSFT
   bucket: jun_core
-  base_price: 392.817
+  base_price: 393.9447
+  avg20_base_price: 393.9447
   current_price: 356.77
-  limit_price: 322.11
+  limit_price: 323.03
   shares: 2
-  estimated_cost: 644.22
-  estimated_cost_jpy: 102885
+  estimated_cost: 646.06
+  estimated_cost_jpy: 103178
   currency: USD
   drawdown_pct: -18
   drawdown_rule: -18% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: false
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: deep_drawdown_candidate,mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost
+  avg20_gap_pct: -18
   suppression_reasons: []
   explanation:
     rule_based_reason: []
@@ -1112,6 +1149,8 @@ exposure_breakdown:
   direct_semiconductor_exposure_jpy: 3778003
   indirect_ai_infra_exposure_pct: 0.0121
   indirect_ai_infra_exposure_jpy: 400331
+  combined_semiconductor_ai_infra_watch_pct: 0.1265
+  combined_semiconductor_ai_infra_watch_jpy: 4178334
   semiconductor_exposure_total_pct: 0.1144
   semiconductor_exposure_total_jpy: 3778003
   breakdown:
@@ -1205,9 +1244,11 @@ long_term_thesis_targets:
   review_priority: medium
   web_review_required: 'yes'
 monthly_execution_outputs:
+  review_target_month: '2026_04'
   portfolio_management_mode: rebalance
   monthly_core_budget_tier: rebalance
   recommended_monthly_core_buy_budget_jpy: 700000
+  monthly_total_core_deployment_jpy: 1450000
   candidate_count: 12
   core_recurring_contributions_total_jpy: 750000
   crypto_weekly_dca_total_jpy: 5000
@@ -1336,10 +1377,16 @@ quarterly_rule_review_outputs:
     reason: raw_bucket
     note: null
   core_reference_missing_symbols: []
+  tradable_core_pct: 0.1641
+  effective_core_including_pension_pct: 0.2665
+  cash_normalization_months_estimate: 8
   direct_semiconductor_exposure_pct: 0.1144
+  combined_semiconductor_ai_infra_watch_pct: 0.1265
   indirect_ai_infra_exposure_pct: 0.0121
 metadata:
   snapshot_path: data/normalized/snapshot_2026_04.yaml
+  review_target_month: '2026_04'
+  review_target_month_start: '2026-04-01'
   resolved_buckets:
     JPY_CASH_EQUIVALENT: liquidity
     BTC: other

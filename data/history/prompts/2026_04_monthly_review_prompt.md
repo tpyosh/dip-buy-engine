@@ -1,8 +1,12 @@
+対象月: 2026_04
+
 あなたは、月次レビュー用の判断材料を読む投資アシスタントです。
 以下の数値は Python スクリプトが整形したものであり、必要に応じて妥当性を疑ってください。
 ただし、Python スクリプトは投資判断エンジンではなく、判断材料の整形エンジンです。
 数値の再計算やスクリプトの結論追認ではなく、ポートフォリオ管理・リスク管理・月次レビュー・四半期ルール見直しの観点から評価してください。
 月次の執行判断と、四半期単位のルール見直し提案は明確に分離してください。
+指値設定は前月末または当月初に実施されるため、`snapshot_date` が前月末でも `review_target_month` の指値設定として解釈してください。
+指値設定基準値は先月の終値平均ではなく、スクリプト実行時点から直近20営業日（約1ヶ月）の終値平均として扱ってください。
 
 目的:
 - 今月の core スポット買い実行額を必ず提案する
@@ -25,11 +29,15 @@
 - 長期シナリオ点検対象
 
 指値提案ルール:
+- この「今月」は `review_target_month` を指す
 - 各銘柄について、提案する指値段数は 0段以上の任意とする
 - Python が出した候補段数に縛られず、0段、1段、2段、3段以上のいずれでもよい
 - 0段にする場合は、その銘柄は今月は見送ると明記する
 - Python 候補より少ない段数しか提案しない場合は、それが「ルール上そう判断した」のか「今月の裁量判断」なのかを明記する
 - Python 候補より多い段数を提案する場合も、なぜ段数を増やすのか理由を明記する
+- 指値設定基準値は、先月平均ではなくスクリプト実行時点から直近20営業日（約1ヶ月）の終値平均として扱う
+- 指値を提案する場合は、各段について「直近20営業日（約1ヶ月）の終値平均」と「その平均から何%下の指値か」を必ず併記する
+- 乖離率は `((指値 / 直近20営業日終値平均) - 1) * 100` のパーセンテージとして扱い、マイナス値で明記する
 
 必須出力形式:
 【要約】
@@ -53,12 +61,19 @@
 
 ## 1. 前提
 - snapshot_date: 2026-03-29
+- review_target_month: 2026_04
 - currency_base: JPY
 - total_assets_jpy: 33028136
 - liquidity_target_jpy: null
 - holdings_count: 24
+- 毎月の税引前キャッシュ流入はおおむね60万〜70万円ある前提で、生活防衛資金の必要水準を評価すること
+- 名古屋市中区・金山駅近くの流動性が高いマンション（約6500万円）を住居兼資産として保有している
+- 上記マンションはフルローンで購入しており、ローン返済はまだほとんど進んでいない
+- そのため、日本国内不動産セクターに対して実質的な積立投資エクスポージャがある前提もポートフォリオ文脈に含めること
 - 半導体エクスポージャ(Direct): 11.44%
 - AIインフラ感応度(Indirect): 1.21%
+- 指値設定は前月末または当月初に実施しうるため、snapshot_date が月末でも翌月の指値設定として解釈してよい
+- 指値設定基準値は先月平均ではなく、スクリプト実行時点から直近20営業日（約1ヶ月）の終値平均を使う
 
 ## 2. この月の snapshot 要約
 - JPY_CASH_EQUIVALENT | liquidity | value_jpy=14942636 | price=null | quantity=null
@@ -98,20 +113,20 @@
 | satellite_core | 5143392 | 15.57% | 15.00% | 0.57% |
 
 ## 4. 対象銘柄ごとの候補
-| symbol | bucket | current_price | base_price | drawdown_rule | limit_price | shares | est_cost_jpy | suppressed | suppressed_reason_code | suppressed_reason_text | note_for_chatgpt | explanation |
-| --- | --- | ---: | ---: | --- | ---: | ---: | ---: | --- | --- | --- | --- | --- |
-| CIBR | satellite_core | 60.7600 | 64.5535 | -5% x 1 | 61.33 | 1 | 9795 | yes | limit_above_current | Calculated limit price is not below the current price. | shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,limit_above_current | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
-| CIBR | satellite_core | 60.7600 | 64.5535 | -8% x 1 | 59.39 | 1 | 9485 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
-| CIBR | satellite_core | 60.7600 | 64.5535 | -12% x 1 | 56.81 | 1 | 9073 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
-| URA | satellite_core | 46.6300 | 49.8865 | -6% x 2 | 46.89 | 2 | 14977 | yes | limit_above_current | Calculated limit price is not below the current price. | shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,limit_above_current | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
-| URA | satellite_core | 46.6300 | 49.8865 | -10% x 2 | 44.90 | 2 | 14341 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
-| URA | satellite_core | 46.6300 | 49.8865 | -15% x 2 | 42.40 | 2 | 13543 | no | - | - | deep_drawdown_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_allow_deep_drawdown_even_if_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_allow_deep_drawdown_even_if_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
-| PLTR | satellite | 143.0600 | 152.3580 | -10% x 1 | 137.12 | 1 | 21899 | yes | high_volatility_shallow_suppressed | High-volatility names default to deeper pullbacks before adding. | high_volatility_name,rule_based_high_volatility_shallow_suppression,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization,high_volatility_shallow_suppressed | {'rule_based_reason': ['rule_based_high_volatility_shallow_suppression'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite', 'actual_pct': Decimal('0.0062'), 'target_pct': Decimal('0.1'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -2}, 'suppression': {'suppressed': True, 'reason_code': 'high_volatility_shallow_suppressed', 'reason_text': 'High-volatility names default to deeper pullbacks before adding.'}} |
-| PLTR | satellite | 143.0600 | 152.3580 | -15% x 2 | 129.50 | 2 | 41363 | no | - | - | deep_drawdown_candidate,high_volatility_name,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite', 'actual_pct': Decimal('0.0062'), 'target_pct': Decimal('0.1'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -2}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
-| PLTR | satellite | 143.0600 | 152.3580 | -22% x 2 | 118.84 | 2 | 37958 | no | - | - | deep_drawdown_candidate,high_volatility_name,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite', 'actual_pct': Decimal('0.0062'), 'target_pct': Decimal('0.1'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -2}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
-| MSFT | jun_core | 356.7700 | 392.8170 | -6% x 1 | 369.25 | 1 | 58971 | yes | limit_above_current | Calculated limit price is not below the current price. | shallow_candidate,mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost,limit_above_current | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'jun_core', 'actual_pct': Decimal('0.0935'), 'target_pct': Decimal('0.2'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': 3}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
-| MSFT | jun_core | 356.7700 | 392.8170 | -10% x 2 | 353.54 | 2 | 112924 | no | - | - | mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'jun_core', 'actual_pct': Decimal('0.0935'), 'target_pct': Decimal('0.2'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': 3}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
-| MSFT | jun_core | 356.7700 | 392.8170 | -18% x 2 | 322.11 | 2 | 102885 | no | - | - | deep_drawdown_candidate,mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'jun_core', 'actual_pct': Decimal('0.0935'), 'target_pct': Decimal('0.2'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': 3}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| symbol | bucket | current_price | base_price | avg20_base_price | drawdown_rule | limit_price | avg20_gap_pct | shares | est_cost_jpy | suppressed | suppressed_reason_code | suppressed_reason_text | note_for_chatgpt | explanation |
+| --- | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | --- | --- | --- |
+| CIBR | satellite_core | 60.7600 | 64.3840 | 64.3840 | -5% x 1 | 61.16 | -5.01 | 1 | 9767 | yes | limit_above_current | Calculated limit price is not below the current price. | shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,limit_above_current | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
+| CIBR | satellite_core | 60.7600 | 64.3840 | 64.3840 | -8% x 1 | 59.23 | -8.01 | 1 | 9459 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
+| CIBR | satellite_core | 60.7600 | 64.3840 | 64.3840 | -12% x 1 | 56.66 | -12.00 | 1 | 9049 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
+| URA | satellite_core | 46.6300 | 51.1673 | 51.1673 | -6% x 2 | 48.10 | -5.99 | 2 | 15364 | yes | limit_above_current | Calculated limit price is not below the current price. | shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,limit_above_current | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
+| URA | satellite_core | 46.6300 | 51.1673 | 51.1673 | -10% x 2 | 46.05 | -10.00 | 2 | 14709 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
+| URA | satellite_core | 46.6300 | 51.1673 | 51.1673 | -15% x 2 | 43.49 | -15.00 | 2 | 13891 | no | - | - | deep_drawdown_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_allow_deep_drawdown_even_if_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:low', 'default_allow_deep_drawdown_even_if_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.1557'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -1}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| PLTR | satellite | 143.0600 | 146.1287 | 146.1287 | -10% x 1 | 131.52 | -10.00 | 1 | 21004 | yes | high_volatility_shallow_suppressed | High-volatility names default to deeper pullbacks before adding. | high_volatility_name,rule_based_high_volatility_shallow_suppression,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization,high_volatility_shallow_suppressed | {'rule_based_reason': ['rule_based_high_volatility_shallow_suppression'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite', 'actual_pct': Decimal('0.0062'), 'target_pct': Decimal('0.1'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -2}, 'suppression': {'suppressed': True, 'reason_code': 'high_volatility_shallow_suppressed', 'reason_text': 'High-volatility names default to deeper pullbacks before adding.'}} |
+| PLTR | satellite | 143.0600 | 146.1287 | 146.1287 | -15% x 2 | 124.21 | -15.00 | 2 | 39674 | no | - | - | deep_drawdown_candidate,high_volatility_name,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite', 'actual_pct': Decimal('0.0062'), 'target_pct': Decimal('0.1'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -2}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| PLTR | satellite | 143.0600 | 146.1287 | 146.1287 | -22% x 2 | 113.98 | -22.00 | 2 | 36406 | no | - | - | deep_drawdown_candidate,high_volatility_name,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite', 'actual_pct': Decimal('0.0062'), 'target_pct': Decimal('0.1'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': -2}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| MSFT | jun_core | 356.7700 | 393.9447 | 393.9447 | -6% x 1 | 370.31 | -6.00 | 1 | 59140 | yes | limit_above_current | Calculated limit price is not below the current price. | shallow_candidate,mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost,limit_above_current | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'jun_core', 'actual_pct': Decimal('0.0935'), 'target_pct': Decimal('0.2'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': 3}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| MSFT | jun_core | 356.7700 | 393.9447 | 393.9447 | -10% x 2 | 354.55 | -10.00 | 2 | 113246 | no | - | - | mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'jun_core', 'actual_pct': Decimal('0.0935'), 'target_pct': Decimal('0.2'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': 3}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| MSFT | jun_core | 356.7700 | 393.9447 | 393.9447 | -18% x 2 | 323.03 | -18.00 | 2 | 103178 | no | - | - | deep_drawdown_candidate,mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'jun_core', 'actual_pct': Decimal('0.0935'), 'target_pct': Decimal('0.2'), 'is_over_target': False}, 'mode_context': {'active_mode': 'rebalance', 'priority_weight': 3}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
 
 ## 5. コア定額買い判定材料
 - core_actual_pct: 16.41%
@@ -215,10 +230,14 @@
 - explanation: {'buy_zone_assessment': {'within_buy_zone': False, 'near_boundary': False, 'drawdown_pct_from_63d_high': Decimal('-12.18'), 'rule': '-10% <= drawdown <= -5%'}, 'bucket_context': {'related_bucket': 'satellite_core', 'related_bucket_actual_pct': Decimal('0.1557'), 'related_bucket_target_pct': Decimal('0.15')}, 'exposure_context': {'semiconductor_direct_exposure_pct': Decimal('0.1144'), 'indirect_ai_infra_exposure_pct': Decimal('0.0121')}}
 
 ## 7. 半導体エクスポージャ内訳
+- direct_cap_monitor_pct: 11.44%
+- direct_cap_monitor_jpy: 3778003
+- direct_plus_indirect_watch_metric_pct: 12.65%
+- direct_plus_indirect_watch_metric_jpy: 4178334
 - direct_semiconductor_exposure_pct: 11.44%
-- direct_semiconductor_exposure_jpy: 3778003
 - indirect_ai_infra_exposure_pct: 1.21%
 - indirect_ai_infra_exposure_jpy: 400331
+- combined_semiconductor_ai_infra_watch_pct: 12.65%
 | symbol | value_jpy | bucket | exposure_type | in_direct | in_indirect | inclusion_reason |
 | --- | ---: | --- | --- | --- | --- | --- |
 | SMH | 59992 | satellite_core | direct_semiconductor | yes | no | matched_exposure_group_rule |
@@ -281,13 +300,20 @@
   - portfolio_management_mode: rebalance
   - monthly_core_budget_tier: rebalance
   - recommended_monthly_core_buy_budget_jpy: 700000
+  - monthly_total_core_deployment_jpy: 1450000
   - candidate_count: 12
   - crypto_weekly_dca_total_jpy: 5000
 - quarterly_rule_review_outputs:
   - no_change: False
   - classification_override_count: 1
   - core_reference_missing_symbols: []
+  - tradable_core_pct: 16.41%
+  - effective_core_including_pension_pct: 26.65%
+  - cash_normalization_months_estimate: 8.0
+  - direct_cap_monitor_pct: 11.44%
+  - direct_plus_indirect_watch_metric_pct: 12.65%
   - direct_semiconductor_exposure_pct: 11.44%
+  - combined_semiconductor_ai_infra_watch_pct: 12.65%
   - indirect_ai_infra_exposure_pct: 1.21%
 
 ## 12. ChatGPT に期待する出力形式
@@ -317,10 +343,16 @@
 - `積立しているからスポット買いは不要` とは結論しないこと
 
 【今月の指値提案】
+- この『今月』は review_target_month を指す。snapshot_date が前月末でも、対象月を取り違えないこと
 - 各銘柄について 0段以上の任意段数で提案してよい
 - 0段の場合は『今月は見送り』と明記する
 - Python 候補より段数を減らした場合は、その理由が『ルール上の判断』か『今月の裁量判断』かを明記する
 - Python 候補より段数を増やした場合も、その理由を明記する
+- 指値設定基準値はスクリプト実行時点から直近20営業日（約1ヶ月）の終値平均ベースとして扱うこと
+- 指値を提案する各段で、直近20営業日（約1ヶ月）の終値平均の実数値を必ず明示すること
+- 指値を提案する各段で、その指値が直近20営業日終値平均から何%下かを必ず明示すること
+- 乖離率は `((指値 / 直近20営業日終値平均) - 1) * 100` で計算し、マイナス値で表記すること
+- 推奨フォーマット例: `指値 450.00 USD（20営業日平均 500.00 USD, 平均比 -10.0%）`
 - 減段理由テンプレートの例: `ルール上の判断: bucket_over_target のため浅い段を見送る`
 - 減段理由テンプレートの例: `今月の裁量判断: core 補強を優先するため段数を減らす`
 
@@ -390,10 +422,13 @@ nice_to_have:
 
 ## 13. 必須の月次・四半期レビュー観点
 - 毎月の運用レビューと四半期ごとのルール変更レビューを分離して評価してください。
+- 指値設定は前月末または当月初に実施されるため、snapshot_date が月末なら翌月の指値設定として扱ってください。
 - 四半期ルール見直しセクションには、月次の執行判断を混ぜないでください。
 - 半導体エクスポージャの合算管理が妥当か確認してください。
 - PLTR の浅い押し目候補抑制ロジックの是非を評価してください。
 - 指値段数は各銘柄 0段以上の任意とし、1段しか出さない場合はその理由を明記してください。
+- 指値を出す場合は、各段で直近20営業日（約1ヶ月）の終値平均と平均比の乖離率を併記してください。
+- 乖離率は `((指値 / 直近20営業日終値平均) - 1) * 100` に基づくマイナス値で記述してください。
 - コアについては『毎月一定額買う / 安ければ追加で厚く買う』という運用思想の妥当性も評価してください。
 - 月次レビューでは、毎回必ず core スポット買い額を提案してください。
 - core スポット買い額は 0円不可で、最初に単一の具体額を出してください。
@@ -407,6 +442,9 @@ nice_to_have:
 - 債券や低リスク商品を提案する場合でも、core equity スポット買い額そのものは別で必ず提示してください。
 - `全部債券` `全部現金維持` は不可です。
 - 生活防衛資金や大口支出情報が不明なら、不明として保守的に扱ってください。
+- 毎月の税引前キャッシュ流入が60万〜70万円ある前提を、生活防衛資金の残し方判断に反映してください。
+- 名古屋市中区・金山駅近くの約6500万円のマンションを住居兼資産として保有し、しかもフルローンで返済初期である点を考慮してください。
+- 上記不動産保有により、日本国内不動産セクターへの実質的なエクスポージャが既にある前提で配分やリスクを評価してください。
 - Core積立設定（毎月固定）は既に実行される前提として扱い、同じ強化提案の反復は避けてください。
 - ただし長期シナリオ悪化やリスク管理上の妥当性がある場合は、固定積立の減額・停止提案を明示してください。
 - 暗号資産の週次積立（BTC/ETH/XRP）も既に実行される前提で扱い、必要時のみ変更提案してください。
@@ -428,4 +466,4 @@ nice_to_have:
 - monthly review と quarterly rule review を分けて整理してください。
 - 修正対象ファイルと必要テストを、Codex が編集に入れる粒度で書いてください。
 
-月次キー: 2026_03
+指値設定対象月キー: 2026_04

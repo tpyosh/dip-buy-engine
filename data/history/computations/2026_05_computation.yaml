@@ -1,192 +1,168 @@
 snapshot:
-  snapshot_date: '2026-03-29'
+  snapshot_date: '2026-04-25'
   currency_base: JPY
-  total_assets_jpy: 33028136
+  total_assets_jpy: 35558948
   liquidity_target_jpy: null
   holdings:
-  - symbol: JPY_CASH_EQUIVALENT
-    name: 預金・現金等（暗号資産除く残高）
+  - symbol: LIQUIDITY
+    name: 預金・現金・暗号資産
     asset_class: liquidity
     quantity: null
     avg_cost: null
     current_price: null
-    market_value_jpy: 14942636
-    currency: JPY
-  - symbol: BTC
-    name: ビットコイン
-    asset_class: other
-    quantity: null
-    avg_cost: null
-    current_price: null
-    market_value_jpy: 153210
-    currency: JPY
-  - symbol: ETH
-    name: イーサリアム
-    asset_class: other
-    quantity: null
-    avg_cost: null
-    current_price: null
-    market_value_jpy: 111366
-    currency: JPY
-  - symbol: XRP
-    name: エックスアールピー
-    asset_class: other
-    quantity: null
-    avg_cost: null
-    current_price: null
-    market_value_jpy: 5798
+    market_value_jpy: 14644262
     currency: JPY
   - symbol: '7203'
     name: トヨタ自動車
-    asset_class: other
+    asset_class: jun_core
     quantity: 800
     avg_cost: 532
-    current_price: 3358
-    market_value_jpy: 2686400
+    current_price: 3123
+    market_value_jpy: 2498400
     currency: JPY
   - symbol: '9444'
     name: トーシンホールディングス
-    asset_class: other
+    asset_class: satellite
     quantity: 1500
     avg_cost: 628
-    current_price: 333
-    market_value_jpy: 499500
+    current_price: 371
+    market_value_jpy: 556500
     currency: JPY
   - symbol: '2353'
     name: 日本駐車場開発
-    asset_class: other
+    asset_class: satellite
     quantity: 100
     avg_cost: 265
-    current_price: 275
-    market_value_jpy: 27500
+    current_price: 251
+    market_value_jpy: 25100
     currency: JPY
   - symbol: '7201'
     name: 日産自動車
-    asset_class: other
+    asset_class: satellite
     quantity: 100
     avg_cost: 368
-    current_price: 349
-    market_value_jpy: 34870
+    current_price: 358
+    market_value_jpy: 35820
     currency: JPY
   - symbol: SMH
     name: ヴァンエック・半導体株ETF
     asset_class: satellite_core
     quantity: 1
     avg_cost: 369.63
-    current_price: 374.25
-    market_value_jpy: 59992
+    current_price: 481.85
+    market_value_jpy: 76989
     currency: USD
   - symbol: PLTR
     name: パランティア・テクノロジーズ
     asset_class: satellite
     quantity: 9
     avg_cost: 160.48
-    current_price: 143.06
-    market_value_jpy: 206392
+    current_price: 141.57
+    market_value_jpy: 203580
     currency: USD
   - symbol: CIBR
-    name: ファーストトラスト ナスダック サイバーセキュリティETF
+    name: ファーストトラスト ナスダック サイバーセキュリティ ETF
     asset_class: satellite_core
     quantity: 88
     avg_cost: 76.66
-    current_price: 60.76
-    market_value_jpy: 857104
+    current_price: 66.59
+    market_value_jpy: 936298
     currency: USD
   - symbol: MSFT
     name: マイクロソフト
     asset_class: jun_core
     quantity: 7
     avg_cost: 404.33
-    current_price: 356.77
-    market_value_jpy: 400331
+    current_price: 415.75
+    market_value_jpy: 464999
     currency: USD
   - symbol: URA
     name: グローバルX ウラニウム ETF
-    asset_class: satellite_core
+    asset_class: satellite
     quantity: 68
     avg_cost: 46.27
-    current_price: 46.63
-    market_value_jpy: 508285
+    current_price: 56.47
+    market_value_jpy: 613548
     currency: USD
   - symbol: NISSEI_SOX_1
     name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
     asset_class: satellite_core
     quantity: 860960
     avg_cost: 15802
-    current_price: 29124
-    market_value_jpy: 2507460
+    current_price: 37930
+    market_value_jpy: 3265621
     currency: JPY
   - symbol: NISSEI_SOX_2
     name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
     asset_class: satellite_core
     quantity: 415654
     avg_cost: 14435
-    current_price: 29124
-    market_value_jpy: 1210551
+    current_price: 37930
+    market_value_jpy: 1576576
     currency: JPY
-  - symbol: RAKUTEN_ALL_COUNTRY_1
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
     name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
     asset_class: core
-    quantity: 978581
-    avg_cost: 13795
-    current_price: 16871
-    market_value_jpy: 1650964
+    quantity: 1006851
+    avg_cost: 13905
+    current_price: 18460
+    market_value_jpy: 1858647
     currency: JPY
-  - symbol: RAKUTEN_ALL_COUNTRY_2
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
     name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
     asset_class: core
     quantity: 725688
     avg_cost: 17570
-    current_price: 16871
-    market_value_jpy: 1224308
+    current_price: 18460
+    market_value_jpy: 1339620
     currency: JPY
-  - symbol: RAKUTEN_SP500
+  - symbol: RAKUTEN_PLUS_SP500
     name: 楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)
     asset_class: core
     quantity: 106530
     avg_cost: 11715
-    current_price: 16863
-    market_value_jpy: 179642
+    current_price: 18566
+    market_value_jpy: 197784
     currency: JPY
-  - symbol: EMAXIS_SP500_1
+  - symbol: EMAXIS_SLIM_SP500_1
     name: eMAXIS Slim 米国株式(S&P500)
     asset_class: core
-    quantity: 44024
-    avg_cost: 38615
-    current_price: 37897
-    market_value_jpy: 166838
+    quantity: 108484
+    avg_cost: 38715
+    current_price: 41725
+    market_value_jpy: 452649
     currency: JPY
-  - symbol: EMAXIS_SP500_2
+  - symbol: EMAXIS_SLIM_SP500_2
     name: eMAXIS Slim 米国株式(S&P500)
     asset_class: core
-    quantity: 361678
-    avg_cost: 32211
-    current_price: 37897
-    market_value_jpy: 1370651
+    quantity: 374328
+    avg_cost: 32458
+    current_price: 41725
+    market_value_jpy: 1561884
     currency: JPY
-  - symbol: EMAXIS_SP500_3
+  - symbol: EMAXIS_SLIM_SP500_3
     name: eMAXIS Slim 米国株式(S&P500)
     asset_class: core
-    quantity: 170193
-    avg_cost: 39661
-    current_price: 37897
-    market_value_jpy: 644980
+    quantity: 228995
+    avg_cost: 39302
+    current_price: 41725
+    market_value_jpy: 955482
     currency: JPY
-  - symbol: EMAXIS_ALL_COUNTRY_TAXABLE
+  - symbol: EMAXIS_SLIM_ALL_COUNTRY
     name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
     asset_class: core
-    quantity: 55611
-    avg_cost: 32368
-    current_price: 32734
-    market_value_jpy: 182037
+    quantity: 146508
+    avg_cost: 32763
+    current_price: 35810
+    market_value_jpy: 524645
     currency: JPY
-  - symbol: EMAXIS_ALL_COUNTRY_PENSION
+  - symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
     name: eMAXIS Slim 全世界株式(オール・カントリー)
     asset_class: pension
     quantity: null
-    avg_cost: null
-    current_price: null
-    market_value_jpy: 3381281
+    avg_cost: 3285695
+    current_price: 3754327
+    market_value_jpy: 3754327
     currency: JPY
   - symbol: POINTS_MILES
     name: ポイント・マイル
@@ -194,229 +170,156 @@ snapshot:
     quantity: null
     avg_cost: null
     current_price: null
-    market_value_jpy: 16037
+    market_value_jpy: 16214
     currency: JPY
   warnings:
-  - Holding JPY_CASH_EQUIVALENT is missing quantity; stored as null.
-  - Holding JPY_CASH_EQUIVALENT is missing avg_cost; stored as null.
-  - Holding JPY_CASH_EQUIVALENT is missing current_price; stored as null.
-  - Holding BTC is missing quantity; stored as null.
-  - Holding BTC is missing avg_cost; stored as null.
-  - Holding BTC is missing current_price; stored as null.
-  - Holding ETH is missing quantity; stored as null.
-  - Holding ETH is missing avg_cost; stored as null.
-  - Holding ETH is missing current_price; stored as null.
-  - Holding XRP is missing quantity; stored as null.
-  - Holding XRP is missing avg_cost; stored as null.
-  - Holding XRP is missing current_price; stored as null.
-  - Holding EMAXIS_ALL_COUNTRY_PENSION is missing quantity; stored as null.
-  - Holding EMAXIS_ALL_COUNTRY_PENSION is missing avg_cost; stored as null.
-  - Holding EMAXIS_ALL_COUNTRY_PENSION is missing current_price; stored as null.
+  - Holding LIQUIDITY is missing quantity; stored as null.
+  - Holding LIQUIDITY is missing avg_cost; stored as null.
+  - Holding LIQUIDITY is missing current_price; stored as null.
+  - Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing quantity; stored as null.
   - Holding POINTS_MILES is missing quantity; stored as null.
   - Holding POINTS_MILES is missing avg_cost; stored as null.
   - Holding POINTS_MILES is missing current_price; stored as null.
-generated_at: '2026-03-29T00:55:05Z'
+generated_at: '2026-04-24T23:40:52Z'
 bucket_allocations:
 - bucket: core
-  market_value_jpy: 5419420
-  actual_pct: 0.1641
+  market_value_jpy: 6890711
+  actual_pct: 0.1938
   target_pct: 0.45
-  delta_pct: -0.2859
+  delta_pct: -0.2562
   preferred_min_pct: 0.35
   preferred_max_pct: 0.55
 - bucket: jun_core
-  market_value_jpy: 3086731
-  actual_pct: 0.0935
+  market_value_jpy: 2963399
+  actual_pct: 0.0833
   target_pct: 0.2
-  delta_pct: -0.1065
+  delta_pct: -0.1167
   preferred_min_pct: 0.1
   preferred_max_pct: 0.3
 - bucket: liquidity
-  market_value_jpy: 14942636
-  actual_pct: 0.4524
+  market_value_jpy: 14644262
+  actual_pct: 0.4118
   target_pct: 0.1
-  delta_pct: 0.3524
+  delta_pct: 0.3118
   preferred_min_pct: 0.05
   preferred_max_pct: 0.15
 - bucket: other
-  market_value_jpy: 848281
-  actual_pct: 0.0257
+  market_value_jpy: 16214
+  actual_pct: 0.0005
   target_pct: null
   delta_pct: null
   preferred_min_pct: null
   preferred_max_pct: null
 - bucket: pension
-  market_value_jpy: 3381281
-  actual_pct: 0.1024
+  market_value_jpy: 3754327
+  actual_pct: 0.1056
   target_pct: null
   delta_pct: null
   preferred_min_pct: null
   preferred_max_pct: null
 - bucket: satellite
-  market_value_jpy: 206392
-  actual_pct: 0.0062
+  market_value_jpy: 821000
+  actual_pct: 0.0231
   target_pct: 0.1
-  delta_pct: -0.0938
+  delta_pct: -0.0769
   preferred_min_pct: 0
   preferred_max_pct: 0.15
 - bucket: satellite_core
-  market_value_jpy: 5143392
-  actual_pct: 0.1557
+  market_value_jpy: 6469032
+  actual_pct: 0.1819
   target_pct: 0.15
-  delta_pct: 0.0057
+  delta_pct: 0.0319
   preferred_min_pct: 0.1
   preferred_max_pct: 0.25
 market_references:
 - symbol: CIBR
   yfinance_symbol: CIBR
-  current_price: 60.76
-  mean_close_20d: 64.5535
-  recent_high_21d: 66.28
-  recent_high_63d: 73.45
+  current_price: 67.24
+  mean_close_20d: 64.4873
+  recent_high_21d: 68.91
+  recent_high_63d: 72.09
   currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 63.87
-  prior_close_63d: 72.85
+  as_of: '2026-04-24'
+  mean_close_30d: 64.4873
+  prior_close_21d: 63.37
+  prior_close_63d: 70.81
 - symbol: URA
   yfinance_symbol: URA
-  current_price: 46.63
-  mean_close_20d: 49.8865
-  recent_high_21d: 56.45
+  current_price: 55.31
+  mean_close_20d: 50.806
+  recent_high_21d: 57.73
   recent_high_63d: 61.81
   currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 54.87
-  prior_close_63d: 46.56
+  as_of: '2026-04-24'
+  mean_close_30d: 50.806
+  prior_close_21d: 48.95
+  prior_close_63d: 57
 - symbol: PLTR
   yfinance_symbol: PLTR
-  current_price: 143.06
-  mean_close_20d: 152.358
-  recent_high_21d: 160.84
-  recent_high_63d: 188.71
+  current_price: 143.09
+  mean_close_20d: 146.1227
+  recent_high_21d: 152.62
+  recent_high_63d: 167.47
   currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 135.94
-  prior_close_63d: 194.17
+  as_of: '2026-04-24'
+  mean_close_30d: 146.1227
+  prior_close_21d: 154.96
+  prior_close_63d: 169.6
 - symbol: MSFT
   yfinance_symbol: MSFT
-  current_price: 356.77
-  mean_close_20d: 392.817
-  recent_high_21d: 410.68
-  recent_high_63d: 487.71
+  current_price: 424.62
+  mean_close_20d: 389.6593
+  recent_high_21d: 432.92
+  recent_high_63d: 481.63
   currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 401.72
-  prior_close_63d: 488.02
+  as_of: '2026-04-24'
+  mean_close_30d: 389.6593
+  prior_close_21d: 371.04
+  prior_close_63d: 465.95
 - symbol: SMH
   yfinance_symbol: SMH
-  current_price: 374.25
-  mean_close_20d: 392.242
-  recent_high_21d: 406.39
-  recent_high_63d: 426.16
+  current_price: 506.44
+  mean_close_20d: 418.959
+  recent_high_21d: 506.44
+  recent_high_63d: 506.44
   currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 412.01
-  prior_close_63d: 364.17
+  as_of: '2026-04-24'
+  mean_close_30d: 418.959
+  prior_close_21d: 399.02
+  prior_close_63d: 400.09
 - symbol: USDJPY
   yfinance_symbol: USDJPY=X
-  current_price: 159.704
-  mean_close_20d: 158.4825
-  recent_high_21d: 159.795
-  recent_high_63d: 159.795
+  current_price: 159.333
+  mean_close_20d: 159.1818
+  recent_high_21d: 160.234
+  recent_high_63d: 160.234
   currency: JPY
-  as_of: '2026-03-27'
-  prior_close_21d: 156.2
-  prior_close_63d: 156.463
-- symbol: RAKUTEN_ALL_COUNTRY_1
-  yfinance_symbol: VT
-  current_price: 134.62
-  mean_close_20d: 140.8625
-  recent_high_21d: 147.84
-  recent_high_63d: 148.91
-  currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 148.4
-  prior_close_63d: 142.36
-- symbol: RAKUTEN_ALL_COUNTRY_2
-  yfinance_symbol: VT
-  current_price: 134.62
-  mean_close_20d: 140.8625
-  recent_high_21d: 147.84
-  recent_high_63d: 148.91
-  currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 148.4
-  prior_close_63d: 142.36
-- symbol: RAKUTEN_SP500
-  yfinance_symbol: VOO
-  current_price: 582.96
-  mean_close_20d: 612.903
-  recent_high_21d: 631.28
-  recent_high_63d: 639.7
-  currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 633.95
-  prior_close_63d: 634.78
-- symbol: EMAXIS_SP500_1
-  yfinance_symbol: VOO
-  current_price: 582.96
-  mean_close_20d: 612.903
-  recent_high_21d: 631.28
-  recent_high_63d: 639.7
-  currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 633.95
-  prior_close_63d: 634.78
-- symbol: EMAXIS_SP500_2
-  yfinance_symbol: VOO
-  current_price: 582.96
-  mean_close_20d: 612.903
-  recent_high_21d: 631.28
-  recent_high_63d: 639.7
-  currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 633.95
-  prior_close_63d: 634.78
-- symbol: EMAXIS_SP500_3
-  yfinance_symbol: VOO
-  current_price: 582.96
-  mean_close_20d: 612.903
-  recent_high_21d: 631.28
-  recent_high_63d: 639.7
-  currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 633.95
-  prior_close_63d: 634.78
-- symbol: EMAXIS_ALL_COUNTRY_TAXABLE
-  yfinance_symbol: ACWI
-  current_price: 134.55
-  mean_close_20d: 140.7685
-  recent_high_21d: 147.38
-  recent_high_63d: 148.65
-  currency: USD
-  as_of: '2026-03-27'
-  prior_close_21d: 147.95
-  prior_close_63d: 142.71
+  as_of: '2026-04-24'
+  mean_close_30d: 159.1818
+  prior_close_21d: 159.384
+  prior_close_63d: 154.336
 candidate_orders:
 - symbol: CIBR
   bucket: satellite_core
-  base_price: 64.5535
-  current_price: 60.76
-  limit_price: 61.33
+  base_price: 64.4873
+  avg20_base_price: 64.4873
+  current_price: 67.24
+  limit_price: 61.26
   shares: 1
-  estimated_cost: 61.33
-  estimated_cost_jpy: 9795
+  estimated_cost: 61.26
+  estimated_cost_jpy: 9761
   currency: USD
   drawdown_pct: -5
   drawdown_rule: -5% x 1
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
-  suppressed_reason_code: limit_above_current
-  suppressed_reason_text: Calculated limit price is not below the current price.
-  note_for_chatgpt: shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,limit_above_current
+  suppressed_reason_code: bucket_over_target_shallow_suppressed
+  suppressed_reason_text: Shallow candidate suppressed because related bucket is over
+    target.
+  note_for_chatgpt: shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -5
   suppression_reasons:
   - Shallow candidate suppressed because related bucket is over target.
-  - Calculated limit price is not below the current price.
   explanation:
     rule_based_reason:
     - auto_tranche_adjustment_bucket_over_target:low
@@ -424,7 +327,7 @@ candidate_orders:
     discretionary_reason: null
     related_bucket_status:
       bucket: satellite_core
-      actual_pct: 0.1557
+      actual_pct: 0.1819
       target_pct: 0.15
       is_over_target: true
     mode_context:
@@ -436,21 +339,23 @@ candidate_orders:
       reason_text: Shallow candidate suppressed because related bucket is over target.
 - symbol: CIBR
   bucket: satellite_core
-  base_price: 64.5535
-  current_price: 60.76
-  limit_price: 59.39
+  base_price: 64.4873
+  avg20_base_price: 64.4873
+  current_price: 67.24
+  limit_price: 59.33
   shares: 1
-  estimated_cost: 59.39
-  estimated_cost_jpy: 9485
+  estimated_cost: 59.33
+  estimated_cost_jpy: 9453
   currency: USD
   drawdown_pct: -8
   drawdown_rule: -8% x 1
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: bucket_over_target_shallow_suppressed
   suppressed_reason_text: Shallow candidate suppressed because related bucket is over
     target.
   note_for_chatgpt: bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -8
   suppression_reasons:
   - Shallow candidate suppressed because related bucket is over target.
   explanation:
@@ -460,7 +365,7 @@ candidate_orders:
     discretionary_reason: null
     related_bucket_status:
       bucket: satellite_core
-      actual_pct: 0.1557
+      actual_pct: 0.1819
       target_pct: 0.15
       is_over_target: true
     mode_context:
@@ -472,21 +377,23 @@ candidate_orders:
       reason_text: Shallow candidate suppressed because related bucket is over target.
 - symbol: CIBR
   bucket: satellite_core
-  base_price: 64.5535
-  current_price: 60.76
-  limit_price: 56.81
+  base_price: 64.4873
+  avg20_base_price: 64.4873
+  current_price: 67.24
+  limit_price: 56.75
   shares: 1
-  estimated_cost: 56.81
-  estimated_cost_jpy: 9073
+  estimated_cost: 56.75
+  estimated_cost_jpy: 9042
   currency: USD
   drawdown_pct: -12
   drawdown_rule: -12% x 1
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: bucket_over_target_shallow_suppressed
   suppressed_reason_text: Shallow candidate suppressed because related bucket is over
     target.
   note_for_chatgpt: bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -12
   suppression_reasons:
   - Shallow candidate suppressed because related bucket is over target.
   explanation:
@@ -496,7 +403,7 @@ candidate_orders:
     discretionary_reason: null
     related_bucket_status:
       bucket: satellite_core
-      actual_pct: 0.1557
+      actual_pct: 0.1819
       target_pct: 0.15
       is_over_target: true
     mode_context:
@@ -508,23 +415,25 @@ candidate_orders:
       reason_text: Shallow candidate suppressed because related bucket is over target.
 - symbol: URA
   bucket: satellite_core
-  base_price: 49.8865
-  current_price: 46.63
-  limit_price: 46.89
+  base_price: 50.806
+  avg20_base_price: 50.806
+  current_price: 55.31
+  limit_price: 47.76
   shares: 2
-  estimated_cost: 93.78
-  estimated_cost_jpy: 14977
+  estimated_cost: 95.52
+  estimated_cost_jpy: 15219
   currency: USD
   drawdown_pct: -6
   drawdown_rule: -6% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
-  suppressed_reason_code: limit_above_current
-  suppressed_reason_text: Calculated limit price is not below the current price.
-  note_for_chatgpt: shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,limit_above_current
+  suppressed_reason_code: bucket_over_target_shallow_suppressed
+  suppressed_reason_text: Shallow candidate suppressed because related bucket is over
+    target.
+  note_for_chatgpt: shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -6
   suppression_reasons:
   - Shallow candidate suppressed because related bucket is over target.
-  - Calculated limit price is not below the current price.
   explanation:
     rule_based_reason:
     - auto_tranche_adjustment_bucket_over_target:low
@@ -532,7 +441,7 @@ candidate_orders:
     discretionary_reason: null
     related_bucket_status:
       bucket: satellite_core
-      actual_pct: 0.1557
+      actual_pct: 0.1819
       target_pct: 0.15
       is_over_target: true
     mode_context:
@@ -544,21 +453,23 @@ candidate_orders:
       reason_text: Shallow candidate suppressed because related bucket is over target.
 - symbol: URA
   bucket: satellite_core
-  base_price: 49.8865
-  current_price: 46.63
-  limit_price: 44.9
+  base_price: 50.806
+  avg20_base_price: 50.806
+  current_price: 55.31
+  limit_price: 45.73
   shares: 2
-  estimated_cost: 89.8
-  estimated_cost_jpy: 14341
+  estimated_cost: 91.46
+  estimated_cost_jpy: 14573
   currency: USD
   drawdown_pct: -10
   drawdown_rule: -10% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: bucket_over_target_shallow_suppressed
   suppressed_reason_text: Shallow candidate suppressed because related bucket is over
     target.
   note_for_chatgpt: bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_deep_only_due_to_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -9.99
   suppression_reasons:
   - Shallow candidate suppressed because related bucket is over target.
   explanation:
@@ -568,7 +479,7 @@ candidate_orders:
     discretionary_reason: null
     related_bucket_status:
       bucket: satellite_core
-      actual_pct: 0.1557
+      actual_pct: 0.1819
       target_pct: 0.15
       is_over_target: true
     mode_context:
@@ -580,20 +491,22 @@ candidate_orders:
       reason_text: Shallow candidate suppressed because related bucket is over target.
 - symbol: URA
   bucket: satellite_core
-  base_price: 49.8865
-  current_price: 46.63
-  limit_price: 42.4
+  base_price: 50.806
+  avg20_base_price: 50.806
+  current_price: 55.31
+  limit_price: 43.19
   shares: 2
-  estimated_cost: 84.8
-  estimated_cost_jpy: 13543
+  estimated_cost: 86.38
+  estimated_cost_jpy: 13763
   currency: USD
   drawdown_pct: -15
   drawdown_rule: -15% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: false
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: deep_drawdown_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:low,default_allow_deep_drawdown_even_if_bucket_over_target,mode_context:rebalance,mode_priority_weight:-1,mode_rebalance_relative_deprioritization
+  avg20_gap_pct: -14.99
   suppression_reasons: []
   explanation:
     rule_based_reason:
@@ -602,7 +515,7 @@ candidate_orders:
     discretionary_reason: null
     related_bucket_status:
       bucket: satellite_core
-      actual_pct: 0.1557
+      actual_pct: 0.1819
       target_pct: 0.15
       is_over_target: true
     mode_context:
@@ -614,21 +527,23 @@ candidate_orders:
       reason_text: null
 - symbol: PLTR
   bucket: satellite
-  base_price: 152.358
-  current_price: 143.06
-  limit_price: 137.12
+  base_price: 146.1227
+  avg20_base_price: 146.1227
+  current_price: 143.09
+  limit_price: 131.51
   shares: 1
-  estimated_cost: 137.12
-  estimated_cost_jpy: 21899
+  estimated_cost: 131.51
+  estimated_cost_jpy: 20954
   currency: USD
   drawdown_pct: -10
   drawdown_rule: -10% x 1
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: true
   suppressed_reason_code: high_volatility_shallow_suppressed
   suppressed_reason_text: High-volatility names default to deeper pullbacks before
     adding.
   note_for_chatgpt: high_volatility_name,rule_based_high_volatility_shallow_suppression,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization,high_volatility_shallow_suppressed
+  avg20_gap_pct: -10
   suppression_reasons:
   - High-volatility names default to deeper pullbacks before adding.
   explanation:
@@ -637,7 +552,7 @@ candidate_orders:
     discretionary_reason: null
     related_bucket_status:
       bucket: satellite
-      actual_pct: 0.0062
+      actual_pct: 0.0231
       target_pct: 0.1
       is_over_target: false
     mode_context:
@@ -649,27 +564,29 @@ candidate_orders:
       reason_text: High-volatility names default to deeper pullbacks before adding.
 - symbol: PLTR
   bucket: satellite
-  base_price: 152.358
-  current_price: 143.06
-  limit_price: 129.5
+  base_price: 146.1227
+  avg20_base_price: 146.1227
+  current_price: 143.09
+  limit_price: 124.2
   shares: 2
-  estimated_cost: 259
-  estimated_cost_jpy: 41363
+  estimated_cost: 248.4
+  estimated_cost_jpy: 39578
   currency: USD
   drawdown_pct: -15
   drawdown_rule: -15% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: false
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: deep_drawdown_candidate,high_volatility_name,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization
+  avg20_gap_pct: -15
   suppression_reasons: []
   explanation:
     rule_based_reason: []
     discretionary_reason: null
     related_bucket_status:
       bucket: satellite
-      actual_pct: 0.0062
+      actual_pct: 0.0231
       target_pct: 0.1
       is_over_target: false
     mode_context:
@@ -681,27 +598,29 @@ candidate_orders:
       reason_text: null
 - symbol: PLTR
   bucket: satellite
-  base_price: 152.358
-  current_price: 143.06
-  limit_price: 118.84
+  base_price: 146.1227
+  avg20_base_price: 146.1227
+  current_price: 143.09
+  limit_price: 113.98
   shares: 2
-  estimated_cost: 237.68
-  estimated_cost_jpy: 37958
+  estimated_cost: 227.96
+  estimated_cost_jpy: 36322
   currency: USD
   drawdown_pct: -22
   drawdown_rule: -22% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: false
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: deep_drawdown_candidate,high_volatility_name,mode_context:rebalance,mode_priority_weight:-2,mode_rebalance_relative_deprioritization
+  avg20_gap_pct: -22
   suppression_reasons: []
   explanation:
     rule_based_reason: []
     discretionary_reason: null
     related_bucket_status:
       bucket: satellite
-      actual_pct: 0.0062
+      actual_pct: 0.0231
       target_pct: 0.1
       is_over_target: false
     mode_context:
@@ -713,28 +632,29 @@ candidate_orders:
       reason_text: null
 - symbol: MSFT
   bucket: jun_core
-  base_price: 392.817
-  current_price: 356.77
-  limit_price: 369.25
+  base_price: 389.6593
+  avg20_base_price: 389.6593
+  current_price: 424.62
+  limit_price: 366.28
   shares: 1
-  estimated_cost: 369.25
-  estimated_cost_jpy: 58971
+  estimated_cost: 366.28
+  estimated_cost_jpy: 58360
   currency: USD
   drawdown_pct: -6
   drawdown_rule: -6% x 1
-  reference_method: mean_close_20d
-  suppressed: true
-  suppressed_reason_code: limit_above_current
-  suppressed_reason_text: Calculated limit price is not below the current price.
-  note_for_chatgpt: shallow_candidate,mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost,limit_above_current
-  suppression_reasons:
-  - Calculated limit price is not below the current price.
+  reference_method: mean_close_30d
+  suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: shallow_candidate,mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost
+  avg20_gap_pct: -6
+  suppression_reasons: []
   explanation:
     rule_based_reason: []
     discretionary_reason: null
     related_bucket_status:
       bucket: jun_core
-      actual_pct: 0.0935
+      actual_pct: 0.0833
       target_pct: 0.2
       is_over_target: false
     mode_context:
@@ -746,27 +666,29 @@ candidate_orders:
       reason_text: null
 - symbol: MSFT
   bucket: jun_core
-  base_price: 392.817
-  current_price: 356.77
-  limit_price: 353.54
+  base_price: 389.6593
+  avg20_base_price: 389.6593
+  current_price: 424.62
+  limit_price: 350.69
   shares: 2
-  estimated_cost: 707.08
-  estimated_cost_jpy: 112924
+  estimated_cost: 701.38
+  estimated_cost_jpy: 111753
   currency: USD
   drawdown_pct: -10
   drawdown_rule: -10% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: false
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost
+  avg20_gap_pct: -10
   suppression_reasons: []
   explanation:
     rule_based_reason: []
     discretionary_reason: null
     related_bucket_status:
       bucket: jun_core
-      actual_pct: 0.0935
+      actual_pct: 0.0833
       target_pct: 0.2
       is_over_target: false
     mode_context:
@@ -778,27 +700,29 @@ candidate_orders:
       reason_text: null
 - symbol: MSFT
   bucket: jun_core
-  base_price: 392.817
-  current_price: 356.77
-  limit_price: 322.11
+  base_price: 389.6593
+  avg20_base_price: 389.6593
+  current_price: 424.62
+  limit_price: 319.52
   shares: 2
-  estimated_cost: 644.22
-  estimated_cost_jpy: 102885
+  estimated_cost: 639.04
+  estimated_cost_jpy: 101820
   currency: USD
   drawdown_pct: -18
   drawdown_rule: -18% x 2
-  reference_method: mean_close_20d
+  reference_method: mean_close_30d
   suppressed: false
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: deep_drawdown_candidate,mode_context:rebalance,mode_priority_weight:3,mode_rebalance_priority_boost
+  avg20_gap_pct: -18
   suppression_reasons: []
   explanation:
     rule_based_reason: []
     discretionary_reason: null
     related_bucket_status:
       bucket: jun_core
-      actual_pct: 0.0935
+      actual_pct: 0.0833
       target_pct: 0.2
       is_over_target: false
     mode_context:
@@ -810,27 +734,22 @@ candidate_orders:
       reason_text: null
 warnings:
 - code: core_below_range
-  message: 'Bucket core is below preferred range: 16.41% < 35.00%'
+  message: 'Bucket core is below preferred range: 19.38% < 35.00%'
   severity: info
   related_symbols: []
 - code: jun_core_below_range
-  message: 'Bucket jun_core is below preferred range: 9.35% < 10.00%'
+  message: 'Bucket jun_core is below preferred range: 8.33% < 10.00%'
   severity: info
   related_symbols: []
 - code: liquidity_above_range
-  message: 'Bucket liquidity is above preferred range: 45.24% > 15.00%'
+  message: 'Bucket liquidity is above preferred range: 41.18% > 15.00%'
   severity: warning
   related_symbols: []
 - code: cash_above_preferred
-  message: 'Liquidity is above preferred total-assets band: 45.24% > 10.00%'
+  message: 'Liquidity is above preferred total-assets band: 41.18% > 10.00%'
   severity: info
   related_symbols:
   - liquidity
-- code: limit_above_current
-  message: 'CIBR: Calculated limit price is not below the current price.'
-  severity: warning
-  related_symbols:
-  - CIBR
 - code: bucket_over_target_shallow_suppressed
   message: 'CIBR: Shallow candidate suppressed because related bucket is over target.'
   severity: warning
@@ -841,8 +760,13 @@ warnings:
   severity: warning
   related_symbols:
   - CIBR
-- code: limit_above_current
-  message: 'URA: Calculated limit price is not below the current price.'
+- code: bucket_over_target_shallow_suppressed
+  message: 'CIBR: Shallow candidate suppressed because related bucket is over target.'
+  severity: warning
+  related_symbols:
+  - CIBR
+- code: bucket_over_target_shallow_suppressed
+  message: 'URA: Shallow candidate suppressed because related bucket is over target.'
   severity: warning
   related_symbols:
   - URA
@@ -856,69 +780,57 @@ warnings:
   severity: warning
   related_symbols:
   - PLTR
-- code: limit_above_current
-  message: 'MSFT: Calculated limit price is not below the current price.'
+- code: missing_core_market_reference
+  message: Core constituent RAKUTEN_PLUS_ALL_COUNTRY_1 is missing market reference
+    data.
   severity: warning
   related_symbols:
-  - MSFT
+  - RAKUTEN_PLUS_ALL_COUNTRY_1
+- code: missing_core_market_reference
+  message: Core constituent RAKUTEN_PLUS_ALL_COUNTRY_2 is missing market reference
+    data.
+  severity: warning
+  related_symbols:
+  - RAKUTEN_PLUS_ALL_COUNTRY_2
+- code: missing_core_market_reference
+  message: Core constituent RAKUTEN_PLUS_SP500 is missing market reference data.
+  severity: warning
+  related_symbols:
+  - RAKUTEN_PLUS_SP500
+- code: missing_core_market_reference
+  message: Core constituent EMAXIS_SLIM_SP500_1 is missing market reference data.
+  severity: warning
+  related_symbols:
+  - EMAXIS_SLIM_SP500_1
+- code: missing_core_market_reference
+  message: Core constituent EMAXIS_SLIM_SP500_2 is missing market reference data.
+  severity: warning
+  related_symbols:
+  - EMAXIS_SLIM_SP500_2
+- code: missing_core_market_reference
+  message: Core constituent EMAXIS_SLIM_SP500_3 is missing market reference data.
+  severity: warning
+  related_symbols:
+  - EMAXIS_SLIM_SP500_3
+- code: missing_core_market_reference
+  message: Core constituent EMAXIS_SLIM_ALL_COUNTRY is missing market reference data.
+  severity: warning
+  related_symbols:
+  - EMAXIS_SLIM_ALL_COUNTRY
 - code: missing_quantity
-  message: Holding JPY_CASH_EQUIVALENT is missing quantity; stored as null.
+  message: Holding LIQUIDITY is missing quantity; stored as null.
   severity: info
   related_symbols: []
 - code: missing_avg_cost
-  message: Holding JPY_CASH_EQUIVALENT is missing avg_cost; stored as null.
+  message: Holding LIQUIDITY is missing avg_cost; stored as null.
   severity: info
   related_symbols: []
 - code: missing_current_price
-  message: Holding JPY_CASH_EQUIVALENT is missing current_price; stored as null.
+  message: Holding LIQUIDITY is missing current_price; stored as null.
   severity: info
   related_symbols: []
 - code: missing_quantity
-  message: Holding BTC is missing quantity; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_avg_cost
-  message: Holding BTC is missing avg_cost; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_current_price
-  message: Holding BTC is missing current_price; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_quantity
-  message: Holding ETH is missing quantity; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_avg_cost
-  message: Holding ETH is missing avg_cost; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_current_price
-  message: Holding ETH is missing current_price; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_quantity
-  message: Holding XRP is missing quantity; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_avg_cost
-  message: Holding XRP is missing avg_cost; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_current_price
-  message: Holding XRP is missing current_price; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_quantity
-  message: Holding EMAXIS_ALL_COUNTRY_PENSION is missing quantity; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_avg_cost
-  message: Holding EMAXIS_ALL_COUNTRY_PENSION is missing avg_cost; stored as null.
-  severity: info
-  related_symbols: []
-- code: missing_current_price
-  message: Holding EMAXIS_ALL_COUNTRY_PENSION is missing current_price; stored as
+  message: Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing quantity; stored as
     null.
   severity: info
   related_symbols: []
@@ -934,16 +846,16 @@ warnings:
   message: Holding POINTS_MILES is missing current_price; stored as null.
   severity: info
   related_symbols: []
-semi_exposure_pct: 0.1144
-liquidity_jpy: 14942636
+semi_exposure_pct: 0.1383
+liquidity_jpy: 14644262
 sox_buy_signal:
   proxy_symbol: SMH
-  current_price: 374.25
-  recent_high_21d: 406.39
-  recent_high_63d: 426.16
-  drawdown_pct: -12.18
-  drawdown_pct_from_21d_high: -7.91
-  drawdown_pct_from_63d_high: -12.18
+  current_price: 506.44
+  recent_high_21d: 506.44
+  recent_high_63d: 506.44
+  drawdown_pct: 0
+  drawdown_pct_from_21d_high: 0
+  drawdown_pct_from_63d_high: 0
   buy_zone: -10% to -5%
   buy_zone_rule_text: drawdown from 63d high between -10% and -5%
   within_buy_zone: false
@@ -952,44 +864,44 @@ sox_buy_signal:
   monthly_buy_budget_jpy:
     min: 100000
     max: 200000
-  related_bucket_actual_pct: 0.1557
+  related_bucket_actual_pct: 0.1819
   related_bucket_target_pct: 0.15
-  semiconductor_exposure_total_pct: 0.1144
-  direct_semiconductor_exposure_pct: 0.1144
-  semiconductor_direct_exposure_pct: 0.1144
-  indirect_ai_infra_exposure_pct: 0.0121
+  semiconductor_exposure_total_pct: 0.1383
+  direct_semiconductor_exposure_pct: 0.1383
+  semiconductor_direct_exposure_pct: 0.1383
+  indirect_ai_infra_exposure_pct: 0.0131
   explanation:
     buy_zone_assessment:
       within_buy_zone: false
       near_boundary: false
-      drawdown_pct_from_63d_high: -12.18
+      drawdown_pct_from_63d_high: 0
       rule: -10% <= drawdown <= -5%
     bucket_context:
       related_bucket: satellite_core
-      related_bucket_actual_pct: 0.1557
+      related_bucket_actual_pct: 0.1819
       related_bucket_target_pct: 0.15
     exposure_context:
-      semiconductor_direct_exposure_pct: 0.1144
-      indirect_ai_infra_exposure_pct: 0.0121
+      semiconductor_direct_exposure_pct: 0.1383
+      indirect_ai_infra_exposure_pct: 0.0131
   priority_lowered_boolean: true
   priority_lowered_reason: related_bucket_over_target
 portfolio_summary:
-  core_actual_pct: 0.1641
+  core_actual_pct: 0.1938
   core_target_pct: 0.45
-  core_delta_pct: -0.2859
-  liquidity_actual_pct: 0.4524
+  core_delta_pct: -0.2562
+  liquidity_actual_pct: 0.4118
   liquidity_target_pct: 0.1
-  cash_excess_pct: 0.3524
-  core_bucket_total_jpy: 5419420
-  total_assets_jpy: 33028136
+  cash_excess_pct: 0.3118
+  core_bucket_total_jpy: 6890711
+  total_assets_jpy: 35558948
 core_buy_materials:
-  core_actual_pct: 0.1641
+  core_actual_pct: 0.1938
   core_target_pct: 0.45
-  core_delta_pct: -0.2859
-  liquidity_actual_pct: 0.4524
+  core_delta_pct: -0.2562
+  liquidity_actual_pct: 0.4118
   liquidity_target_pct: 0.1
-  cash_excess_pct: 0.3524
-  core_bucket_total_jpy: 5419420
+  cash_excess_pct: 0.3118
+  core_bucket_total_jpy: 6890711
   monthly_core_budget_policy:
     base_monthly_buy_amount_jpy: 100000
     monthly_core_buy_budget_min_jpy: 100000
@@ -1027,9 +939,9 @@ core_buy_materials:
     rule_based_reason: rebalance_mode_core_underweight_and_cash_overweight
     discretionary_reason: null
     related_bucket_status:
-      core_actual_pct: 0.1641
+      core_actual_pct: 0.1938
       core_target_pct: 0.45
-      liquidity_actual_pct: 0.4524
+      liquidity_actual_pct: 0.4118
       liquidity_target_pct: 0.1
     mode_context:
       active_mode: rebalance
@@ -1037,86 +949,88 @@ core_buy_materials:
       rebalance_mode_reason: rebalance_mode_core_underweight_and_cash_overweight
       rebalance_mode_description: core不足と現金過多が大きい局面で、月次の配分是正速度を上げる補助モード
   core_constituents:
-  - symbol: RAKUTEN_ALL_COUNTRY_1
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
     name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
-    quantity: 978581
-    value_jpy: 1650964
-    current_price: 16871
-    reference_symbol: VT
-    reference_current_price: 134.62
-    recent_high_21d: 147.84
-    recent_high_63d: 148.91
-    drawdown_pct_from_recent_high: -9.6
-  - symbol: RAKUTEN_ALL_COUNTRY_2
+    quantity: 1006851
+    value_jpy: 1858647
+    current_price: 18460
+    reference_symbol: null
+    reference_current_price: null
+    recent_high_21d: null
+    recent_high_63d: null
+    drawdown_pct_from_recent_high: null
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
     name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
     quantity: 725688
-    value_jpy: 1224308
-    current_price: 16871
-    reference_symbol: VT
-    reference_current_price: 134.62
-    recent_high_21d: 147.84
-    recent_high_63d: 148.91
-    drawdown_pct_from_recent_high: -9.6
-  - symbol: RAKUTEN_SP500
+    value_jpy: 1339620
+    current_price: 18460
+    reference_symbol: null
+    reference_current_price: null
+    recent_high_21d: null
+    recent_high_63d: null
+    drawdown_pct_from_recent_high: null
+  - symbol: RAKUTEN_PLUS_SP500
     name: 楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)
     quantity: 106530
-    value_jpy: 179642
-    current_price: 16863
-    reference_symbol: VOO
-    reference_current_price: 582.96
-    recent_high_21d: 631.28
-    recent_high_63d: 639.7
-    drawdown_pct_from_recent_high: -8.87
-  - symbol: EMAXIS_SP500_1
+    value_jpy: 197784
+    current_price: 18566
+    reference_symbol: null
+    reference_current_price: null
+    recent_high_21d: null
+    recent_high_63d: null
+    drawdown_pct_from_recent_high: null
+  - symbol: EMAXIS_SLIM_SP500_1
     name: eMAXIS Slim 米国株式(S&P500)
-    quantity: 44024
-    value_jpy: 166838
-    current_price: 37897
-    reference_symbol: VOO
-    reference_current_price: 582.96
-    recent_high_21d: 631.28
-    recent_high_63d: 639.7
-    drawdown_pct_from_recent_high: -8.87
-  - symbol: EMAXIS_SP500_2
+    quantity: 108484
+    value_jpy: 452649
+    current_price: 41725
+    reference_symbol: null
+    reference_current_price: null
+    recent_high_21d: null
+    recent_high_63d: null
+    drawdown_pct_from_recent_high: null
+  - symbol: EMAXIS_SLIM_SP500_2
     name: eMAXIS Slim 米国株式(S&P500)
-    quantity: 361678
-    value_jpy: 1370651
-    current_price: 37897
-    reference_symbol: VOO
-    reference_current_price: 582.96
-    recent_high_21d: 631.28
-    recent_high_63d: 639.7
-    drawdown_pct_from_recent_high: -8.87
-  - symbol: EMAXIS_SP500_3
+    quantity: 374328
+    value_jpy: 1561884
+    current_price: 41725
+    reference_symbol: null
+    reference_current_price: null
+    recent_high_21d: null
+    recent_high_63d: null
+    drawdown_pct_from_recent_high: null
+  - symbol: EMAXIS_SLIM_SP500_3
     name: eMAXIS Slim 米国株式(S&P500)
-    quantity: 170193
-    value_jpy: 644980
-    current_price: 37897
-    reference_symbol: VOO
-    reference_current_price: 582.96
-    recent_high_21d: 631.28
-    recent_high_63d: 639.7
-    drawdown_pct_from_recent_high: -8.87
-  - symbol: EMAXIS_ALL_COUNTRY_TAXABLE
+    quantity: 228995
+    value_jpy: 955482
+    current_price: 41725
+    reference_symbol: null
+    reference_current_price: null
+    recent_high_21d: null
+    recent_high_63d: null
+    drawdown_pct_from_recent_high: null
+  - symbol: EMAXIS_SLIM_ALL_COUNTRY
     name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
-    quantity: 55611
-    value_jpy: 182037
-    current_price: 32734
-    reference_symbol: ACWI
-    reference_current_price: 134.55
-    recent_high_21d: 147.38
-    recent_high_63d: 148.65
-    drawdown_pct_from_recent_high: -9.49
+    quantity: 146508
+    value_jpy: 524645
+    current_price: 35810
+    reference_symbol: null
+    reference_current_price: null
+    recent_high_21d: null
+    recent_high_63d: null
+    drawdown_pct_from_recent_high: null
 exposure_breakdown:
-  direct_semiconductor_exposure_pct: 0.1144
-  direct_semiconductor_exposure_jpy: 3778003
-  indirect_ai_infra_exposure_pct: 0.0121
-  indirect_ai_infra_exposure_jpy: 400331
-  semiconductor_exposure_total_pct: 0.1144
-  semiconductor_exposure_total_jpy: 3778003
+  direct_semiconductor_exposure_pct: 0.1383
+  direct_semiconductor_exposure_jpy: 4919186
+  indirect_ai_infra_exposure_pct: 0.0131
+  indirect_ai_infra_exposure_jpy: 464999
+  combined_semiconductor_ai_infra_watch_pct: 0.1514
+  combined_semiconductor_ai_infra_watch_jpy: 5384185
+  semiconductor_exposure_total_pct: 0.1383
+  semiconductor_exposure_total_jpy: 4919186
   breakdown:
   - symbol: SMH
-    value_jpy: 59992
+    value_jpy: 76989
     bucket: satellite_core
     exposure_type: direct_semiconductor
     included_in_semiconductor_exposure: 'yes'
@@ -1124,7 +1038,7 @@ exposure_breakdown:
     included_in_indirect_ai_infra_exposure: 'no'
     inclusion_reason: matched_exposure_group_rule
   - symbol: MSFT
-    value_jpy: 400331
+    value_jpy: 464999
     bucket: jun_core
     exposure_type: indirect_ai_infra
     included_in_semiconductor_exposure: 'no'
@@ -1132,7 +1046,7 @@ exposure_breakdown:
     included_in_indirect_ai_infra_exposure: 'yes'
     inclusion_reason: matched_indirect_ai_infra_rule
   - symbol: NISSEI_SOX_1
-    value_jpy: 2507460
+    value_jpy: 3265621
     bucket: satellite_core
     exposure_type: direct_semiconductor
     included_in_semiconductor_exposure: 'yes'
@@ -1140,7 +1054,7 @@ exposure_breakdown:
     included_in_indirect_ai_infra_exposure: 'no'
     inclusion_reason: matched_exposure_group_rule
   - symbol: NISSEI_SOX_2
-    value_jpy: 1210551
+    value_jpy: 1576576
     bucket: satellite_core
     exposure_type: direct_semiconductor
     included_in_semiconductor_exposure: 'yes'
@@ -1150,8 +1064,8 @@ exposure_breakdown:
 long_term_thesis_targets:
 - symbol: URA
   bucket: satellite_core
-  current_value_jpy: 508285
-  portfolio_pct: 0.0154
+  current_value_jpy: 613548
+  portfolio_pct: 0.0173
   thesis_id: nuclear_revival
   long_term_thesis_summary: '脱炭素、電力需要増、エネルギー安全保障を背景に、 原子力需要が中長期で再評価されるという仮説。
 
@@ -1165,8 +1079,8 @@ long_term_thesis_targets:
   web_review_required: 'yes'
 - symbol: CIBR
   bucket: satellite_core
-  current_value_jpy: 857104
-  portfolio_pct: 0.026
+  current_value_jpy: 936298
+  portfolio_pct: 0.0263
   thesis_id: persistent_cybersecurity_spending
   long_term_thesis_summary: 'サイバーセキュリティ支出は構造的に維持・拡大するという仮説。
 
@@ -1178,8 +1092,8 @@ long_term_thesis_targets:
   web_review_required: 'yes'
 - symbol: MSFT
   bucket: jun_core
-  current_value_jpy: 400331
-  portfolio_pct: 0.0121
+  current_value_jpy: 464999
+  portfolio_pct: 0.0131
   thesis_id: hyperscaler_ai_platform_compounding
   long_term_thesis_summary: 'クラウド・AI基盤・企業ソフトウェアの複合優位により、 長期で利益成長が継続するという仮説。
 
@@ -1192,8 +1106,8 @@ long_term_thesis_targets:
   web_review_required: 'yes'
 - symbol: PLTR
   bucket: satellite
-  current_value_jpy: 206392
-  portfolio_pct: 0.0062
+  current_value_jpy: 203580
+  portfolio_pct: 0.0057
   thesis_id: defense_ai_gov_software_scaling
   long_term_thesis_summary: '政府・防衛・大企業向けの高付加価値ソフトウェア需要が継続し、 AI時代のプラットフォーム企業として拡大するという仮説。
 
@@ -1205,9 +1119,11 @@ long_term_thesis_targets:
   review_priority: medium
   web_review_required: 'yes'
 monthly_execution_outputs:
+  review_target_month: '2026_05'
   portfolio_management_mode: rebalance
   monthly_core_budget_tier: rebalance
   recommended_monthly_core_buy_budget_jpy: 700000
+  monthly_total_core_deployment_jpy: 1450000
   candidate_count: 12
   core_recurring_contributions_total_jpy: 750000
   crypto_weekly_dca_total_jpy: 5000
@@ -1215,44 +1131,29 @@ quarterly_rule_review_outputs:
   no_change: false
   classification_override_count: 1
   classification_audit:
-  - symbol: JPY_CASH_EQUIVALENT
+  - symbol: LIQUIDITY
     raw_bucket: liquidity
     resolved_bucket: liquidity
     reason: raw_bucket
     note: null
-  - symbol: BTC
-    raw_bucket: other
-    resolved_bucket: other
-    reason: raw_bucket
-    note: null
-  - symbol: ETH
-    raw_bucket: other
-    resolved_bucket: other
-    reason: raw_bucket
-    note: null
-  - symbol: XRP
-    raw_bucket: other
-    resolved_bucket: other
-    reason: raw_bucket
-    note: null
   - symbol: '7203'
-    raw_bucket: other
+    raw_bucket: jun_core
     resolved_bucket: jun_core
     reason: japan_large_cap_core_position_treated_as_jun_core
     note: トヨタは運用上、準コア株式として管理
   - symbol: '9444'
-    raw_bucket: other
-    resolved_bucket: other
+    raw_bucket: satellite
+    resolved_bucket: satellite
     reason: raw_bucket
     note: null
   - symbol: '2353'
-    raw_bucket: other
-    resolved_bucket: other
+    raw_bucket: satellite
+    resolved_bucket: satellite
     reason: raw_bucket
     note: null
   - symbol: '7201'
-    raw_bucket: other
-    resolved_bucket: other
+    raw_bucket: satellite
+    resolved_bucket: satellite
     reason: raw_bucket
     note: null
   - symbol: SMH
@@ -1276,7 +1177,7 @@ quarterly_rule_review_outputs:
     reason: explicit_bucket_lock_for_ai_infra_compounder
     note: null
   - symbol: URA
-    raw_bucket: satellite_core
+    raw_bucket: satellite
     resolved_bucket: satellite_core
     reason: symbol_to_bucket
     note: null
@@ -1290,42 +1191,42 @@ quarterly_rule_review_outputs:
     resolved_bucket: satellite_core
     reason: semiconductor_auto_classification
     note: null
-  - symbol: RAKUTEN_ALL_COUNTRY_1
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: RAKUTEN_ALL_COUNTRY_2
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: RAKUTEN_SP500
+  - symbol: RAKUTEN_PLUS_SP500
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: EMAXIS_SP500_1
+  - symbol: EMAXIS_SLIM_SP500_1
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: EMAXIS_SP500_2
+  - symbol: EMAXIS_SLIM_SP500_2
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: EMAXIS_SP500_3
+  - symbol: EMAXIS_SLIM_SP500_3
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: EMAXIS_ALL_COUNTRY_TAXABLE
+  - symbol: EMAXIS_SLIM_ALL_COUNTRY
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: EMAXIS_ALL_COUNTRY_PENSION
+  - symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
     raw_bucket: pension
     resolved_bucket: pension
     reason: raw_bucket
@@ -1335,20 +1236,30 @@ quarterly_rule_review_outputs:
     resolved_bucket: other
     reason: raw_bucket
     note: null
-  core_reference_missing_symbols: []
-  direct_semiconductor_exposure_pct: 0.1144
-  indirect_ai_infra_exposure_pct: 0.0121
+  core_reference_missing_symbols:
+  - EMAXIS_SLIM_ALL_COUNTRY
+  - EMAXIS_SLIM_SP500_1
+  - EMAXIS_SLIM_SP500_2
+  - EMAXIS_SLIM_SP500_3
+  - RAKUTEN_PLUS_ALL_COUNTRY_1
+  - RAKUTEN_PLUS_ALL_COUNTRY_2
+  - RAKUTEN_PLUS_SP500
+  tradable_core_pct: 0.1938
+  effective_core_including_pension_pct: 0.2994
+  cash_normalization_months_estimate: 7.6
+  direct_semiconductor_exposure_pct: 0.1383
+  combined_semiconductor_ai_infra_watch_pct: 0.1514
+  indirect_ai_infra_exposure_pct: 0.0131
 metadata:
-  snapshot_path: data/normalized/snapshot_2026_04.yaml
+  snapshot_path: data/normalized/snapshot_2026_05.yaml
+  review_target_month: '2026_05'
+  review_target_month_start: '2026-05-01'
   resolved_buckets:
-    JPY_CASH_EQUIVALENT: liquidity
-    BTC: other
-    ETH: other
-    XRP: other
+    LIQUIDITY: liquidity
     '7203': jun_core
-    '9444': other
-    '2353': other
-    '7201': other
+    '9444': satellite
+    '2353': satellite
+    '7201': satellite
     SMH: satellite_core
     PLTR: satellite
     CIBR: satellite_core
@@ -1356,54 +1267,39 @@ metadata:
     URA: satellite_core
     NISSEI_SOX_1: satellite_core
     NISSEI_SOX_2: satellite_core
-    RAKUTEN_ALL_COUNTRY_1: core
-    RAKUTEN_ALL_COUNTRY_2: core
-    RAKUTEN_SP500: core
-    EMAXIS_SP500_1: core
-    EMAXIS_SP500_2: core
-    EMAXIS_SP500_3: core
-    EMAXIS_ALL_COUNTRY_TAXABLE: core
-    EMAXIS_ALL_COUNTRY_PENSION: pension
+    RAKUTEN_PLUS_ALL_COUNTRY_1: core
+    RAKUTEN_PLUS_ALL_COUNTRY_2: core
+    RAKUTEN_PLUS_SP500: core
+    EMAXIS_SLIM_SP500_1: core
+    EMAXIS_SLIM_SP500_2: core
+    EMAXIS_SLIM_SP500_3: core
+    EMAXIS_SLIM_ALL_COUNTRY: core
+    PENSION_EMAXIS_SLIM_ALL_COUNTRY: pension
     POINTS_MILES: other
   classification_audit:
-  - symbol: JPY_CASH_EQUIVALENT
+  - symbol: LIQUIDITY
     raw_bucket: liquidity
     resolved_bucket: liquidity
     reason: raw_bucket
     note: null
-  - symbol: BTC
-    raw_bucket: other
-    resolved_bucket: other
-    reason: raw_bucket
-    note: null
-  - symbol: ETH
-    raw_bucket: other
-    resolved_bucket: other
-    reason: raw_bucket
-    note: null
-  - symbol: XRP
-    raw_bucket: other
-    resolved_bucket: other
-    reason: raw_bucket
-    note: null
   - symbol: '7203'
-    raw_bucket: other
+    raw_bucket: jun_core
     resolved_bucket: jun_core
     reason: japan_large_cap_core_position_treated_as_jun_core
     note: トヨタは運用上、準コア株式として管理
   - symbol: '9444'
-    raw_bucket: other
-    resolved_bucket: other
+    raw_bucket: satellite
+    resolved_bucket: satellite
     reason: raw_bucket
     note: null
   - symbol: '2353'
-    raw_bucket: other
-    resolved_bucket: other
+    raw_bucket: satellite
+    resolved_bucket: satellite
     reason: raw_bucket
     note: null
   - symbol: '7201'
-    raw_bucket: other
-    resolved_bucket: other
+    raw_bucket: satellite
+    resolved_bucket: satellite
     reason: raw_bucket
     note: null
   - symbol: SMH
@@ -1427,7 +1323,7 @@ metadata:
     reason: explicit_bucket_lock_for_ai_infra_compounder
     note: null
   - symbol: URA
-    raw_bucket: satellite_core
+    raw_bucket: satellite
     resolved_bucket: satellite_core
     reason: symbol_to_bucket
     note: null
@@ -1441,42 +1337,42 @@ metadata:
     resolved_bucket: satellite_core
     reason: semiconductor_auto_classification
     note: null
-  - symbol: RAKUTEN_ALL_COUNTRY_1
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: RAKUTEN_ALL_COUNTRY_2
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: RAKUTEN_SP500
+  - symbol: RAKUTEN_PLUS_SP500
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: EMAXIS_SP500_1
+  - symbol: EMAXIS_SLIM_SP500_1
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: EMAXIS_SP500_2
+  - symbol: EMAXIS_SLIM_SP500_2
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: EMAXIS_SP500_3
+  - symbol: EMAXIS_SLIM_SP500_3
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: EMAXIS_ALL_COUNTRY_TAXABLE
+  - symbol: EMAXIS_SLIM_ALL_COUNTRY
     raw_bucket: core
     resolved_bucket: core
     reason: raw_bucket
     note: null
-  - symbol: EMAXIS_ALL_COUNTRY_PENSION
+  - symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
     raw_bucket: pension
     resolved_bucket: pension
     reason: raw_bucket
@@ -1528,63 +1424,48 @@ metadata:
     - 暗号資産の週次積立は既存で実行中の前提で評価する
     - 継続・減額・停止の提案が必要な場合は、理由とトリガー条件を明示する
   core_spot_buy_materials:
-    liquidity_actual_pct: 0.4524
+    liquidity_actual_pct: 0.4118
     liquidity_target_pct: 0.1
-    cash_excess_pct: 0.3524
-    core_actual_pct: 0.1641
+    cash_excess_pct: 0.3118
+    core_actual_pct: 0.1938
     core_target_pct: 0.45
-    core_delta_pct: -0.2859
-    jun_core_actual_pct: 0.0935
+    core_delta_pct: -0.2562
+    jun_core_actual_pct: 0.0833
     jun_core_target_pct: 0.2
-    jun_core_delta_pct: -0.1065
+    jun_core_delta_pct: -0.1167
     current_monthly_core_auto_invest_amount_jpy: 750000
     annualized_core_auto_invest_amount_jpy: 9000000
-    major_core_proxy_stats:
-    - reference_symbol: VT
-      one_month_return_pct: -9.29
-      three_month_return_pct: -5.44
-      one_month_drawdown_from_high_pct: -8.94
-      three_month_drawdown_from_high_pct: -9.6
-    - reference_symbol: VOO
-      one_month_return_pct: -8.04
-      three_month_return_pct: -8.16
-      one_month_drawdown_from_high_pct: -7.65
-      three_month_drawdown_from_high_pct: -8.87
-    - reference_symbol: ACWI
-      one_month_return_pct: -9.06
-      three_month_return_pct: -5.72
-      one_month_drawdown_from_high_pct: -8.71
-      three_month_drawdown_from_high_pct: -9.49
+    major_core_proxy_stats: []
     portfolio_risk_bucket_summary:
     - bucket: core
-      actual_pct: 0.1641
+      actual_pct: 0.1938
       target_pct: 0.45
-      delta_pct: -0.2859
+      delta_pct: -0.2562
     - bucket: jun_core
-      actual_pct: 0.0935
+      actual_pct: 0.0833
       target_pct: 0.2
-      delta_pct: -0.1065
+      delta_pct: -0.1167
     - bucket: liquidity
-      actual_pct: 0.4524
+      actual_pct: 0.4118
       target_pct: 0.1
-      delta_pct: 0.3524
+      delta_pct: 0.3118
     - bucket: other
-      actual_pct: 0.0257
+      actual_pct: 0.0005
       target_pct: null
       delta_pct: null
     - bucket: pension
-      actual_pct: 0.1024
+      actual_pct: 0.1056
       target_pct: null
       delta_pct: null
     - bucket: satellite
-      actual_pct: 0.0062
+      actual_pct: 0.0231
       target_pct: 0.1
-      delta_pct: -0.0938
+      delta_pct: -0.0769
     - bucket: satellite_core
-      actual_pct: 0.1557
+      actual_pct: 0.1819
       target_pct: 0.15
-      delta_pct: 0.0057
-    current_cash_jpy: 14942636
+      delta_pct: 0.0319
+    current_cash_jpy: 14644262
     bond_like_holdings_present: false
     bond_like_holdings: null
     emergency_fund_managed_separately: null

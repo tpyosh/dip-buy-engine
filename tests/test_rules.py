@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from dataclasses import replace
 from decimal import Decimal
 
 from monthly_limit_order_review.rules import calculate_sox_buy_signal
@@ -57,3 +58,28 @@ def test_sox_buy_signal_uses_recent_high(
     assert "explanation" in signal
     assert signal["explanation"]["bucket_context"]["related_bucket"] == "satellite_core"
     assert "semiconductor_direct_exposure_pct" in signal["explanation"]["exposure_context"]
+
+
+def test_sox_buy_signal_is_false_when_drawdown_is_zero(
+    buy_rules_config,
+    sample_market_references,
+    sample_portfolio_analysis,
+    sample_exposure_breakdown,
+) -> None:
+    adjusted_references = [
+        replace(reference, current_price=reference.recent_high_63d, recent_high_21d=reference.recent_high_63d)
+        if reference.symbol == "SMH"
+        else reference
+        for reference in sample_market_references
+    ]
+
+    signal = calculate_sox_buy_signal(
+        buy_rules_config,
+        adjusted_references,
+        bucket_allocations=sample_portfolio_analysis["bucket_allocations"],
+        exposure_breakdown=sample_exposure_breakdown,
+    )
+
+    assert signal["drawdown_pct"] == Decimal("0.00")
+    assert signal["within_buy_zone"] is False
+    assert signal["within_buy_zone_boolean"] is False

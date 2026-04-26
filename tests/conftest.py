@@ -306,14 +306,22 @@ def sample_computation(
             "candidate_count": len(sample_candidate_orders),
             "core_recurring_contributions_total_jpy": 750000,
             "crypto_weekly_dca_total_jpy": 5000,
+            "annualized_crypto_dca_jpy": 260000,
+            "annualized_crypto_dca_pct_of_total_assets": Decimal("0.0520"),
         },
         quarterly_rule_review_outputs={
             "classification_override_count": 0,
             "classification_audit": sample_portfolio_analysis.get("classification_audit", []),
             "core_reference_missing_symbols": [],
+            "core_reference_proxy_suggestions": {},
             "tradable_core_pct": Decimal("0.3600"),
             "effective_core_including_pension_pct": Decimal("0.3600"),
-            "cash_normalization_months_estimate": Decimal("0.8"),
+            "cash_normalization_months_estimate": {
+                "gross_deployment_months": Decimal("0.8"),
+                "net_cash_reduction_months": Decimal("2.2"),
+                "assumed_monthly_cash_inflow_jpy": Decimal("650000"),
+                "net_cash_reduction_jpy": Decimal("200000"),
+            },
             "direct_semiconductor_exposure_pct": sample_exposure_breakdown.get("direct_semiconductor_exposure_pct"),
             "combined_semiconductor_ai_infra_watch_pct": sample_exposure_breakdown.get(
                 "combined_semiconductor_ai_infra_watch_pct"
@@ -344,6 +352,9 @@ def sample_computation(
                     {"symbol": "ETH", "amount_jpy_per_week": 2000},
                     {"symbol": "XRP", "amount_jpy_per_week": 1000},
                 ],
+                "crypto_weekly_dca_total_jpy": 5000,
+                "annualized_crypto_dca_jpy": 260000,
+                "annualized_crypto_dca_pct_of_total_assets": Decimal("0.0520"),
                 "crypto_review_guidance": [
                     "暗号資産の週次積立は既存で実行中の前提で評価する",
                 ],
@@ -377,6 +388,10 @@ def sample_computation(
                 "bond_like_holdings": None,
                 "emergency_fund_managed_separately": None,
                 "near_term_large_expense": None,
+                "real_estate_exposure_present": True,
+                "real_estate_use": "residence_and_asset",
+                "mortgage_status": "full_loan_early_stage",
+                "liquidity_comment": "residential real estate should not be treated as emergency liquidity",
             },
         },
     )

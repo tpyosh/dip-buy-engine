@@ -129,9 +129,11 @@ def build_candidate_notes(
     target_pct: Decimal | None,
 ) -> list[str]:
     notes: list[str] = []
-    if drawdown_pct >= Decimal("-6"):
+    drawdown_profile = classify_drawdown_profile(symbol=symbol, bucket=bucket, drawdown_pct=drawdown_pct)
+    notes.append(f"drawdown_profile:{drawdown_profile}")
+    if drawdown_profile == "shallow":
         notes.append("shallow_candidate")
-    if drawdown_pct <= Decimal("-15"):
+    elif drawdown_profile == "deep":
         notes.append("deep_drawdown_candidate")
     if bucket == "satellite":
         notes.append("high_volatility_name")
@@ -140,6 +142,12 @@ def build_candidate_notes(
     if symbol == "PLTR" and "high_volatility_name" not in notes:
         notes.append("high_volatility_name")
     return notes
+
+
+def classify_drawdown_profile(*, symbol: str, bucket: str, drawdown_pct: Decimal) -> str:
+    if symbol == "PLTR" or bucket == "satellite":
+        return "deep" if drawdown_pct <= Decimal("-12") else "shallow"
+    return "deep" if drawdown_pct <= Decimal("-15") else "shallow"
 
 
 def build_candidate_policy_outcome(
@@ -167,6 +175,7 @@ def build_candidate_policy_outcome(
             bucket_policy.get("deep_drawdown_threshold_pct", -15),
             field_name="candidate_policy.bucket_over_target.deep_drawdown_threshold_pct",
         )
+        notes.append(f"bucket_over_target_deep_threshold_pct:{deep_threshold}")
         if behavior == "deep_only":
             if drawdown_pct > deep_threshold:
                 notes.append(str(bucket_policy.get("deep_only_note", "default_deep_only_due_to_bucket_over_target")))
@@ -198,6 +207,8 @@ def build_candidate_policy_outcome(
         high_volatility_policy.get("shallow_drawdown_threshold_pct", -12),
         field_name="candidate_policy.high_volatility.shallow_drawdown_threshold_pct",
     )
+    if symbol.upper() in high_vol_symbols:
+        notes.append(f"high_volatility_shallow_threshold_pct:{shallow_threshold}")
     if symbol.upper() in high_vol_symbols and bool(high_volatility_policy.get("suppress_shallow_candidates", False)):
         if drawdown_pct > shallow_threshold:
             suppressed = True

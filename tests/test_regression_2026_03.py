@@ -49,12 +49,19 @@ def fake_references(requests: dict[str, dict[str, str]]) -> list[MarketReference
         "USDJPY": dict(current_price="157.54", mean_close_30d="157.00", recent_high_21d="158.00", recent_high_63d="159.00", prior_close_21d="156.00", prior_close_63d="155.00", currency="JPY"),
         "RAKUTEN_ALL_COUNTRY_1": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
         "RAKUTEN_ALL_COUNTRY_2": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
+        "RAKUTEN_PLUS_ALL_COUNTRY_1": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
+        "RAKUTEN_PLUS_ALL_COUNTRY_2": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
         "EMAXIS_ALL_COUNTRY": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
+        "EMAXIS_SLIM_ALL_COUNTRY": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
         "EMAXIS_ALL_COUNTRY_TAXABLE": dict(current_price="110.00", mean_close_30d="108.00", recent_high_21d="112.00", recent_high_63d="115.00", prior_close_21d="113.00", prior_close_63d="118.00", currency="USD"),
         "RAKUTEN_SP500": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
+        "RAKUTEN_PLUS_SP500": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
         "EMAXIS_SP500_1": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
         "EMAXIS_SP500_2": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
         "EMAXIS_SP500_3": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
+        "EMAXIS_SLIM_SP500_1": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
+        "EMAXIS_SLIM_SP500_2": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
+        "EMAXIS_SLIM_SP500_3": dict(current_price="500.00", mean_close_30d="490.00", recent_high_21d="510.00", recent_high_63d="520.00", prior_close_21d="515.00", prior_close_63d="530.00", currency="USD"),
     }
 
     references: list[MarketReference] = []
@@ -117,7 +124,10 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "no_change" in computation.quarterly_rule_review_outputs
     assert computation.quarterly_rule_review_outputs["tradable_core_pct"] == Decimal("0.1688")
     assert computation.quarterly_rule_review_outputs["effective_core_including_pension_pct"] == Decimal("0.2740")
-    assert computation.quarterly_rule_review_outputs["cash_normalization_months_estimate"] == Decimal("7.8")
+    cash_normalization = computation.quarterly_rule_review_outputs["cash_normalization_months_estimate"]
+    assert cash_normalization["gross_deployment_months"] == Decimal("7.8")
+    assert cash_normalization["assumed_monthly_cash_inflow_jpy"] == Decimal("650000")
+    assert cash_normalization["net_cash_reduction_jpy"] == Decimal("800000")
     assert computation.quarterly_rule_review_outputs["combined_semiconductor_ai_infra_watch_pct"] == Decimal("0.1262")
     assert ura_candidate.avg20_gap_pct == Decimal("-6.00")
     assert "【要約】" in prompt
@@ -140,7 +150,9 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "monthly_total_core_deployment_jpy: 1450000" in prompt
     assert "tradable_core_pct: 16.88%" in prompt
     assert "effective_core_including_pension_pct: 27.40%" in prompt
-    assert "cash_normalization_months_estimate: 7.8" in prompt
+    assert "gross_deployment_months: 7.8" in prompt
+    assert "assumed_monthly_cash_inflow_jpy: 650000" in prompt
+    assert "net_cash_reduction_jpy: 800000" in prompt
     assert "direct_cap_monitor_pct: 11.83%" in prompt
     assert "direct_plus_indirect_watch_metric_pct: 12.62%" in prompt
     assert "0円は禁止" in prompt
@@ -164,6 +176,9 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "| BTC | 2000 |" in prompt
     assert "| ETH | 2000 |" in prompt
     assert "| XRP | 1000 |" in prompt
+    assert "annualized_crypto_dca_jpy: 260000" in prompt
+    assert "real_estate_exposure_present: True" in prompt
+    assert "liquidity_comment: residential real estate should not be treated as emergency liquidity" in prompt
 
 
 def test_taxable_all_country_drawdown_is_not_null_after_reference_mapping(monkeypatch) -> None:
@@ -191,3 +206,24 @@ def test_snapshot_2026_04_is_treated_as_april_limit_order_cycle(monkeypatch) -> 
     assert computation.monthly_execution_outputs["review_target_month"] == "2026_04"
     assert "review_target_month: 2026_04" in prompt
     assert "指値設定対象月キー: 2026_04" in prompt
+    assert "4月1日:" in prompt
+
+
+def test_snapshot_2026_05_core_references_are_not_missing_and_schedule_uses_may(monkeypatch) -> None:
+    monkeypatch.setattr("monthly_limit_order_review.cli.fetch_market_references", fake_references)
+
+    snapshot_path = ROOT / "data/normalized/snapshot_2026_05.yaml"
+    computation = compute_monthly(snapshot_path, project_root=ROOT)
+    template_text = read_text(ROOT / "prompts/templates/monthly_review_template.md")
+    prompt = build_monthly_review_prompt(computation, template_text)
+
+    core_constituents = computation.core_buy_materials["core_constituents"]
+
+    assert all(item["reference_symbol"] is not None for item in core_constituents)
+    assert all(item["drawdown_pct_from_recent_high"] is not None for item in core_constituents)
+    assert computation.quarterly_rule_review_outputs["core_reference_missing_symbols"] == []
+    assert computation.metadata["review_target_month"] == "2026_05"
+    assert computation.monthly_execution_outputs["review_target_month"] == "2026_05"
+    assert "review_target_month: 2026_05" in prompt
+    assert "指値設定対象月キー: 2026_05" in prompt
+    assert "5月1日:" in prompt

@@ -167,16 +167,30 @@ def build_core_buy_materials(
         if resolved_buckets.get(holding.symbol) != "core":
             continue
         reference = reference_map.get(holding.symbol)
+        suggested_proxy_symbol = suggest_core_proxy_symbol(holding)
         drawdown_pct = None
         if reference is None:
-            warnings.append(
-                PortfolioWarning(
-                    code="missing_core_market_reference",
-                    severity="warning",
-                    message=f"Core constituent {holding.symbol} is missing market reference data.",
-                    related_symbols=[holding.symbol],
+            if suggested_proxy_symbol is not None:
+                warnings.append(
+                    PortfolioWarning(
+                        code="core_proxy_symbol_suggestion",
+                        severity="info",
+                        message=(
+                            f"Core constituent {holding.symbol} has no market reference data. "
+                            f"Use proxy {suggested_proxy_symbol}."
+                        ),
+                        related_symbols=[holding.symbol],
+                    )
                 )
-            )
+            else:
+                warnings.append(
+                    PortfolioWarning(
+                        code="missing_core_market_reference",
+                        severity="warning",
+                        message=f"Core constituent {holding.symbol} is missing market reference data.",
+                        related_symbols=[holding.symbol],
+                    )
+                )
         elif reference.current_price is None or reference.recent_high_63d in (None, Decimal("0")):
             warnings.append(
                 PortfolioWarning(
@@ -199,6 +213,7 @@ def build_core_buy_materials(
                 "quantity": holding.quantity,
                 "value_jpy": holding.market_value_jpy,
                 "current_price": holding.current_price,
+                "suggested_proxy_symbol": suggested_proxy_symbol,
                 "reference_symbol": reference.yfinance_symbol if reference is not None else None,
                 "reference_current_price": reference.current_price if reference is not None else None,
                 "recent_high_21d": reference.recent_high_21d if reference is not None else None,
@@ -239,6 +254,16 @@ def build_core_buy_materials(
         },
         warnings,
     )
+
+
+def suggest_core_proxy_symbol(holding: Holding) -> str | None:
+    symbol = holding.symbol.upper()
+    name = holding.name
+    if "ALL_COUNTRY" in symbol or "オール・カントリー" in name or "全世界株式" in name:
+        return "ACWI"
+    if "SP500" in symbol or "S&P500" in name:
+        return "VOO"
+    return None
 
 
 def determine_core_budget_plan(

@@ -127,3 +127,32 @@ def test_core_budget_enters_rebalance_mode_when_dual_imbalance_is_extreme(
     assert core_buy_materials["recommended_monthly_core_buy_budget_jpy"] == 700000
     assert core_buy_materials["rebalance_mode_active"] is True
     assert core_buy_materials["portfolio_management_mode"] == "rebalance"
+
+
+def test_missing_core_reference_emits_proxy_suggestion_instead_of_generic_warning(
+    sample_snapshot,
+    portfolio_policy_config,
+    buy_rules_config,
+) -> None:
+    adjusted_holdings = list(sample_snapshot.holdings)
+    adjusted_holdings[1] = replace(
+        adjusted_holdings[1],
+        symbol="EMAXIS_SLIM_ALL_COUNTRY",
+        name="eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)",
+    )
+    adjusted_snapshot = replace(sample_snapshot, holdings=adjusted_holdings)
+    adjusted_analysis = analyze_portfolio(adjusted_snapshot, portfolio_policy_config)
+    core_buy_materials, warnings = build_core_buy_materials(
+        adjusted_snapshot,
+        adjusted_analysis["bucket_allocations"],
+        adjusted_analysis["resolved_buckets"],
+        [],
+        buy_rules_config,
+    )
+
+    constituent = next(item for item in core_buy_materials["core_constituents"] if item["symbol"] == "EMAXIS_SLIM_ALL_COUNTRY")
+
+    assert constituent["reference_symbol"] is None
+    assert constituent["suggested_proxy_symbol"] == "ACWI"
+    assert any(warning.code == "core_proxy_symbol_suggestion" and warning.severity == "info" for warning in warnings)
+    assert all(warning.code != "missing_core_market_reference" for warning in warnings)

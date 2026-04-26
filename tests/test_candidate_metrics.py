@@ -24,12 +24,21 @@ def test_bucket_over_target_candidates_get_default_behavior_notes(
     )
 
     cibr_first = next(candidate for candidate in candidates if candidate.symbol == "CIBR" and candidate.drawdown_pct == Decimal("-5"))
+    cibr_second = next(candidate for candidate in candidates if candidate.symbol == "CIBR" and candidate.drawdown_pct == Decimal("-8"))
+    cibr_third = next(candidate for candidate in candidates if candidate.symbol == "CIBR" and candidate.drawdown_pct == Decimal("-12"))
     ura_deep = next(candidate for candidate in candidates if candidate.symbol == "URA" and candidate.drawdown_pct == Decimal("-15"))
 
     assert "default_deep_only_due_to_bucket_over_target" in (cibr_first.note_for_chatgpt or "")
     assert "default_allow_deep_drawdown_even_if_bucket_over_target" in (ura_deep.note_for_chatgpt or "")
+    assert "drawdown_profile:shallow" in (cibr_first.note_for_chatgpt or "")
+    assert "drawdown_profile:shallow" in (cibr_second.note_for_chatgpt or "")
+    assert "drawdown_profile:shallow" in (cibr_third.note_for_chatgpt or "")
+    assert "bucket_over_target_deep_threshold_pct:-15" in (cibr_third.note_for_chatgpt or "")
+    assert "drawdown_profile:deep" in (ura_deep.note_for_chatgpt or "")
     assert cibr_first.suppressed is True
     assert cibr_first.suppressed_reason_code == "bucket_over_target_shallow_suppressed"
+    assert cibr_second.suppressed_reason_code == "bucket_over_target_shallow_suppressed"
+    assert cibr_third.suppressed_reason_code == "bucket_over_target_shallow_suppressed"
 
 
 def test_high_volatility_shallow_candidate_is_policy_suppressed(
@@ -60,6 +69,8 @@ def test_high_volatility_shallow_candidate_is_policy_suppressed(
     assert pltr_first.suppressed is True
     assert pltr_first.suppressed_reason_code == "high_volatility_shallow_suppressed"
     assert "rule_based_high_volatility_shallow_suppression" in (pltr_first.note_for_chatgpt or "")
+    assert "drawdown_profile:shallow" in (pltr_first.note_for_chatgpt or "")
+    assert "high_volatility_shallow_threshold_pct:-12" in (pltr_first.note_for_chatgpt or "")
     assert any(warning.code == "high_volatility_shallow_suppressed" for warning in warnings)
 
 

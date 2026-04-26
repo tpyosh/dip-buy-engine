@@ -11,7 +11,12 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
     classification_audit = computation.metadata.get("classification_audit", [])
     classification_reason_map = {item["symbol"]: item.get("reason") for item in classification_audit}
     review_target_month = computation.metadata.get("review_target_month", month_key(snapshot.snapshot_date))
-    rendered_template = template_text.replace("{{REVIEW_TARGET_MONTH}}", review_target_month)
+    rendered_template = (
+        template_text.replace("{{REVIEW_TARGET_MONTH}}", review_target_month).replace(
+            "{{REVIEW_TARGET_MONTH_JP}}",
+            review_target_month_to_japanese_month(review_target_month),
+        )
+    )
     lines: list[str] = [rendered_template.strip(), "", "## 1. 前提"]
 
     lines.extend(
@@ -160,28 +165,30 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- コードブロック外に Codex向け修正要約を書かないこと",
             "- 問題がない場合でもコードブロックは省略せず、`must: なし` のように明記すること",
             "- must / should / nice_to_have は空欄不可だが、該当なしの場合は `なし` と書いてよい",
+            "- コードやルールへの修正指摘が実質的にない月でも、`README.md` に当月の月次サマリーを反映する依頼は必ず含めること",
+            "- 修正指摘がない月は、少なくとも `should` に `README.md` へ当月サマリー・購入計画・ポートフォリオサマリーを反映する` と書くこと",
             "- 出力例:",
             "```md",
             "must:",
             "- なし",
             "",
             "should:",
-            "- なし",
+            "- README.md に当月の月次サマリー・購入計画・ポートフォリオサマリーを反映する",
             "",
             "nice_to_have:",
             "- なし",
             "",
             "修正目的:",
-            "- 大きな修正提案なし",
+            "- コード修正提案がない月でも README.md に当月の運用要約を反映できるようにする",
             "",
             "変更すべき仕様:",
-            "- なし",
+            "- 修正提案がない月でも README.md 更新依頼は必ず含める",
             "",
             "影響範囲:",
-            "- なし",
+            "- README.md",
             "",
             "推奨テスト:",
-            "- なし",
+            "- README.md の見出し、表、Mermaid が壊れないことを確認",
             "```",
         ]
     )
@@ -226,12 +233,14 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- ハルシネーション防止のため、明確な根拠がある改善提案のみを挙げてください。",
             "- must / should / nice_to_have は空欄不可ですが、該当なしの場合は `なし` と明記してください。",
             "- Codex向け修正要約は必ず md コードブロックで出力してください。",
+            "- コード修正提案がない月でも、README.md に当月サマリーを反映する依頼は必ず Codex向け修正要約に含めてください。",
             "- ルール改善が不要な場合は、その旨を明記してください。",
             "",
             "## 14. 必須の Codex 向け修正要約観点",
             "- must / should / nice_to_have は必ず埋めてください。",
             "- 空欄は不可ですが、該当なしの場合は `なし` と明記してください。",
             "- 【Codex向け修正要約】 全体を単一の ```md コードブロックで出力してください。",
+            "- コード修正提案がない月でも、README.md に当月の月次サマリー・購入計画・ポートフォリオサマリーを反映する依頼を必ず 1件以上含めてください。",
             "- monthly review と quarterly rule review を分けて整理してください。",
             "- 修正対象ファイルと必要テストを、Codex が編集に入れる粒度で書いてください。",
             "",
@@ -314,13 +323,14 @@ def build_core_buy_materials(core_buy_materials: dict) -> list[str]:
         f"- rebalance_mode_active: {core_buy_materials.get('rebalance_mode_active')}",
         f"- rebalance_mode_reason: {core_buy_materials.get('rebalance_mode_reason') or '-'}",
         f"- core_budget_explanation: {core_buy_materials.get('explanation')}",
-        "| symbol | quantity | value_jpy | current_price | reference_symbol | reference_current_price | recent_high_21d | recent_high_63d | drawdown_pct_from_recent_high |",
-        "| --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: |",
+        "| symbol | quantity | value_jpy | current_price | reference_symbol | suggested_proxy_symbol | reference_current_price | recent_high_21d | recent_high_63d | drawdown_pct_from_recent_high |",
+        "| --- | ---: | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: |",
     ]
     for item in core_buy_materials.get("core_constituents", []):
         lines.append(
             f"| {item['symbol']} | {format_value(item['quantity'])} | {item['value_jpy']} | "
             f"{format_value(item['current_price'])} | {item['reference_symbol'] or '-'} | "
+            f"{item.get('suggested_proxy_symbol') or '-'} | "
             f"{format_value(item['reference_current_price'])} | {format_value(item['recent_high_21d'])} | "
             f"{format_value(item['recent_high_63d'])} | {format_value(item['drawdown_pct_from_recent_high'])} |"
         )
@@ -345,6 +355,10 @@ def build_core_spot_buy_materials(spot_buy_materials: dict) -> list[str]:
         f"- bond_like_holdings: {spot_buy_materials.get('bond_like_holdings')}",
         f"- emergency_fund_managed_separately: {spot_buy_materials.get('emergency_fund_managed_separately')}",
         f"- near_term_large_expense: {spot_buy_materials.get('near_term_large_expense')}",
+        f"- real_estate_exposure_present: {spot_buy_materials.get('real_estate_exposure_present')}",
+        f"- real_estate_use: {spot_buy_materials.get('real_estate_use')}",
+        f"- mortgage_status: {spot_buy_materials.get('mortgage_status')}",
+        f"- liquidity_comment: {spot_buy_materials.get('liquidity_comment')}",
         "| reference_symbol | one_month_return_pct | three_month_return_pct | one_month_drawdown_from_high_pct | three_month_drawdown_from_high_pct |",
         "| --- | ---: | ---: | ---: | ---: |",
     ]
@@ -393,6 +407,9 @@ def build_core_recurring_contributions(recurring_config: dict) -> list[str]:
 def build_crypto_weekly_dca(recurring_config: dict) -> list[str]:
     plans = recurring_config.get("crypto_weekly_dca", [])
     lines = [
+        f"- crypto_weekly_dca_total_jpy: {recurring_config.get('crypto_weekly_dca_total_jpy', 'null')}",
+        f"- annualized_crypto_dca_jpy: {recurring_config.get('annualized_crypto_dca_jpy', 'null')}",
+        f"- annualized_crypto_dca_pct_of_total_assets: {format_pct(recurring_config.get('annualized_crypto_dca_pct_of_total_assets'))}",
         "| symbol | amount_jpy_per_week |",
         "| --- | ---: |",
     ]
@@ -456,6 +473,8 @@ def build_exposure_breakdown(exposure_breakdown: dict) -> list[str]:
 def build_review_partition_section(computation: MonthlyComputation) -> list[str]:
     monthly = computation.monthly_execution_outputs or {}
     quarterly = computation.quarterly_rule_review_outputs or {}
+    raw_cash_normalization = quarterly.get("cash_normalization_months_estimate")
+    cash_normalization = raw_cash_normalization if isinstance(raw_cash_normalization, dict) else {}
     return [
         "- monthly_execution_outputs:",
         f"  - portfolio_management_mode: {monthly.get('portfolio_management_mode')}",
@@ -464,13 +483,20 @@ def build_review_partition_section(computation: MonthlyComputation) -> list[str]
         f"  - monthly_total_core_deployment_jpy: {monthly.get('monthly_total_core_deployment_jpy')}",
         f"  - candidate_count: {monthly.get('candidate_count')}",
         f"  - crypto_weekly_dca_total_jpy: {monthly.get('crypto_weekly_dca_total_jpy')}",
+        f"  - annualized_crypto_dca_jpy: {monthly.get('annualized_crypto_dca_jpy')}",
+        f"  - annualized_crypto_dca_pct_of_total_assets: {format_pct(monthly.get('annualized_crypto_dca_pct_of_total_assets'))}",
         "- quarterly_rule_review_outputs:",
         f"  - no_change: {quarterly.get('no_change')}",
         f"  - classification_override_count: {quarterly.get('classification_override_count')}",
         f"  - core_reference_missing_symbols: {quarterly.get('core_reference_missing_symbols')}",
+        f"  - core_reference_proxy_suggestions: {quarterly.get('core_reference_proxy_suggestions')}",
         f"  - tradable_core_pct: {format_pct(quarterly.get('tradable_core_pct'))}",
         f"  - effective_core_including_pension_pct: {format_pct(quarterly.get('effective_core_including_pension_pct'))}",
-        f"  - cash_normalization_months_estimate: {quarterly.get('cash_normalization_months_estimate')}",
+        "  - cash_normalization_months_estimate:",
+        f"    - gross_deployment_months: {cash_normalization.get('gross_deployment_months')}",
+        f"    - net_cash_reduction_months: {cash_normalization.get('net_cash_reduction_months')}",
+        f"    - assumed_monthly_cash_inflow_jpy: {cash_normalization.get('assumed_monthly_cash_inflow_jpy')}",
+        f"    - net_cash_reduction_jpy: {cash_normalization.get('net_cash_reduction_jpy')}",
         f"  - direct_cap_monitor_pct: {format_pct(quarterly.get('direct_semiconductor_exposure_pct'))}",
         f"  - direct_plus_indirect_watch_metric_pct: {format_pct(quarterly.get('combined_semiconductor_ai_infra_watch_pct'))}",
         f"  - direct_semiconductor_exposure_pct: {format_pct(quarterly.get('direct_semiconductor_exposure_pct'))}",
@@ -528,3 +554,8 @@ def normalize_text(value: str | None) -> str:
     if not value:
         return "-"
     return " ".join(str(value).split())
+
+
+def review_target_month_to_japanese_month(review_target_month: str) -> str:
+    month = int(review_target_month.split("_")[1])
+    return f"{month}月"

@@ -36,6 +36,8 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "必ず単一の ```md コードブロックで出力すること" in prompt
     assert "無理に改善提案を作らない" in prompt
     assert "`must: なし`" in prompt
+    assert "README.md に当月サマリーを反映する依頼は必ず Codex向け修正要約に含めてください。" in prompt
+    assert "README.md に当月の月次サマリー・購入計画・ポートフォリオサマリーを反映する" in prompt
     assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
     assert "monthly_core_budget_tier" in prompt
     assert "recommended_monthly_core_buy_budget_jpy" in prompt
@@ -63,11 +65,16 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "tradable_core_pct" in prompt
     assert "effective_core_including_pension_pct" in prompt
     assert "cash_normalization_months_estimate" in prompt
+    assert "gross_deployment_months" in prompt
+    assert "assumed_monthly_cash_inflow_jpy" in prompt
     assert "in_direct" in prompt
     assert "in_indirect" in prompt
     assert "avg20_gap_pct" in prompt
     assert "direct_cap_monitor_pct" in prompt
     assert "direct_plus_indirect_watch_metric_pct" in prompt
     assert "priority_lowered_boolean" in prompt
+    assert "suggested_proxy_symbol" in prompt
+    assert "annualized_crypto_dca_jpy" in prompt
+    assert "real_estate_exposure_present" in prompt
     assert "月次の執行判断と、四半期単位のルール見直し提案は明確に分離してください。" in prompt
     assert "指値設定対象月キー" in prompt

@@ -14,7 +14,7 @@ from .diff_analyzer import build_proposal_diffs
 from .exposure_metrics import build_exposure_breakdown
 from .market_data import fetch_market_references
 from .models import MonthlyComputation
-from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics
+from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics, suggest_core_proxy_symbol
 from .prompt_renderer import render_chatgpt_prompt
 from .readme_portfolio import refresh_readme_portfolio
 from .review_parser import parse_review_feedback
@@ -22,7 +22,7 @@ from .rules import calculate_sox_buy_signal
 from .snapshot_loader import load_snapshot
 from .storage import default_output_paths, load_yaml, read_text, write_text, write_yaml
 from .thesis_metrics import build_long_term_thesis_targets
-from .utils import infer_target_month_start, month_key, quantize, target_month_key
+from .utils import infer_target_month_start, month_key, percent, quantize, target_month_key
 from .validation import (
     apply_candidate_validations,
     build_exposure_validation_warnings,
@@ -30,6 +30,7 @@ from .validation import (
 )
 
 LOGGER = logging.getLogger(__name__)
+ASSUMED_MONTHLY_CASH_INFLOW_JPY = Decimal("650000")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -200,6 +201,14 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         int(item.get("amount_jpy_per_week", 0))
         for item in recurring_contributions.get("crypto_weekly_dca", [])
     )
+    annualized_crypto_dca_jpy = crypto_weekly_total_jpy * 52
+    annualized_crypto_dca_pct_of_total_assets = percent(
+        Decimal(str(annualized_crypto_dca_jpy)),
+        snapshot.total_assets_jpy,
+    )
+    recurring_contributions["crypto_weekly_dca_total_jpy"] = crypto_weekly_total_jpy
+    recurring_contributions["annualized_crypto_dca_jpy"] = annualized_crypto_dca_jpy
+    recurring_contributions["annualized_crypto_dca_pct_of_total_assets"] = annualized_crypto_dca_pct_of_total_assets
 
     portfolio_analysis = compute_portfolio_metrics(snapshot, merged_policy)
     requests = build_reference_requests(snapshot, merged_buy_rules, merged_tickers, portfolio_analysis["resolved_buckets"])
@@ -259,6 +268,11 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             for symbol in warning.related_symbols
         }
     )
+    core_reference_proxy_suggestions = {
+        item["symbol"]: item["suggested_proxy_symbol"]
+        for item in core_buy_materials.get("core_constituents", [])
+        if item.get("reference_symbol") is None and item.get("suggested_proxy_symbol") is not None
+    }
     classification_override_count = sum(
         1
         for item in portfolio_analysis["classification_audit"]
@@ -285,6 +299,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         liquidity_allocation=bucket_allocations_by_name.get("liquidity"),
         total_assets_jpy=snapshot.total_assets_jpy,
         monthly_total_core_deployment_jpy=monthly_total_core_deployment_jpy,
+        monthly_cash_inflow_jpy=ASSUMED_MONTHLY_CASH_INFLOW_JPY,
     )
     quarterly_no_change = classification_override_count == 0 and not core_reference_missing_symbols
     return MonthlyComputation(
@@ -312,12 +327,15 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "candidate_count": len(candidate_orders),
             "core_recurring_contributions_total_jpy": recurring_contributions.get("total_monthly_jpy"),
             "crypto_weekly_dca_total_jpy": crypto_weekly_total_jpy,
+            "annualized_crypto_dca_jpy": annualized_crypto_dca_jpy,
+            "annualized_crypto_dca_pct_of_total_assets": annualized_crypto_dca_pct_of_total_assets,
         },
         quarterly_rule_review_outputs={
             "no_change": quarterly_no_change,
             "classification_override_count": classification_override_count,
             "classification_audit": portfolio_analysis["classification_audit"],
             "core_reference_missing_symbols": core_reference_missing_symbols,
+            "core_reference_proxy_suggestions": core_reference_proxy_suggestions,
             "tradable_core_pct": tradable_core_pct,
             "effective_core_including_pension_pct": effective_core_including_pension_pct,
             "cash_normalization_months_estimate": cash_normalization_months_estimate,
@@ -344,6 +362,7 @@ def estimate_cash_normalization_months(
     liquidity_allocation,
     total_assets_jpy: Decimal,
     monthly_total_core_deployment_jpy,
+    monthly_cash_inflow_jpy: Decimal | None,
 ):
     if liquidity_allocation is None or liquidity_allocation.target_pct is None:
         return None
@@ -351,9 +370,26 @@ def estimate_cash_normalization_months(
         return None
     cash_excess_pct = liquidity_allocation.actual_pct - liquidity_allocation.target_pct
     if cash_excess_pct <= 0:
-        return Decimal("0.0")
+        return {
+            "gross_deployment_months": Decimal("0.0"),
+            "net_cash_reduction_months": Decimal("0.0"),
+            "assumed_monthly_cash_inflow_jpy": monthly_cash_inflow_jpy,
+            "net_cash_reduction_jpy": Decimal("0"),
+        }
     cash_excess_jpy = total_assets_jpy * cash_excess_pct
-    return quantize(cash_excess_jpy / Decimal(str(monthly_total_core_deployment_jpy)), 1)
+    gross_deployment_months = quantize(cash_excess_jpy / Decimal(str(monthly_total_core_deployment_jpy)), 1)
+    net_cash_reduction_jpy = Decimal(str(monthly_total_core_deployment_jpy))
+    if monthly_cash_inflow_jpy is not None:
+        net_cash_reduction_jpy = net_cash_reduction_jpy - monthly_cash_inflow_jpy
+    net_cash_reduction_months = None
+    if net_cash_reduction_jpy > 0:
+        net_cash_reduction_months = quantize(cash_excess_jpy / net_cash_reduction_jpy, 1)
+    return {
+        "gross_deployment_months": gross_deployment_months,
+        "net_cash_reduction_months": net_cash_reduction_months,
+        "assumed_monthly_cash_inflow_jpy": monthly_cash_inflow_jpy,
+        "net_cash_reduction_jpy": net_cash_reduction_jpy,
+    }
 
 
 def build_reference_requests(
@@ -370,9 +406,9 @@ def build_reference_requests(
     required_symbols.append("USDJPY")
 
     optional_core_symbols = [
-        holding.symbol
+        holding
         for holding in snapshot.holdings
-        if resolved_buckets.get(holding.symbol) == "core" and holding.symbol in yfinance_symbols
+        if resolved_buckets.get(holding.symbol) == "core"
     ]
 
     requests: dict[str, dict[str, str]] = {}
@@ -385,11 +421,15 @@ def build_reference_requests(
             "yfinance_symbol": yfinance_symbol,
             "currency": "JPY" if symbol == "USDJPY" else "USD",
         }
-    for symbol in optional_core_symbols:
+    for holding in optional_core_symbols:
+        symbol = holding.symbol
         if symbol in requests:
             continue
+        yfinance_symbol = yfinance_symbols.get(symbol) or suggest_core_proxy_symbol(holding)
+        if yfinance_symbol is None:
+            continue
         requests[symbol] = {
-            "yfinance_symbol": yfinance_symbols[symbol],
+            "yfinance_symbol": yfinance_symbol,
             "currency": "USD",
         }
     return requests
@@ -436,6 +476,7 @@ def build_core_spot_buy_materials(
 
     jun_core_allocation = allocation_map.get("jun_core")
     bond_like_holdings = detect_bond_like_holdings(snapshot.holdings)
+    real_estate_risk_profile = build_real_estate_risk_profile()
     return {
         "liquidity_actual_pct": core_buy_materials.get("liquidity_actual_pct"),
         "liquidity_target_pct": core_buy_materials.get("liquidity_target_pct"),
@@ -463,6 +504,10 @@ def build_core_spot_buy_materials(
         "bond_like_holdings": bond_like_holdings or None,
         "emergency_fund_managed_separately": None,
         "near_term_large_expense": None,
+        "real_estate_exposure_present": real_estate_risk_profile["real_estate_exposure_present"],
+        "real_estate_use": real_estate_risk_profile["real_estate_use"],
+        "mortgage_status": real_estate_risk_profile["mortgage_status"],
+        "liquidity_comment": real_estate_risk_profile["liquidity_comment"],
     }
 
 
@@ -493,6 +538,15 @@ def detect_bond_like_holdings(holdings) -> list[dict]:
                 }
             )
     return matches
+
+
+def build_real_estate_risk_profile() -> dict[str, object]:
+    return {
+        "real_estate_exposure_present": True,
+        "real_estate_use": "residence_and_asset",
+        "mortgage_status": "full_loan_early_stage",
+        "liquidity_comment": "residential real estate should not be treated as emergency liquidity",
+    }
 
 
 if __name__ == "__main__":

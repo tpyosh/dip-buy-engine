@@ -11,6 +11,7 @@ def build_candidate(**overrides) -> CandidateOrder:
         symbol="URA",
         bucket="satellite_core",
         base_price=Decimal("100"),
+        avg20_base_price=Decimal("100"),
         current_price=Decimal("90"),
         limit_price=Decimal("85"),
         shares=2,

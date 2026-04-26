@@ -4,23 +4,101 @@
 
 本ツールは自動売買ツールではありません。Python が数値計算と履歴保存を担当し、ChatGPT が月次レビューと改善提案を担当し、最終判断と発注はユーザが手動で行います。
 
+## Monthly Review: 2026_05
+
+- snapshot_date: 2026-04-25
+- total_assets_jpy: 35,558,948円
+
+### Monthly Review Summary
+
+- 2026年5月は core不足と現金過多を是正する月
+- 固定積立がNISA枠枯渇により550,000円に低下
+- その補填として coreスポット買いを900,000円に増額
+- 5月のcore投入合計は1,450,000円
+- SOX投信は買わない
+- satellite_core は目標超過のため、テーマ追加は深い押し目限定
+- 今月の優先順位は `core > MSFT押し目 > PLTR/URA深い押し目 > CIBR/SOX見送り`
+
+### Purchase Plan
+
+固定積立の実績見込みが 550,000円まで低下するため、5月のcore投入目標 1,450,000円を維持する目的で、スポット買いを 900,000円まで増額する。
+
+| item | amount_jpy | note |
+| --- | ---: | --- |
+| 固定積立（当初想定） | 750,000 | 当初の5月想定 |
+| 固定積立（実績見込み） | 550,000 | NISA枠の枯渇により今月は550,000円まで低下 |
+| coreスポット買い | 900,000 | 固定積立の減少200,000円分を補填 |
+| 5月のcore投入合計 | 1,450,000 | 固定積立550,000円 + スポット買い900,000円 |
+
+| fund | amount_jpy |
+| --- | ---: |
+| eMAXIS Slim 全世界株式（オール・カントリー） | 550,000 |
+| eMAXIS Slim 米国株式（S&P500） | 350,000 |
+| **合計** | **900,000** |
+
+| date | fund | amount_jpy |
+| --- | --- | ---: |
+| 2026-05-01 | eMAXIS Slim 全世界株式（オール・カントリー） | 150,000 |
+| 2026-05-01 | eMAXIS Slim 米国株式（S&P500） | 100,000 |
+| 2026-05-08 | eMAXIS Slim 全世界株式（オール・カントリー） | 150,000 |
+| 2026-05-08 | eMAXIS Slim 米国株式（S&P500） | 100,000 |
+| 2026-05-15 | eMAXIS Slim 全世界株式（オール・カントリー） | 150,000 |
+| 2026-05-15 | eMAXIS Slim 米国株式（S&P500） | 100,000 |
+| 2026-05-22 | eMAXIS Slim 全世界株式（オール・カントリー） | 100,000 |
+| 2026-05-22 | eMAXIS Slim 米国株式（S&P500） | 50,000 |
+| **合計** |  | **900,000** |
+
+### Portfolio Summary
+
+| bucket | market_value_jpy | actual_pct | target_pct | delta_pct |
+| --- | ---: | ---: | ---: | ---: |
+| core | 6,890,711 | 19.38% | 45.00% | -25.62pt |
+| jun_core | 2,963,399 | 8.33% | 20.00% | -11.67pt |
+| liquidity | 14,644,262 | 41.18% | 10.00% | +31.18pt |
+| pension | 3,754,327 | 10.56% | - | - |
+| satellite | 821,000 | 2.31% | 10.00% | -7.69pt |
+| satellite_core | 6,469,032 | 18.19% | 15.00% | +3.19pt |
+| other | 16,214 | 0.05% | - | - |
+
+- core は目標45.00%に対して19.38%で、依然として大幅不足
+- liquidity は41.18%で、目標10.00%を大きく上回る過大待機資金
+- satellite_core は18.19%で目標15.00%を超過しているため、テーマETFやSOX追加より core 補強を優先する
+- 半導体 direct exposure は13.83%
+- direct + indirect AI infrastructure watch metric は15.14%
+- 名古屋市中区・金山駅近くの流動性が高いマンションを住居兼資産として保有している一方、フルローン購入で返済初期のため、国内不動産への実質エクスポージャとレバレッジリスクがある
+- そのため現金を一気に削りすぎず、ただし現在の流動性41.18%は明確に過大として扱う
+
+### Mermaid Pie Chart
+
+```mermaid
+pie showData
+    title Portfolio by Bucket - 2026_05
+    "core" : 6890711
+    "jun_core" : 2963399
+    "liquidity" : 14644262
+    "pension" : 3754327
+    "satellite" : 821000
+    "satellite_core" : 6469032
+    "other" : 16214
+```
+
 <!-- portfolio-piechart:start -->
 ## Latest Portfolio Snapshot
 
-- snapshot_date: 2026-03-29
-- total_assets_jpy: 33028136
+- snapshot_date: 2026-04-25
+- total_assets_jpy: 35558948
 
 ![Portfolio Allocation](docs/portfolio_allocation_latest.svg)
 
 | bucket | market_value_jpy | pct |
 | --- | ---: | ---: |
-| core | 5419420 | 16.41% |
-| jun_core | 3086731 | 9.35% |
-| satellite_core | 5143392 | 15.57% |
-| satellite | 206392 | 0.62% |
-| pension | 3381281 | 10.24% |
-| liquidity | 14942636 | 45.24% |
-| other | 848281 | 2.57% |
+| core | 6890711 | 19.38% |
+| jun_core | 2963399 | 8.33% |
+| satellite_core | 6469032 | 18.19% |
+| satellite | 821000 | 2.31% |
+| pension | 3754327 | 10.56% |
+| liquidity | 14644262 | 41.18% |
+| other | 16214 | 0.05% |
 <!-- portfolio-piechart:end -->
 
 ## 目的

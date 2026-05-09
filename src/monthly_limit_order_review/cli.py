@@ -4,7 +4,7 @@ import argparse
 import logging
 import sys
 from copy import deepcopy
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from pathlib import Path
 from decimal import Decimal
 
@@ -13,7 +13,7 @@ from .codex_patch_builder import build_codex_patch_prompt, build_codex_patch_req
 from .diff_analyzer import build_proposal_diffs
 from .exposure_metrics import build_exposure_breakdown
 from .market_data import fetch_market_references
-from .models import MonthlyComputation
+from .models import MonthlyComputation, PortfolioWarning
 from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics, suggest_core_proxy_symbol
 from .prompt_renderer import render_chatgpt_prompt
 from .readme_portfolio import refresh_readme_portfolio
@@ -183,6 +183,12 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         allocation_rules = load_yaml(allocation_rules_path)
         if "core_budget_policy" in allocation_rules:
             merged_buy_rules["core_budget_policy"] = allocation_rules["core_budget_policy"]
+    budget_policy_warnings: list[PortfolioWarning] = []
+    if "core_budget_policy" in merged_buy_rules:
+        merged_buy_rules["core_budget_policy"], budget_policy_warnings = resolve_core_budget_policy_for_month(
+            merged_buy_rules["core_budget_policy"],
+            review_target_month_start,
+        )
 
     merged_tickers = deepcopy(tickers)
     if market_reference_path.exists():
@@ -193,9 +199,13 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     if classification_overrides_path.exists():
         merged_policy["classification_overrides"] = load_yaml(classification_overrides_path)
     recurring_contributions = (
-        load_yaml(recurring_contributions_path).get("core_recurring_contributions", {})
+        deepcopy(load_yaml(recurring_contributions_path).get("core_recurring_contributions", {}))
         if recurring_contributions_path.exists()
         else {}
+    )
+    recurring_contributions, recurring_contribution_warnings = resolve_core_recurring_contributions_for_month(
+        recurring_contributions,
+        review_target_month_start,
     )
     crypto_weekly_total_jpy = sum(
         int(item.get("amount_jpy_per_week", 0))
@@ -258,6 +268,8 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     warnings = list(portfolio_analysis["warnings"])
     warnings.extend(candidate_warnings)
     warnings.extend(core_material_warnings)
+    warnings.extend(recurring_contribution_warnings)
+    warnings.extend(budget_policy_warnings)
     warnings.extend(build_exposure_validation_warnings(exposure_breakdown))
     warnings.extend(build_validation_warnings(snapshot.warnings))
     core_reference_missing_symbols = sorted(
@@ -318,6 +330,15 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         long_term_thesis_targets=long_term_thesis_targets,
         monthly_execution_outputs={
             "review_target_month": review_target_month,
+            "nisa_growth_quota_status": recurring_contributions.get("nisa_growth_quota_status"),
+            "fixed_core_auto_invest_amount_jpy": recurring_total_jpy,
+            "taxable_core_spot_buy_required": recurring_contributions.get("taxable_core_spot_buy_required", False),
+            "recommended_taxable_core_spot_buy_jpy": (
+                recommended_spot_buy_jpy
+                if recurring_contributions.get("taxable_core_spot_buy_required", False)
+                else None
+            ),
+            "core_spot_buy_account_type": recurring_contributions.get("core_spot_buy_account_type"),
             "portfolio_management_mode": core_buy_materials.get("portfolio_management_mode"),
             "monthly_core_budget_tier": core_buy_materials.get("monthly_core_budget_tier"),
             "recommended_monthly_core_buy_budget_jpy": core_buy_materials.get(
@@ -329,6 +350,10 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "crypto_weekly_dca_total_jpy": crypto_weekly_total_jpy,
             "annualized_crypto_dca_jpy": annualized_crypto_dca_jpy,
             "annualized_crypto_dca_pct_of_total_assets": annualized_crypto_dca_pct_of_total_assets,
+            "taxable_account_note": recurring_contributions.get("taxable_account_note"),
+            "nisa_exhaustion_adjustment_reason": recurring_contributions.get(
+                "nisa_exhaustion_adjustment_reason"
+            ),
         },
         quarterly_rule_review_outputs={
             "no_change": quarterly_no_change,
@@ -392,6 +417,117 @@ def estimate_cash_normalization_months(
     }
 
 
+def resolve_core_budget_policy_for_month(
+    budget_policy: dict,
+    review_target_month_start: date,
+) -> tuple[dict, list[PortfolioWarning]]:
+    resolved = deepcopy(budget_policy)
+    overrides = resolved.pop("date_based_overrides", []) or []
+    active_override = find_active_month_override(overrides, review_target_month_start)
+    if active_override is None:
+        resolved["date_based_override_active"] = False
+        return resolved, []
+
+    resolved = deep_merge_dicts(resolved, active_override)
+    resolved.pop("date_based_overrides", None)
+    resolved["date_based_override_active"] = True
+    resolved["active_date_based_override"] = summarize_date_based_override(active_override)
+    return resolved, []
+
+
+def resolve_core_recurring_contributions_for_month(
+    recurring_contributions: dict,
+    review_target_month_start: date,
+) -> tuple[dict, list[PortfolioWarning]]:
+    resolved = deepcopy(recurring_contributions)
+    overrides = resolved.pop("date_based_overrides", []) or []
+    active_override = find_active_month_override(overrides, review_target_month_start)
+    warnings: list[PortfolioWarning] = []
+    if active_override is not None:
+        base_review_guidance = list(resolved.get("review_guidance", []) or [])
+        override_review_guidance = list(active_override.get("review_guidance", []) or [])
+        resolved = deep_merge_dicts(resolved, active_override)
+        resolved.pop("date_based_overrides", None)
+        if override_review_guidance:
+            resolved["review_guidance"] = base_review_guidance + override_review_guidance
+        resolved["date_based_override_active"] = True
+        resolved["active_date_based_override"] = summarize_date_based_override(active_override)
+        return resolved, warnings
+
+    resolved["date_based_override_active"] = False
+    latest_followup_override = latest_followup_required_override(overrides)
+    if latest_followup_override is not None:
+        latest_end = parse_month_start(latest_followup_override["active_to"])
+        if review_target_month_start > latest_end:
+            code = str(
+                latest_followup_override.get(
+                    "followup_warning_code",
+                    "post_date_based_core_recurring_rule_missing",
+                )
+            )
+            message = (
+                f"No explicit core recurring contribution / NISA growth quota rule is configured for "
+                f"{review_target_month_start.strftime('%Y_%m')}; do not carry the "
+                f"{latest_followup_override.get('active_from')} to {latest_followup_override.get('active_to')} "
+                "override forward without configuration."
+            )
+            warnings.append(PortfolioWarning(code=code, severity="warning", message=message))
+            resolved["configuration_warnings"] = [message]
+            resolved["nisa_growth_quota_status"] = "requires_explicit_configuration"
+    return resolved, warnings
+
+
+def find_active_month_override(overrides: list[dict], review_target_month_start: date) -> dict | None:
+    for override in overrides:
+        active_from = override.get("active_from") or override.get("period", {}).get("start")
+        active_to = override.get("active_to") or override.get("period", {}).get("end")
+        if active_from is None or active_to is None:
+            continue
+        start = parse_month_start(active_from)
+        end = parse_month_start(active_to)
+        if start <= review_target_month_start <= end:
+            return override
+    return None
+
+
+def latest_followup_required_override(overrides: list[dict]) -> dict | None:
+    candidates = [
+        override
+        for override in overrides
+        if override.get("requires_explicit_followup_rule") and override.get("active_to") is not None
+    ]
+    if not candidates:
+        return None
+    return max(candidates, key=lambda override: parse_month_start(override["active_to"]))
+
+
+def parse_month_start(value) -> date:
+    if isinstance(value, date):
+        return date(value.year, value.month, 1)
+    parts = str(value).replace("_", "-").split("-")
+    if len(parts) < 2:
+        raise ValueError(f"Invalid month value: {value}")
+    return date(int(parts[0]), int(parts[1]), 1)
+
+
+def deep_merge_dicts(base: dict, override: dict) -> dict:
+    merged = deepcopy(base)
+    for key, value in override.items():
+        if key in {"active_from", "active_to", "period"}:
+            merged[key] = deepcopy(value)
+            continue
+        if isinstance(value, dict) and isinstance(merged.get(key), dict):
+            merged[key] = deep_merge_dicts(merged[key], value)
+        else:
+            merged[key] = deepcopy(value)
+    return merged
+
+
+def summarize_date_based_override(override: dict) -> dict:
+    omitted_keys = {"plans", "review_guidance"}
+    return {key: deepcopy(value) for key, value in override.items() if key not in omitted_keys}
+
+
 def build_reference_requests(
     snapshot,
     buy_rules: dict,
@@ -450,6 +586,17 @@ def build_core_spot_buy_materials(
     allocation_map = {allocation.bucket: allocation for allocation in portfolio_analysis["bucket_allocations"]}
     reference_map = {reference.symbol: reference for reference in market_references}
     current_monthly_core_auto_invest = recurring_contributions.get("total_monthly_jpy")
+    fixed_core_auto_invest = recurring_contributions.get(
+        "monthly_core_auto_invest_amount_jpy",
+        current_monthly_core_auto_invest,
+    )
+    recommended_core_spot_buy = core_buy_materials.get("recommended_monthly_core_buy_budget_jpy")
+    taxable_core_spot_buy_required = bool(recurring_contributions.get("taxable_core_spot_buy_required", False))
+    total_monthly_core_deployment = (
+        fixed_core_auto_invest + recommended_core_spot_buy
+        if fixed_core_auto_invest is not None and recommended_core_spot_buy is not None
+        else None
+    )
     annualized_core_auto_invest = (
         int(current_monthly_core_auto_invest) * 12 if current_monthly_core_auto_invest is not None else None
     )
@@ -487,8 +634,33 @@ def build_core_spot_buy_materials(
         "jun_core_actual_pct": jun_core_allocation.actual_pct if jun_core_allocation is not None else None,
         "jun_core_target_pct": jun_core_allocation.target_pct if jun_core_allocation is not None else None,
         "jun_core_delta_pct": jun_core_allocation.delta_pct if jun_core_allocation is not None else None,
+        "nisa_growth_quota_status": recurring_contributions.get("nisa_growth_quota_status"),
+        "nisa_exhaustion_adjustment_reason": recurring_contributions.get("nisa_exhaustion_adjustment_reason"),
+        "taxable_core_spot_buy_required": taxable_core_spot_buy_required,
+        "core_spot_buy_account_type": recurring_contributions.get("core_spot_buy_account_type"),
+        "taxable_account_note": recurring_contributions.get("taxable_account_note"),
+        "tax_note": recurring_contributions.get("tax_note"),
+        "fixed_core_auto_invest_amount_jpy": fixed_core_auto_invest,
         "current_monthly_core_auto_invest_amount_jpy": current_monthly_core_auto_invest,
         "annualized_core_auto_invest_amount_jpy": annualized_core_auto_invest,
+        "recommended_taxable_core_spot_buy_jpy": (
+            recommended_core_spot_buy if taxable_core_spot_buy_required else None
+        ),
+        "recommended_monthly_core_buy_budget_jpy": recommended_core_spot_buy,
+        "total_monthly_core_deployment_jpy": total_monthly_core_deployment,
+        "baseline_total_core_deployment_target_jpy": recurring_contributions.get(
+            "baseline_total_core_deployment_target_jpy"
+        )
+        or core_buy_materials.get("baseline_total_core_deployment_target_jpy"),
+        "baseline_core_spot_buy_jpy": core_buy_materials.get("baseline_core_spot_buy_jpy")
+        or recurring_contributions.get("rebalance_mode_core_spot_buy_reference_jpy"),
+        "hard_cap_core_spot_buy_jpy": core_buy_materials.get("hard_cap_core_spot_buy_jpy"),
+        "monthly_core_budget_band": core_buy_materials.get("monthly_core_budget_band"),
+        "spot_buy_bands": core_buy_materials.get("spot_buy_bands"),
+        "core_spot_buy_allocation_rule": recurring_contributions.get("core_spot_buy_allocation_rule"),
+        "date_based_override_active": recurring_contributions.get("date_based_override_active", False),
+        "active_date_based_override": recurring_contributions.get("active_date_based_override"),
+        "configuration_warnings": recurring_contributions.get("configuration_warnings", []),
         "major_core_proxy_stats": major_core_proxy_stats,
         "portfolio_risk_bucket_summary": [
             {

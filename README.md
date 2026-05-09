@@ -82,6 +82,28 @@ pie showData
     "other" : 16214
 ```
 
+## Monthly Purchase Policy: 2026_06 to 2026_12
+
+2026年6月〜12月は、2026年NISA成長投資枠枯渇により、core固定積立は100,000円/月のみとして扱う。
+
+| item | amount_jpy | account | note |
+| --- | ---: | --- | --- |
+| eMAXIS Slim 全世界株式（オール・カントリー） | 50,000 | NISAつみたて投資枠 | 固定core積立 |
+| eMAXIS Slim 米国株式（S&P500） | 50,000 | NISAつみたて投資枠 | 固定core積立 |
+| **固定core積立合計** | **100,000** |  | NISA成長投資枠750,000円/月は前提にしない |
+
+core不足と現金過多が続く限り、NISA成長投資枠の不足分は特定口座でのcoreスポット買いを厚くして補う。税効率はNISAより落ちるが、2026年6月〜12月の主問題は税効率ではなく、core不足と現金過多による基本配分の歪みである。
+
+| mode | core spot buy range | condition |
+| --- | ---: | --- |
+| Normal | 300,000〜600,000円 | core不足はあるが現金過多が軽度、または相場が高値圏 |
+| Aggressive | 700,000〜1,000,000円 | core不足が大きく、liquidity が target を大きく上回る |
+| Rebalance | 1,000,000〜1,500,000円 | core_delta_pct が -25pt 程度以下、cash_excess_pct が +25pt 程度以上 |
+
+Rebalance mode では、固定積立100,000円 + 特定口座coreスポット買い1,350,000円 = 月次core投入1,450,000円を目安にする。ただし単月のcoreスポット買いは原則1,500,000円を上限とし、住宅ローン・生活防衛資金・大口支出不明リスクを考慮して現金を一気に削りすぎない。
+
+coreスポット買いの配分は既存core商品に限定し、基本は eMAXIS Slim 全世界株式（オール・カントリー）60% / eMAXIS Slim 米国株式（S&P500）40% とする。米国株・半導体・AIインフラ感応度が高い月は、オルカン65% / S&P500 35% などオルカンを厚めにする。
+
 <!-- portfolio-piechart:start -->
 ## Latest Portfolio Snapshot
 

@@ -244,11 +244,26 @@ def build_core_buy_materials(
             "monthly_core_buy_budget_max_jpy": budget_policy.get("monthly_core_buy_budget_max_jpy"),
             "recommended_monthly_core_buy_budget_jpy": budget_plan["recommended_monthly_core_buy_budget_jpy"],
             "monthly_core_budget_tier": budget_plan["monthly_core_budget_tier"],
+            "monthly_core_budget_band": budget_plan["monthly_core_budget_band"],
             "monthly_core_budget_override_active": budget_plan["monthly_core_budget_override_active"],
             "monthly_core_budget_override_reason": budget_plan["monthly_core_budget_override_reason"],
             "portfolio_management_mode": budget_plan["portfolio_management_mode"],
             "rebalance_mode_active": budget_plan["rebalance_mode_active"],
             "rebalance_mode_reason": budget_plan["rebalance_mode_reason"],
+            "date_based_core_budget_override_active": budget_policy.get("date_based_override_active", False),
+            "active_date_based_core_budget_override": budget_policy.get("active_date_based_override"),
+            "nisa_growth_quota_status": budget_policy.get("nisa_growth_quota_status"),
+            "taxable_core_spot_buy_required": budget_policy.get("taxable_core_spot_buy_required", False),
+            "core_spot_buy_account_type": budget_policy.get("core_spot_buy_account_type"),
+            "fixed_core_auto_invest_jpy": budget_policy.get("fixed_core_auto_invest_jpy"),
+            "baseline_total_core_deployment_target_jpy": budget_policy.get(
+                "baseline_total_core_deployment_target_jpy"
+            ),
+            "baseline_core_spot_buy_jpy": budget_policy.get("baseline_core_spot_buy_jpy"),
+            "hard_cap_core_spot_buy_jpy": budget_policy.get("hard_cap_core_spot_buy_jpy"),
+            "spot_buy_bands": budget_policy.get("spot_buy_bands"),
+            "hard_cap_note": budget_policy.get("hard_cap_note"),
+            "satellite_interaction_policy": budget_policy.get("satellite_interaction_policy"),
             "explanation": budget_plan["explanation"],
             "core_constituents": core_constituents,
         },
@@ -330,9 +345,20 @@ def determine_core_budget_plan(
         elif override_active:
             portfolio_management_mode = "normal_with_override"
 
+    hard_cap = budget_policy.get("hard_cap_core_spot_buy_jpy")
+    if hard_cap is not None and selected_budget is not None:
+        selected_budget = min(int(selected_budget), int(hard_cap))
+    selected_tier_policy = budget_tiers.get(selected_tier, {})
+    selected_band = {
+        "min_jpy": selected_tier_policy.get("min_jpy"),
+        "max_jpy": selected_tier_policy.get("max_jpy"),
+        "description": selected_tier_policy.get("description"),
+    }
+
     return {
         "recommended_monthly_core_buy_budget_jpy": selected_budget,
         "monthly_core_budget_tier": selected_tier,
+        "monthly_core_budget_band": selected_band,
         "monthly_core_budget_override_active": override_active,
         "monthly_core_budget_override_reason": override_reason,
         "portfolio_management_mode": portfolio_management_mode,
@@ -351,6 +377,7 @@ def determine_core_budget_plan(
                 "active_mode": portfolio_management_mode,
                 "rebalance_mode_active": rebalance_active,
                 "rebalance_mode_reason": rebalance_reason,
+                "selected_budget_band": selected_band,
                 "rebalance_mode_description": (
                     budget_policy.get("rebalance_mode", {}).get("description") if rebalance_active else None
                 ),

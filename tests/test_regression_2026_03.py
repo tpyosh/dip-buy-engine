@@ -224,6 +224,84 @@ def test_snapshot_2026_05_core_references_are_not_missing_and_schedule_uses_may(
     assert computation.quarterly_rule_review_outputs["core_reference_missing_symbols"] == []
     assert computation.metadata["review_target_month"] == "2026_05"
     assert computation.monthly_execution_outputs["review_target_month"] == "2026_05"
+    assert computation.monthly_execution_outputs["fixed_core_auto_invest_amount_jpy"] == 750000
+    assert computation.monthly_execution_outputs["taxable_core_spot_buy_required"] is False
+    assert computation.monthly_execution_outputs["recommended_monthly_core_buy_budget_jpy"] == 700000
+    assert computation.monthly_execution_outputs["recommended_taxable_core_spot_buy_jpy"] is None
+    assert computation.metadata["core_recurring_contributions"]["date_based_override_active"] is False
     assert "review_target_month: 2026_05" in prompt
     assert "指値設定対象月キー: 2026_05" in prompt
     assert "5月1日:" in prompt
+
+
+def test_snapshot_2026_06_applies_nisa_exhaustion_core_deployment_override(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr("monthly_limit_order_review.cli.fetch_market_references", fake_references)
+
+    snapshot_path = tmp_path / "snapshot_2026_06.yaml"
+    snapshot_path.write_text(
+        (ROOT / "data/normalized/snapshot_2026_05.yaml").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    computation = compute_monthly(snapshot_path, project_root=ROOT)
+    template_text = read_text(ROOT / "prompts/templates/monthly_review_template.md")
+    prompt = build_monthly_review_prompt(computation, template_text)
+    monthly = computation.monthly_execution_outputs
+    recurring = computation.metadata["core_recurring_contributions"]
+    spot_materials = computation.metadata["core_spot_buy_materials"]
+
+    assert computation.metadata["review_target_month"] == "2026_06"
+    assert monthly["review_target_month"] == "2026_06"
+    assert monthly["nisa_growth_quota_status"] == "exhausted"
+    assert monthly["fixed_core_auto_invest_amount_jpy"] == 100000
+    assert monthly["core_recurring_contributions_total_jpy"] == 100000
+    assert monthly["taxable_core_spot_buy_required"] is True
+    assert monthly["core_spot_buy_account_type"] == "特定口座"
+    assert monthly["recommended_monthly_core_buy_budget_jpy"] == 1350000
+    assert monthly["recommended_taxable_core_spot_buy_jpy"] == 1350000
+    assert monthly["monthly_total_core_deployment_jpy"] == 1450000
+    assert monthly["recommended_monthly_core_buy_budget_jpy"] > 700000
+    assert computation.core_buy_materials["monthly_core_budget_tier"] == "rebalance"
+    assert computation.core_buy_materials["date_based_core_budget_override_active"] is True
+    assert computation.core_buy_materials["baseline_core_spot_buy_jpy"] == 1350000
+    assert recurring["date_based_override_active"] is True
+    assert recurring["total_monthly_jpy"] == 100000
+    assert recurring["plans"][0]["fund_name"] == "eMAXIS Slim 全世界株式（オール・カントリー）"
+    assert recurring["plans"][0]["amount_jpy"] == 50000
+    assert recurring["plans"][1]["fund_name"] == "eMAXIS Slim 米国株式（S&P500）"
+    assert recurring["plans"][1]["amount_jpy"] == 50000
+    assert spot_materials["taxable_core_spot_buy_required"] is True
+    assert spot_materials["fixed_core_auto_invest_amount_jpy"] == 100000
+    assert spot_materials["recommended_taxable_core_spot_buy_jpy"] == 1350000
+    assert spot_materials["total_monthly_core_deployment_jpy"] == 1450000
+    assert spot_materials["baseline_core_spot_buy_jpy"] == 1350000
+    assert spot_materials["core_spot_buy_allocation_rule"]["allowed_products_only"] is True
+    assert "fixed_core_auto_invest_amount_jpy: 100000" in prompt
+    assert "recommended_taxable_core_spot_buy_jpy: 1350000" in prompt
+    assert "account_type: 特定口座" in prompt
+    assert "NISAより税効率は落ちる" in prompt
+    assert "total_monthly_core_deployment_jpy: 1450000" in prompt
+    assert "指値設定対象月キー: 2026_06" in prompt
+
+
+def test_snapshot_after_2026_12_requires_explicit_nisa_rule(monkeypatch, tmp_path) -> None:
+    monkeypatch.setattr("monthly_limit_order_review.cli.fetch_market_references", fake_references)
+
+    snapshot_path = tmp_path / "snapshot_2027_01.yaml"
+    snapshot_path.write_text(
+        (ROOT / "data/normalized/snapshot_2026_05.yaml").read_text(encoding="utf-8"),
+        encoding="utf-8",
+    )
+    computation = compute_monthly(snapshot_path, project_root=ROOT)
+    warning_codes = {warning.code for warning in computation.warnings}
+    monthly = computation.monthly_execution_outputs
+    recurring = computation.metadata["core_recurring_contributions"]
+
+    assert computation.metadata["review_target_month"] == "2027_01"
+    assert monthly["review_target_month"] == "2027_01"
+    assert monthly["nisa_growth_quota_status"] == "requires_explicit_configuration"
+    assert monthly["fixed_core_auto_invest_amount_jpy"] == 750000
+    assert monthly["recommended_monthly_core_buy_budget_jpy"] == 700000
+    assert monthly["recommended_monthly_core_buy_budget_jpy"] != 1350000
+    assert monthly["taxable_core_spot_buy_required"] is False
+    assert recurring["date_based_override_active"] is False
+    assert "post_2026_nisa_growth_quota_rule_missing" in warning_codes

@@ -22,3 +22,74 @@ core_budget_policy:
     budget_tier: "rebalance"
     reason_code: "rebalance_mode_core_underweight_and_cash_overweight"
     description: "core不足と現金過多が大きい局面で、月次の配分是正速度を上げる補助モード"
+  date_based_overrides:
+    - active_from: "2026-06"
+      active_to: "2026-12"
+      reason_code: "nisa_growth_quota_exhausted_2026"
+      reason: "2026年NISA成長投資枠を使い切ったため"
+      nisa_growth_quota_status: "exhausted"
+      taxable_core_spot_buy_required: true
+      core_spot_buy_account_type: "特定口座"
+      fixed_core_auto_invest_jpy: 100000
+      baseline_total_core_deployment_target_jpy: 1450000
+      baseline_core_spot_buy_jpy: 1350000
+      hard_cap_core_spot_buy_jpy: 1500000
+      monthly_core_buy_budget_min_jpy: 300000
+      monthly_core_buy_budget_max_jpy: 1500000
+      budget_tiers:
+        standard:
+          budget_jpy: 300000
+          min_jpy: 300000
+          max_jpy: 600000
+          description: "Normal mode: core不足はあるが現金過多が軽度、または相場が高値圏"
+        aggressive:
+          budget_jpy: 900000
+          min_jpy: 700000
+          max_jpy: 1000000
+          description: "Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る"
+        rebalance:
+          budget_jpy: 1350000
+          min_jpy: 1000000
+          max_jpy: 1500000
+          description: "Rebalance mode: NISA固定積立減少分を特定口座スポットで補う"
+      override_conditions:
+        core_shortfall_pct_gte: 0.15
+        cash_excess_pct_gte: 0.15
+        budget_tier: "aggressive"
+        reason_code: "nisa_exhaustion_core_underweight_and_cash_overweight"
+      rebalance_mode:
+        enabled: true
+        core_shortfall_pct_gte: 0.25
+        cash_excess_pct_gte: 0.25
+        monthly_core_buy_budget_max_jpy: 1500000
+        budget_tier: "rebalance"
+        reason_code: "nisa_exhaustion_rebalance_core_underweight_and_cash_overweight"
+        description: "2026年6月〜12月は固定core積立が100,000円/月まで落ちるため、core不足と現金過多が大きい月は特定口座スポット買いで是正速度を維持する"
+      spot_buy_bands:
+        normal:
+          min_jpy: 300000
+          max_jpy: 600000
+          conditions:
+            - "core不足はあるが、現金過多が軽度"
+            - "相場が高値圏で、急いで投入する必要が低い"
+        aggressive:
+          min_jpy: 700000
+          max_jpy: 1000000
+          conditions:
+            - "core不足が大きい"
+            - "liquidity が target を大きく上回る"
+            - "ただし rebalance mode ほどではない"
+        rebalance:
+          min_jpy: 1000000
+          max_jpy: 1500000
+          conditions:
+            - "core_delta_pct <= -25pt 程度"
+            - "cash_excess_pct >= +25pt 程度"
+            - "生活防衛資金を残しても現金過多が明確"
+            - "NISA固定積立減少分を特定口座スポットで補う必要がある"
+      hard_cap_note: "単月のcoreスポット買いは原則1,500,000円を上限とし、例外的に大きな下落局面で上限超過を提案する場合は明確な理由を出す"
+      satellite_interaction_policy:
+        - "satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定"
+        - "PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定"
+        - "MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先"
+        - "指値候補が出ても、coreスポット買い予算を削ってまでテーマ銘柄を買わない"

@@ -1,5 +1,8 @@
 core_recurring_contributions:
   total_monthly_jpy: 750000
+  monthly_core_auto_invest_amount_jpy: 750000
+  nisa_growth_quota_status: "not_exhausted_or_default_rule"
+  taxable_core_spot_buy_required: false
   plans:
     - day_of_month: 1
       fund_name: "eMAXIS Slim 米国株式(S&P500)"
@@ -29,6 +32,51 @@ core_recurring_contributions:
     - "この固定積立は毎月すでに執行される前提で評価する"
     - "core不足の指摘は、固定積立の寄与を織り込んだうえで必要時のみ行う"
     - "長期シナリオ悪化やリスク管理上の理由がある場合は、固定積立の減額・停止提案を明示する"
+  date_based_overrides:
+    - active_from: "2026-06"
+      active_to: "2026-12"
+      reason_code: "nisa_growth_quota_exhausted_2026"
+      reason: "2026年NISA成長投資枠を使い切ったため"
+      nisa_growth_quota_status: "exhausted"
+      total_monthly_jpy: 100000
+      monthly_core_auto_invest_amount_jpy: 100000
+      taxable_core_spot_buy_required: true
+      core_spot_buy_account_type: "特定口座"
+      baseline_total_core_deployment_target_jpy: 1450000
+      rebalance_mode_core_spot_buy_reference_jpy: 1350000
+      taxable_account_note: "NISA成長投資枠枯渇のため、2026年6月〜12月のcoreスポット買いは原則として特定口座で行う"
+      tax_note: "NISAより税効率は落ちるが、現在の主問題はcore不足と現金過多であるため、特定口座でのcore積増しを許容する"
+      nisa_exhaustion_adjustment_reason: "NISA枠がないからcore購入を弱めるのではなく、NISA固定積立減少分を特定口座スポットで補う"
+      core_spot_buy_allocation_rule:
+        allowed_products_only: true
+        default_allocation:
+          eMAXIS Slim 全世界株式（オール・カントリー）: 0.60
+          eMAXIS Slim 米国株式（S&P500）: 0.40
+        high_us_ai_infra_sensitivity_allocation:
+          eMAXIS Slim 全世界株式（オール・カントリー）: 0.65
+          eMAXIS Slim 米国株式（S&P500）: 0.35
+        note: "既存core商品に限定し、米国株・半導体・AIインフラ感応度が高い月はオルカン比率を厚めにする"
+      plans:
+        - day_of_month: 8
+          fund_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+          amount_jpy: 50000
+          settlement_type: "クレジットカード決済"
+          account_type: "NISAつみたて投資枠"
+          distribution_course: "再投資型"
+        - day_of_month: 8
+          fund_name: "eMAXIS Slim 米国株式（S&P500）"
+          amount_jpy: 50000
+          settlement_type: "クレジットカード決済"
+          account_type: "NISAつみたて投資枠"
+          distribution_course: "再投資型"
+      review_guidance:
+        - "2026年6月〜12月は、NISA成長投資枠の固定積立750,000円/月を前提にしない"
+        - "固定core積立は100,000円/月として扱う"
+        - "core不足と現金過多が続く限り、特定口座でのcoreスポット買いを厚めに提案する"
+        - "税効率よりも、core不足と現金過多の是正を優先する"
+        - "生活防衛資金・住宅ローン・大口支出不明リスクを考慮し、現金を一気に削りすぎない"
+      requires_explicit_followup_rule: true
+      followup_warning_code: "post_2026_nisa_growth_quota_rule_missing"
   crypto_weekly_dca:
     - symbol: "BTC"
       amount_jpy_per_week: 2000

@@ -2,59 +2,111 @@ snapshot_date: "2026-03-07"
 currency_base: "JPY"
 total_assets_jpy: 5000000
 liquidity_target_jpy: 1000000
+category_totals_jpy:
+  liquidity: 1200000
+  core: 1800000
+  jun_core: 800000
+  satellite_core: 800000
+  satellite: 400000
+source_evidence:
+  primary_source: "moneyforward_screenshots"
+  auxiliary_source: "moneyforward_pasted_text"
+ocr_notes: []
+validation_notes: []
 
 holdings:
   - symbol: "JPY_CASH"
     name: "Cash"
+    source_category: "現金・預金"
+    institution: null
+    account_type: "現金・預金"
     asset_class: "liquidity"
     quantity: null
     avg_cost: null
     current_price: null
+    unit_price: null
+    profit_loss_jpy: null
+    valuation_jpy: 1200000
     market_value_jpy: 1200000
     currency: "JPY"
+    notes: null
 
   - symbol: "ALL_COUNTRY_FUND"
     name: "All Country Mutual Funds"
+    source_category: "投資信託"
+    institution: null
+    account_type: "NISAつみたて投資枠"
     asset_class: "core"
     quantity: null
     avg_cost: null
     current_price: null
+    unit_price: null
+    profit_loss_jpy: null
+    valuation_jpy: 1800000
     market_value_jpy: 1800000
     currency: "JPY"
+    notes: null
 
   - symbol: "MSFT"
     name: "Microsoft"
+    source_category: "外国株式"
+    institution: null
+    account_type: "特定口座"
     asset_class: "jun_core"
     quantity: 4
     avg_cost: 410
     current_price: 400
+    unit_price: 400
+    profit_loss_jpy: null
+    valuation_jpy: 800000
     market_value_jpy: 800000
     currency: "USD"
+    notes: null
 
   - symbol: "NIKKO_SOX_FUND"
     name: "Nikkei SOX Index Fund"
+    source_category: "投資信託"
+    institution: null
+    account_type: "特定口座"
     asset_class: "satellite_core"
     quantity: null
     avg_cost: null
     current_price: null
+    unit_price: null
+    profit_loss_jpy: null
+    valuation_jpy: 600000
     market_value_jpy: 600000
     currency: "JPY"
+    notes: null
 
   - symbol: "SMH"
     name: "VanEck Semiconductor ETF"
+    source_category: "外国株式"
+    institution: null
+    account_type: "特定口座"
     asset_class: "satellite_core"
     quantity: 1
     avg_cost: 200
     current_price: 230
+    unit_price: 230
+    profit_loss_jpy: null
+    valuation_jpy: 200000
     market_value_jpy: 200000
     currency: "USD"
+    notes: null
 
   - symbol: "PLTR"
     name: "Palantir Technologies"
+    source_category: "外国株式"
+    institution: null
+    account_type: "特定口座"
     asset_class: "satellite"
     quantity: 10
     avg_cost: 80
     current_price: 70
+    unit_price: 70
+    profit_loss_jpy: null
+    valuation_jpy: 400000
     market_value_jpy: 400000
     currency: "USD"
-
+    notes: null

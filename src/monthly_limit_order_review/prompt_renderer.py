@@ -27,6 +27,9 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             f"- total_assets_jpy: {snapshot.total_assets_jpy}",
             f"- liquidity_target_jpy: {snapshot.liquidity_target_jpy or 'null'}",
             f"- holdings_count: {len(snapshot.holdings)}",
+            "- スナップショットは Money Forward スクリーンショットを一次情報として Codex が OCR・正規化したものとして扱うこと",
+            "- Money Forward から貼り付けられたテキストがある場合でも、それは補助情報であり、HTML由来でレイアウト・列・階層・並び順が崩れている可能性がある",
+            "- OCR・正規化・前月差分の検証警告は後続の警告一覧に含めているため、投資レビューでは警告を前提条件として扱うこと",
             "- 毎月の税引前キャッシュ流入はおおむね60万〜70万円ある前提で、生活防衛資金の必要水準を評価すること",
             "- 名古屋市中区・金山駅近くの流動性が高いマンション（約6500万円）を住居兼資産として保有している",
             "- 上記マンションはフルローンで購入しており、ローン返済はまだほとんど進んでいない",
@@ -280,11 +283,24 @@ def build_portfolio_summary(
         if effective_bucket != holding.asset_class:
             reason = classification_reason_map.get(holding.symbol, "-")
             bucket_label = f"{effective_bucket} (raw={holding.asset_class}, reason={reason})"
+        optional_parts = []
+        if getattr(holding, "source_category", None):
+            optional_parts.append(f"source_category={holding.source_category}")
+        if getattr(holding, "institution", None):
+            optional_parts.append(f"institution={holding.institution}")
+        if getattr(holding, "account_type", None):
+            optional_parts.append(f"account_type={holding.account_type}")
+        if getattr(holding, "profit_loss_jpy", None) is not None:
+            optional_parts.append(f"profit_loss_jpy={holding.profit_loss_jpy}")
+        if getattr(holding, "notes", None):
+            optional_parts.append(f"notes={normalize_text(holding.notes)}")
+        optional_text = f" | {' | '.join(optional_parts)}" if optional_parts else ""
         lines.append(
             "- "
             f"{holding.symbol} | {bucket_label} | value_jpy={holding.market_value_jpy} | "
             f"price={holding.current_price if holding.current_price is not None else 'null'} | "
             f"quantity={holding.quantity if holding.quantity is not None else 'null'}"
+            f"{optional_text}"
         )
     return lines
 

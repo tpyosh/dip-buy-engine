@@ -132,21 +132,26 @@ coreスポット買いの配分は既存core商品に限定し、基本は eMAXI
 
 ## 毎月のワークフロー
 
-1. Money Forward の資産キャプチャを ChatGPT に貼る
-2. [prompts/moneyforward_normalization_prompt.md](/Users/tappeiyoshida/Documents/stock/prompts/moneyforward_normalization_prompt.md) を使って YAML に正規化する
-3. ChatGPT の返した YAML を `data/normalized/snapshot_YYYY_MM.yaml` という命名規約で保存する
-4. 例として [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/Documents/stock/data/normalized/snapshot_2026_03.yaml) の形式を使う
-5. CLI で市場データ取得、比率計算、ルール計算、警告抽出を実行する
-6. 生成された月次レビュー用プロンプトを ChatGPT に貼る
-7. ChatGPT の回答をテキストで保存する
-8. CLI でレビュー取り込み、差分保存、Codex 向け修正プロンプト生成を行う
-9. 必要なら Codex に修正プロンプトを渡してスクリプトを改善する
+1. ユーザが Codex セッションに Money Forward のスクリーンショットを添付する
+2. 必要に応じて、Money Forward の画面からコピーしたテキストも Codex に貼る
+3. Codex が [prompts/moneyforward_normalization_prompt.md](/Users/tappeiyoshida/Documents/stock/prompts/moneyforward_normalization_prompt.md) のルールに従い、スクリーンショットを一次情報として OCR・正規化する
+4. Codex が `data/normalized/snapshot_YYYY_MM.yaml` を作成または更新する
+5. 例として [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/Documents/stock/data/normalized/snapshot_2026_03.yaml) の形式を使う
+6. Codex / CLI が合計、カテゴリ、通貨、分類、前月差分、重複、OCR由来の不確実性を検証する
+7. CLI で市場データ取得、比率計算、ルール計算、警告抽出を実行する
+8. 生成された月次レビュー用プロンプトを ChatGPT に貼る
+9. ChatGPT が月次レビューと購入提案を返す
+10. ChatGPT の回答をテキストで保存する
+11. CLI でレビュー取り込み、差分保存、Codex 向け修正プロンプト生成を行う
+12. 必要なら Codex に修正プロンプトを渡してスクリプトを改善する
+
+将来の月次レビュー開始時は [prompts/templates/moneyforward_monthly_session_start_prompt.md](/Users/tappeiyoshida/Documents/stock/prompts/templates/moneyforward_monthly_session_start_prompt.md) を Codex に貼り、スクリーンショット添付から始める。
 
 ## 役割分担
 
 - Python: YAML ロード、`yfinance` 取得、20日平均、63日高値、バケット比率、警告、候補価格、差分保存、履歴保存
-- ChatGPT: 今月の指値提案、SOX 投信判定、ポートフォリオ診断、改善提案、Codex 向け修正要約
-- Codex: ChatGPT が出した改善点をコードとテストへ落とし込む
+- Codex: Money Forward スクリーンショットの OCR、補助テキストとの照合、YAML 正規化、検証警告の整理、ChatGPT 向け月次レビュープロンプト生成、ChatGPT が出した改善点のコードとテストへの反映
+- ChatGPT: 今月の指値提案、SOX 投信判定、ポートフォリオ診断、購入提案、改善提案、Codex 向け修正要約
 
 ## セットアップ
 
@@ -192,13 +197,55 @@ python -m monthly_limit_order_review.cli generate-codex-patch \
 
 ## 入力 YAML の作り方
 
-- 画像 OCR は Python に入れず、ChatGPT に YAML 正規化だけをさせます
-- ChatGPT はファイルを書かず、チャット上に YAML を返します。ユーザがそれを保存します
+- Codex が Money Forward スクリーンショットを OCR し、既存スナップショット形式へ正規化します
+- Money Forward からコピーしたテキストは補助情報として扱います。HTML/web view 由来のコピーは、レイアウト、列、階層、並び順、カテゴリとの対応が崩れる可能性があります
+- 金額と項目の対応、口座区分、カテゴリ、並び順はスクリーンショットを優先して確定します
+- 画像とテキストが矛盾する場合は、原則として画像を優先し、矛盾を `ocr_notes` または `validation_notes` に残します
 - 保存ファイル名は `snapshot_date` に合わせて `data/normalized/snapshot_YYYY_MM.yaml` とします
 - 読み取れない値は `null` にします
+- 推測した値は `notes`、`ocr_notes`、`validation_notes` のいずれかで推測であることを明示します
 - `asset_class` は `liquidity`, `core`, `jun_core`, `satellite_core`, `satellite`, `pension`, `other` のいずれかを付けます
 - `currency_base` は原則 `JPY` を入れます
 - サンプルは [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/Documents/stock/data/normalized/snapshot_2026_03.yaml) を参照してください
+
+## Evidence Priority
+
+1. Money Forward スクリーンショット / 画像: 資産名、金額、カテゴリ、口座ラベル、視覚的な grouping の一次情報
+2. 既存リポジトリデータ / 前月スナップショット: 継続性、資産同一性、既存分類、月次差分の異常検知
+3. Money Forward から貼り付けられたテキスト: ラベルや数字の確認用の補助情報。レイアウト、順序、階層、列対応は信用しない
+4. 推測: 必要な場合のみ使い、推測であることを明示する。不明値を黙って補完しない
+
+## OCR Normalization Fields
+
+Money Forward スクリーンショットから読み取れる範囲で以下を残す。
+
+- `snapshot_date`
+- `currency_base`
+- `total_assets_jpy`
+- `category_totals_jpy`
+- `source_evidence`
+- `ocr_notes`
+- `validation_notes`
+- holdings ごとの `symbol`, `name`, `source_category`, `institution`, `account_type`, `asset_class`, `quantity`, `avg_cost`, `current_price`, `unit_price`, `profit_loss_jpy`, `valuation_jpy`, `market_value_jpy`, `currency`, `notes`
+
+`category_totals_jpy` は、Money Forward 画面上のカテゴリ名を使う場合は holdings の `source_category` と対応させる。リポジトリ分類で合計する場合は `asset_class` と対応させる。
+
+読み取れない項目は `null` にする。同一ファンドや資産は、既存ルールが明示しない限り合算しない。
+
+## Snapshot Validation
+
+月次レビュー用プロンプトを生成する前に、少なくとも以下を確認する。
+
+- `total_assets_jpy` と holdings の合計が大きく矛盾していないか
+- `category_totals_jpy` がある場合、カテゴリ合計と該当 holdings 合計が大きく矛盾していないか
+- `currency_base` と holdings の `currency` が想定範囲か
+- 前月存在した資産が不自然に消えていないか
+- 同一資産の月次増減が異常に大きくないか
+- OCR や貼り付けテキスト由来の重複がないか
+- NISA / 特定 / 年金 / 現金 / 預金の分類が `asset_class` と矛盾していないか
+- core / satellite / pension / liquidity の扱いが既存ルールと矛盾していないか
+
+検証警告は必ず ChatGPT 月次レビュー依頼プロンプトの警告一覧に含める。警告は常に出力をブロックするものではないが、投資判断に影響する曖昧さはユーザ確認または明示警告の対象にする。
 
 ## 主要コマンド
 

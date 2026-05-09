@@ -65,6 +65,13 @@ def load_snapshot(path: str | Path) -> PortfolioSnapshot:
             current_price=to_optional_decimal(item.get("current_price")),
             market_value_jpy=to_decimal(item.get("market_value_jpy"), field_name=f"{symbol}.market_value_jpy"),
             currency=currency,
+            source_category=optional_string(item.get("source_category")),
+            institution=optional_string(item.get("institution")),
+            account_type=optional_string(item.get("account_type")),
+            unit_price=to_optional_decimal(item.get("unit_price")),
+            profit_loss_jpy=to_optional_decimal(item.get("profit_loss_jpy")),
+            valuation_jpy=to_optional_decimal(item.get("valuation_jpy")),
+            notes=optional_string(item.get("notes")),
         )
         holdings.append(holding)
 
@@ -75,6 +82,10 @@ def load_snapshot(path: str | Path) -> PortfolioSnapshot:
         liquidity_target_jpy=to_optional_decimal(payload.get("liquidity_target_jpy")),
         holdings=holdings,
         warnings=warnings,
+        source_evidence=payload.get("source_evidence") or {},
+        category_totals_jpy=load_category_totals(payload),
+        ocr_notes=load_string_list(payload.get("ocr_notes")),
+        validation_notes=load_string_list(payload.get("validation_notes")),
     )
 
     holdings_total = sum((holding.market_value_jpy for holding in holdings), start=Decimal("0"))
@@ -87,3 +98,28 @@ def load_snapshot(path: str | Path) -> PortfolioSnapshot:
         LOGGER.warning(message)
 
     return snapshot
+
+
+def optional_string(value) -> str | None:
+    if value in (None, ""):
+        return None
+    return str(value)
+
+
+def load_string_list(value) -> list[str]:
+    if value in (None, ""):
+        return []
+    if not isinstance(value, list):
+        return [str(value)]
+    return [str(item) for item in value]
+
+
+def load_category_totals(payload: dict) -> dict[str, Decimal]:
+    raw_totals = payload.get("category_totals_jpy") or payload.get("asset_class_totals_jpy") or {}
+    if not isinstance(raw_totals, dict):
+        raise ValueError("Snapshot field 'category_totals_jpy' must be a mapping when present")
+    return {
+        str(category): to_decimal(value, field_name=f"category_totals_jpy.{category}")
+        for category, value in raw_totals.items()
+        if value not in (None, "")
+    }

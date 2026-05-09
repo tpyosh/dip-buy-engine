@@ -57,3 +57,53 @@ holdings:
     snapshot = load_snapshot(path)
 
     assert not any("Sum of holding market values" in warning for warning in snapshot.warnings)
+
+
+def test_load_snapshot_reads_ocr_metadata_fields(tmp_path: Path) -> None:
+    path = tmp_path / "snapshot_with_ocr_metadata.yaml"
+    path.write_text(
+        """snapshot_date: "2026-03-07"
+currency_base: "JPY"
+total_assets_jpy: 1000000
+category_totals_jpy:
+  core: 1000000
+source_evidence:
+  primary_source: "moneyforward_screenshots"
+ocr_notes:
+  - "one field was unreadable"
+validation_notes:
+  - "checked totals"
+holdings:
+  - symbol: "TEST"
+    name: "Test Asset"
+    source_category: "投資信託"
+    institution: "Test Securities"
+    account_type: "NISAつみたて投資枠"
+    asset_class: "core"
+    quantity: 10
+    avg_cost: 900
+    current_price: 1000
+    unit_price: 1000
+    profit_loss_jpy: 100000
+    valuation_jpy: 1000000
+    market_value_jpy: 1000000
+    currency: "JPY"
+    notes: "OCR confidence low"
+""",
+        encoding="utf-8",
+    )
+
+    snapshot = load_snapshot(path)
+    holding = snapshot.holdings[0]
+
+    assert snapshot.category_totals_jpy["core"] == 1000000
+    assert snapshot.source_evidence["primary_source"] == "moneyforward_screenshots"
+    assert snapshot.ocr_notes == ["one field was unreadable"]
+    assert snapshot.validation_notes == ["checked totals"]
+    assert holding.source_category == "投資信託"
+    assert holding.institution == "Test Securities"
+    assert holding.account_type == "NISAつみたて投資枠"
+    assert holding.unit_price == 1000
+    assert holding.profit_loss_jpy == 100000
+    assert holding.valuation_jpy == 1000000
+    assert holding.notes == "OCR confidence low"

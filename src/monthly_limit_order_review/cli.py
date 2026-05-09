@@ -13,7 +13,7 @@ from .codex_patch_builder import build_codex_patch_prompt, build_codex_patch_req
 from .diff_analyzer import build_proposal_diffs
 from .exposure_metrics import build_exposure_breakdown
 from .market_data import fetch_market_references
-from .models import MonthlyComputation, PortfolioWarning
+from .models import MonthlyComputation, PortfolioSnapshot, PortfolioWarning
 from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics, suggest_core_proxy_symbol
 from .prompt_renderer import render_chatgpt_prompt
 from .readme_portfolio import refresh_readme_portfolio
@@ -26,6 +26,7 @@ from .utils import infer_target_month_start, month_key, percent, quantize, targe
 from .validation import (
     apply_candidate_validations,
     build_exposure_validation_warnings,
+    build_ocr_snapshot_validation_warnings,
     build_validation_warnings,
 )
 
@@ -170,6 +171,10 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     snapshot = load_snapshot(snapshot_path)
     review_target_month_start = infer_target_month_start(snapshot.snapshot_date, snapshot_path=snapshot_path)
     review_target_month = month_key(review_target_month_start)
+    previous_snapshot, previous_snapshot_warnings = load_previous_snapshot_for_validation(
+        snapshot_path,
+        review_target_month_start,
+    )
     buy_rules = load_yaml(project_root / "config/buy_rules.yaml")
     portfolio_policy = load_yaml(project_root / "config/portfolio_policy.yaml")
     tickers = load_yaml(project_root / "config/tickers.yaml")
@@ -271,6 +276,14 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     warnings.extend(recurring_contribution_warnings)
     warnings.extend(budget_policy_warnings)
     warnings.extend(build_exposure_validation_warnings(exposure_breakdown))
+    warnings.extend(previous_snapshot_warnings)
+    warnings.extend(
+        build_ocr_snapshot_validation_warnings(
+            snapshot,
+            previous_snapshot=previous_snapshot,
+            classification_audit=portfolio_analysis["classification_audit"],
+        )
+    )
     warnings.extend(build_validation_warnings(snapshot.warnings))
     core_reference_missing_symbols = sorted(
         {
@@ -372,6 +385,9 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         },
         metadata={
             "snapshot_path": str(snapshot_path),
+            "previous_snapshot_path": str(previous_snapshot_path(snapshot_path, review_target_month_start))
+            if previous_snapshot is not None
+            else None,
             "review_target_month": review_target_month,
             "review_target_month_start": review_target_month_start.isoformat(),
             "resolved_buckets": portfolio_analysis["resolved_buckets"],
@@ -380,6 +396,36 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "core_spot_buy_materials": core_spot_buy_materials,
         },
     )
+
+
+def load_previous_snapshot_for_validation(
+    snapshot_path: Path,
+    review_target_month_start: date,
+) -> tuple[PortfolioSnapshot | None, list[PortfolioWarning]]:
+    candidate_path = previous_snapshot_path(snapshot_path, review_target_month_start)
+    if candidate_path == snapshot_path or not candidate_path.exists():
+        return None, []
+    try:
+        return load_snapshot(candidate_path), []
+    except Exception as exc:  # noqa: BLE001
+        return None, [
+            PortfolioWarning(
+                code="previous_snapshot_validation_unavailable",
+                severity="warning",
+                message=f"Could not load previous snapshot for OCR continuity validation: {candidate_path} ({exc})",
+            )
+        ]
+
+
+def previous_snapshot_path(snapshot_path: Path, review_target_month_start: date) -> Path:
+    previous_month = previous_month_start(review_target_month_start)
+    return snapshot_path.parent / f"snapshot_{previous_month.strftime('%Y_%m')}.yaml"
+
+
+def previous_month_start(value: date) -> date:
+    year = value.year - 1 if value.month == 1 else value.year
+    month = 12 if value.month == 1 else value.month - 1
+    return date(year, month, 1)
 
 
 def estimate_cash_normalization_months(

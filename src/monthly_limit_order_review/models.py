@@ -15,6 +15,13 @@ class Holding:
     current_price: Decimal | None
     market_value_jpy: Decimal
     currency: str
+    source_category: str | None = None
+    institution: str | None = None
+    account_type: str | None = None
+    unit_price: Decimal | None = None
+    profit_loss_jpy: Decimal | None = None
+    valuation_jpy: Decimal | None = None
+    notes: str | None = None
 
 
 @dataclass(slots=True)
@@ -25,6 +32,10 @@ class PortfolioSnapshot:
     liquidity_target_jpy: Decimal | None
     holdings: list[Holding]
     warnings: list[str] = field(default_factory=list)
+    source_evidence: dict = field(default_factory=dict)
+    category_totals_jpy: dict[str, Decimal] = field(default_factory=dict)
+    ocr_notes: list[str] = field(default_factory=list)
+    validation_notes: list[str] = field(default_factory=list)
 
 
 @dataclass(slots=True)

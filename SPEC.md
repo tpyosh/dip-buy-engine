@@ -24,15 +24,17 @@ Python CLI プロジェクトを作成したい。
 
 このプロジェクトは、以下の運用を前提に設計すること。
 
-1. ユーザが ChatGPT に Money Forward の資産キャプチャを貼る
-2. ChatGPT がそのキャプチャを YAML に正規化する
-3. ユーザがその YAML を Python スクリプトに入力する
-4. Python が市場データ取得・ルール計算・比率計算・警告抽出を行い、**ChatGPT 用月次レビュー・提案プロンプト**を生成する
-5. ユーザがそのプロンプトを ChatGPT に貼る
-6. ChatGPT がその月の最新モデルとして、今月の指値提案・ポートフォリオ診断・ルール改善提案を返す
-7. ユーザがその提案を参考に最終判断し、証券会社で手動発注する
-8. Python は ChatGPT の回答を保存し、改善提案を抽出し、**Codex 向け修正プロンプト**を生成する
-9. ユーザは必要に応じてその修正プロンプトを Codex に渡し、スクリプトを改善する
+1. ユーザが Codex に Money Forward の資産スクリーンショットを添付する
+2. 必要に応じて、Money Forward 画面からコピーしたテキストも Codex に貼る
+3. Codex がスクリーンショットを一次情報として OCR し、貼り付けテキストを補助情報として照合する
+4. Codex が既存の snapshot YAML 形式に正規化し、`data/normalized/snapshot_YYYY_MM.yaml` を作成または更新する
+5. Codex / Python が合計、カテゴリ、通貨、分類、前月差分、重複、OCR由来の不確実性を検証する
+6. Python が市場データ取得・ルール計算・比率計算・警告抽出を行い、**ChatGPT 用月次レビュー・提案プロンプト**を生成する
+7. ユーザがそのプロンプトを ChatGPT に貼る
+8. ChatGPT がその月の最新モデルとして、今月の指値提案・ポートフォリオ診断・購入提案・ルール改善提案を返す
+9. ユーザがその提案を参考に最終判断し、証券会社で手動発注する
+10. Python は ChatGPT の回答を保存し、改善提案を抽出し、**Codex 向け修正プロンプト**を生成する
+11. ユーザは必要に応じてその修正プロンプトを Codex に渡し、スクリプトを改善する
 
 ---
 
@@ -82,7 +84,7 @@ ChatGPT が担当すること:
 - 証券会社 API 接続
 - 自動発注
 - ブラウザ自動操作
-- 完全自動 OCR
+- Python 内の独自 OCR エンジン実装
 - Web UI
 - モバイルアプリ
 - 大規模バックテスト基盤
@@ -95,8 +97,9 @@ ChatGPT が担当すること:
 ## Design principles
 
 ### 1. OCR と投資ロジックを切り離す
-画像の解釈は ChatGPT 側に任せ、Python は YAML 入力のみを扱う。  
-これにより OCR 揺れで投資判断ロジックが壊れるのを防ぐ。
+画像の解釈と YAML 正規化は Codex セッションで行い、Python は正規化済み YAML 入力のみを扱う。
+Money Forward からコピーした HTML 由来のテキストは補助情報であり、レイアウト、列、階層、並び順、カテゴリ対応は信用しない。
+これにより OCR 揺れや貼り付けテキストの構造崩れで投資判断ロジックが壊れるのを防ぐ。
 
 ### 2. Python が数値事実を作り、ChatGPT がレビューする
 ChatGPT に価格計算や比率計算を主担当させない。  
@@ -164,6 +167,7 @@ monthly-limit-order-review-system/
     templates/
       monthly_review_template.md
       codex_patch_template.md
+      moneyforward_monthly_session_start_prompt.md
     generated/
       monthly_review_prompt_YYYY_MM.md
       codex_patch_prompt_YYYY_MM.md
@@ -198,8 +202,15 @@ monthly-limit-order-review-system/
 
 ## Input format assumptions
 
-ユーザは毎月、ChatGPT に Money Forward キャプチャを貼り、YAML を作る。  
-Python はその YAML を読む。
+ユーザは毎月、Codex に Money Forward スクリーンショットを添付する。必要に応じて Money Forward 画面からコピーしたテキストも貼る。
+Codex はスクリーンショットを一次情報、既存スナップショットを継続性確認、貼り付けテキストを補助情報として扱い、YAML を作る。Python はその YAML を読む。
+
+Evidence priority:
+
+1. Money Forward screenshots/images: asset names, amounts, categories, account labels, and visual grouping.
+2. Existing repository data and previous monthly snapshots: continuity, likely asset identity, existing classifications, and abnormal month-over-month changes.
+3. User-pasted Money Forward text copy: auxiliary evidence only. It may confirm labels or numbers, but layout, ordering, grouping, hierarchy, and column association are unreliable.
+4. Inference: use only when necessary, mark clearly, and never silently invent missing values.
 
 入力 YAML の想定例:
 
@@ -212,10 +223,16 @@ liquidity_target_jpy: 1000000
 holdings:
   - symbol: "7203"
     name: "Toyota Motor"
+    source_category: "株式"
+    institution: null
+    account_type: "特定口座"
     asset_class: "jun_core"
     quantity: 800
     avg_cost: 532
     current_price: 3515
+    unit_price: 3515
+    profit_loss_jpy: null
+    valuation_jpy: 2812000
     market_value_jpy: 2812000
     currency: "JPY"
 
@@ -772,16 +789,18 @@ Codex 向け修正プロンプトには以下を含めること。
 ```text
 あなたは資産スナップショット正規化アシスタントです。
 
-以下の Money Forward キャプチャから、投資判断ロジックで使えるように資産情報を YAML に変換してください。
+Money Forward スクリーンショットを一次情報として OCR し、投資判断ロジックで使えるように資産情報を YAML に変換してください。
+Money Forward からコピーされたテキストがある場合は、補助情報としてだけ使ってください。
 
 ルール:
+- スクリーンショットを一次情報として扱う
+- 貼り付けテキストは HTML 由来でレイアウト、列、階層、並び順、カテゴリ対応が崩れている可能性がある
 - 推測を最小化する
 - 読み取れない値は null にする
 - 通貨は JPY / USD を明記する
 - 同一カテゴリの複数ファンドは合算せず、原則として1行ずつ残す
 - ただし後段でまとめるため、asset_class は必ず付与する
-- 出力は YAML のみ
-- 余計な説明文は不要
+- 画像とテキストが矛盾する場合は画像を優先し、矛盾を ocr_notes または validation_notes に残す
 
 asset_class の候補:
 - liquidity
@@ -794,17 +813,33 @@ asset_class の候補:
 
 必要項目:
 - snapshot_date
+- currency_base
 - total_assets_jpy
+- category_totals_jpy
+- source_evidence
+- ocr_notes
+- validation_notes
 - holdings:
   - symbol
   - name
+  - source_category
+  - institution
+  - account_type
   - asset_class
   - quantity
   - avg_cost
   - current_price
+  - unit_price
+  - profit_loss_jpy
+  - valuation_jpy
   - market_value_jpy
   - currency
+  - notes
 ```
+
+### 1-1. `prompts/templates/moneyforward_monthly_session_start_prompt.md`
+
+将来の月次レビュー開始時に Codex に貼る日本語テンプレートを保存すること。テンプレートは、Money Forward スクリーンショット添付から始め、Codex が OCR、正規化、検証、ChatGPT 月次レビュー依頼プロンプト生成まで実施する前提を明記する。
 
 ### 2. Monthly review template
 

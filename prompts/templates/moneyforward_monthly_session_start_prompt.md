@@ -2,7 +2,7 @@
 
 あなたはこの資産運用リポジトリの月次レビュー準備担当です。
 
-今回から、Money ForwardキャプチャのOCRはChatGPTではなくCodex側で実施します。
+この運用では、Money ForwardキャプチャのOCRはChatGPTではなくCodex側で実施します。ChatGPTには、Codexが正規化・検証した月次レビュー依頼プロンプトだけを渡します。
 
 ## 入力
 

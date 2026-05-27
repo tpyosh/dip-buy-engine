@@ -117,7 +117,10 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert computation.core_buy_materials["recommended_monthly_core_buy_budget_jpy"] == 700000
     assert computation.monthly_execution_outputs["candidate_count"] == len(computation.candidate_orders)
     assert computation.monthly_execution_outputs["core_recurring_contributions_total_jpy"] == 750000
-    assert computation.monthly_execution_outputs["crypto_weekly_dca_total_jpy"] == 5000
+    assert computation.monthly_execution_outputs["pension_monthly_dca_total_jpy"] == 55000
+    assert computation.monthly_execution_outputs["annualized_pension_dca_jpy"] == 660000
+    assert computation.monthly_execution_outputs["crypto_weekly_dca_total_jpy"] == 4000
+    assert computation.monthly_execution_outputs["annualized_crypto_dca_jpy"] == 208000
     assert computation.monthly_execution_outputs["monthly_total_core_deployment_jpy"] == 1450000
     assert "classification_audit" in computation.quarterly_rule_review_outputs
     assert "candidate_count" not in computation.quarterly_rule_review_outputs
@@ -169,14 +172,18 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "((指値 / 直近20営業日終値平均) - 1) * 100" in prompt
     assert "指値設定対象月キー: 2026_03" in prompt
     assert "## 5-2. Core積立設定（毎月固定）" in prompt
-    assert "## 5-3. 暗号資産積立設定（毎週固定）" in prompt
+    assert "## 5-3. iDeCo積立設定（毎月固定）" in prompt
+    assert "## 5-4. 暗号資産積立設定（毎週固定）" in prompt
     assert "total_monthly_jpy: 750000" in prompt
     assert "eMAXIS Slim 米国株式(S&P500)" in prompt
     assert "楽天・プラス・オールカントリー株式インデックス・ファンド" in prompt
+    assert "| IDECO_ALL_COUNTRY | eMAXIS Slim 全世界株式（オール・カントリー） | 55000 | iDeCo | pension |" in prompt
+    assert "pension_monthly_dca_total_jpy: 55000" in prompt
+    assert "annualized_pension_dca_jpy: 660000" in prompt
     assert "| BTC | 2000 |" in prompt
     assert "| ETH | 2000 |" in prompt
-    assert "| XRP | 1000 |" in prompt
-    assert "annualized_crypto_dca_jpy: 260000" in prompt
+    assert "| XRP | 1000 |" not in prompt
+    assert "annualized_crypto_dca_jpy: 208000" in prompt
     assert "real_estate_exposure_present: True" in prompt
     assert "liquidity_comment: residential real estate should not be treated as emergency liquidity" in prompt
 
@@ -216,6 +223,9 @@ def test_snapshot_2026_05_core_references_are_not_missing_and_schedule_uses_may(
     computation = compute_monthly(snapshot_path, project_root=ROOT)
     template_text = read_text(ROOT / "prompts/templates/monthly_review_template.md")
     prompt = build_monthly_review_prompt(computation, template_text)
+    monthly = computation.monthly_execution_outputs
+    recurring = computation.metadata["core_recurring_contributions"]
+    spot_materials = computation.metadata["core_spot_buy_materials"]
 
     core_constituents = computation.core_buy_materials["core_constituents"]
 
@@ -223,13 +233,28 @@ def test_snapshot_2026_05_core_references_are_not_missing_and_schedule_uses_may(
     assert all(item["drawdown_pct_from_recent_high"] is not None for item in core_constituents)
     assert computation.quarterly_rule_review_outputs["core_reference_missing_symbols"] == []
     assert computation.metadata["review_target_month"] == "2026_05"
-    assert computation.monthly_execution_outputs["review_target_month"] == "2026_05"
-    assert computation.monthly_execution_outputs["fixed_core_auto_invest_amount_jpy"] == 750000
-    assert computation.monthly_execution_outputs["taxable_core_spot_buy_required"] is False
-    assert computation.monthly_execution_outputs["recommended_monthly_core_buy_budget_jpy"] == 700000
-    assert computation.monthly_execution_outputs["recommended_taxable_core_spot_buy_jpy"] is None
-    assert computation.metadata["core_recurring_contributions"]["date_based_override_active"] is False
+    assert monthly["review_target_month"] == "2026_05"
+    assert monthly["nisa_growth_quota_status"] == "exhausted"
+    assert monthly["fixed_core_auto_invest_amount_jpy"] == 100000
+    assert monthly["core_recurring_contributions_total_jpy"] == 100000
+    assert monthly["pension_monthly_dca_total_jpy"] == 55000
+    assert monthly["crypto_weekly_dca_total_jpy"] == 4000
+    assert monthly["taxable_core_spot_buy_required"] is True
+    assert monthly["core_spot_buy_account_type"] == "特定口座"
+    assert monthly["recommended_monthly_core_buy_budget_jpy"] == 1280000
+    assert monthly["recommended_taxable_core_spot_buy_jpy"] == 1280000
+    assert monthly["monthly_total_core_deployment_jpy"] == 1380000
+    assert recurring["date_based_override_active"] is True
+    assert recurring["total_monthly_jpy"] == 100000
+    assert spot_materials["taxable_core_spot_buy_required"] is True
+    assert spot_materials["fixed_core_auto_invest_amount_jpy"] == 100000
+    assert spot_materials["recommended_taxable_core_spot_buy_jpy"] == 1280000
+    assert spot_materials["total_monthly_core_deployment_jpy"] == 1380000
     assert "review_target_month: 2026_05" in prompt
+    assert "fixed_core_auto_invest_amount_jpy: 100000" in prompt
+    assert "recommended_taxable_core_spot_buy_jpy: 1280000" in prompt
+    assert "account_type: 特定口座" in prompt
+    assert "total_monthly_core_deployment_jpy: 1380000" in prompt
     assert "指値設定対象月キー: 2026_05" in prompt
     assert "5月1日:" in prompt
 
@@ -254,15 +279,17 @@ def test_snapshot_2026_06_applies_nisa_exhaustion_core_deployment_override(monke
     assert monthly["nisa_growth_quota_status"] == "exhausted"
     assert monthly["fixed_core_auto_invest_amount_jpy"] == 100000
     assert monthly["core_recurring_contributions_total_jpy"] == 100000
+    assert monthly["pension_monthly_dca_total_jpy"] == 55000
+    assert monthly["crypto_weekly_dca_total_jpy"] == 4000
     assert monthly["taxable_core_spot_buy_required"] is True
     assert monthly["core_spot_buy_account_type"] == "特定口座"
-    assert monthly["recommended_monthly_core_buy_budget_jpy"] == 1350000
-    assert monthly["recommended_taxable_core_spot_buy_jpy"] == 1350000
-    assert monthly["monthly_total_core_deployment_jpy"] == 1450000
+    assert monthly["recommended_monthly_core_buy_budget_jpy"] == 1280000
+    assert monthly["recommended_taxable_core_spot_buy_jpy"] == 1280000
+    assert monthly["monthly_total_core_deployment_jpy"] == 1380000
     assert monthly["recommended_monthly_core_buy_budget_jpy"] > 700000
     assert computation.core_buy_materials["monthly_core_budget_tier"] == "rebalance"
     assert computation.core_buy_materials["date_based_core_budget_override_active"] is True
-    assert computation.core_buy_materials["baseline_core_spot_buy_jpy"] == 1350000
+    assert computation.core_buy_materials["baseline_core_spot_buy_jpy"] == 1280000
     assert recurring["date_based_override_active"] is True
     assert recurring["total_monthly_jpy"] == 100000
     assert recurring["plans"][0]["fund_name"] == "eMAXIS Slim 全世界株式（オール・カントリー）"
@@ -271,15 +298,15 @@ def test_snapshot_2026_06_applies_nisa_exhaustion_core_deployment_override(monke
     assert recurring["plans"][1]["amount_jpy"] == 50000
     assert spot_materials["taxable_core_spot_buy_required"] is True
     assert spot_materials["fixed_core_auto_invest_amount_jpy"] == 100000
-    assert spot_materials["recommended_taxable_core_spot_buy_jpy"] == 1350000
-    assert spot_materials["total_monthly_core_deployment_jpy"] == 1450000
-    assert spot_materials["baseline_core_spot_buy_jpy"] == 1350000
+    assert spot_materials["recommended_taxable_core_spot_buy_jpy"] == 1280000
+    assert spot_materials["total_monthly_core_deployment_jpy"] == 1380000
+    assert spot_materials["baseline_core_spot_buy_jpy"] == 1280000
     assert spot_materials["core_spot_buy_allocation_rule"]["allowed_products_only"] is True
     assert "fixed_core_auto_invest_amount_jpy: 100000" in prompt
-    assert "recommended_taxable_core_spot_buy_jpy: 1350000" in prompt
+    assert "recommended_taxable_core_spot_buy_jpy: 1280000" in prompt
     assert "account_type: 特定口座" in prompt
     assert "NISAより税効率は落ちる" in prompt
-    assert "total_monthly_core_deployment_jpy: 1450000" in prompt
+    assert "total_monthly_core_deployment_jpy: 1380000" in prompt
     assert "指値設定対象月キー: 2026_06" in prompt
 
 
@@ -301,7 +328,7 @@ def test_snapshot_after_2026_12_requires_explicit_nisa_rule(monkeypatch, tmp_pat
     assert monthly["nisa_growth_quota_status"] == "requires_explicit_configuration"
     assert monthly["fixed_core_auto_invest_amount_jpy"] == 750000
     assert monthly["recommended_monthly_core_buy_budget_jpy"] == 700000
-    assert monthly["recommended_monthly_core_buy_budget_jpy"] != 1350000
+    assert monthly["recommended_monthly_core_buy_budget_jpy"] != 1280000
     assert monthly["taxable_core_spot_buy_required"] is False
     assert recurring["date_based_override_active"] is False
     assert "post_2026_nisa_growth_quota_rule_missing" in warning_codes

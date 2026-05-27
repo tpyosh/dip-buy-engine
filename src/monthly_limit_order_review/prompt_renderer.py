@@ -28,6 +28,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             f"- liquidity_target_jpy: {snapshot.liquidity_target_jpy or 'null'}",
             f"- holdings_count: {len(snapshot.holdings)}",
             "- スナップショットは Money Forward スクリーンショットを一次情報として Codex が OCR・正規化したものとして扱うこと",
+            "- ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しないこと。画像読取は Codex 側で完了済みとして扱い、このプロンプト内の構造化データだけをレビューすること",
             "- Money Forward から貼り付けられたテキストがある場合でも、それは補助情報であり、HTML由来でレイアウト・列・階層・並び順が崩れている可能性がある",
             "- OCR・正規化・前月差分の検証警告は後続の警告一覧に含めているため、投資レビューでは警告を前提条件として扱うこと",
             "- 毎月の税引前キャッシュ流入はおおむね60万〜70万円ある前提で、生活防衛資金の必要水準を評価すること",
@@ -59,7 +60,10 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
     lines.extend(["", "## 5-2. Core積立設定（毎月固定）"])
     lines.extend(build_core_recurring_contributions(computation.metadata.get("core_recurring_contributions", {})))
 
-    lines.extend(["", "## 5-3. 暗号資産積立設定（毎週固定）"])
+    lines.extend(["", "## 5-3. iDeCo積立設定（毎月固定）"])
+    lines.extend(build_pension_monthly_dca(computation.metadata.get("core_recurring_contributions", {})))
+
+    lines.extend(["", "## 5-4. 暗号資産積立設定（毎週固定）"])
     lines.extend(build_crypto_weekly_dca(computation.metadata.get("core_recurring_contributions", {})))
 
     lines.extend(["", "## 6. SOX 判定材料"])
@@ -106,12 +110,12 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 今月の推奨スポット買い総額を、JPY の単一具体額で最初に明示すること",
             "- 0円は禁止。必ず non-zero の執行額を出すこと",
             "- `多めに` `厚めに` `数十万円` `50〜100万円` のような曖昧表現は禁止",
-            "- 2026年6月〜12月で `nisa_growth_quota_status: exhausted` の場合は、固定core積立額を100,000円として明示すること",
-            "- 2026年6月〜12月で `taxable_core_spot_buy_required: True` の場合は、`account_type: 特定口座`、NISA成長投資枠枯渇の理由、税効率メモを明示すること",
-            "- 2026年6月〜12月は、固定core積立額 + coreスポット買い提案額 = total_monthly_core_deployment_jpy を明示すること",
+            "- 2026年5月〜12月で `nisa_growth_quota_status: exhausted` の場合は、固定core積立額を100,000円として明示すること",
+            "- 2026年5月〜12月で `taxable_core_spot_buy_required: True` の場合は、`account_type: 特定口座`、NISA成長投資枠枯渇の理由、税効率メモを明示すること",
+            "- 2026年5月〜12月は、固定core積立額 + coreスポット買い提案額 = total_monthly_core_deployment_jpy を明示すること",
             "- NISA枠がないからcore購入を弱めるのではなく、core不足と現金過多の是正を優先して特定口座スポットで補うこと",
             "- 税効率低下よりもcore不足と現金過多の是正を優先するが、住宅ローン・生活防衛資金・大口支出不明を理由に現金を一気に削りすぎないこと",
-            "- 2026年6月〜12月の提案額は、normal / aggressive / rebalance のどの rule-based band に基づくか、また今月の discretionary adjustment があるかを分けて書くこと",
+            "- 2026年5月〜12月の提案額は、normal / aggressive / rebalance のどの rule-based band に基づくか、また今月の discretionary adjustment があるかを分けて書くこと",
             "- 配分先内訳を明示すること",
             "- 実行方法を `一括` / `2〜4分割` / `押し目待ち併用` のいずれかで明示すること",
             "- 判断根拠は `相場面` / `ポートフォリオ歪み` / `流動性水準` を分けて書くこと",
@@ -128,7 +132,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 0段の場合は『今月は見送り』と明記する",
             "- Python 候補より段数を減らした場合は、その理由が『ルール上の判断』か『今月の裁量判断』かを明記する",
             "- Python 候補より段数を増やした場合も、その理由を明記する",
-            "- 2026年6月〜12月は coreスポット買いの優先度を上げ、coreスポット買い予算を削ってまでテーマ銘柄を買わないこと",
+            "- 2026年5月〜12月は coreスポット買いの優先度を上げ、coreスポット買い予算を削ってまでテーマ銘柄を買わないこと",
             "- satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定とすること",
             "- PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定すること",
             "- MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先すること",
@@ -145,7 +149,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 安ければ追加でどの程度厚くする考え方が妥当か",
             "- コアとサテライトの資金配分優先順位",
             "- 既存の毎月固定積立（Core積立設定）を前提に評価すること",
-            "- 2026年6月〜12月で NISA成長投資枠が枯渇している場合は、固定core積立100,000円/月を前提にし、特定口座スポット買いで補う方針を明示すること",
+            "- 2026年5月〜12月で NISA成長投資枠が枯渇している場合は、固定core積立100,000円/月を前提にし、特定口座スポット買いで補う方針を明示すること",
             "- 積立設定が大きくても、それだけでスポット買い免除にしないこと",
             "- 固定積立を維持するか、減額/停止すべきかを明示すること（必要な場合のみ）",
             "- ルール上の判断と今月の裁量判断を分けて説明すること",
@@ -158,7 +162,8 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 現在の偏り",
             "- 注意点",
             "- 今月の補強優先順位",
-            "- 暗号資産の週次積立（BTC/ETH/XRP）を前提に、維持/減額/停止の要否を明示すること",
+            "- iDeCoのオルカン月次積立55,000円はpensionとして前提にし、tradable coreとは分けて評価すること",
+            "- 暗号資産の週次積立（BTC/ETH）を前提に、維持/減額/停止の要否を明示すること",
             "",
             "【長期シナリオレビュー】",
             "- 対象銘柄ごとに、現在の長期仮説に大きな変化があるかを書く",
@@ -181,24 +186,26 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- コードブロック外に Codex向け修正要約を書かないこと",
             "- 問題がない場合でもコードブロックは省略せず、`must: なし` のように明記すること",
             "- must / should / nice_to_have は空欄不可だが、該当なしの場合は `なし` と書いてよい",
-            "- コードやルールへの修正指摘が実質的にない月でも、`README.md` に当月の月次サマリーを反映する依頼は必ず含めること",
-            "- 修正指摘がない月は、少なくとも `should` に `README.md` へ当月サマリー・購入計画・ポートフォリオサマリーを反映する` と書くこと",
+            "- コードやルールへの修正指摘が実質的にない月でも、`README.md` に当月の月次サマリーと今月の指値買い設定を反映する依頼は必ず含めること",
+            "- 修正指摘がない月は、少なくとも `should` に `README.md` へ当月サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する` と書くこと",
+            "- README.md では、今月の指値買い設定を当月セクション内の見やすい位置に置き、銘柄、指値、株数、見送り対象、主な理由を一覧化すること",
             "- 出力例:",
             "```md",
             "must:",
             "- なし",
             "",
             "should:",
-            "- README.md に当月の月次サマリー・購入計画・ポートフォリオサマリーを反映する",
+            "- README.md に当月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する",
             "",
             "nice_to_have:",
             "- なし",
             "",
             "修正目的:",
-            "- コード修正提案がない月でも README.md に当月の運用要約を反映できるようにする",
+            "- コード修正提案がない月でも README.md に当月の運用要約と指値買い設定を反映できるようにする",
             "",
             "変更すべき仕様:",
             "- 修正提案がない月でも README.md 更新依頼は必ず含める",
+            "- README.md の当月セクションには、今月の指値買い設定を見やすい表で含める",
             "",
             "影響範囲:",
             "- README.md",
@@ -225,11 +232,12 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 月次レビューでは、毎回必ず core スポット買い額を提案してください。",
             "- core スポット買い額は 0円不可で、最初に単一の具体額を出してください。",
             "- 金額はその月の portfolio 歪み、相場状況、流動性水準で変動してよいです。",
-            "- 2026年6月〜12月は、NISA成長投資枠の固定積立750,000円/月を前提にせず、固定core積立100,000円/月として扱ってください。",
-            "- 2026年6月〜12月は、NISA枠枯渇により特定口座でcoreスポット買いを行う旨を明示してください。",
-            "- 2026年6月〜12月は、税効率よりもcore不足と現金過多の是正を優先する理由を明示してください。",
-            "- 2026年6月〜12月は、固定積立100,000円とスポット買い提案額の合計core投入額を明示してください。",
-            "- 2026年6月〜12月は、coreスポット買いの提案が rule-based なのか discretionary なのかを明示してください。",
+            "- 2026年5月〜12月は、NISA成長投資枠の固定積立750,000円/月を前提にせず、固定core積立100,000円/月として扱ってください。",
+            "- 2026年5月〜12月は、NISA枠枯渇により特定口座でcoreスポット買いを行う旨を明示してください。",
+            "- 2026年5月〜12月は、税効率よりもcore不足と現金過多の是正を優先する理由を明示してください。",
+            "- 2026年5月〜12月は、固定core積立100,000円とスポット買い提案額の合計core投入額を明示してください。",
+            "- 2026年5月〜12月は、iDeCo55,000円/月とBTC/ETH週次積立もキャッシュアウトとして別枠で考慮し、総投資額は月145万円程度を目安にしてください。",
+            "- 2026年5月〜12月は、coreスポット買いの提案が rule-based なのか discretionary なのかを明示してください。",
             "- cash_excess_pct が大きいほど、core スポット買い額を増やしてください。",
             "- core_delta_pct が大きいほど、core スポット買い額を増やしてください。",
             "- broad market ベースで明確に下落している月は、core スポット買い額を増やしてください。",
@@ -244,7 +252,8 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 上記不動産保有により、日本国内不動産セクターへの実質的なエクスポージャが既にある前提で配分やリスクを評価してください。",
             "- Core積立設定（毎月固定）は既に実行される前提として扱い、同じ強化提案の反復は避けてください。",
             "- ただし長期シナリオ悪化やリスク管理上の妥当性がある場合は、固定積立の減額・停止提案を明示してください。",
-            "- 暗号資産の週次積立（BTC/ETH/XRP）も既に実行される前提で扱い、必要時のみ変更提案してください。",
+            "- iDeCoのオルカン月次積立55,000円はpensionとして既に実行される前提で扱い、tradable coreとは分けて評価してください。",
+            "- 暗号資産の週次積立（BTC/ETH）も既に実行される前提で扱い、必要時のみ変更提案してください。",
             "- コア不足と現金過多が同時発生している場合、押し目買いルール設計に問題がないかもレビューしてください。",
             "- 中長期投資前提のため、短期トレンドやテクニカル悪化を売却理由にしない前提でレビューしてください。",
             "- ただし、長期シナリオ・政策前提・技術前提・競争優位の前提が崩れた可能性がある場合は、その有無をWebベースで点検してください。",
@@ -254,14 +263,15 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- ハルシネーション防止のため、明確な根拠がある改善提案のみを挙げてください。",
             "- must / should / nice_to_have は空欄不可ですが、該当なしの場合は `なし` と明記してください。",
             "- Codex向け修正要約は必ず md コードブロックで出力してください。",
-            "- コード修正提案がない月でも、README.md に当月サマリーを反映する依頼は必ず Codex向け修正要約に含めてください。",
+            "- コード修正提案がない月でも、README.md に当月サマリーと今月の指値買い設定を反映する依頼は必ず Codex向け修正要約に含めてください。",
             "- ルール改善が不要な場合は、その旨を明記してください。",
             "",
             "## 14. 必須の Codex 向け修正要約観点",
             "- must / should / nice_to_have は必ず埋めてください。",
             "- 空欄は不可ですが、該当なしの場合は `なし` と明記してください。",
             "- 【Codex向け修正要約】 全体を単一の ```md コードブロックで出力してください。",
-            "- コード修正提案がない月でも、README.md に当月の月次サマリー・購入計画・ポートフォリオサマリーを反映する依頼を必ず 1件以上含めてください。",
+            "- コード修正提案がない月でも、README.md に当月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する依頼を必ず 1件以上含めてください。",
+            "- 今月の指値買い設定は、銘柄、指値、株数、見送り対象、主な理由が一目で分かる表としてREADME.mdの当月セクションに置いてください。",
             "- monthly review と quarterly rule review を分けて整理してください。",
             "- 修正対象ファイルと必要テストを、Codex が編集に入れる粒度で書いてください。",
             "",
@@ -480,6 +490,32 @@ def build_core_recurring_contributions(recurring_config: dict) -> list[str]:
     return lines
 
 
+def build_pension_monthly_dca(recurring_config: dict) -> list[str]:
+    plans = recurring_config.get("pension_monthly_dca", [])
+    lines = [
+        f"- pension_monthly_dca_total_jpy: {recurring_config.get('pension_monthly_dca_total_jpy', 'null')}",
+        f"- annualized_pension_dca_jpy: {recurring_config.get('annualized_pension_dca_jpy', 'null')}",
+        f"- annualized_pension_dca_pct_of_total_assets: {format_pct(recurring_config.get('annualized_pension_dca_pct_of_total_assets'))}",
+        "| symbol | fund_name | amount_jpy_per_month | account_type | asset_class |",
+        "| --- | --- | ---: | --- | --- |",
+    ]
+    if not plans:
+        lines.append("| - | - | - | - | - |")
+    for plan in plans:
+        lines.append(
+            f"| {plan.get('symbol', '-')} | {plan.get('fund_name', '-')} | "
+            f"{plan.get('amount_jpy_per_month', '-')} | {plan.get('account_type', '-')} | "
+            f"{plan.get('asset_class', '-')} |"
+        )
+
+    guidance = recurring_config.get("pension_review_guidance", [])
+    if guidance:
+        lines.append("- pension_review_guidance:")
+        for item in guidance:
+            lines.append(f"  - {item}")
+    return lines
+
+
 def build_crypto_weekly_dca(recurring_config: dict) -> list[str]:
     plans = recurring_config.get("crypto_weekly_dca", [])
     lines = [
@@ -564,6 +600,9 @@ def build_review_partition_section(computation: MonthlyComputation) -> list[str]
         f"  - recommended_monthly_core_buy_budget_jpy: {monthly.get('recommended_monthly_core_buy_budget_jpy')}",
         f"  - monthly_total_core_deployment_jpy: {monthly.get('monthly_total_core_deployment_jpy')}",
         f"  - candidate_count: {monthly.get('candidate_count')}",
+        f"  - pension_monthly_dca_total_jpy: {monthly.get('pension_monthly_dca_total_jpy')}",
+        f"  - annualized_pension_dca_jpy: {monthly.get('annualized_pension_dca_jpy')}",
+        f"  - annualized_pension_dca_pct_of_total_assets: {format_pct(monthly.get('annualized_pension_dca_pct_of_total_assets'))}",
         f"  - crypto_weekly_dca_total_jpy: {monthly.get('crypto_weekly_dca_total_jpy')}",
         f"  - annualized_crypto_dca_jpy: {monthly.get('annualized_crypto_dca_jpy')}",
         f"  - annualized_crypto_dca_pct_of_total_assets: {format_pct(monthly.get('annualized_crypto_dca_pct_of_total_assets'))}",

@@ -33,7 +33,7 @@ core_recurring_contributions:
     - "core不足の指摘は、固定積立の寄与を織り込んだうえで必要時のみ行う"
     - "長期シナリオ悪化やリスク管理上の理由がある場合は、固定積立の減額・停止提案を明示する"
   date_based_overrides:
-    - active_from: "2026-06"
+    - active_from: "2026-05"
       active_to: "2026-12"
       reason_code: "nisa_growth_quota_exhausted_2026"
       reason: "2026年NISA成長投資枠を使い切ったため"
@@ -42,11 +42,11 @@ core_recurring_contributions:
       monthly_core_auto_invest_amount_jpy: 100000
       taxable_core_spot_buy_required: true
       core_spot_buy_account_type: "特定口座"
-      baseline_total_core_deployment_target_jpy: 1450000
-      rebalance_mode_core_spot_buy_reference_jpy: 1350000
-      taxable_account_note: "NISA成長投資枠枯渇のため、2026年6月〜12月のcoreスポット買いは原則として特定口座で行う"
+      baseline_total_core_deployment_target_jpy: 1380000
+      rebalance_mode_core_spot_buy_reference_jpy: 1280000
+      taxable_account_note: "NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う"
       tax_note: "NISAより税効率は落ちるが、現在の主問題はcore不足と現金過多であるため、特定口座でのcore積増しを許容する"
-      nisa_exhaustion_adjustment_reason: "NISA枠がないからcore購入を弱めるのではなく、NISA固定積立減少分を特定口座スポットで補う"
+      nisa_exhaustion_adjustment_reason: "NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う"
       core_spot_buy_allocation_rule:
         allowed_products_only: true
         default_allocation:
@@ -70,20 +70,27 @@ core_recurring_contributions:
           account_type: "NISAつみたて投資枠"
           distribution_course: "再投資型"
       review_guidance:
-        - "2026年6月〜12月は、NISA成長投資枠の固定積立750,000円/月を前提にしない"
+        - "2026年5月〜12月は、NISA成長投資枠の固定積立750,000円/月を前提にしない"
         - "固定core積立は100,000円/月として扱う"
         - "core不足と現金過多が続く限り、特定口座でのcoreスポット買いを厚めに提案する"
         - "税効率よりも、core不足と現金過多の是正を優先する"
         - "生活防衛資金・住宅ローン・大口支出不明リスクを考慮し、現金を一気に削りすぎない"
       requires_explicit_followup_rule: true
       followup_warning_code: "post_2026_nisa_growth_quota_rule_missing"
+  pension_monthly_dca:
+    - symbol: "IDECO_ALL_COUNTRY"
+      fund_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+      amount_jpy_per_month: 55000
+      account_type: "iDeCo"
+      asset_class: "pension"
+  pension_review_guidance:
+    - "iDeCoのオルカン月次積立はpensionとして既存で実行中の前提で評価する"
+    - "tradable coreとは分け、effective_core_including_pension_pctの文脈で補助的に扱う"
   crypto_weekly_dca:
     - symbol: "BTC"
       amount_jpy_per_week: 2000
     - symbol: "ETH"
       amount_jpy_per_week: 2000
-    - symbol: "XRP"
-      amount_jpy_per_week: 1000
   crypto_review_guidance:
     - "暗号資産の週次積立は既存で実行中の前提で評価する"
     - "継続・減額・停止の提案が必要な場合は、理由とトリガー条件を明示する"

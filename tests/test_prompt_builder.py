@@ -10,12 +10,16 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     prompt = build_monthly_review_prompt(sample_computation, template_path.read_text(encoding="utf-8"))
 
     assert prompt.startswith("対象月: 2026_03\n")
+    assert "Codex が Money Forward スクリーンショットを一次情報として OCR・正規化" in prompt
+    assert "ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しません。" in prompt
+    assert "ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しないこと。" in prompt
     assert "## 1. 前提" in prompt
     assert "【要約】" in prompt
     assert "## 5. コア定額買い判定材料" in prompt
     assert "## 5-1. Coreスポット買い判断材料" in prompt
     assert "## 5-2. Core積立設定（毎月固定）" in prompt
-    assert "## 5-3. 暗号資産積立設定（毎週固定）" in prompt
+    assert "## 5-3. iDeCo積立設定（毎月固定）" in prompt
+    assert "## 5-4. 暗号資産積立設定（毎週固定）" in prompt
     assert "## 6. SOX 判定材料" in prompt
     assert "## 7. 半導体エクスポージャ内訳" in prompt
     assert "## 8. 長期シナリオ点検対象" in prompt
@@ -36,8 +40,9 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "必ず単一の ```md コードブロックで出力すること" in prompt
     assert "無理に改善提案を作らない" in prompt
     assert "`must: なし`" in prompt
-    assert "README.md に当月サマリーを反映する依頼は必ず Codex向け修正要約に含めてください。" in prompt
-    assert "README.md に当月の月次サマリー・購入計画・ポートフォリオサマリーを反映する" in prompt
+    assert "README.md に当月サマリーと今月の指値買い設定を反映する依頼は必ず Codex向け修正要約に含めてください。" in prompt
+    assert "README.md に当月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する" in prompt
+    assert "今月の指値買い設定は、銘柄、指値、株数、見送り対象、主な理由が一目で分かる表" in prompt
     assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
     assert "monthly_core_budget_tier" in prompt
     assert "recommended_monthly_core_buy_budget_jpy" in prompt
@@ -57,10 +62,16 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "フルローンで購入しており、ローン返済はまだほとんど進んでいない" in prompt
     assert "日本国内不動産セクターに対して実質的な積立投資エクスポージャがある前提" in prompt
     assert "既存の毎月固定積立（Core積立設定）を前提に評価すること" in prompt
+    assert "| IDECO_ALL_COUNTRY | eMAXIS Slim 全世界株式（オール・カントリー） | 55000 | iDeCo | pension |" in prompt
+    assert "pension_monthly_dca_total_jpy: 55000" in prompt
+    assert "annualized_pension_dca_jpy: 660000" in prompt
     assert "| BTC | 2000 |" in prompt
     assert "| ETH | 2000 |" in prompt
-    assert "| XRP | 1000 |" in prompt
-    assert "暗号資産の週次積立（BTC/ETH/XRP）も既に実行される前提で扱い" in prompt
+    assert "| XRP | 1000 |" not in prompt
+    assert "crypto_weekly_dca_total_jpy: 4000" in prompt
+    assert "annualized_crypto_dca_jpy: 208000" in prompt
+    assert "暗号資産の週次積立（BTC/ETH）も既に実行される前提で扱い" in prompt
+    assert "iDeCoのオルカン月次積立55,000円はpensionとして既に実行される前提で扱い" in prompt
     assert "rebalance_mode_active" in prompt
     assert "tradable_core_pct" in prompt
     assert "effective_core_including_pension_pct" in prompt

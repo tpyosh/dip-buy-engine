@@ -305,9 +305,12 @@ def sample_computation(
             "monthly_total_core_deployment_jpy": 850000,
             "candidate_count": len(sample_candidate_orders),
             "core_recurring_contributions_total_jpy": 750000,
-            "crypto_weekly_dca_total_jpy": 5000,
-            "annualized_crypto_dca_jpy": 260000,
-            "annualized_crypto_dca_pct_of_total_assets": Decimal("0.0520"),
+            "pension_monthly_dca_total_jpy": 55000,
+            "annualized_pension_dca_jpy": 660000,
+            "annualized_pension_dca_pct_of_total_assets": Decimal("0.1320"),
+            "crypto_weekly_dca_total_jpy": 4000,
+            "annualized_crypto_dca_jpy": 208000,
+            "annualized_crypto_dca_pct_of_total_assets": Decimal("0.0416"),
         },
         quarterly_rule_review_outputs={
             "classification_override_count": 0,
@@ -350,11 +353,25 @@ def sample_computation(
                 "crypto_weekly_dca": [
                     {"symbol": "BTC", "amount_jpy_per_week": 2000},
                     {"symbol": "ETH", "amount_jpy_per_week": 2000},
-                    {"symbol": "XRP", "amount_jpy_per_week": 1000},
                 ],
-                "crypto_weekly_dca_total_jpy": 5000,
-                "annualized_crypto_dca_jpy": 260000,
-                "annualized_crypto_dca_pct_of_total_assets": Decimal("0.0520"),
+                "pension_monthly_dca": [
+                    {
+                        "symbol": "IDECO_ALL_COUNTRY",
+                        "fund_name": "eMAXIS Slim 全世界株式（オール・カントリー）",
+                        "amount_jpy_per_month": 55000,
+                        "account_type": "iDeCo",
+                        "asset_class": "pension",
+                    }
+                ],
+                "pension_monthly_dca_total_jpy": 55000,
+                "annualized_pension_dca_jpy": 660000,
+                "annualized_pension_dca_pct_of_total_assets": Decimal("0.1320"),
+                "crypto_weekly_dca_total_jpy": 4000,
+                "annualized_crypto_dca_jpy": 208000,
+                "annualized_crypto_dca_pct_of_total_assets": Decimal("0.0416"),
+                "pension_review_guidance": [
+                    "iDeCoのオルカン月次積立はpensionとして既存で実行中の前提で評価する",
+                ],
                 "crypto_review_guidance": [
                     "暗号資産の週次積立は既存で実行中の前提で評価する",
                 ],

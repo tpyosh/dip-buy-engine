@@ -212,6 +212,15 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         recurring_contributions,
         review_target_month_start,
     )
+    pension_monthly_total_jpy = sum(
+        int(item.get("amount_jpy_per_month", 0))
+        for item in recurring_contributions.get("pension_monthly_dca", [])
+    )
+    annualized_pension_dca_jpy = pension_monthly_total_jpy * 12
+    annualized_pension_dca_pct_of_total_assets = percent(
+        Decimal(str(annualized_pension_dca_jpy)),
+        snapshot.total_assets_jpy,
+    )
     crypto_weekly_total_jpy = sum(
         int(item.get("amount_jpy_per_week", 0))
         for item in recurring_contributions.get("crypto_weekly_dca", [])
@@ -221,6 +230,9 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         Decimal(str(annualized_crypto_dca_jpy)),
         snapshot.total_assets_jpy,
     )
+    recurring_contributions["pension_monthly_dca_total_jpy"] = pension_monthly_total_jpy
+    recurring_contributions["annualized_pension_dca_jpy"] = annualized_pension_dca_jpy
+    recurring_contributions["annualized_pension_dca_pct_of_total_assets"] = annualized_pension_dca_pct_of_total_assets
     recurring_contributions["crypto_weekly_dca_total_jpy"] = crypto_weekly_total_jpy
     recurring_contributions["annualized_crypto_dca_jpy"] = annualized_crypto_dca_jpy
     recurring_contributions["annualized_crypto_dca_pct_of_total_assets"] = annualized_crypto_dca_pct_of_total_assets
@@ -360,6 +372,9 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "monthly_total_core_deployment_jpy": monthly_total_core_deployment_jpy,
             "candidate_count": len(candidate_orders),
             "core_recurring_contributions_total_jpy": recurring_contributions.get("total_monthly_jpy"),
+            "pension_monthly_dca_total_jpy": pension_monthly_total_jpy,
+            "annualized_pension_dca_jpy": annualized_pension_dca_jpy,
+            "annualized_pension_dca_pct_of_total_assets": annualized_pension_dca_pct_of_total_assets,
             "crypto_weekly_dca_total_jpy": crypto_weekly_total_jpy,
             "annualized_crypto_dca_jpy": annualized_crypto_dca_jpy,
             "annualized_crypto_dca_pct_of_total_assets": annualized_crypto_dca_pct_of_total_assets,

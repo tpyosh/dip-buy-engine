@@ -114,6 +114,8 @@ def compute_candidate_metrics(
                         else []
                     ),
                     explanation=explanation,
+                    snapshot_price_source_date=snapshot.snapshot_date if current_holding is not None else None,
+                    market_candidate_price_source_date=reference.as_of if reference is not None else None,
                 )
             )
 

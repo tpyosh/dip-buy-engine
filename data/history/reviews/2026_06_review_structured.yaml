@@ -1,0 +1,348 @@
+raw_text: "以下、アップロードされた 2026_06 月次レビュー用データを前提にした判断です。\n\n【要約】\n\n* 6月は **テーマ追加ではなく、特定口座でcoreを厚めに補強する月**。\n\
+  * 今月のcoreスポット買い提案は **900,000円**。固定core積立100,000円と合わせて、6月のcore投入は **1,000,000円**。\n\
+  * core 22.00%に対して流動性36.57%なので、現金過多の是正を優先。\n* SOX投信は **買わない**。半導体・satellite_coreが既に過大で、SMHも高値圏に近い。\n\
+  * 長期シナリオは、URA/CIBR/MSFTは大きな変化なし。PLTRは成長は強いが、バリュエーション・競争・政府依存で要監視。\n\n【今月のcoreスポット買い提案】\n\
+  **900,000円**\n\naccount_type: **特定口座**\n理由: 2026年NISA成長投資枠は枯渇済み。NISAより税効率は落ちるが、現状の主問題は\
+  \ **core不足と現金過多** なので、特定口座で補う方が合理的。\n\n固定core積立額: **100,000円/月**\ncoreスポット買い提案額:\
+  \ **900,000円**\n固定積立 + スポット買い合計: **1,000,000円**\n\nrule-based band: **aggressive**\n\
+  \n* core_actual_pct: 22.00% / target 45.00% / delta -23.00pt\n* liquidity_actual_pct:\
+  \ 36.57% / target 10.00% / excess +26.57pt\n* rebalance mode ではないが、aggressive band\
+  \ の上限寄りが妥当。\n\ndiscretionary adjustment: **なし**\n\n* スクリプト提案900,000円をそのまま採用。\n*\
+  \ broad market proxy は直近高値圏だが、core不足と現金過多が大きいため、見送りや30万円程度への縮小は弱すぎる。\n\n配分先内訳\n\n\
+  * eMAXIS Slim 全世界株式(オール・カントリー)(オルカン): **585,000円**\n* eMAXIS Slim 米国株式(S&P500):\
+  \ **315,000円**\n* 合計: **900,000円**\n\n配分理由: 半導体・AIインフラ・米国株感応度が既に高いため、標準の60/40ではなく\
+  \ **オルカン65% / S&P500 35%** に寄せる。\n\n実行方法: **4分割**\n\n実行スケジュール\n\n* 6月1日: eMAXIS\
+  \ Slim 全世界株式(オール・カントリー)(オルカン) 200,000円\n* 6月1日: eMAXIS Slim 米国株式(S&P500) 100,000円\n\
+  * 6月8日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 150,000円\n* 6月8日: eMAXIS Slim 米国株式(S&P500)\
+  \ 75,000円\n* 6月15日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 125,000円\n* 6月15日: eMAXIS\
+  \ Slim 米国株式(S&P500) 70,000円\n* 6月22日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 110,000円\n\
+  * 6月22日: eMAXIS Slim 米国株式(S&P500) 70,000円\n\n判断根拠\n\n* 相場面: VT/VOO/ACWI proxy は直近高値圏で、フルリバランス級の一括投入は不要。\n\
+  * ポートフォリオ歪み: core 22.00%は目標45%に対して明確に不足。satellite_coreは21.36%で目標15%を超過。\n* 流動性水準:\
+  \ liquidity 13,749,225円、36.57%は過大。住宅ローン初期・大口支出不明を考慮しても、90万円は過度な現金削減ではない。\n\n【今月の指値提案】\n\
+  6月は **coreスポット買いを最優先**。テーマ銘柄の指値は、約定してもcore補強を圧迫しない小口に限定。\n\n| 銘柄   |           \
+  \                                        提案 | 理由                               \
+  \                                                                             |\n\
+  | ---- | ---------------------------------------------------: | -------------------------------------------------------------------------------------------------------------\
+  \ |\n| CIBR |                                           **今月は見送り** | ルール上の判断: satellite_core\
+  \ が over target。Python候補は -5%、-8%、-12% の浅い押し目のみで、すべて suppressed。今月の裁量判断としても、直近高騰後に追わない。\
+  \ |\n| URA  |   指値 45.38 USD（20営業日平均 53.3833 USD, 平均比 -14.99%）, 2株 | ルール上の判断: satellite_core\
+  \ over target だが、-15%の深い押し目は許容。約定想定額も小さい。                                      \
+  \         |\n| PLTR | 指値 109.02 USD（20営業日平均 139.7678 USD, 平均比 -22.00%）, 2株 | 今月の裁量判断:\
+  \ -15%段は見送り、-22%のみ。高ボラ・高バリュエーション銘柄なので、core補強を優先し浅い押し目は買わない。                    \
+  \                        |\n| MSFT | 指値 377.30 USD（20営業日平均 419.2170 USD, 平均比 -10.00%）,\
+  \ 2株 | 今月の裁量判断: -6%段は浅すぎるため見送り。jun_core不足はあるが、今月は broad market core を優先。       \
+  \                                      |\n\nPython候補より減らしたもの\n\n* CIBR: 0段。ルール上の判断\
+  \ + 今月の裁量判断。satellite_core過大で浅い押し目を買う必要がない。\n* PLTR: 2段 → 1段。今月の裁量判断。core補強優先、高ボラ銘柄は深い押し目だけ。\n\
+  * MSFT: 3段 → 1段。今月の裁量判断。MSFTは良いjun_coreだが、今月はオルカン/S&P500を優先。\n\n【コア定額買い方針レビュー】\n\
+  固定core積立 **100,000円/月** は維持でよい。減額・停止理由はない。\n\n今月最低いくら買うべきか\n\n* 最低ライン: 固定100,000円\
+  \ + 特定口座スポット700,000円 = **800,000円**\n* 今月の妥当ライン: 固定100,000円 + 特定口座スポット900,000円 =\
+  \ **1,000,000円**\n* 直近高値圏なので1,280,000円スポットまでは不要。\n\n安ければ追加で厚くする考え方\n\n* broad market\
+  \ proxy が5%程度下落: スポットを **1,100,000〜1,200,000円** まで引き上げ可。\n* 10%級の下落: スポットを **1,300,000〜1,500,000円**\
+  \ に引き上げ検討。\n* ただし単月1,500,000円超は、生活防衛資金・住宅ローン・大口支出不明を考えると、かなり大きな下落局面以外では不要。\n\n優先順位\n\
+  \n1. 特定口座でオルカン/S&P500のcore補強\n2. 深い押し目だけURA/MSFT/PLTRを小口\n3. CIBR/SOX追加は見送り\n4.\
+  \ 新規テーマ追加は不要\n\nルール上の判断\n\n* NISA成長枠枯渇中でも、core不足と現金過多が続く限り、特定口座でcoreを補う。\n* satellite_coreが過大なので、サテライト追加よりcore補強が優先。\n\
+  \n今月の裁量判断\n\n* 高値圏なのでrebalance modeまでは上げない。\n* ただし現金過多を理由に、900,000円は予定通り実行する。\n\n\
+  【SOX投信判定】\n**買わない。**\n\n理由\n\n* SMH proxy の63日高値からの下落率は -0.53%で、買いゾーンの -10%〜-5%に入っていない。\n\
+  * satellite_core は21.36%で目標15.00%を超過。\n* 半導体Direct exposureは16.77%、MSFTを含むDirect+Indirect監視指標は18.04%。\n\
+  * SOX投信は既に含み益が大きく、ここで追加するよりcore不足の是正が優先。\n\n【ポートフォリオ診断】\n現在の偏り\n\n* core不足: 22.00%\
+  \ vs target 45.00%。\n* liquidity過多: 36.57% vs target 10.00%。\n* satellite_core過大:\
+  \ 21.36% vs target 15.00%。\n* 半導体エクスポージャが高め: direct 16.77%、direct+indirect 18.04%。\n\
+  * 住居兼資産として金山近辺の不動産をフルローン初期で保有しているため、日本国内不動産への実質エクスポージャも既にある。\n\n注意点\n\n* liquidityは大きいが、住宅ローン初期・子育て・大口支出不明を考えると、いきなり目標10%まで落とす必要はない。\n\
+  * ただし月90万円程度のcoreスポットを数ヶ月続けても、生活防衛資金を壊す水準ではない。\n* iDeCoのオルカン55,000円/月は pension として有効だが、tradable\
+  \ core とは分けて見るべき。effective core including pension は32.65%だが、売買可能なcoreは22.00%で不足。\n\
+  * BTC/ETHの週4,000円積立は、総資産比で年0.55%程度なので維持でよい。減額・停止は不要。\n\n今月の補強優先順位\n\n1. オルカン\n2.\
+  \ S&P500\n3. MSFTの深めの押し目\n4. URAの深い押し目\n5. PLTRはさらに深い押し目だけ\n6. CIBR/SOXは見送り\n\n\
+  【長期シナリオレビュー】\nURA / 原子力・ウラン\n\n* 確認した事実: World Nuclear Associationの2026年1月更新レポートは、2050年までの原子力容量拡大目標や、既存炉継続・新設が進む場合の大幅な容量拡大を扱っている。また、燃料サイクル側では採掘・燃料インフラの拡張、供給ギャップ、長いリードタイム、地政学リスクが論点になっている。([ワールド・ニュークリア・アソシエーション][1])\n\
+  * 確認した事実: USGSは2025〜2035年に商用原子炉燃料として 433 million lb U3O8 相当が必要と見込んでいる。([米国地質調査出版物倉庫][2])\n\
+  * 確認した事実: URAはウラン採掘・精製・探鉱・原子力関連部品企業へのバスケット投資である。([Global X ETFs][3])\n* 推論: 原子力再評価の長期仮説は維持。需要ストーリーは崩れていない。ただし、URAは政策・商品市況・鉱山供給・地政学に振られるので、保有継続はよいが追加は深い押し目限定。\n\
+  * 判定: **継続保有でよい**\n\nCIBR / サイバーセキュリティ\n\n* 確認した事実: Gartnerは世界の情報セキュリティ支出を2025年2130億ドル、2026年2400億ドル、前年比+12.5%と見込んでいる。([ガートナー][4])\n\
+  * 確認した事実: CIBRはNasdaq CTA Cybersecurity Indexに連動し、アプリケーションセキュリティ、データセキュリティ、エンドポイント、ID管理、ネットワークセキュリティ、セキュリティ運用などを対象にする。上位保有はCrowdStrike、Palo\
+  \ Alto、Fortinet、Cisco、Broadcomなどで、ソフトウェア・コンピュータサービス比率が75.30%。([ファースト・トラスト][5])\n\
+  * 推論: サイバーセキュリティ支出の構造的拡大仮説は維持。ただしETF内でも上位銘柄の集中とバリュエーションリスクはある。\n* 判定: **継続保有でよい**\n\
+  \nMSFT / クラウド・AI基盤\n\n* 確認した事実: Microsoft FY26 Q3は売上829億ドル、前年比+18%、営業利益384億ドル、+20%。Microsoft\
+  \ Cloud revenueは545億ドル、+29%、Azure and other cloud services revenueは+40%。AI businessの年率売上ランレートは370億ドル、前年比+123%と発表されている。([Microsoft][6])\n\
+  * 確認した事実: 同四半期のcapexは319億ドルで、約3分の2がGPU/CPU中心の短期資産と説明されている。([Microsoft][7])\n* 推論:\
+  \ クラウド・AI・企業ソフトウェアの複合優位は維持。リスクはAI投資回収とcapex過大化だが、現時点では仮説崩壊ではなく、利益成長を伴った投資拡大。\n*\
+  \ 判定: **継続保有でよい**\n\nPLTR / 政府・防衛・AIソフトウェア\n\n* 確認した事実: PalantirはQ1 2026で売上16.33億ドル、前年比+85%。米国売上は+104%、米国商業は+133%、米国政府は+84%。FY2026売上ガイダンスも76.50〜76.62億ドルへ引き上げている。([SEC][8])\n\
+  * 確認した事実: 同社は大型案件数、TCV、RDV、フリーキャッシュフローも強く、米国商業RDVは前年比+112%。([SEC][8])\n* 確認した事実:\
+  \ 一方で、AI企業やDatabricks/Snowflake系との競争、商業売上の期待値、バリュエーションへの懸念は市場側で指摘されている。([Investors.com][9])\n\
+  * 推論: 事業成長シナリオはむしろ強い。ただし株価に織り込まれた期待が高く、政府・防衛色の強さ、AIプラットフォーム競争、評価倍率の高さから、core化は不適切。小口satelliteとして深い押し目限定が妥当。\n\
+  * 判定: **要監視**\n\n【四半期ルール見直し】\n維持してよいルール\n\n* satellite_core over target時にSOX/CIBR/URAを深い押し目限定にするルールは妥当。\n\
+  * PLTRの浅い押し目抑制ロジックは妥当。高ボラ・高期待銘柄を-10%程度で機械的に拾うのは、core不足局面では弱い。\n* 半導体DirectとMSFTを含むIndirect\
+  \ AIインフラを分けて監視する設計も妥当。Direct 16.77%、Direct+Indirect 18.04%という見方は過剰集中の検知に使える。\n*\
+  \ 2026年5月〜12月のNISA成長枠枯渇時に、特定口座coreスポット買いで補うルールは維持でよい。\n\n改善した方がよいルール\n\n* 大きなルール変更提案はなし。\n\
+  * ただし、CIBRについて「satellite_core over targetなら-15%以下だけ許容」とするなら、Python候補にも -15%段を出すか、明示的に「今月は\
+  \ eligible deep candidate なし」と表示した方がレビューしやすい。\n* snapshot price と candidate current_price\
+  \ に差がある銘柄があるため、価格ソース日付を分けて出すと誤読が減る。\n\n追加した方がよい制約\n\n* coreスポット買いのルールは維持。今月のように高値圏でも、cash_excessとcore不足が大きい場合は、aggressive\
+  \ bandの中で執行するのが妥当。\n* 生活防衛資金が未定義なので、今後は `liquidity_floor_jpy` または `emergency_fund_floor_jpy`\
+  \ を明示できると、coreスポット額の上限判断が安定する。\n\nスクリプト修正が望ましい点\n\n* must級の修正はなし。\n* should級として、README更新、価格ソース日付の明示、CIBR\
+  \ deep candidate生成有無の明示、前月比大幅変化の検証メモ追加。\n\n【Codex向け修正要約】\n\n```md\nmust:\n- なし\n\
+  \nshould:\n- README.md に 2026_06 の月次サマリー・coreスポット購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する\n\
+  - README.md の当月セクション内の見やすい位置に「今月の指値買い設定」を追加または更新し、銘柄、指値、株数、見送り対象、主な理由を一覧化する\n- snapshot_price\
+  \ と candidate current_price の価格ソース日付が異なる可能性があるため、出力に `snapshot_price_source_date`\
+  \ と `market_candidate_price_source_date` のような区別を追加する\n- CIBR のように satellite_core\
+  \ over target で浅い候補が suppressed される場合、eligible deep candidate が生成されないなら「今月は eligible\
+  \ deep candidate なし」と明示する\n- EMAXIS_SLIM_SP500_1 と EMAXIS_SLIM_ALL_COUNTRY の large_month_over_month_change\
+  \ について、購入・売却・口座グルーピング変更・OCR誤読のどれが原因か README.md または検証ログに確認結果を残す\n\nnice_to_have:\n\
+  - liquidity_floor_jpy または emergency_fund_floor_jpy を設定ファイルに持たせ、住宅ローン初期・大口支出不明時の\
+  \ coreスポット買い上限判断を安定させる\n- coreスポット買いスケジュールを自動生成する場合、配分先内訳と日付別実行額の合計一致チェックをテストに追加する\n\
+  - satellite_core over target 時の CIBR / URA / SOX の deep threshold を銘柄別に設定できるようにする\n\
+  \n修正目的:\n- コード修正提案が少ない月でも README.md に当月の運用要約と指値買い設定を確実に反映する\n- 月次レビューで snapshot\
+  \ 価格と候補生成用価格の混同を避ける\n- over target のテーマ銘柄について、浅い候補を suppressed した後に買える候補が存在するのか、存在しないのかを明確にする\n\
+  - 前月比で大きく変化した core 投信の値が、実取引によるものかOCR/正規化由来かを追跡可能にする\n\n変更すべき仕様:\n- README.md の\
+  \ 2026_06 セクションに、月次サマリー、coreスポット買い計画、今月の指値買い設定、ポートフォリオサマリーを追加または更新する\n- 今月の指値買い設定は、銘柄、指値、20営業日平均、平均比乖離率、株数、見送り対象、主な理由を表で記載する\n\
+  - price 系フィールドは、Money Forward snapshot由来の評価価格と、市場データ由来の候補生成価格を区別して出力する\n- over target\
+  \ bucket で shallow candidate を suppressed した場合、deep candidate が生成されていない理由を出力する\n\
+  \n影響範囲:\n- README.md\n- monthly review 出力生成ロジック\n- limit order candidate 生成ロジック\n\
+  - price source / validation 出力\n- month-over-month validation log\n\n推奨テスト:\n- README.md\
+  \ の見出し、表、Mermaid が壊れないことを確認する\n- coreスポット買いの配分先内訳合計と実行スケジュール合計が一致することを確認する\n- CIBR\
+  \ のような over target 銘柄で shallow candidate が suppressed され、deep candidate がない場合に「eligible\
+  \ deep candidate なし」と出ることを確認する\n- snapshot価格とcandidate価格のソース日付が別フィールドで出力されることを確認する\n\
+  - large_month_over_month_change が出た銘柄について、検証警告がREADME.mdまたはログに反映されることを確認する\n```\n\
+  \n[1]: https://world-nuclear.org/our-association/publications/global-trends-reports/world-nuclear-outlook-report\
+  \ \"World Nuclear Outlook Report - World Nuclear Association\"\n[2]: https://pubs.usgs.gov/publication/fs20253057/full\
+  \ \"Uranium—Deposits, production and resources, market dynamics, and supply chain\
+  \ risks\"\n[3]: https://www.globalxetfs.com/funds/ura/ \"Uranium ETF (URA)\"\n[4]:\
+  \ https://www.gartner.com/en/newsroom/press-releases/2025-07-29-gartner-forecasts-worldwide-end-user-spending-on-information-security-to-total-213-billion-us-dollars-in-2025\
+  \ \"Gartner Forecasts Worldwide End-User Spending on Information Security to Total\
+  \ $213 Billion in 2025\"\n[5]: https://www.ftportfolios.com/retail/etf/etfsummary.aspx?Ticker=CIBR\
+  \ \"\n\tFirst Trust Nasdaq Cybersecurity ETF (CIBR)\n\"\n[6]: https://www.microsoft.com/en-us/investor/earnings/fy-2026-q3/press-release-webcast\
+  \ \"FY26 Q3 - Press Releases - Investor Relations - Microsoft\"\n[7]: https://www.microsoft.com/en-us/investor/events/fy-2026/earnings-fy-2026-q3\
+  \ \"Microsoft Fiscal Year 2026 Third Quarter Earnings Conference Call\"\n[8]: https://www.sec.gov/Archives/edgar/data/1321655/000132165526000026/a2026q1ex991pressrelease.htm\
+  \ \"Document\"\n[9]: https://www.investors.com/news/technology/palantir-stock-pltr-software-stocks-igv-etf-2026/?utm_source=chatgpt.com\
+  \ \"Palantir Mystery Deepens As Many Software Stocks Claw Back Amid AI Fears\"\n"
+sections:
+  monthly_proposals: '6月は **coreスポット買いを最優先**。テーマ銘柄の指値は、約定してもcore補強を圧迫しない小口に限定。
+
+
+    | 銘柄   |                                                   提案 | 理由                                                                                                            |
+
+    | ---- | ---------------------------------------------------: | -------------------------------------------------------------------------------------------------------------
+    |
+
+    | CIBR |                                           **今月は見送り** | ルール上の判断: satellite_core
+    が over target。Python候補は -5%、-8%、-12% の浅い押し目のみで、すべて suppressed。今月の裁量判断としても、直近高騰後に追わない。
+    |
+
+    | URA  |   指値 45.38 USD（20営業日平均 53.3833 USD, 平均比 -14.99%）, 2株 | ルール上の判断: satellite_core
+    over target だが、-15%の深い押し目は許容。約定想定額も小さい。                                               |
+
+    | PLTR | 指値 109.02 USD（20営業日平均 139.7678 USD, 平均比 -22.00%）, 2株 | 今月の裁量判断: -15%段は見送り、-22%のみ。高ボラ・高バリュエーション銘柄なので、core補強を優先し浅い押し目は買わない。                                            |
+
+    | MSFT | 指値 377.30 USD（20営業日平均 419.2170 USD, 平均比 -10.00%）, 2株 | 今月の裁量判断: -6%段は浅すぎるため見送り。jun_core不足はあるが、今月は
+    broad market core を優先。                                             |
+
+
+    Python候補より減らしたもの
+
+
+    * CIBR: 0段。ルール上の判断 + 今月の裁量判断。satellite_core過大で浅い押し目を買う必要がない。
+
+    * PLTR: 2段 → 1段。今月の裁量判断。core補強優先、高ボラ銘柄は深い押し目だけ。
+
+    * MSFT: 3段 → 1段。今月の裁量判断。MSFTは良いjun_coreだが、今月はオルカン/S&P500を優先。'
+  sox_decision: '**買わない。**
+
+
+    理由
+
+
+    * SMH proxy の63日高値からの下落率は -0.53%で、買いゾーンの -10%〜-5%に入っていない。
+
+    * satellite_core は21.36%で目標15.00%を超過。
+
+    * 半導体Direct exposureは16.77%、MSFTを含むDirect+Indirect監視指標は18.04%。
+
+    * SOX投信は既に含み益が大きく、ここで追加するよりcore不足の是正が優先。'
+  portfolio_diagnosis: '現在の偏り
+
+
+    * core不足: 22.00% vs target 45.00%。
+
+    * liquidity過多: 36.57% vs target 10.00%。
+
+    * satellite_core過大: 21.36% vs target 15.00%。
+
+    * 半導体エクスポージャが高め: direct 16.77%、direct+indirect 18.04%。
+
+    * 住居兼資産として金山近辺の不動産をフルローン初期で保有しているため、日本国内不動産への実質エクスポージャも既にある。
+
+
+    注意点
+
+
+    * liquidityは大きいが、住宅ローン初期・子育て・大口支出不明を考えると、いきなり目標10%まで落とす必要はない。
+
+    * ただし月90万円程度のcoreスポットを数ヶ月続けても、生活防衛資金を壊す水準ではない。
+
+    * iDeCoのオルカン55,000円/月は pension として有効だが、tradable core とは分けて見るべき。effective core
+    including pension は32.65%だが、売買可能なcoreは22.00%で不足。
+
+    * BTC/ETHの週4,000円積立は、総資産比で年0.55%程度なので維持でよい。減額・停止は不要。
+
+
+    今月の補強優先順位
+
+
+    1. オルカン
+
+    2. S&P500
+
+    3. MSFTの深めの押し目
+
+    4. URAの深い押し目
+
+    5. PLTRはさらに深い押し目だけ
+
+    6. CIBR/SOXは見送り'
+  rule_review: '維持してよいルール
+
+
+    * satellite_core over target時にSOX/CIBR/URAを深い押し目限定にするルールは妥当。
+
+    * PLTRの浅い押し目抑制ロジックは妥当。高ボラ・高期待銘柄を-10%程度で機械的に拾うのは、core不足局面では弱い。
+
+    * 半導体DirectとMSFTを含むIndirect AIインフラを分けて監視する設計も妥当。Direct 16.77%、Direct+Indirect
+    18.04%という見方は過剰集中の検知に使える。
+
+    * 2026年5月〜12月のNISA成長枠枯渇時に、特定口座coreスポット買いで補うルールは維持でよい。
+
+
+    改善した方がよいルール
+
+
+    * 大きなルール変更提案はなし。
+
+    * ただし、CIBRについて「satellite_core over targetなら-15%以下だけ許容」とするなら、Python候補にも -15%段を出すか、明示的に「今月は
+    eligible deep candidate なし」と表示した方がレビューしやすい。
+
+    * snapshot price と candidate current_price に差がある銘柄があるため、価格ソース日付を分けて出すと誤読が減る。
+
+
+    追加した方がよい制約
+
+
+    * coreスポット買いのルールは維持。今月のように高値圏でも、cash_excessとcore不足が大きい場合は、aggressive bandの中で執行するのが妥当。
+
+    * 生活防衛資金が未定義なので、今後は `liquidity_floor_jpy` または `emergency_fund_floor_jpy` を明示できると、coreスポット額の上限判断が安定する。
+
+
+    スクリプト修正が望ましい点
+
+
+    * must級の修正はなし。
+
+    * should級として、README更新、価格ソース日付の明示、CIBR deep candidate生成有無の明示、前月比大幅変化の検証メモ追加。'
+  codex_summary: "```md\nmust:\n- なし\n\nshould:\n- README.md に 2026_06 の月次サマリー・coreスポット購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する\n\
+    - README.md の当月セクション内の見やすい位置に「今月の指値買い設定」を追加または更新し、銘柄、指値、株数、見送り対象、主な理由を一覧化する\n\
+    - snapshot_price と candidate current_price の価格ソース日付が異なる可能性があるため、出力に `snapshot_price_source_date`\
+    \ と `market_candidate_price_source_date` のような区別を追加する\n- CIBR のように satellite_core\
+    \ over target で浅い候補が suppressed される場合、eligible deep candidate が生成されないなら「今月は eligible\
+    \ deep candidate なし」と明示する\n- EMAXIS_SLIM_SP500_1 と EMAXIS_SLIM_ALL_COUNTRY の large_month_over_month_change\
+    \ について、購入・売却・口座グルーピング変更・OCR誤読のどれが原因か README.md または検証ログに確認結果を残す\n\nnice_to_have:\n\
+    - liquidity_floor_jpy または emergency_fund_floor_jpy を設定ファイルに持たせ、住宅ローン初期・大口支出不明時の\
+    \ coreスポット買い上限判断を安定させる\n- coreスポット買いスケジュールを自動生成する場合、配分先内訳と日付別実行額の合計一致チェックをテストに追加する\n\
+    - satellite_core over target 時の CIBR / URA / SOX の deep threshold を銘柄別に設定できるようにする\n\
+    \n修正目的:\n- コード修正提案が少ない月でも README.md に当月の運用要約と指値買い設定を確実に反映する\n- 月次レビューで snapshot\
+    \ 価格と候補生成用価格の混同を避ける\n- over target のテーマ銘柄について、浅い候補を suppressed した後に買える候補が存在するのか、存在しないのかを明確にする\n\
+    - 前月比で大きく変化した core 投信の値が、実取引によるものかOCR/正規化由来かを追跡可能にする\n\n変更すべき仕様:\n- README.md\
+    \ の 2026_06 セクションに、月次サマリー、coreスポット買い計画、今月の指値買い設定、ポートフォリオサマリーを追加または更新する\n- 今月の指値買い設定は、銘柄、指値、20営業日平均、平均比乖離率、株数、見送り対象、主な理由を表で記載する\n\
+    - price 系フィールドは、Money Forward snapshot由来の評価価格と、市場データ由来の候補生成価格を区別して出力する\n- over\
+    \ target bucket で shallow candidate を suppressed した場合、deep candidate が生成されていない理由を出力する\n\
+    \n影響範囲:\n- README.md\n- monthly review 出力生成ロジック\n- limit order candidate 生成ロジック\n\
+    - price source / validation 出力\n- month-over-month validation log\n\n推奨テスト:\n\
+    - README.md の見出し、表、Mermaid が壊れないことを確認する\n- coreスポット買いの配分先内訳合計と実行スケジュール合計が一致することを確認する\n\
+    - CIBR のような over target 銘柄で shallow candidate が suppressed され、deep candidate がない場合に「eligible\
+    \ deep candidate なし」と出ることを確認する\n- snapshot価格とcandidate価格のソース日付が別フィールドで出力されることを確認する\n\
+    - large_month_over_month_change が出た銘柄について、検証警告がREADME.mdまたはログに反映されることを確認する\n```\n\
+    \n[1]: https://world-nuclear.org/our-association/publications/global-trends-reports/world-nuclear-outlook-report\
+    \ \"World Nuclear Outlook Report - World Nuclear Association\"\n[2]: https://pubs.usgs.gov/publication/fs20253057/full\
+    \ \"Uranium—Deposits, production and resources, market dynamics, and supply chain\
+    \ risks\"\n[3]: https://www.globalxetfs.com/funds/ura/ \"Uranium ETF (URA)\"\n\
+    [4]: https://www.gartner.com/en/newsroom/press-releases/2025-07-29-gartner-forecasts-worldwide-end-user-spending-on-information-security-to-total-213-billion-us-dollars-in-2025\
+    \ \"Gartner Forecasts Worldwide End-User Spending on Information Security to Total\
+    \ $213 Billion in 2025\"\n[5]: https://www.ftportfolios.com/retail/etf/etfsummary.aspx?Ticker=CIBR\
+    \ \"\n\tFirst Trust Nasdaq Cybersecurity ETF (CIBR)\n\"\n[6]: https://www.microsoft.com/en-us/investor/earnings/fy-2026-q3/press-release-webcast\
+    \ \"FY26 Q3 - Press Releases - Investor Relations - Microsoft\"\n[7]: https://www.microsoft.com/en-us/investor/events/fy-2026/earnings-fy-2026-q3\
+    \ \"Microsoft Fiscal Year 2026 Third Quarter Earnings Conference Call\"\n[8]:\
+    \ https://www.sec.gov/Archives/edgar/data/1321655/000132165526000026/a2026q1ex991pressrelease.htm\
+    \ \"Document\"\n[9]: https://www.investors.com/news/technology/palantir-stock-pltr-software-stocks-igv-etf-2026/?utm_source=chatgpt.com\
+    \ \"Palantir Mystery Deepens As Many Software Stocks Claw Back Amid AI Fears\""
+order_proposals:
+- symbol: CIBR
+  recommended_price: null
+  recommended_shares: 0
+  reason: 'ルール上の判断: satellite_core が over target。Python候補は -5%、-8%、-12% の浅い押し目のみで、すべて
+    suppressed。今月の裁量判断としても、直近高騰後に追わない。'
+- symbol: URA
+  recommended_price: 45.38
+  recommended_shares: 2
+  reason: 'ルール上の判断: satellite_core over target だが、-15%の深い押し目は許容。約定想定額も小さい。'
+- symbol: PLTR
+  recommended_price: 109.02
+  recommended_shares: 2
+  reason: '今月の裁量判断: -15%段は見送り、-22%のみ。高ボラ・高バリュエーション銘柄なので、core補強を優先し浅い押し目は買わない。'
+- symbol: MSFT
+  recommended_price: 377.3
+  recommended_shares: 2
+  reason: '今月の裁量判断: -6%段は浅すぎるため見送り。jun_core不足はあるが、今月は broad market core を優先。'
+sox_decision: 買わない
+portfolio_diagnosis:
+- 'core不足: 22.00% vs target 45.00%。'
+- 'liquidity過多: 36.57% vs target 10.00%。'
+- 'satellite_core過大: 21.36% vs target 15.00%。'
+- '半導体エクスポージャが高め: direct 16.77%、direct+indirect 18.04%。'
+- 住居兼資産として金山近辺の不動産をフルローン初期で保有しているため、日本国内不動産への実質エクスポージャも既にある。
+- liquidityは大きいが、住宅ローン初期・子育て・大口支出不明を考えると、いきなり目標10%まで落とす必要はない。
+- ただし月90万円程度のcoreスポットを数ヶ月続けても、生活防衛資金を壊す水準ではない。
+- iDeCoのオルカン55,000円/月は pension として有効だが、tradable core とは分けて見るべき。effective core including
+  pension は32.65%だが、売買可能なcoreは22.00%で不足。
+- BTC/ETHの週4,000円積立は、総資産比で年0.55%程度なので維持でよい。減額・停止は不要。
+rule_review:
+- satellite_core over target時にSOX/CIBR/URAを深い押し目限定にするルールは妥当。
+- PLTRの浅い押し目抑制ロジックは妥当。高ボラ・高期待銘柄を-10%程度で機械的に拾うのは、core不足局面では弱い。
+- 半導体DirectとMSFTを含むIndirect AIインフラを分けて監視する設計も妥当。Direct 16.77%、Direct+Indirect 18.04%という見方は過剰集中の検知に使える。
+- 2026年5月〜12月のNISA成長枠枯渇時に、特定口座coreスポット買いで補うルールは維持でよい。
+- 大きなルール変更提案はなし。
+- ただし、CIBRについて「satellite_core over targetなら-15%以下だけ許容」とするなら、Python候補にも -15%段を出すか、明示的に「今月は
+  eligible deep candidate なし」と表示した方がレビューしやすい。
+- snapshot price と candidate current_price に差がある銘柄があるため、価格ソース日付を分けて出すと誤読が減る。
+- coreスポット買いのルールは維持。今月のように高値圏でも、cash_excessとcore不足が大きい場合は、aggressive bandの中で執行するのが妥当。
+- 生活防衛資金が未定義なので、今後は `liquidity_floor_jpy` または `emergency_fund_floor_jpy` を明示できると、coreスポット額の上限判断が安定する。
+- must級の修正はなし。
+- should級として、README更新、価格ソース日付の明示、CIBR deep candidate生成有無の明示、前月比大幅変化の検証メモ追加。
+must:
+- なし
+should:
+- README.md に 2026_06 の月次サマリー・coreスポット購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する
+- README.md の当月セクション内の見やすい位置に「今月の指値買い設定」を追加または更新し、銘柄、指値、株数、見送り対象、主な理由を一覧化する
+- snapshot_price と candidate current_price の価格ソース日付が異なる可能性があるため、出力に `snapshot_price_source_date`
+  と `market_candidate_price_source_date` のような区別を追加する
+- CIBR のように satellite_core over target で浅い候補が suppressed される場合、eligible deep candidate
+  が生成されないなら「今月は eligible deep candidate なし」と明示する
+- EMAXIS_SLIM_SP500_1 と EMAXIS_SLIM_ALL_COUNTRY の large_month_over_month_change について、購入・売却・口座グルーピング変更・OCR誤読のどれが原因か
+  README.md または検証ログに確認結果を残す
+nice_to_have:
+- liquidity_floor_jpy または emergency_fund_floor_jpy を設定ファイルに持たせ、住宅ローン初期・大口支出不明時の coreスポット買い上限判断を安定させる
+- coreスポット買いスケジュールを自動生成する場合、配分先内訳と日付別実行額の合計一致チェックをテストに追加する
+- satellite_core over target 時の CIBR / URA / SOX の deep threshold を銘柄別に設定できるようにする
+- コード修正提案が少ない月でも README.md に当月の運用要約と指値買い設定を確実に反映する
+- 月次レビューで snapshot 価格と候補生成用価格の混同を避ける
+- over target のテーマ銘柄について、浅い候補を suppressed した後に買える候補が存在するのか、存在しないのかを明確にする
+- 前月比で大きく変化した core 投信の値が、実取引によるものかOCR/正規化由来かを追跡可能にする
+- README.md の 2026_06 セクションに、月次サマリー、coreスポット買い計画、今月の指値買い設定、ポートフォリオサマリーを追加または更新する
+- 今月の指値買い設定は、銘柄、指値、20営業日平均、平均比乖離率、株数、見送り対象、主な理由を表で記載する
+- price 系フィールドは、Money Forward snapshot由来の評価価格と、市場データ由来の候補生成価格を区別して出力する
+- over target bucket で shallow candidate を suppressed した場合、deep candidate が生成されていない理由を出力する
+- README.md
+- monthly review 出力生成ロジック
+- limit order candidate 生成ロジック
+- price source / validation 出力
+- month-over-month validation log
+- README.md の見出し、表、Mermaid が壊れないことを確認する
+- coreスポット買いの配分先内訳合計と実行スケジュール合計が一致することを確認する
+- CIBR のような over target 銘柄で shallow candidate が suppressed され、deep candidate がない場合に「eligible
+  deep candidate なし」と出ることを確認する
+- snapshot価格とcandidate価格のソース日付が別フィールドで出力されることを確認する
+- large_month_over_month_change が出た銘柄について、検証警告がREADME.mdまたはログに反映されることを確認する
+parser_warnings: []

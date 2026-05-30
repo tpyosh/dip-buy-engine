@@ -1,0 +1,626 @@
+対象月: 2026_06
+
+あなたは、月次レビュー用の判断材料を読む投資アシスタントです。
+以下の数値は、Codex が Money Forward スクリーンショットを一次情報として OCR・正規化し、Python スクリプトが整形したものです。必要に応じて妥当性を疑ってください。
+ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しません。画像読取は Codex 側で完了済みとして扱い、このプロンプト内の構造化データだけをレビュー対象にしてください。
+Money Forward から貼り付けられたテキストが使われている場合でも、それは補助情報です。HTML由来のコピーはレイアウト、列、階層、並び順、カテゴリ対応が崩れている可能性があります。
+OCR・正規化・前月差分の検証警告が含まれる場合は、投資判断の前提条件として明示的に扱ってください。
+ただし、Python スクリプトは投資判断エンジンではなく、判断材料の整形エンジンです。
+数値の再計算やスクリプトの結論追認ではなく、ポートフォリオ管理・リスク管理・月次レビュー・四半期ルール見直しの観点から評価してください。
+月次の執行判断と、四半期単位のルール見直し提案は明確に分離してください。
+指値設定は前月末または当月初に実施されるため、`snapshot_date` が前月末でも `review_target_month` の指値設定として解釈してください。
+指値設定基準値は先月の終値平均ではなく、スクリプト実行時点から直近20営業日（約1ヶ月）の終値平均として扱ってください。
+
+目的:
+- 今月の core スポット買い実行額を必ず提案する
+- 今月の指値設定案を提案する
+- コア定額買い方針をレビューする
+- SOX投信を買うべきか判定する
+- 長期投資シナリオに大きな変化がないか点検する
+- ポートフォリオの偏りを指摘する
+- 今月の補強優先順位を述べる
+- スクリプト改善余地があれば明示する
+
+あなたに渡す情報:
+- 月次スナップショット
+- Python が計算した基準値
+- Python が計算した候補材料
+- ポートフォリオ比率
+- リスク警告
+- OCR / 正規化 / 前月差分の検証警告
+- コア定額買いの判断材料
+- 半導体エクスポージャ内訳
+- 長期シナリオ点検対象
+
+指値提案ルール:
+- この「今月」は `review_target_month` を指す
+- 各銘柄について、提案する指値段数は 0段以上の任意とする
+- Python が出した候補段数に縛られず、0段、1段、2段、3段以上のいずれでもよい
+- 0段にする場合は、その銘柄は今月は見送ると明記する
+- Python 候補より少ない段数しか提案しない場合は、それが「ルール上そう判断した」のか「今月の裁量判断」なのかを明記する
+- Python 候補より多い段数を提案する場合も、なぜ段数を増やすのか理由を明記する
+- 2026年5月〜12月は coreスポット買いの優先度を上げ、指値候補が出ても coreスポット買い予算を削ってまでテーマ銘柄を買わない
+- satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定とする
+- PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定する
+- MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先する
+- 指値設定基準値は、先月平均ではなくスクリプト実行時点から直近20営業日（約1ヶ月）の終値平均として扱う
+- 指値を提案する場合は、各段について「直近20営業日（約1ヶ月）の終値平均」と「その平均から何%下の指値か」を必ず併記する
+- 乖離率は `((指値 / 直近20営業日終値平均) - 1) * 100` のパーセンテージとして扱い、マイナス値で明記する
+
+coreスポット買い出力ルール:
+- `【今月のcoreスポット買い提案】` では、提案総額、配分先内訳、実行スケジュールを必ず記載する
+- 2026年5月〜12月で `nisa_growth_quota_status: exhausted` の場合は、固定core積立額を 100,000円として扱い、NISA成長投資枠750,000円/月を前提にしない
+- 2026年5月〜12月で `taxable_core_spot_buy_required: True` の場合は、coreスポット買い提案に `account_type: 特定口座`、理由、税効率メモを必ず明記する
+- NISA枠がない月でも core 購入を弱めるのではなく、core不足と現金過多が続く限り、特定口座スポット買いで補う前提で判断する
+- 税効率低下よりも core不足と現金過多の是正を優先する。ただし生活防衛資金・住宅ローン・大口支出不明リスクを考慮し、現金を一気に削りすぎない
+- 2026年5月〜12月は、固定core積立額、特定口座coreスポット買い提案額、固定積立+スポット買いの合計core投入額を必ず明記する
+- 2026年5月〜12月の core スポット買いは、normal 300,000〜600,000円、aggressive 700,000〜1,000,000円、rebalance 1,000,000〜1,500,000円を基本レンジとして扱う
+- 2026年5月〜12月の rebalance mode では、固定core積立 100,000円、baseline_total_core_deployment_target_jpy 1,380,000円、baseline_core_spot_buy_jpy 1,280,000円を目安にする。iDeCo55,000円/月とBTC/ETH週次積立もキャッシュアウトとして別枠で考慮し、総投資額は月145万円程度を目安にする。ただし毎月必ず1,280,000円に固定せず、core_delta_pct、cash_excess_pct、current_cash_jpy、生活防衛資金、大口支出不明、相場下落/高値圏、毎月のキャッシュ流入、住宅ローン文脈で調整する
+- 単月の core スポット買いは原則1,500,000円を上限とする。例外的に大きな下落局面で上限超過を提案する場合は明確な理由を出す
+- coreスポット買いの配分は既存core商品に限定し、新規商品を増やさない。基本は eMAXIS Slim 全世界株式（オール・カントリー）60% / eMAXIS Slim 米国株式（S&P500）40%。米国株・半導体・AIインフラ感応度が高い月はオルカン65% / S&P500 35% などオルカンを厚めにする
+- 2026年5月〜12月は、今月の提案が rule-based なのか discretionary なのかを必ず分けて書く
+- core を積み増したほうがよい月は、`eMAXIS Slim 米国株式(S&P500)` と `eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)` の今月の積み増しスケジュールを明示する
+- `配分先内訳` では銘柄ごとの金額を記載し、合計は提案総額と一致させる
+- `実行スケジュール` では `review_target_month` 内の日付を使い、各行を `6月1日: eMAXIS Slim 米国株式(S&P500) 150,000円` の形式で記載する
+- 実行スケジュールの金額合計は、配分先内訳および提案総額と一致させる
+- coreスポット買いを見送る場合は、見送り理由を明記し、`実行スケジュールなし` と記載する
+- フォーマット例:
+```text
+【今月のcoreスポット買い提案】
+700,000円
+配分先内訳
+eMAXIS Slim 全世界株式(オール・カントリー)(オルカン): 400,000円
+eMAXIS Slim 米国株式(S&P500): 300,000円
+実行スケジュール
+6月1日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 200,000円
+6月4日: eMAXIS Slim 米国株式(S&P500) 150,000円
+6月11日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 100,000円
+6月18日: eMAXIS Slim 米国株式(S&P500) 100,000円
+6月25日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 100,000円
+6月25日: eMAXIS Slim 米国株式(S&P500) 50,000円
+```
+
+Codex向け修正要約ルール:
+- `【Codex向け修正要約】` は、修正指摘の有無にかかわらず毎回必ず出力する
+- コードやルールへの修正指摘が実質的にない月でも、`README.md` の最新月セクションに月次サマリーと今月の指値買い設定を反映する依頼は必ず含める
+- 修正指摘がない場合でも、少なくとも `should` には `README.md` へ最新月サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する依頼を入れる
+- `README.md` 更新依頼だけの月でも、must / should / nice_to_have / 修正目的 / 変更すべき仕様 / 影響範囲 / 推奨テスト を省略しない
+- `README.md` 更新依頼を入れる場合は、既存構成を壊さず、最新月セクションの見やすい位置に「今月の指値買い設定」を追加または更新する前提を明記する
+- `README.md` 更新依頼には、ルート README へ月次レビュー履歴を蓄積せず、既存の `## Monthly Review: YYYY_MM` を最新月の内容で置換し、過去月の `Monthly Review` セクションを残さない前提を必ず含める
+
+必須出力形式:
+【要約】
+...
+【今月のcoreスポット買い提案】
+...
+【今月の指値提案】
+...
+【コア定額買い方針レビュー】
+...
+【SOX投信判定】
+...
+【ポートフォリオ診断】
+...
+【長期シナリオレビュー】
+...
+【四半期ルール見直し】
+...
+【Codex向け修正要約】
+...
+
+## 1. 前提
+- snapshot_date: 2026-05-30
+- review_target_month: 2026_06
+- currency_base: JPY
+- total_assets_jpy: 37592966
+- liquidity_target_jpy: null
+- holdings_count: 21
+- スナップショットは Money Forward スクリーンショットを一次情報として Codex が OCR・正規化したものとして扱うこと
+- ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しないこと。画像読取は Codex 側で完了済みとして扱い、このプロンプト内の構造化データだけをレビューすること
+- Money Forward から貼り付けられたテキストがある場合でも、それは補助情報であり、HTML由来でレイアウト・列・階層・並び順が崩れている可能性がある
+- OCR・正規化・前月差分の検証警告は後続の警告一覧に含めているため、投資レビューでは警告を前提条件として扱うこと
+- 毎月の税引前キャッシュ流入はおおむね60万〜70万円ある前提で、生活防衛資金の必要水準を評価すること
+- 名古屋市中区・金山駅近くの流動性が高いマンション（約6500万円）を住居兼資産として保有している
+- 上記マンションはフルローンで購入しており、ローン返済はまだほとんど進んでいない
+- そのため、日本国内不動産セクターに対して実質的な積立投資エクスポージャがある前提もポートフォリオ文脈に含めること
+- 半導体エクスポージャ(Direct): 16.77%
+- AIインフラ感応度(Indirect): 1.27%
+- 指値設定は前月末または当月初に実施しうるため、snapshot_date が月末でも翌月の指値設定として解釈してよい
+- 指値設定基準値は先月平均ではなく、スクリプト実行時点から直近20営業日（約1ヶ月）の終値平均を使う
+
+## 2. この月の snapshot 要約
+- LIQUIDITY | liquidity | value_jpy=13749225 | price=null | quantity=null | source_category=預金・現金・暗号資産 | notes=内訳: PayPay -130,485円; メルペイ（残高払い）19円; モバイルSuica 1,915円; 三菱UFJ銀行 普通 2,585,303円; 楽天銀行 円預金(普通預金) 8,471,062円; 楽天証券 米ドル 596,743円; 野村証券 MRF 1,742,804円; 楽天証券 預り金 481,864円。
+- 7203 | jun_core | value_jpy=2433600 | price=3042 | quantity=800 | source_category=株式（現物） | institution=野村証券 | profit_loss_jpy=2008000 | notes=前日比 -23,200円、評価損益率 471.80%。
+- 9444 | satellite | value_jpy=343500 | price=229 | quantity=1500 | source_category=株式（現物） | institution=野村証券 | profit_loss_jpy=-598500 | notes=前日比 10,500円、評価損益率 -63.54%。
+- 2353 | satellite | value_jpy=24500 | price=245 | quantity=100 | source_category=株式（現物） | institution=野村証券 | profit_loss_jpy=-2000 | notes=前日比 -100円、評価損益率 -7.55%。
+- 7201 | satellite | value_jpy=41230 | price=412 | quantity=100 | source_category=株式（現物） | institution=楽天証券 | profit_loss_jpy=4475 | notes=前日比 0円、評価損益率 12.18%。現在値は画面表示上 412、評価額は 41,230円。
+- SMH | satellite_core | value_jpy=95534 | price=599.83 | quantity=1 | source_category=株式（現物） | institution=楽天証券 | profit_loss_jpy=36664 | notes=前日比 0円、評価損益率 62.28%。
+- PLTR | satellite | value_jpy=205467 | price=143.34 | quantity=9 | source_category=株式（現物） | institution=楽天証券 | profit_loss_jpy=-24574 | notes=前日比 0円、評価損益率 -10.68%。
+- CIBR | satellite_core | value_jpy=1172838 | price=83.68 | quantity=88 | source_category=株式（現物） | institution=楽天証券 | profit_loss_jpy=98431 | notes=前日比 0円、評価損益率 9.16%。
+- MSFT | jun_core | value_jpy=476046 | price=426.99 | quantity=7 | source_category=株式（現物） | institution=楽天証券 | profit_loss_jpy=25263 | notes=前日比 0円、評価損益率 5.60%。
+- URA | satellite_core (raw=satellite, reason=symbol_to_bucket) | value_jpy=549640 | price=50.75 | quantity=68 | source_category=株式（現物） | institution=楽天証券 | profit_loss_jpy=48538 | notes=前日比 0円、評価損益率 9.69%。config/portfolio_policy.yaml では satellite_core に解決される。
+- NISSEI_SOX_1 | satellite_core | value_jpy=4188484 | price=48649 | quantity=860960 | source_category=投資信託 | institution=楽天証券 | profit_loss_jpy=2828027 | notes=前日比 0円、評価損益率 207.87%。
+- NISSEI_SOX_2 | satellite_core | value_jpy=2022115 | price=48649 | quantity=415654 | source_category=投資信託 | institution=楽天証券 | profit_loss_jpy=1422115 | notes=前日比 0円、評価損益率 237.02%。
+- RAKUTEN_PLUS_ALL_COUNTRY_1 | core | value_jpy=2005942 | price=19410 | quantity=1033458 | source_category=投資信託 | institution=楽天証券 | profit_loss_jpy=555941 | notes=前日比 0円、評価損益率 38.34%。
+- RAKUTEN_PLUS_ALL_COUNTRY_2 | core | value_jpy=1644017 | price=19410 | quantity=846995 | source_category=投資信託 | institution=楽天証券 | profit_loss_jpy=144017 | notes=前日比 0円、評価損益率 9.60%。
+- RAKUTEN_PLUS_SP500 | core | value_jpy=208969 | price=19616 | quantity=106530 | source_category=投資信託 | institution=楽天証券 | profit_loss_jpy=84169 | notes=前日比 0円、評価損益率 67.44%。
+- EMAXIS_SLIM_SP500_1 | core | value_jpy=735693 | price=44082 | quantity=166892 | source_category=投資信託 | institution=楽天証券 | profit_loss_jpy=65693 | notes=前日比 0円、評価損益率 9.80%。
+- EMAXIS_SLIM_SP500_2 | core | value_jpy=1701825 | price=44082 | quantity=386059 | source_category=投資信託 | institution=楽天証券 | profit_loss_jpy=436825 | notes=前日比 0円、評価損益率 34.53%。
+- EMAXIS_SLIM_SP500_3 | core | value_jpy=1009456 | price=44082 | quantity=228995 | source_category=投資信託 | institution=楽天証券 | profit_loss_jpy=109456 | notes=前日比 0円、評価損益率 12.16%。
+- EMAXIS_SLIM_ALL_COUNTRY | core | value_jpy=964412 | price=37661 | quantity=256077 | source_category=投資信託 | institution=楽天証券 | profit_loss_jpy=84412 | notes=前日比 0円、評価損益率 9.59%。
+- PENSION_EMAXIS_SLIM_ALL_COUNTRY | pension | value_jpy=4004256 | price=null | quantity=null | source_category=年金 | account_type=iDeCo | notes=Money Forward画面では年金カテゴリ合計のみ確認。銘柄名は前月 snapshot_2026_05.yaml から継続。
+- POINTS_MILES | other | value_jpy=16213 | price=null | quantity=null | source_category=ポイント・マイル | notes=内訳: ANAマイレージ 786円; Vポイント/Tポイント 7円; Amazon通常ポイント 30円; 楽天期間限定ポイント 20円; 楽天ポイント 15,370円。
+
+## 3. 現在の資産配分
+| bucket | market_value_jpy | actual_pct | target_pct | delta_pct |
+| --- | ---: | ---: | ---: | ---: |
+| core | 8270314 | 22.00% | 45.00% | -23.00% |
+| jun_core | 2909646 | 7.74% | 20.00% | -12.26% |
+| liquidity | 13749225 | 36.57% | 10.00% | 26.57% |
+| other | 16213 | 0.04% | - | - |
+| pension | 4004256 | 10.65% | - | - |
+| satellite | 614697 | 1.64% | 10.00% | -8.36% |
+| satellite_core | 8028611 | 21.36% | 15.00% | 6.36% |
+
+## 4. 対象銘柄ごとの候補
+| symbol | bucket | current_price | snapshot_price_source_date | market_candidate_price_source_date | base_price | avg20_base_price | drawdown_rule | limit_price | avg20_gap_pct | shares | est_cost_jpy | suppressed | suppressed_reason_code | suppressed_reason_text | note_for_chatgpt | explanation |
+| --- | --- | ---: | --- | --- | ---: | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | --- | --- | --- |
+| CIBR | satellite_core | 89.0400 | 2026-05-30 | 2026-05-29 | 74.4840 | 74.4840 | -5% x 1 | 70.76 | -5.00 | 1 | 11269 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | drawdown_profile:shallow,shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_deep_only_due_to_bucket_over_target,mode_context:normal,mode_priority_weight:0,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:medium', 'bucket_over_target_deep_threshold_pct:-15', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.2136'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'normal', 'priority_weight': 0}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
+| CIBR | satellite_core | 89.0400 | 2026-05-30 | 2026-05-29 | 74.4840 | 74.4840 | -8% x 1 | 68.53 | -7.99 | 1 | 10914 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | drawdown_profile:shallow,shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_deep_only_due_to_bucket_over_target,mode_context:normal,mode_priority_weight:0,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:medium', 'bucket_over_target_deep_threshold_pct:-15', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.2136'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'normal', 'priority_weight': 0}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
+| CIBR | satellite_core | 89.0400 | 2026-05-30 | 2026-05-29 | 74.4840 | 74.4840 | -12% x 1 | 65.55 | -11.99 | 1 | 10439 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | drawdown_profile:shallow,shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_deep_only_due_to_bucket_over_target,mode_context:normal,mode_priority_weight:0,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:medium', 'bucket_over_target_deep_threshold_pct:-15', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.2136'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'normal', 'priority_weight': 0}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
+| URA | satellite_core | 50.7600 | 2026-05-30 | 2026-05-29 | 53.3833 | 53.3833 | -6% x 2 | 50.18 | -6.00 | 2 | 15983 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | drawdown_profile:shallow,shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_deep_only_due_to_bucket_over_target,mode_context:normal,mode_priority_weight:0,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:medium', 'bucket_over_target_deep_threshold_pct:-15', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.2136'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'normal', 'priority_weight': 0}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
+| URA | satellite_core | 50.7600 | 2026-05-30 | 2026-05-29 | 53.3833 | 53.3833 | -10% x 2 | 48.04 | -10.01 | 2 | 15301 | yes | bucket_over_target_shallow_suppressed | Shallow candidate suppressed because related bucket is over target. | drawdown_profile:shallow,shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_deep_only_due_to_bucket_over_target,mode_context:normal,mode_priority_weight:0,bucket_over_target_shallow_suppressed | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:medium', 'bucket_over_target_deep_threshold_pct:-15', 'default_deep_only_due_to_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.2136'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'normal', 'priority_weight': 0}, 'suppression': {'suppressed': True, 'reason_code': 'bucket_over_target_shallow_suppressed', 'reason_text': 'Shallow candidate suppressed because related bucket is over target.'}} |
+| URA | satellite_core | 50.7600 | 2026-05-30 | 2026-05-29 | 53.3833 | 53.3833 | -15% x 2 | 45.38 | -14.99 | 2 | 14454 | no | - | - | drawdown_profile:deep,deep_drawdown_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_allow_deep_drawdown_even_if_bucket_over_target,mode_context:normal,mode_priority_weight:0 | {'rule_based_reason': ['auto_tranche_adjustment_bucket_over_target:medium', 'bucket_over_target_deep_threshold_pct:-15', 'default_allow_deep_drawdown_even_if_bucket_over_target'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite_core', 'actual_pct': Decimal('0.2136'), 'target_pct': Decimal('0.15'), 'is_over_target': True}, 'mode_context': {'active_mode': 'normal', 'priority_weight': 0}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| PLTR | satellite | 156.5400 | 2026-05-30 | 2026-05-29 | 139.7678 | 139.7678 | -10% x 1 | 125.79 | -10.00 | 1 | 20033 | yes | high_volatility_shallow_suppressed | High-volatility names default to deeper pullbacks before adding. | drawdown_profile:shallow,shallow_candidate,high_volatility_name,high_volatility_shallow_threshold_pct:-12,rule_based_high_volatility_shallow_suppression,mode_context:normal,mode_priority_weight:-1,high_volatility_shallow_suppressed | {'rule_based_reason': ['high_volatility_shallow_threshold_pct:-12', 'rule_based_high_volatility_shallow_suppression'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite', 'actual_pct': Decimal('0.0164'), 'target_pct': Decimal('0.1'), 'is_over_target': False}, 'mode_context': {'active_mode': 'normal', 'priority_weight': -1}, 'suppression': {'suppressed': True, 'reason_code': 'high_volatility_shallow_suppressed', 'reason_text': 'High-volatility names default to deeper pullbacks before adding.'}} |
+| PLTR | satellite | 156.5400 | 2026-05-30 | 2026-05-29 | 139.7678 | 139.7678 | -15% x 2 | 118.80 | -15.00 | 2 | 37839 | no | - | - | drawdown_profile:deep,deep_drawdown_candidate,high_volatility_name,high_volatility_shallow_threshold_pct:-12,mode_context:normal,mode_priority_weight:-1 | {'rule_based_reason': ['high_volatility_shallow_threshold_pct:-12'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite', 'actual_pct': Decimal('0.0164'), 'target_pct': Decimal('0.1'), 'is_over_target': False}, 'mode_context': {'active_mode': 'normal', 'priority_weight': -1}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| PLTR | satellite | 156.5400 | 2026-05-30 | 2026-05-29 | 139.7678 | 139.7678 | -22% x 2 | 109.02 | -22.00 | 2 | 34724 | no | - | - | drawdown_profile:deep,deep_drawdown_candidate,high_volatility_name,high_volatility_shallow_threshold_pct:-12,mode_context:normal,mode_priority_weight:-1 | {'rule_based_reason': ['high_volatility_shallow_threshold_pct:-12'], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'satellite', 'actual_pct': Decimal('0.0164'), 'target_pct': Decimal('0.1'), 'is_over_target': False}, 'mode_context': {'active_mode': 'normal', 'priority_weight': -1}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| MSFT | jun_core | 450.2400 | 2026-05-30 | 2026-05-29 | 419.2170 | 419.2170 | -6% x 1 | 394.06 | -6.00 | 1 | 62756 | no | - | - | drawdown_profile:shallow,shallow_candidate,mode_context:normal,mode_priority_weight:1 | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'jun_core', 'actual_pct': Decimal('0.0774'), 'target_pct': Decimal('0.2'), 'is_over_target': False}, 'mode_context': {'active_mode': 'normal', 'priority_weight': 1}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| MSFT | jun_core | 450.2400 | 2026-05-30 | 2026-05-29 | 419.2170 | 419.2170 | -10% x 2 | 377.30 | -10.00 | 2 | 120174 | no | - | - | drawdown_profile:shallow,shallow_candidate,mode_context:normal,mode_priority_weight:1 | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'jun_core', 'actual_pct': Decimal('0.0774'), 'target_pct': Decimal('0.2'), 'is_over_target': False}, 'mode_context': {'active_mode': 'normal', 'priority_weight': 1}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+| MSFT | jun_core | 450.2400 | 2026-05-30 | 2026-05-29 | 419.2170 | 419.2170 | -18% x 2 | 343.76 | -18.00 | 2 | 109491 | no | - | - | drawdown_profile:deep,deep_drawdown_candidate,mode_context:normal,mode_priority_weight:1 | {'rule_based_reason': [], 'discretionary_reason': None, 'related_bucket_status': {'bucket': 'jun_core', 'actual_pct': Decimal('0.0774'), 'target_pct': Decimal('0.2'), 'is_over_target': False}, 'mode_context': {'active_mode': 'normal', 'priority_weight': 1}, 'suppression': {'suppressed': False, 'reason_code': None, 'reason_text': None}} |
+
+Candidate availability notes:
+- CIBR: 今月は eligible deep candidate なし。bucket over target のため浅い候補は suppressed され、設定済み候補に deep threshold 以下の段がありません。
+
+## 5. コア定額買い判定材料
+- core_actual_pct: 22.00%
+- core_target_pct: 45.00%
+- core_delta_pct: -23.00%
+- liquidity_actual_pct: 36.57%
+- liquidity_target_pct: 10.00%
+- cash_excess_pct: 26.57%
+- core_bucket_total_jpy: 8270314
+- monthly_core_budget_policy: {'base_monthly_buy_amount_jpy': 100000, 'monthly_core_buy_budget_min_jpy': 300000, 'monthly_core_buy_budget_max_jpy': 1500000, 'budget_tiers': {'standard': {'budget_jpy': 300000, 'min_jpy': 300000, 'max_jpy': 600000, 'description': 'Normal mode: core不足はあるが現金過多が軽度、または相場が高値圏'}, 'aggressive': {'budget_jpy': 900000, 'min_jpy': 700000, 'max_jpy': 1000000, 'description': 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'}, 'rebalance': {'budget_jpy': 1280000, 'min_jpy': 1000000, 'max_jpy': 1500000, 'description': 'Rebalance mode: 現在の固定積立等を踏まえて特定口座スポットで補う'}}, 'override_conditions': {'core_shortfall_pct_gte': 0.15, 'cash_excess_pct_gte': 0.15, 'budget_tier': 'aggressive', 'reason_code': 'nisa_exhaustion_core_underweight_and_cash_overweight'}, 'rebalance_mode': {'enabled': True, 'core_shortfall_pct_gte': 0.25, 'cash_excess_pct_gte': 0.25, 'monthly_core_buy_budget_max_jpy': 1500000, 'budget_tier': 'rebalance', 'reason_code': 'nisa_exhaustion_rebalance_core_underweight_and_cash_overweight', 'description': '2026年5月〜12月は固定core積立が100,000円/月のため、core不足と現金過多が大きい月は特定口座スポット買いで是正速度を維持する'}, 'active_from': '2026-05', 'active_to': '2026-12', 'reason_code': 'nisa_growth_quota_exhausted_2026', 'reason': '2026年NISA成長投資枠を使い切ったため', 'nisa_growth_quota_status': 'exhausted', 'taxable_core_spot_buy_required': True, 'core_spot_buy_account_type': '特定口座', 'fixed_core_auto_invest_jpy': 100000, 'baseline_total_core_deployment_target_jpy': 1380000, 'baseline_core_spot_buy_jpy': 1280000, 'hard_cap_core_spot_buy_jpy': 1500000, 'spot_buy_bands': {'normal': {'min_jpy': 300000, 'max_jpy': 600000, 'conditions': ['core不足はあるが、現金過多が軽度', '相場が高値圏で、急いで投入する必要が低い']}, 'aggressive': {'min_jpy': 700000, 'max_jpy': 1000000, 'conditions': ['core不足が大きい', 'liquidity が target を大きく上回る', 'ただし rebalance mode ほどではない']}, 'rebalance': {'min_jpy': 1000000, 'max_jpy': 1500000, 'conditions': ['core_delta_pct <= -25pt 程度', 'cash_excess_pct >= +25pt 程度', '生活防衛資金を残しても現金過多が明確', '現在の固定積立等を踏まえて特定口座スポットで補う必要がある']}}, 'hard_cap_note': '単月のcoreスポット買いは原則1,500,000円を上限とし、例外的に大きな下落局面で上限超過を提案する場合は明確な理由を出す', 'satellite_interaction_policy': ['satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定', 'PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定', 'MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先', '指値候補が出ても、coreスポット買い予算を削ってまでテーマ銘柄を買わない'], 'date_based_override_active': True, 'active_date_based_override': {'active_from': '2026-05', 'active_to': '2026-12', 'reason_code': 'nisa_growth_quota_exhausted_2026', 'reason': '2026年NISA成長投資枠を使い切ったため', 'nisa_growth_quota_status': 'exhausted', 'taxable_core_spot_buy_required': True, 'core_spot_buy_account_type': '特定口座', 'fixed_core_auto_invest_jpy': 100000, 'baseline_total_core_deployment_target_jpy': 1380000, 'baseline_core_spot_buy_jpy': 1280000, 'hard_cap_core_spot_buy_jpy': 1500000, 'monthly_core_buy_budget_min_jpy': 300000, 'monthly_core_buy_budget_max_jpy': 1500000, 'budget_tiers': {'standard': {'budget_jpy': 300000, 'min_jpy': 300000, 'max_jpy': 600000, 'description': 'Normal mode: core不足はあるが現金過多が軽度、または相場が高値圏'}, 'aggressive': {'budget_jpy': 900000, 'min_jpy': 700000, 'max_jpy': 1000000, 'description': 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'}, 'rebalance': {'budget_jpy': 1280000, 'min_jpy': 1000000, 'max_jpy': 1500000, 'description': 'Rebalance mode: 現在の固定積立等を踏まえて特定口座スポットで補う'}}, 'override_conditions': {'core_shortfall_pct_gte': 0.15, 'cash_excess_pct_gte': 0.15, 'budget_tier': 'aggressive', 'reason_code': 'nisa_exhaustion_core_underweight_and_cash_overweight'}, 'rebalance_mode': {'enabled': True, 'core_shortfall_pct_gte': 0.25, 'cash_excess_pct_gte': 0.25, 'monthly_core_buy_budget_max_jpy': 1500000, 'budget_tier': 'rebalance', 'reason_code': 'nisa_exhaustion_rebalance_core_underweight_and_cash_overweight', 'description': '2026年5月〜12月は固定core積立が100,000円/月のため、core不足と現金過多が大きい月は特定口座スポット買いで是正速度を維持する'}, 'spot_buy_bands': {'normal': {'min_jpy': 300000, 'max_jpy': 600000, 'conditions': ['core不足はあるが、現金過多が軽度', '相場が高値圏で、急いで投入する必要が低い']}, 'aggressive': {'min_jpy': 700000, 'max_jpy': 1000000, 'conditions': ['core不足が大きい', 'liquidity が target を大きく上回る', 'ただし rebalance mode ほどではない']}, 'rebalance': {'min_jpy': 1000000, 'max_jpy': 1500000, 'conditions': ['core_delta_pct <= -25pt 程度', 'cash_excess_pct >= +25pt 程度', '生活防衛資金を残しても現金過多が明確', '現在の固定積立等を踏まえて特定口座スポットで補う必要がある']}}, 'hard_cap_note': '単月のcoreスポット買いは原則1,500,000円を上限とし、例外的に大きな下落局面で上限超過を提案する場合は明確な理由を出す', 'satellite_interaction_policy': ['satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定', 'PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定', 'MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先', '指値候補が出ても、coreスポット買い予算を削ってまでテーマ銘柄を買わない']}}
+- monthly_core_buy_budget_min_jpy: 300000
+- monthly_core_buy_budget_max_jpy: 1500000
+- monthly_core_budget_tier: aggressive
+- monthly_core_budget_band: {'min_jpy': 700000, 'max_jpy': 1000000, 'description': 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'}
+- recommended_monthly_core_buy_budget_jpy: 900000
+- monthly_core_budget_override_active: True
+- monthly_core_budget_override_reason: nisa_exhaustion_core_underweight_and_cash_overweight
+- portfolio_management_mode: normal_with_override
+- rebalance_mode_active: False
+- rebalance_mode_reason: -
+- date_based_core_budget_override_active: True
+- nisa_growth_quota_status: exhausted
+- taxable_core_spot_buy_required: True
+- core_spot_buy_account_type: 特定口座
+- fixed_core_auto_invest_jpy: 100000
+- baseline_total_core_deployment_target_jpy: 1380000
+- baseline_core_spot_buy_jpy: 1280000
+- hard_cap_core_spot_buy_jpy: 1500000
+- spot_buy_bands: {'normal': {'min_jpy': 300000, 'max_jpy': 600000, 'conditions': ['core不足はあるが、現金過多が軽度', '相場が高値圏で、急いで投入する必要が低い']}, 'aggressive': {'min_jpy': 700000, 'max_jpy': 1000000, 'conditions': ['core不足が大きい', 'liquidity が target を大きく上回る', 'ただし rebalance mode ほどではない']}, 'rebalance': {'min_jpy': 1000000, 'max_jpy': 1500000, 'conditions': ['core_delta_pct <= -25pt 程度', 'cash_excess_pct >= +25pt 程度', '生活防衛資金を残しても現金過多が明確', '現在の固定積立等を踏まえて特定口座スポットで補う必要がある']}}
+- satellite_interaction_policy: ['satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定', 'PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定', 'MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先', '指値候補が出ても、coreスポット買い予算を削ってまでテーマ銘柄を買わない']
+- core_budget_explanation: {'rule_based_reason': 'nisa_exhaustion_core_underweight_and_cash_overweight', 'discretionary_reason': None, 'related_bucket_status': {'core_actual_pct': Decimal('0.2200'), 'core_target_pct': Decimal('0.45'), 'liquidity_actual_pct': Decimal('0.3657'), 'liquidity_target_pct': Decimal('0.1')}, 'mode_context': {'active_mode': 'normal_with_override', 'rebalance_mode_active': False, 'rebalance_mode_reason': None, 'selected_budget_band': {'min_jpy': 700000, 'max_jpy': 1000000, 'description': 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'}, 'rebalance_mode_description': None}}
+| symbol | quantity | value_jpy | current_price | reference_symbol | suggested_proxy_symbol | reference_current_price | recent_high_21d | recent_high_63d | drawdown_pct_from_recent_high |
+| --- | ---: | ---: | ---: | --- | --- | ---: | ---: | ---: | ---: |
+| RAKUTEN_PLUS_ALL_COUNTRY_1 | 1033458 | 2005942 | 19410 | VT | ACWI | 158.1200 | 158.1200 | 158.1200 | 0.00 |
+| RAKUTEN_PLUS_ALL_COUNTRY_2 | 846995 | 1644017 | 19410 | VT | ACWI | 158.1200 | 158.1200 | 158.1200 | 0.00 |
+| RAKUTEN_PLUS_SP500 | 106530 | 208969 | 19616 | VOO | VOO | 695.4900 | 695.4900 | 695.4900 | 0.00 |
+| EMAXIS_SLIM_SP500_1 | 166892 | 735693 | 44082 | VOO | VOO | 695.4900 | 695.4900 | 695.4900 | 0.00 |
+| EMAXIS_SLIM_SP500_2 | 386059 | 1701825 | 44082 | VOO | VOO | 695.4900 | 695.4900 | 695.4900 | 0.00 |
+| EMAXIS_SLIM_SP500_3 | 228995 | 1009456 | 44082 | VOO | VOO | 695.4900 | 695.4900 | 695.4900 | 0.00 |
+| EMAXIS_SLIM_ALL_COUNTRY | 256077 | 964412 | 37661 | ACWI | ACWI | 158.5400 | 158.5400 | 158.5400 | 0.00 |
+
+## 5-1. Coreスポット買い判断材料
+- liquidity_actual_pct: 36.57%
+- liquidity_target_pct: 10.00%
+- cash_excess_pct: 26.57%
+- core_actual_pct: 22.00%
+- core_target_pct: 45.00%
+- core_delta_pct: -23.00%
+- jun_core_actual_pct: 7.74%
+- jun_core_target_pct: 20.00%
+- jun_core_delta_pct: -12.26%
+- nisa_growth_quota_status: exhausted
+- nisa_exhaustion_adjustment_reason: NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う
+- taxable_core_spot_buy_required: True
+- account_type: 特定口座
+- taxable_account_note: NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う
+- tax_note: NISAより税効率は落ちるが、現在の主問題はcore不足と現金過多であるため、特定口座でのcore積増しを許容する
+- fixed_core_auto_invest_amount_jpy: 100000
+- current_monthly_core_auto_invest_amount_jpy: 100000
+- annualized_core_auto_invest_amount_jpy: 1200000
+- recommended_taxable_core_spot_buy_jpy: 900000
+- recommended_monthly_core_buy_budget_jpy: 900000
+- total_monthly_core_deployment_jpy: 1000000
+- baseline_total_core_deployment_target_jpy: 1380000
+- baseline_core_spot_buy_jpy: 1280000
+- hard_cap_core_spot_buy_jpy: 1500000
+- monthly_core_budget_band: {'min_jpy': 700000, 'max_jpy': 1000000, 'description': 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'}
+- spot_buy_bands: {'normal': {'min_jpy': 300000, 'max_jpy': 600000, 'conditions': ['core不足はあるが、現金過多が軽度', '相場が高値圏で、急いで投入する必要が低い']}, 'aggressive': {'min_jpy': 700000, 'max_jpy': 1000000, 'conditions': ['core不足が大きい', 'liquidity が target を大きく上回る', 'ただし rebalance mode ほどではない']}, 'rebalance': {'min_jpy': 1000000, 'max_jpy': 1500000, 'conditions': ['core_delta_pct <= -25pt 程度', 'cash_excess_pct >= +25pt 程度', '生活防衛資金を残しても現金過多が明確', '現在の固定積立等を踏まえて特定口座スポットで補う必要がある']}}
+- core_spot_buy_allocation_rule: {'allowed_products_only': True, 'default_allocation': {'eMAXIS Slim 全世界株式（オール・カントリー）': 0.6, 'eMAXIS Slim 米国株式（S&P500）': 0.4}, 'high_us_ai_infra_sensitivity_allocation': {'eMAXIS Slim 全世界株式（オール・カントリー）': 0.65, 'eMAXIS Slim 米国株式（S&P500）': 0.35}, 'note': '既存core商品に限定し、米国株・半導体・AIインフラ感応度が高い月はオルカン比率を厚めにする'}
+- date_based_override_active: True
+- active_date_based_override: {'active_from': '2026-05', 'active_to': '2026-12', 'reason_code': 'nisa_growth_quota_exhausted_2026', 'reason': '2026年NISA成長投資枠を使い切ったため', 'nisa_growth_quota_status': 'exhausted', 'total_monthly_jpy': 100000, 'monthly_core_auto_invest_amount_jpy': 100000, 'taxable_core_spot_buy_required': True, 'core_spot_buy_account_type': '特定口座', 'baseline_total_core_deployment_target_jpy': 1380000, 'rebalance_mode_core_spot_buy_reference_jpy': 1280000, 'taxable_account_note': 'NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う', 'tax_note': 'NISAより税効率は落ちるが、現在の主問題はcore不足と現金過多であるため、特定口座でのcore積増しを許容する', 'nisa_exhaustion_adjustment_reason': 'NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う', 'core_spot_buy_allocation_rule': {'allowed_products_only': True, 'default_allocation': {'eMAXIS Slim 全世界株式（オール・カントリー）': 0.6, 'eMAXIS Slim 米国株式（S&P500）': 0.4}, 'high_us_ai_infra_sensitivity_allocation': {'eMAXIS Slim 全世界株式（オール・カントリー）': 0.65, 'eMAXIS Slim 米国株式（S&P500）': 0.35}, 'note': '既存core商品に限定し、米国株・半導体・AIインフラ感応度が高い月はオルカン比率を厚めにする'}, 'requires_explicit_followup_rule': True, 'followup_warning_code': 'post_2026_nisa_growth_quota_rule_missing'}
+- configuration_warnings: []
+- current_cash_jpy: 13749225
+- bond_like_holdings_present: False
+- bond_like_holdings: None
+- emergency_fund_managed_separately: None
+- near_term_large_expense: None
+- real_estate_exposure_present: True
+- real_estate_use: residence_and_asset
+- mortgage_status: full_loan_early_stage
+- liquidity_comment: residential real estate should not be treated as emergency liquidity
+| reference_symbol | one_month_return_pct | three_month_return_pct | one_month_drawdown_from_high_pct | three_month_drawdown_from_high_pct |
+| --- | ---: | ---: | ---: | ---: |
+| VT | 6.16 | 6.95 | 0.00 | 0.00 |
+| VOO | 6.31 | 10.21 | 0.00 | 0.00 |
+| ACWI | 6.30 | 7.57 | 0.00 | 0.00 |
+- portfolio_risk_bucket_summary:
+  - core: actual_pct=22.00%, target_pct=45.00%, delta_pct=-23.00%
+  - jun_core: actual_pct=7.74%, target_pct=20.00%, delta_pct=-12.26%
+  - liquidity: actual_pct=36.57%, target_pct=10.00%, delta_pct=26.57%
+  - other: actual_pct=0.04%, target_pct=null, delta_pct=null
+  - pension: actual_pct=10.65%, target_pct=null, delta_pct=null
+  - satellite: actual_pct=1.64%, target_pct=10.00%, delta_pct=-8.36%
+  - satellite_core: actual_pct=21.36%, target_pct=15.00%, delta_pct=6.36%
+
+## 5-2. Core積立設定（毎月固定）
+- total_monthly_jpy: 100000
+- monthly_core_auto_invest_amount_jpy: 100000
+- nisa_growth_quota_status: exhausted
+- taxable_core_spot_buy_required: True
+- core_spot_buy_account_type: 特定口座
+- date_based_override_active: True
+- active_date_based_override: {'active_from': '2026-05', 'active_to': '2026-12', 'reason_code': 'nisa_growth_quota_exhausted_2026', 'reason': '2026年NISA成長投資枠を使い切ったため', 'nisa_growth_quota_status': 'exhausted', 'total_monthly_jpy': 100000, 'monthly_core_auto_invest_amount_jpy': 100000, 'taxable_core_spot_buy_required': True, 'core_spot_buy_account_type': '特定口座', 'baseline_total_core_deployment_target_jpy': 1380000, 'rebalance_mode_core_spot_buy_reference_jpy': 1280000, 'taxable_account_note': 'NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う', 'tax_note': 'NISAより税効率は落ちるが、現在の主問題はcore不足と現金過多であるため、特定口座でのcore積増しを許容する', 'nisa_exhaustion_adjustment_reason': 'NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う', 'core_spot_buy_allocation_rule': {'allowed_products_only': True, 'default_allocation': {'eMAXIS Slim 全世界株式（オール・カントリー）': 0.6, 'eMAXIS Slim 米国株式（S&P500）': 0.4}, 'high_us_ai_infra_sensitivity_allocation': {'eMAXIS Slim 全世界株式（オール・カントリー）': 0.65, 'eMAXIS Slim 米国株式（S&P500）': 0.35}, 'note': '既存core商品に限定し、米国株・半導体・AIインフラ感応度が高い月はオルカン比率を厚めにする'}, 'requires_explicit_followup_rule': True, 'followup_warning_code': 'post_2026_nisa_growth_quota_rule_missing'}
+- taxable_account_note: NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う
+- tax_note: NISAより税効率は落ちるが、現在の主問題はcore不足と現金過多であるため、特定口座でのcore積増しを許容する
+- nisa_exhaustion_adjustment_reason: NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う
+- baseline_total_core_deployment_target_jpy: 1380000
+- rebalance_mode_core_spot_buy_reference_jpy: 1280000
+- configuration_warnings: []
+| day_of_month | fund_name | amount_jpy | settlement_type | account_type | distribution_course |
+| ---: | --- | ---: | --- | --- | --- |
+| 8 | eMAXIS Slim 全世界株式（オール・カントリー） | 50000 | クレジットカード決済 | NISAつみたて投資枠 | 再投資型 |
+| 8 | eMAXIS Slim 米国株式（S&P500） | 50000 | クレジットカード決済 | NISAつみたて投資枠 | 再投資型 |
+- review_guidance:
+  - この固定積立は毎月すでに執行される前提で評価する
+  - core不足の指摘は、固定積立の寄与を織り込んだうえで必要時のみ行う
+  - 長期シナリオ悪化やリスク管理上の理由がある場合は、固定積立の減額・停止提案を明示する
+  - 2026年5月〜12月は、NISA成長投資枠の固定積立750,000円/月を前提にしない
+  - 固定core積立は100,000円/月として扱う
+  - core不足と現金過多が続く限り、特定口座でのcoreスポット買いを厚めに提案する
+  - 税効率よりも、core不足と現金過多の是正を優先する
+  - 生活防衛資金・住宅ローン・大口支出不明リスクを考慮し、現金を一気に削りすぎない
+
+## 5-3. iDeCo積立設定（毎月固定）
+- pension_monthly_dca_total_jpy: 55000
+- annualized_pension_dca_jpy: 660000
+- annualized_pension_dca_pct_of_total_assets: 1.76%
+| symbol | fund_name | amount_jpy_per_month | account_type | asset_class |
+| --- | --- | ---: | --- | --- |
+| IDECO_ALL_COUNTRY | eMAXIS Slim 全世界株式（オール・カントリー） | 55000 | iDeCo | pension |
+- pension_review_guidance:
+  - iDeCoのオルカン月次積立はpensionとして既存で実行中の前提で評価する
+  - tradable coreとは分け、effective_core_including_pension_pctの文脈で補助的に扱う
+
+## 5-4. 暗号資産積立設定（毎週固定）
+- crypto_weekly_dca_total_jpy: 4000
+- annualized_crypto_dca_jpy: 208000
+- annualized_crypto_dca_pct_of_total_assets: 0.55%
+| symbol | amount_jpy_per_week |
+| --- | ---: |
+| BTC | 2000 |
+| ETH | 2000 |
+- crypto_review_guidance:
+  - 暗号資産の週次積立は既存で実行中の前提で評価する
+  - 継続・減額・停止の提案が必要な場合は、理由とトリガー条件を明示する
+
+## 6. SOX 判定材料
+- proxy_symbol: SMH
+- current_price: 598.9300
+- recent_high_21d: 602.1400
+- recent_high_63d: 602.1400
+- drawdown_pct_from_21d_high: -0.53
+- drawdown_pct_from_63d_high: -0.53
+- buy_zone_rule_text: drawdown from 63d high between -10% and -5%
+- within_buy_zone_boolean: False
+- near_boundary_boolean: False
+- monthly_buy_budget_jpy: {'min': 100000, 'max': 200000}
+- related_bucket_actual_pct: 21.36%
+- related_bucket_target_pct: 15.00%
+- semiconductor_exposure_total_pct: 16.77%
+- priority_lowered_boolean: True
+- priority_lowered_reason: related_bucket_over_target
+- explanation: {'buy_zone_assessment': {'within_buy_zone': False, 'near_boundary': False, 'drawdown_pct_from_63d_high': Decimal('-0.53'), 'rule': '-10% <= drawdown <= -5%'}, 'bucket_context': {'related_bucket': 'satellite_core', 'related_bucket_actual_pct': Decimal('0.2136'), 'related_bucket_target_pct': Decimal('0.15')}, 'exposure_context': {'semiconductor_direct_exposure_pct': Decimal('0.1677'), 'indirect_ai_infra_exposure_pct': Decimal('0.0127')}}
+
+## 7. 半導体エクスポージャ内訳
+- direct_cap_monitor_pct: 16.77%
+- direct_cap_monitor_jpy: 6306133
+- direct_plus_indirect_watch_metric_pct: 18.04%
+- direct_plus_indirect_watch_metric_jpy: 6782179
+- direct_semiconductor_exposure_pct: 16.77%
+- indirect_ai_infra_exposure_pct: 1.27%
+- indirect_ai_infra_exposure_jpy: 476046
+- combined_semiconductor_ai_infra_watch_pct: 18.04%
+| symbol | value_jpy | bucket | exposure_type | in_direct | in_indirect | inclusion_reason |
+| --- | ---: | --- | --- | --- | --- | --- |
+| SMH | 95534 | satellite_core | direct_semiconductor | yes | no | matched_exposure_group_rule |
+| MSFT | 476046 | jun_core | indirect_ai_infra | no | yes | matched_indirect_ai_infra_rule |
+| NISSEI_SOX_1 | 4188484 | satellite_core | direct_semiconductor | yes | no | matched_exposure_group_rule |
+| NISSEI_SOX_2 | 2022115 | satellite_core | direct_semiconductor | yes | no | matched_exposure_group_rule |
+
+## 8. 長期シナリオ点検対象
+| symbol | bucket | current_value_jpy | portfolio_pct | thesis_id | long_term_thesis_summary | key_risk_if_thesis_breaks | review_priority | web_review_required |
+| --- | --- | ---: | ---: | --- | --- | --- | --- | --- |
+| URA | satellite_core | 549640 | 1.46% | nuclear_revival | 脱炭素、電力需要増、エネルギー安全保障を背景に、 原子力需要が中長期で再評価されるという仮説。 | 炭素回収技術の量産化・低コスト化; 再エネ＋蓄電の経済性改善; 政策転換; 原子力新設の採算悪化 | high | yes |
+| CIBR | satellite_core | 1172838 | 3.12% | persistent_cybersecurity_spending | サイバーセキュリティ支出は構造的に維持・拡大するという仮説。 | 支出成長の鈍化; バリュエーション過熱後の長期低迷 | medium | yes |
+| MSFT | jun_core | 476046 | 1.27% | hyperscaler_ai_platform_compounding | クラウド・AI基盤・企業ソフトウェアの複合優位により、 長期で利益成長が継続するという仮説。 | AI投資回収の停滞; 規制強化; 競争優位の低下 | medium | yes |
+| PLTR | satellite | 205467 | 0.55% | defense_ai_gov_software_scaling | 政府・防衛・大企業向けの高付加価値ソフトウェア需要が継続し、 AI時代のプラットフォーム企業として拡大するという仮説。 | 政府需要の鈍化; 競争激化; 収益化の鈍化 | medium | yes |
+
+## 9. ChatGPTへの長期シナリオレビュー依頼
+- この投資方針は中長期前提であり、短期トレンドやテクニカル悪化だけでは売却判断しません。
+- ただし、長期の成長ストーリー・構造的需要シナリオ・政策前提・競争優位の前提が崩れた場合は再評価余地があります。
+- 上の対象銘柄について、最新のWeb情報を調査した上で、長期シナリオに変化がないかレビューしてください。
+- Webで確認した事実と、そこからの推論を分けて記述してください。
+- 価格やチャートではなく、事業 / 技術 / 政策 / 競争環境 / 需要構造の変化を主に見てください。
+- 大きな変化が見当たらない場合は、無理に懸念を捏造せず『大きな変化なし』としてください。
+- 根拠が弱い場合は『判断材料不足』と言ってかまいません。
+- 売却判断そのものを断定せず、`継続保有でよい` / `要監視` / `仮説弱化` の区分で返してください。
+- Web調査を使い、長期視点で判断してください。
+
+## 10. 警告一覧
+- [info] core_below_range: Bucket core is below preferred range: 22.00% < 35.00%
+- [info] jun_core_below_range: Bucket jun_core is below preferred range: 7.74% < 10.00%
+- [warning] liquidity_above_range: Bucket liquidity is above preferred range: 36.57% > 15.00%
+- [info] cash_above_preferred: Liquidity is above preferred total-assets band: 36.57% > 10.00%
+- [warning] bucket_over_target_shallow_suppressed: CIBR: Shallow candidate suppressed because related bucket is over target.
+- [warning] bucket_over_target_shallow_suppressed: CIBR: Shallow candidate suppressed because related bucket is over target.
+- [warning] bucket_over_target_shallow_suppressed: CIBR: Shallow candidate suppressed because related bucket is over target.
+- [warning] bucket_over_target_shallow_suppressed: URA: Shallow candidate suppressed because related bucket is over target.
+- [warning] bucket_over_target_shallow_suppressed: URA: Shallow candidate suppressed because related bucket is over target.
+- [warning] high_volatility_shallow_suppressed: PLTR: High-volatility names default to deeper pullbacks before adding.
+- [info] asset_class_resolved_by_rules: URA: raw asset_class=satellite was resolved to satellite_core by symbol_to_bucket.
+- [warning] large_month_over_month_change: EMAXIS_SLIM_SP500_1: market_value_jpy changed from 452649 to 735693 (gap=283044, pct=0.6253057004433899113882942412). Verify OCR digits, purchases/sales, and account grouping.
+- [warning] large_month_over_month_change: EMAXIS_SLIM_ALL_COUNTRY: market_value_jpy changed from 524645 to 964412 (gap=439767, pct=0.8382182237512984970789772132). Verify OCR digits, purchases/sales, and account grouping.
+- [info] missing_quantity: Holding LIQUIDITY is missing quantity; stored as null.
+- [info] missing_avg_cost: Holding LIQUIDITY is missing avg_cost; stored as null.
+- [info] missing_current_price: Holding LIQUIDITY is missing current_price; stored as null.
+- [info] missing_quantity: Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing quantity; stored as null.
+- [info] missing_avg_cost: Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing avg_cost; stored as null.
+- [info] missing_current_price: Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing current_price; stored as null.
+- [info] missing_quantity: Holding POINTS_MILES is missing quantity; stored as null.
+- [info] missing_avg_cost: Holding POINTS_MILES is missing avg_cost; stored as null.
+- [info] missing_current_price: Holding POINTS_MILES is missing current_price; stored as null.
+
+## 11. 生成ロジック上の分離データ
+- monthly_execution_outputs:
+  - review_target_month: 2026_06
+  - nisa_growth_quota_status: exhausted
+  - fixed_core_auto_invest_amount_jpy: 100000
+  - taxable_core_spot_buy_required: True
+  - recommended_taxable_core_spot_buy_jpy: 900000
+  - core_spot_buy_account_type: 特定口座
+  - portfolio_management_mode: normal_with_override
+  - monthly_core_budget_tier: aggressive
+  - recommended_monthly_core_buy_budget_jpy: 900000
+  - monthly_total_core_deployment_jpy: 1000000
+  - candidate_count: 12
+  - pension_monthly_dca_total_jpy: 55000
+  - annualized_pension_dca_jpy: 660000
+  - annualized_pension_dca_pct_of_total_assets: 1.76%
+  - crypto_weekly_dca_total_jpy: 4000
+  - annualized_crypto_dca_jpy: 208000
+  - annualized_crypto_dca_pct_of_total_assets: 0.55%
+  - taxable_account_note: NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う
+  - nisa_exhaustion_adjustment_reason: NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う
+- quarterly_rule_review_outputs:
+  - no_change: False
+  - classification_override_count: 1
+  - core_reference_missing_symbols: []
+  - core_reference_proxy_suggestions: {}
+  - tradable_core_pct: 22.00%
+  - effective_core_including_pension_pct: 32.65%
+  - cash_normalization_months_estimate:
+    - gross_deployment_months: 10.0
+    - net_cash_reduction_months: 28.5
+    - assumed_monthly_cash_inflow_jpy: 650000
+    - net_cash_reduction_jpy: 350000
+  - direct_cap_monitor_pct: 16.77%
+  - direct_plus_indirect_watch_metric_pct: 18.04%
+  - direct_semiconductor_exposure_pct: 16.77%
+  - combined_semiconductor_ai_infra_watch_pct: 18.04%
+  - indirect_ai_infra_exposure_pct: 1.27%
+
+## 12. ChatGPT に期待する出力形式
+以下の見出しを維持してください。
+月次の執行判断と、四半期単位のルール見直し提案は明確に分離してください。
+月次の注文判断・資金配分判断を、四半期ルール見直しセクションに混ぜないでください。
+【要約】
+- 3〜6行程度で短くまとめる
+- 今月の最重要判断
+- 今月の core スポット買い執行額
+- コア / サテライトの優先順位
+- SOXの判定
+- ルール改善の要否
+- 『今月何をする月か』が一目で分かる内容にする
+
+【今月のcoreスポット買い提案】
+- このセクションは毎回必須とする
+- 今月の推奨スポット買い総額を、JPY の単一具体額で最初に明示すること
+- 0円は禁止。必ず non-zero の執行額を出すこと
+- `多めに` `厚めに` `数十万円` `50〜100万円` のような曖昧表現は禁止
+- 2026年5月〜12月で `nisa_growth_quota_status: exhausted` の場合は、固定core積立額を100,000円として明示すること
+- 2026年5月〜12月で `taxable_core_spot_buy_required: True` の場合は、`account_type: 特定口座`、NISA成長投資枠枯渇の理由、税効率メモを明示すること
+- 2026年5月〜12月は、固定core積立額 + coreスポット買い提案額 = total_monthly_core_deployment_jpy を明示すること
+- NISA枠がないからcore購入を弱めるのではなく、core不足と現金過多の是正を優先して特定口座スポットで補うこと
+- 税効率低下よりもcore不足と現金過多の是正を優先するが、住宅ローン・生活防衛資金・大口支出不明を理由に現金を一気に削りすぎないこと
+- 2026年5月〜12月の提案額は、normal / aggressive / rebalance のどの rule-based band に基づくか、また今月の discretionary adjustment があるかを分けて書くこと
+- 配分先内訳を明示すること
+- 実行方法を `一括` / `2〜4分割` / `押し目待ち併用` のいずれかで明示すること
+- 判断根拠は `相場面` / `ポートフォリオ歪み` / `流動性水準` を分けて書くこと
+- その判断が `ルール上の判断` か `今月の裁量判断` かを分離すること
+- broad market core 商品を優先し、むやみに新規商品を増やさないこと
+- coreスポット買いは原則として eMAXIS Slim 全世界株式（オール・カントリー）と eMAXIS Slim 米国株式（S&P500）に限定すること
+- 基本配分はオルカン60% / S&P500 40%、米国株・半導体・AIインフラ感応度が高い場合はオルカン65% / S&P500 35% などオルカン厚めにすること
+- 債券や低リスク商品を提案してもよいが、core equity のスポット買い額は必ず別途提示すること
+- `積立しているからスポット買いは不要` とは結論しないこと
+
+【今月の指値提案】
+- この『今月』は review_target_month を指す。snapshot_date が前月末でも、対象月を取り違えないこと
+- 各銘柄について 0段以上の任意段数で提案してよい
+- 0段の場合は『今月は見送り』と明記する
+- Python 候補より段数を減らした場合は、その理由が『ルール上の判断』か『今月の裁量判断』かを明記する
+- Python 候補より段数を増やした場合も、その理由を明記する
+- 2026年5月〜12月は coreスポット買いの優先度を上げ、coreスポット買い予算を削ってまでテーマ銘柄を買わないこと
+- satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定とすること
+- PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定すること
+- MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先すること
+- 指値設定基準値はスクリプト実行時点から直近20営業日（約1ヶ月）の終値平均ベースとして扱うこと
+- 指値を提案する各段で、直近20営業日（約1ヶ月）の終値平均の実数値を必ず明示すること
+- 指値を提案する各段で、その指値が直近20営業日終値平均から何%下かを必ず明示すること
+- 乖離率は `((指値 / 直近20営業日終値平均) - 1) * 100` で計算し、マイナス値で表記すること
+- 推奨フォーマット例: `指値 450.00 USD（20営業日平均 500.00 USD, 平均比 -10.0%）`
+- 減段理由テンプレートの例: `ルール上の判断: bucket_over_target のため浅い段を見送る`
+- 減段理由テンプレートの例: `今月の裁量判断: core 補強を優先するため段数を減らす`
+
+【コア定額買い方針レビュー】
+- コアは今月最低いくら買うべきか
+- 安ければ追加でどの程度厚くする考え方が妥当か
+- コアとサテライトの資金配分優先順位
+- 既存の毎月固定積立（Core積立設定）を前提に評価すること
+- 2026年5月〜12月で NISA成長投資枠が枯渇している場合は、固定core積立100,000円/月を前提にし、特定口座スポット買いで補う方針を明示すること
+- 積立設定が大きくても、それだけでスポット買い免除にしないこと
+- 固定積立を維持するか、減額/停止すべきかを明示すること（必要な場合のみ）
+- ルール上の判断と今月の裁量判断を分けて説明すること
+
+【SOX投信判定】
+- 買う / 買わない
+- 理由
+
+【ポートフォリオ診断】
+- 現在の偏り
+- 注意点
+- 今月の補強優先順位
+- iDeCoのオルカン月次積立55,000円はpensionとして前提にし、tradable coreとは分けて評価すること
+- 暗号資産の週次積立（BTC/ETH）を前提に、維持/減額/停止の要否を明示すること
+
+【長期シナリオレビュー】
+- 対象銘柄ごとに、現在の長期仮説に大きな変化があるかを書く
+- Webで確認した主要事実と、そこからの推論を分けて書く
+- 判定区分は `継続保有でよい` / `要監視` / `仮説弱化` を使う
+- 売却を即断せず、なぜその判定にしたかを書く
+- 大きな変化が見当たらない場合は『大きな変化なし』と簡潔に書く
+
+【四半期ルール見直し】
+- このセクションでは、四半期単位で見直すべき構造的なルール変更だけを書くこと
+- 月次の執行判断、今月の注文可否、今月だけの資金配分判断はここに混ぜないこと
+- 維持してよいルール / 改善した方がよいルール / 追加した方がよい制約 / スクリプト修正が望ましい点を整理すること
+- 改善提案は、明確な問題・矛盾・欠落・ノイズ・仕様不足がある場合のみ挙げること
+- 大きな問題がない場合は『大きなルール変更提案なし』と明記してよい
+- ハルシネーション防止のため、推測で問題点や改善案を作らないこと
+- must には月次判断に実害があるものだけを入れること
+
+【Codex向け修正要約】
+- このセクションの本文全体を、必ず単一の ```md コードブロックで出力すること
+- コードブロック外に Codex向け修正要約を書かないこと
+- 問題がない場合でもコードブロックは省略せず、`must: なし` のように明記すること
+- must / should / nice_to_have は空欄不可だが、該当なしの場合は `なし` と書いてよい
+- コードやルールへの修正指摘が実質的にない月でも、`README.md` の最新月セクションに月次サマリーと今月の指値買い設定を反映する依頼は必ず含めること
+- 修正指摘がない月は、少なくとも `should` に `README.md` へ最新月サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する` と書くこと
+- README.md では、今月の指値買い設定を最新月セクション内の見やすい位置に置き、銘柄、指値、株数、見送り対象、主な理由を一覧化すること
+- README.md 更新依頼には、ルートREADMEに月次レビュー履歴を蓄積せず、既存の `## Monthly Review: YYYY_MM` を最新月の内容で置換し、過去月の `Monthly Review` セクションを残さない前提を必ず含めること
+- 出力例:
+```md
+must:
+- なし
+
+should:
+- README.md に最新月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映し、過去月の Monthly Review セクションは残さない
+
+nice_to_have:
+- なし
+
+修正目的:
+- コード修正提案がない月でも README.md に最新月の運用要約と指値買い設定を反映できるようにする
+
+変更すべき仕様:
+- 修正提案がない月でも README.md 更新依頼は必ず含める
+- README.md の最新月セクションには、今月の指値買い設定を見やすい表で含める
+- ルートREADMEには月次レビュー履歴を蓄積せず、過去月の Monthly Review セクションは data/history 側の履歴に任せる
+
+影響範囲:
+- README.md
+
+推奨テスト:
+- README.md の見出し、表、Mermaid が壊れず、Monthly Review セクションが最新月だけであることを確認
+```
+
+## 13. 必須の月次・四半期レビュー観点
+- 毎月の運用レビューと四半期ごとのルール変更レビューを分離して評価してください。
+- 指値設定は前月末または当月初に実施されるため、snapshot_date が月末なら翌月の指値設定として扱ってください。
+- 四半期ルール見直しセクションには、月次の執行判断を混ぜないでください。
+- 半導体エクスポージャの合算管理が妥当か確認してください。
+- PLTR の浅い押し目候補抑制ロジックの是非を評価してください。
+- 指値段数は各銘柄 0段以上の任意とし、1段しか出さない場合はその理由を明記してください。
+- 指値を出す場合は、各段で直近20営業日（約1ヶ月）の終値平均と平均比の乖離率を併記してください。
+- 乖離率は `((指値 / 直近20営業日終値平均) - 1) * 100` に基づくマイナス値で記述してください。
+- コアについては『毎月一定額買う / 安ければ追加で厚く買う』という運用思想の妥当性も評価してください。
+- 月次レビューでは、毎回必ず core スポット買い額を提案してください。
+- core スポット買い額は 0円不可で、最初に単一の具体額を出してください。
+- 金額はその月の portfolio 歪み、相場状況、流動性水準で変動してよいです。
+- 2026年5月〜12月は、NISA成長投資枠の固定積立750,000円/月を前提にせず、固定core積立100,000円/月として扱ってください。
+- 2026年5月〜12月は、NISA枠枯渇により特定口座でcoreスポット買いを行う旨を明示してください。
+- 2026年5月〜12月は、税効率よりもcore不足と現金過多の是正を優先する理由を明示してください。
+- 2026年5月〜12月は、固定core積立100,000円とスポット買い提案額の合計core投入額を明示してください。
+- 2026年5月〜12月は、iDeCo55,000円/月とBTC/ETH週次積立もキャッシュアウトとして別枠で考慮し、総投資額は月145万円程度を目安にしてください。
+- 2026年5月〜12月は、coreスポット買いの提案が rule-based なのか discretionary なのかを明示してください。
+- cash_excess_pct が大きいほど、core スポット買い額を増やしてください。
+- core_delta_pct が大きいほど、core スポット買い額を増やしてください。
+- broad market ベースで明確に下落している月は、core スポット買い額を増やしてください。
+- 高値圏でも cash_excess と core不足が大きい場合は、一定額は必ず実行してください。
+- satellite_core が過大でも、core不足是正を優先してください。
+- 既存の broad market core 商品を優先し、新規商品追加は最小限にしてください。
+- 債券や低リスク商品を提案する場合でも、core equity スポット買い額そのものは別で必ず提示してください。
+- `全部債券` `全部現金維持` は不可です。
+- 生活防衛資金や大口支出情報が不明なら、不明として保守的に扱ってください。
+- 毎月の税引前キャッシュ流入が60万〜70万円ある前提を、生活防衛資金の残し方判断に反映してください。
+- 名古屋市中区・金山駅近くの約6500万円のマンションを住居兼資産として保有し、しかもフルローンで返済初期である点を考慮してください。
+- 上記不動産保有により、日本国内不動産セクターへの実質的なエクスポージャが既にある前提で配分やリスクを評価してください。
+- Core積立設定（毎月固定）は既に実行される前提として扱い、同じ強化提案の反復は避けてください。
+- ただし長期シナリオ悪化やリスク管理上の妥当性がある場合は、固定積立の減額・停止提案を明示してください。
+- iDeCoのオルカン月次積立55,000円はpensionとして既に実行される前提で扱い、tradable coreとは分けて評価してください。
+- 暗号資産の週次積立（BTC/ETH）も既に実行される前提で扱い、必要時のみ変更提案してください。
+- コア不足と現金過多が同時発生している場合、押し目買いルール設計に問題がないかもレビューしてください。
+- 中長期投資前提のため、短期トレンドやテクニカル悪化を売却理由にしない前提でレビューしてください。
+- ただし、長期シナリオ・政策前提・技術前提・競争優位の前提が崩れた可能性がある場合は、その有無をWebベースで点検してください。
+- 大きな変化が見当たらない場合は、無理に懸念を作らず『大きな変化なし』としてください。
+- 事実と推論を分けて記述してください。
+- 大きな問題がない場合は、無理に改善提案を作らないでください。
+- ハルシネーション防止のため、明確な根拠がある改善提案のみを挙げてください。
+- must / should / nice_to_have は空欄不可ですが、該当なしの場合は `なし` と明記してください。
+- Codex向け修正要約は必ず md コードブロックで出力してください。
+- コード修正提案がない月でも、README.md の最新月セクションにサマリーと今月の指値買い設定を反映し、過去月の Monthly Review セクションを残さない依頼は必ず Codex向け修正要約に含めてください。
+- ルール改善が不要な場合は、その旨を明記してください。
+
+## 14. 必須の Codex 向け修正要約観点
+- must / should / nice_to_have は必ず埋めてください。
+- 空欄は不可ですが、該当なしの場合は `なし` と明記してください。
+- 【Codex向け修正要約】 全体を単一の ```md コードブロックで出力してください。
+- コード修正提案がない月でも、README.md に最新月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する依頼を必ず 1件以上含めてください。
+- 今月の指値買い設定は、銘柄、指値、株数、見送り対象、主な理由が一目で分かる表としてREADME.mdの最新月セクションに置いてください。
+- ルートREADMEには月次レビュー履歴を蓄積せず、過去月の Monthly Review セクションは残さないでください。
+- monthly review と quarterly rule review を分けて整理してください。
+- 修正対象ファイルと必要テストを、Codex が編集に入れる粒度で書いてください。
+
+指値設定対象月キー: 2026_06

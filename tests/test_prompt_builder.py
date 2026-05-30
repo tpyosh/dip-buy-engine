@@ -35,14 +35,22 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "| ALL_COUNTRY_FUND |" in prompt
     assert "| MSFT | jun_core |" in prompt
     assert "suppressed_reason_code" in prompt
+    assert "snapshot_price_source_date" in prompt
+    assert "market_candidate_price_source_date" in prompt
+    assert "eligible deep candidate なし" in prompt
     assert "0段以上の任意段数" in prompt
     assert "ルール上の判断" in prompt
     assert "必ず単一の ```md コードブロックで出力すること" in prompt
     assert "無理に改善提案を作らない" in prompt
     assert "`must: なし`" in prompt
-    assert "README.md に当月サマリーと今月の指値買い設定を反映する依頼は必ず Codex向け修正要約に含めてください。" in prompt
-    assert "README.md に当月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する" in prompt
+    assert (
+        "README.md の最新月セクションにサマリーと今月の指値買い設定を反映し、"
+        "過去月の Monthly Review セクションを残さない依頼は必ず Codex向け修正要約に含めてください。"
+        in prompt
+    )
+    assert "README.md に最新月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する" in prompt
     assert "今月の指値買い設定は、銘柄、指値、株数、見送り対象、主な理由が一目で分かる表" in prompt
+    assert "ルートREADMEには月次レビュー履歴を蓄積せず、過去月の Monthly Review セクションは残さないでください。" in prompt
     assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
     assert "monthly_core_budget_tier" in prompt
     assert "recommended_monthly_core_buy_budget_jpy" in prompt

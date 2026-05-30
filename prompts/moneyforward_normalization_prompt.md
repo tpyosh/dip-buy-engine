@@ -18,6 +18,8 @@ Codex は以下をしてはいけません。
 
 正規化とChatGPT向け月次レビュー依頼プロンプトの生成が完了したら、Codex は停止し、ユーザにChatGPTへ貼り付けるよう促してください。ChatGPTの出力がユーザから明示的に貼り付けられた後にのみ、Codex はREADME、月次サマリー、購入計画、指値設定、プロンプト改善をレポジトリへ反映できます。
 
+ChatGPTの出力をREADMEへ反映する場合でも、ルートREADMEには最新月の `Monthly Review` だけを残し、過去月の `Monthly Review` セクションは残さないでください。過去月のレビュー原文、構造化レビュー、差分、計算結果は `data/history/` 配下を履歴として扱ってください。
+
 ## Source Priority
 
 1. Money Forward スクリーンショット / 画像

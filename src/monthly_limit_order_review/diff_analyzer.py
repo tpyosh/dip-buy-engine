@@ -55,7 +55,8 @@ def build_proposal_diffs(
                     else "ChatGPT review did not include a proposal for this symbol."
                 ),
                 added_warnings=added_warnings,
-                candidate_removed=python_candidate is not None and review_candidate is None,
+                candidate_removed=python_candidate is not None
+                and (review_candidate is None or review_candidate.recommended_shares == 0),
             )
         )
     return diffs

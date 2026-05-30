@@ -186,32 +186,34 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- コードブロック外に Codex向け修正要約を書かないこと",
             "- 問題がない場合でもコードブロックは省略せず、`must: なし` のように明記すること",
             "- must / should / nice_to_have は空欄不可だが、該当なしの場合は `なし` と書いてよい",
-            "- コードやルールへの修正指摘が実質的にない月でも、`README.md` に当月の月次サマリーと今月の指値買い設定を反映する依頼は必ず含めること",
-            "- 修正指摘がない月は、少なくとも `should` に `README.md` へ当月サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する` と書くこと",
-            "- README.md では、今月の指値買い設定を当月セクション内の見やすい位置に置き、銘柄、指値、株数、見送り対象、主な理由を一覧化すること",
+            "- コードやルールへの修正指摘が実質的にない月でも、`README.md` の最新月セクションに月次サマリーと今月の指値買い設定を反映する依頼は必ず含めること",
+            "- 修正指摘がない月は、少なくとも `should` に `README.md` へ最新月サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する` と書くこと",
+            "- README.md では、今月の指値買い設定を最新月セクション内の見やすい位置に置き、銘柄、指値、株数、見送り対象、主な理由を一覧化すること",
+            "- README.md 更新依頼には、ルートREADMEに月次レビュー履歴を蓄積せず、既存の `## Monthly Review: YYYY_MM` を最新月の内容で置換し、過去月の `Monthly Review` セクションを残さない前提を必ず含めること",
             "- 出力例:",
             "```md",
             "must:",
             "- なし",
             "",
             "should:",
-            "- README.md に当月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する",
+            "- README.md に最新月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映し、過去月の Monthly Review セクションは残さない",
             "",
             "nice_to_have:",
             "- なし",
             "",
             "修正目的:",
-            "- コード修正提案がない月でも README.md に当月の運用要約と指値買い設定を反映できるようにする",
+            "- コード修正提案がない月でも README.md に最新月の運用要約と指値買い設定を反映できるようにする",
             "",
             "変更すべき仕様:",
             "- 修正提案がない月でも README.md 更新依頼は必ず含める",
-            "- README.md の当月セクションには、今月の指値買い設定を見やすい表で含める",
+            "- README.md の最新月セクションには、今月の指値買い設定を見やすい表で含める",
+            "- ルートREADMEには月次レビュー履歴を蓄積せず、過去月の Monthly Review セクションは data/history 側の履歴に任せる",
             "",
             "影響範囲:",
             "- README.md",
             "",
             "推奨テスト:",
-            "- README.md の見出し、表、Mermaid が壊れないことを確認",
+            "- README.md の見出し、表、Mermaid が壊れず、Monthly Review セクションが最新月だけであることを確認",
             "```",
         ]
     )
@@ -263,15 +265,16 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- ハルシネーション防止のため、明確な根拠がある改善提案のみを挙げてください。",
             "- must / should / nice_to_have は空欄不可ですが、該当なしの場合は `なし` と明記してください。",
             "- Codex向け修正要約は必ず md コードブロックで出力してください。",
-            "- コード修正提案がない月でも、README.md に当月サマリーと今月の指値買い設定を反映する依頼は必ず Codex向け修正要約に含めてください。",
+            "- コード修正提案がない月でも、README.md の最新月セクションにサマリーと今月の指値買い設定を反映し、過去月の Monthly Review セクションを残さない依頼は必ず Codex向け修正要約に含めてください。",
             "- ルール改善が不要な場合は、その旨を明記してください。",
             "",
             "## 14. 必須の Codex 向け修正要約観点",
             "- must / should / nice_to_have は必ず埋めてください。",
             "- 空欄は不可ですが、該当なしの場合は `なし` と明記してください。",
             "- 【Codex向け修正要約】 全体を単一の ```md コードブロックで出力してください。",
-            "- コード修正提案がない月でも、README.md に当月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する依頼を必ず 1件以上含めてください。",
-            "- 今月の指値買い設定は、銘柄、指値、株数、見送り対象、主な理由が一目で分かる表としてREADME.mdの当月セクションに置いてください。",
+            "- コード修正提案がない月でも、README.md に最新月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する依頼を必ず 1件以上含めてください。",
+            "- 今月の指値買い設定は、銘柄、指値、株数、見送り対象、主な理由が一目で分かる表としてREADME.mdの最新月セクションに置いてください。",
+            "- ルートREADMEには月次レビュー履歴を蓄積せず、過去月の Monthly Review セクションは残さないでください。",
             "- monthly review と quarterly rule review を分けて整理してください。",
             "- 修正対象ファイルと必要テストを、Codex が編集に入れる粒度で書いてください。",
             "",
@@ -331,12 +334,14 @@ def build_bucket_allocation_table(bucket_allocations: list) -> list[str]:
 
 def build_candidate_table(candidate_orders: list) -> list[str]:
     lines = [
-        "| symbol | bucket | current_price | base_price | avg20_base_price | drawdown_rule | limit_price | avg20_gap_pct | shares | est_cost_jpy | suppressed | suppressed_reason_code | suppressed_reason_text | note_for_chatgpt | explanation |",
-        "| --- | --- | ---: | ---: | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | --- | --- | --- |",
+        "| symbol | bucket | current_price | snapshot_price_source_date | market_candidate_price_source_date | base_price | avg20_base_price | drawdown_rule | limit_price | avg20_gap_pct | shares | est_cost_jpy | suppressed | suppressed_reason_code | suppressed_reason_text | note_for_chatgpt | explanation |",
+        "| --- | --- | ---: | --- | --- | ---: | ---: | --- | ---: | ---: | ---: | ---: | --- | --- | --- | --- | --- |",
     ]
     for candidate in candidate_orders:
         lines.append(
             f"| {candidate.symbol} | {candidate.bucket} | {format_value(candidate.current_price)} | "
+            f"{format_value(getattr(candidate, 'snapshot_price_source_date', None))} | "
+            f"{format_value(getattr(candidate, 'market_candidate_price_source_date', None))} | "
             f"{format_value(candidate.base_price)} | {format_value(candidate.avg20_base_price)} | "
             f"{candidate.drawdown_rule} | {format_value(candidate.limit_price)} | {format_value(candidate.avg20_gap_pct)} | "
             f"{candidate.shares} | {format_value(candidate.estimated_cost_jpy)} | "
@@ -344,7 +349,36 @@ def build_candidate_table(candidate_orders: list) -> list[str]:
             f"{candidate.suppressed_reason_text or '-'} | {candidate.note_for_chatgpt or '-'} | "
             f"{normalize_text(str(candidate.explanation) if candidate.explanation else '-')} |"
         )
+    availability_notes = build_candidate_availability_notes(candidate_orders)
+    if availability_notes:
+        lines.extend(["", "Candidate availability notes:"])
+        lines.extend(availability_notes)
     return lines
+
+
+def build_candidate_availability_notes(candidate_orders: list) -> list[str]:
+    notes: list[str] = []
+    symbols = sorted({candidate.symbol for candidate in candidate_orders})
+    for symbol in symbols:
+        symbol_candidates = [candidate for candidate in candidate_orders if candidate.symbol == symbol]
+        if not symbol_candidates:
+            continue
+        has_eligible = any(not candidate.suppressed for candidate in symbol_candidates)
+        has_bucket_over_target_suppression = any(
+            candidate.suppressed_reason_code == "bucket_over_target_shallow_suppressed"
+            for candidate in symbol_candidates
+        )
+        has_deep_candidate = any(
+            "deep_drawdown_candidate" in (candidate.note_for_chatgpt or "")
+            for candidate in symbol_candidates
+        )
+        if has_eligible or not has_bucket_over_target_suppression or has_deep_candidate:
+            continue
+        notes.append(
+            f"- {symbol}: 今月は eligible deep candidate なし。"
+            "bucket over target のため浅い候補は suppressed され、設定済み候補に deep threshold 以下の段がありません。"
+        )
+    return notes
 
 
 def build_core_buy_materials(core_buy_materials: dict) -> list[str]:

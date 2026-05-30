@@ -74,6 +74,10 @@ Codexは以下をしてはいけません。
 - 「おすすめ」「結論」「実行すべき」という形で投資助言を完結する
 - 正規化タスクから投資判断タスクへ勝手に進む
 
+## README履歴ルール
+
+ChatGPT出力をREADMEへ反映する場合でも、ルートREADMEには最新月の `Monthly Review` だけを残し、過去月の `Monthly Review` セクションは残さないでください。過去月のレビュー原文、構造化レビュー、差分、計算結果は `data/history/` 配下を履歴として扱ってください。
+
 ## 必ず最初に読むもの
 
 作業前に以下を確認してください。
@@ -115,99 +119,103 @@ Codexは以下をしてはいけません。
 この先の投資判断はCodexが行わず、ユーザがChatGPTに貼り付けるまで待ってください。
 ```
 
-## Monthly Review: 2026_05
+## Monthly Review: 2026_06
 
-- snapshot_date: 2026-04-25
-- total_assets_jpy: 35,558,948円
+- snapshot_date: 2026-05-30
+- total_assets_jpy: 37,592,966円
+- review_source: [data/history/reviews/chatgpt_review_2026_06.txt](/Users/tappeiyoshida/Documents/stock/data/history/reviews/chatgpt_review_2026_06.txt)
 
 ### Monthly Review Summary
 
-- 2026年5月は core不足と現金過多を是正する月
-- 現在の固定積立は、NISAつみたて投資枠100,000円/月、iDeCoオルカン55,000円/月、BTC/ETH各2,000円/週
-- 5月のスポット購入は、上記の既存積立を差し引いた特定口座coreスポット買い1,280,000円にする
-- 5月のcore投入合計は1,380,000円（NISA固定core積立100,000円 + coreスポット買い1,280,000円）
-- SOX投信は買わない
-- satellite_core は目標超過のため、テーマ追加は深い押し目限定
-- 今月の優先順位は `core > MSFT押し目 > PLTR/URA深い押し目 > CIBR/SOX見送り`
+- 2026年6月はテーマ追加ではなく、特定口座で core を厚めに補強する月
+- ChatGPT月次レビューでは、今月の core スポット買い提案は 900,000円
+- 固定core積立100,000円と合わせ、6月のcore投入合計は 1,000,000円
+- core は22.00%で目標45.00%を大きく下回り、liquidity は36.57%で目標10.00%を大きく上回る
+- SOX投信は買わない。半導体・satellite_core が既に過大で、SMHも高値圏に近い
+- 長期シナリオは URA / CIBR / MSFT は大きな変化なし、PLTR は成長が強い一方で要監視
+- 今月の優先順位は `オルカン > S&P500 > MSFT深めの押し目 > URA深い押し目 > PLTRさらに深い押し目 > CIBR/SOX見送り`
 
 ### Purchase Plan
 
-固定core積立は NISAつみたて投資枠の100,000円/月として扱う。iDeCoのオルカン55,000円/月は pension、BTC/ETH各2,000円/週は暗号資産の継続積立として別枠で把握する。5月の総投資額は、NISA 100,000円 + iDeCo 55,000円 + BTC/ETH 16,000円（4週分） + 特定口座coreスポット買い1,280,000円 = 1,451,000円を目安にする。
+2026年NISA成長投資枠は枯渇済みのため、固定core積立はNISAつみたて投資枠100,000円/月として扱う。ChatGPT月次レビューでは、NISAより税効率は落ちても、現状の主問題である core不足と現金過多を是正するため、特定口座で 900,000円の core スポット買いを行う提案になった。
 
-| item | amount_jpy | note |
-| --- | ---: | --- |
-| NISA固定core積立 | 100,000 | NISAつみたて投資枠 |
-| iDeCoオルカン積立 | 55,000 | pensionとして別枠で把握 |
-| BTC/ETH週次積立 | 4,000 / week | BTC 2,000円/週 + ETH 2,000円/週 |
-| coreスポット買い | 1,280,000 | 既存積立を差し引いた特定口座での追加購入 |
-| 5月のcore投入合計 | 1,380,000 | NISA固定core積立100,000円 + coreスポット買い1,280,000円 |
-| 5月の総投資額 | 1,451,000 | core投入1,380,000円 + iDeCo55,000円 + BTC/ETH16,000円 |
+| item | amount_jpy | account | note |
+| --- | ---: | --- | --- |
+| NISA固定core積立 | 100,000 | NISAつみたて投資枠 | eMAXIS Slim 全世界株式50,000円 + eMAXIS Slim 米国株式50,000円 |
+| coreスポット買い | 900,000 | 特定口座 | aggressive band。オルカン65% / S&P500 35% |
+| 6月のcore投入合計 | 1,000,000 |  | 固定core積立100,000円 + coreスポット買い900,000円 |
+| iDeCoオルカン積立 | 55,000 | iDeCo | pensionとして別枠で把握 |
+| BTC/ETH週次積立 | 4,000 / week | 暗号資産 | BTC 2,000円/週 + ETH 2,000円/週 |
 
 | fund | amount_jpy |
 | --- | ---: |
-| eMAXIS Slim 全世界株式（オール・カントリー） | 768,000 |
-| eMAXIS Slim 米国株式（S&P500） | 512,000 |
-| **合計** | **1,280,000** |
+| eMAXIS Slim 全世界株式（オール・カントリー） | 585,000 |
+| eMAXIS Slim 米国株式（S&P500） | 315,000 |
+| **合計** | **900,000** |
 
 | date | fund | amount_jpy |
 | --- | --- | ---: |
-| 2026-05-01 | eMAXIS Slim 全世界株式（オール・カントリー） | 192,000 |
-| 2026-05-01 | eMAXIS Slim 米国株式（S&P500） | 128,000 |
-| 2026-05-08 | eMAXIS Slim 全世界株式（オール・カントリー） | 192,000 |
-| 2026-05-08 | eMAXIS Slim 米国株式（S&P500） | 128,000 |
-| 2026-05-15 | eMAXIS Slim 全世界株式（オール・カントリー） | 192,000 |
-| 2026-05-15 | eMAXIS Slim 米国株式（S&P500） | 128,000 |
-| 2026-05-22 | eMAXIS Slim 全世界株式（オール・カントリー） | 192,000 |
-| 2026-05-22 | eMAXIS Slim 米国株式（S&P500） | 128,000 |
-| **合計** |  | **1,280,000** |
+| 2026-06-01 | eMAXIS Slim 全世界株式（オール・カントリー） | 200,000 |
+| 2026-06-01 | eMAXIS Slim 米国株式（S&P500） | 100,000 |
+| 2026-06-08 | eMAXIS Slim 全世界株式（オール・カントリー） | 150,000 |
+| 2026-06-08 | eMAXIS Slim 米国株式（S&P500） | 75,000 |
+| 2026-06-15 | eMAXIS Slim 全世界株式（オール・カントリー） | 125,000 |
+| 2026-06-15 | eMAXIS Slim 米国株式（S&P500） | 70,000 |
+| 2026-06-22 | eMAXIS Slim 全世界株式（オール・カントリー） | 110,000 |
+| 2026-06-22 | eMAXIS Slim 米国株式（S&P500） | 70,000 |
+| **合計** |  | **900,000** |
 
 ### Limit Buy Settings
 
-core補強を最優先にし、テーマ銘柄は深い押し目だけを対象にする。satellite_core は目標超過のため、CIBR と SOX 投信は見送り、URA は深い押し目限定にする。
+6月は core スポット買いを最優先にし、テーマ銘柄の指値は約定しても core 補強を圧迫しない小口に限定する。satellite_core が over target のため、CIBR と SOX 投信は見送り、URA / PLTR / MSFT は深い押し目だけを対象にする。
 
-| target | limit setting | shares | status | note |
-| --- | ---: | ---: | --- | --- |
-| MSFT | 366.28 USD | 1 | set | jun_core 補強候補。ただし core スポット買いを優先 |
-| MSFT | 350.69 USD | 2 | set | 深めの押し目 |
-| MSFT | 319.52 USD | 2 | set | 大きな押し目 |
-| PLTR | 124.20 USD | 2 | set | 高ボラ銘柄のため深い押し目限定 |
-| PLTR | 113.98 USD | 2 | set | さらに深い押し目 |
-| URA | 43.19 USD | 2 | set | satellite_core 目標超過のため深い押し目限定 |
-| CIBR | - | - | skip | satellite_core 目標超過のため今月は見送り |
-| SOX投信 | - | - | skip | satellite_core 目標超過、core 補強優先のため買わない |
+| target | limit setting | 20d avg | avg gap | shares | status | note |
+| --- | ---: | ---: | ---: | ---: | --- | --- |
+| URA | 45.38 USD | 53.3833 USD | -14.99% | 2 | set | satellite_core over target だが、深い押し目は許容 |
+| PLTR | 109.02 USD | 139.7678 USD | -22.00% | 2 | set | 高ボラ・高バリュエーションのため、さらに深い押し目だけ |
+| MSFT | 377.30 USD | 419.2170 USD | -10.00% | 2 | set | jun_core候補だが、6月は broad market core を優先 |
+| CIBR | - | - | - | - | skip | satellite_core過大。浅い候補のみで eligible deep candidate なし |
+| SOX投信 | - | - | - | - | skip | SOX買いゾーン外、satellite_core過大、core補強優先 |
 
 ### Portfolio Summary
 
 | bucket | market_value_jpy | actual_pct | target_pct | delta_pct |
 | --- | ---: | ---: | ---: | ---: |
-| core | 6,890,711 | 19.38% | 45.00% | -25.62pt |
-| jun_core | 2,963,399 | 8.33% | 20.00% | -11.67pt |
-| liquidity | 14,644,262 | 41.18% | 10.00% | +31.18pt |
-| pension | 3,754,327 | 10.56% | - | - |
-| satellite | 821,000 | 2.31% | 10.00% | -7.69pt |
-| satellite_core | 6,469,032 | 18.19% | 15.00% | +3.19pt |
-| other | 16,214 | 0.05% | - | - |
+| core | 8,270,314 | 22.00% | 45.00% | -23.00pt |
+| jun_core | 2,909,646 | 7.74% | 20.00% | -12.26pt |
+| liquidity | 13,749,225 | 36.57% | 10.00% | +26.57pt |
+| pension | 4,004,256 | 10.65% | - | - |
+| satellite | 614,697 | 1.64% | 10.00% | -8.36pt |
+| satellite_core | 8,028,611 | 21.36% | 15.00% | +6.36pt |
+| other | 16,213 | 0.04% | - | - |
 
-- core は目標45.00%に対して19.38%で、依然として大幅不足
-- liquidity は41.18%で、目標10.00%を大きく上回る過大待機資金
-- satellite_core は18.19%で目標15.00%を超過しているため、テーマETFやSOX追加より core 補強を優先する
-- 半導体 direct exposure は13.83%
-- direct + indirect AI infrastructure watch metric は15.14%
-- 名古屋市中区・金山駅近くの流動性が高いマンションを住居兼資産として保有している一方、フルローン購入で返済初期のため、国内不動産への実質エクスポージャとレバレッジリスクがある
-- そのため現金を一気に削りすぎず、ただし現在の流動性41.18%は明確に過大として扱う
+- core は目標45.00%に対して22.00%で不足
+- liquidity は36.57%で、目標10.00%を大きく上回る過大待機資金
+- satellite_core は21.36%で目標15.00%を超過
+- 半導体 direct exposure は16.77%
+- direct + indirect AI infrastructure watch metric は18.04%
+- iDeCoのオルカン55,000円/月は pension として扱い、tradable core とは分けて評価する
+- BTC/ETHの週4,000円積立は、ChatGPT月次レビューでは維持でよいとされた
+
+### Validation Notes
+
+- スクリーンショット内に取得日が見えないため、セッション日付 2026-05-30 を snapshot_date とした
+- 株式（現物）の明細合計は 5,342,355円で、カテゴリ合計 5,342,359円との差は -4円。Money Forwardの外貨換算・表示丸め差として許容
+- 年金はカテゴリ合計のみ確認でき、詳細明細は今回の画像に含まれないため、前月の年金銘柄名を継続利用
+- EMAXIS_SLIM_SP500_1 と EMAXIS_SLIM_ALL_COUNTRY は前月比で評価額が大きく増加。画像上では数量増加も確認できるため、積立・スポット購入による増加候補として扱う。ただし取引明細は未確認のため、OCR誤読ではないかはユーザ確認対象
 
 ### Mermaid Pie Chart
 
 ```mermaid
 pie showData
-    title Portfolio by Bucket - 2026_05
-    "core" : 6890711
-    "jun_core" : 2963399
-    "liquidity" : 14644262
-    "pension" : 3754327
-    "satellite" : 821000
-    "satellite_core" : 6469032
-    "other" : 16214
+    title Portfolio by Bucket - 2026_06
+    "core" : 8270314
+    "jun_core" : 2909646
+    "liquidity" : 13749225
+    "pension" : 4004256
+    "satellite" : 614697
+    "satellite_core" : 8028611
+    "other" : 16213
 ```
 
 ## Monthly Purchase Policy: 2026_05 to 2026_12
@@ -241,20 +249,20 @@ coreスポット買いの配分は既存core商品に限定し、基本は eMAXI
 <!-- portfolio-piechart:start -->
 ## Latest Portfolio Snapshot
 
-- snapshot_date: 2026-04-25
-- total_assets_jpy: 35558948
+- snapshot_date: 2026-05-30
+- total_assets_jpy: 37592966
 
 ![Portfolio Allocation](docs/portfolio_allocation_latest.svg)
 
 | bucket | market_value_jpy | pct |
 | --- | ---: | ---: |
-| core | 6890711 | 19.38% |
-| jun_core | 2963399 | 8.33% |
-| satellite_core | 6469032 | 18.19% |
-| satellite | 821000 | 2.31% |
-| pension | 3754327 | 10.56% |
-| liquidity | 14644262 | 41.18% |
-| other | 16214 | 0.05% |
+| core | 8270314 | 22.00% |
+| jun_core | 2909646 | 7.74% |
+| satellite_core | 8028611 | 21.36% |
+| satellite | 614697 | 1.64% |
+| pension | 4004256 | 10.65% |
+| liquidity | 13749225 | 36.57% |
+| other | 16213 | 0.04% |
 <!-- portfolio-piechart:end -->
 
 ## 目的
@@ -263,7 +271,8 @@ coreスポット買いの配分は既存core商品に限定し、基本は eMAXI
 - ポートフォリオの偏りとリスク警告を毎月構造化して残す
 - ChatGPT の改善提案を Codex 向けの編集粒度に落とし込む
 - Python 候補値と ChatGPT 最終提案の差分を保存する
-- README の当月セクションには、月次サマリー、購入計画、今月の指値買い設定、ポートフォリオサマリーを見やすい順序で残す
+- ルート README には月次レビュー履歴を蓄積せず、最新月の `Monthly Review` だけを見やすい順序で残す
+- 過去月の月次レビュー原文、構造化レビュー、差分、計算結果は `data/history/` 配下を正とする
 
 ## 毎月のワークフロー
 
@@ -278,7 +287,8 @@ coreスポット買いの配分は既存core商品に限定し、基本は eMAXI
 9. ChatGPT が Codex / CLI で検証済みの構造化データを前提に、月次レビューと購入提案を返す
 10. ChatGPT の回答をテキストで保存する
 11. CLI でレビュー取り込み、差分保存、Codex 向け修正プロンプト生成を行う
-12. ユーザがChatGPT出力またはCodex向け修正プロンプトを明示的に貼り付けた場合のみ、Codex がREADME の当月セクションに月次サマリー、購入計画、今月の指値買い設定、ポートフォリオサマリーを反映する
+12. ユーザがChatGPT出力またはCodex向け修正プロンプトを明示的に貼り付けた場合のみ、Codex がREADME の最新月セクションに月次サマリー、購入計画、今月の指値買い設定、ポートフォリオサマリーを反映する
+13. README 更新時は既存の `## Monthly Review: YYYY_MM` を最新月の内容に置換し、過去月の `Monthly Review` セクションをルートREADMEに残さない
 
 将来の月次レビュー開始時は [prompts/templates/moneyforward_monthly_session_start_prompt.md](/Users/tappeiyoshida/Documents/stock/prompts/templates/moneyforward_monthly_session_start_prompt.md) を Codex に貼り、スクリーンショット添付から始める。
 

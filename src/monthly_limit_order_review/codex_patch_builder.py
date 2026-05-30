@@ -42,6 +42,9 @@ KEYWORD_TARGETS = {
         "src/monthly_limit_order_review/cli.py",
         "README.md",
     ],
+    "README": [
+        "README.md",
+    ],
 }
 
 
@@ -54,12 +57,25 @@ def build_codex_patch_request(
         "ChatGPT の改善提案を、既存の CLI 月次ワークフローを壊さずに反映する。",
         "Python 候補値と ChatGPT 提案との差分保存を継続しつつ、レビュー品質を高める。",
     ]
+    must = _normalize_readme_monthly_review_items(snapshot_month, review_feedback.must)
+    should = _normalize_readme_monthly_review_items(snapshot_month, review_feedback.should)
+    nice_to_have = _normalize_readme_monthly_review_items(snapshot_month, review_feedback.nice_to_have)
+    all_prioritized_items = [*must, *should, *nice_to_have]
+    if _has_readme_monthly_review_item(all_prioritized_items) and not _has_latest_only_readme_rule(
+        all_prioritized_items
+    ):
+        should.append(
+            "README.md 更新時は既存の `## Monthly Review: YYYY_MM` を "
+            f"`{snapshot_month}` の内容に置換し、ルートREADMEに月次レビュー履歴を蓄積せず、"
+            "過去月の `Monthly Review` セクションを残さない"
+        )
+
     prioritized_items = [
-        ("must", item) for item in review_feedback.must
+        ("must", item) for item in must
     ] + [
-        ("should", item) for item in review_feedback.should
+        ("should", item) for item in should
     ] + [
-        ("nice_to_have", item) for item in review_feedback.nice_to_have
+        ("nice_to_have", item) for item in nice_to_have
     ]
 
     target_files = infer_target_files(item for _, item in prioritized_items)
@@ -80,9 +96,9 @@ def build_codex_patch_request(
 
     return CodexPatchRequest(
         snapshot_month=snapshot_month,
-        must=review_feedback.must,
-        should=review_feedback.should,
-        nice_to_have=review_feedback.nice_to_have,
+        must=must,
+        should=should,
+        nice_to_have=nice_to_have,
         objectives=objectives,
         target_files=target_files,
         spec_diffs=spec_diffs,
@@ -154,6 +170,49 @@ def infer_target_files(items: list[str] | tuple[str, ...] | object) -> list[str]
     return sorted(resolved)
 
 
+def _normalize_readme_monthly_review_items(snapshot_month: str, items: list[str]) -> list[str]:
+    normalized: list[str] = []
+    for item in items:
+        normalized_item = item
+        if "README" in item:
+            normalized_item = (
+                item.replace("当月セクション", "最新月セクション")
+                .replace("当月の運用要約", "最新月の運用要約")
+                .replace("当月サマリー", "最新月サマリー")
+                .replace("当月の月次サマリー", "最新月の月次サマリー")
+                .replace(f"README.md に {snapshot_month} の", "README.md に最新月の")
+                .replace(
+                    f"README.md の {snapshot_month} セクション",
+                    "README.md の最新月セクション",
+                )
+            )
+        if normalized_item not in normalized:
+            normalized.append(normalized_item)
+    return normalized
+
+
+def _has_readme_monthly_review_item(items: list[str]) -> bool:
+    monthly_keywords = (
+        "Monthly Review",
+        "月次サマリー",
+        "指値買い設定",
+        "coreスポット",
+        "ポートフォリオサマリー",
+    )
+    return any(
+        "README" in item and any(keyword in item for keyword in monthly_keywords)
+        for item in items
+    )
+
+
+def _has_latest_only_readme_rule(items: list[str]) -> bool:
+    latest_only_keywords = ("月次レビュー履歴", "過去月の `Monthly Review`", "過去月の Monthly Review")
+    return any(
+        "README" in item and any(keyword in item for keyword in latest_only_keywords)
+        for item in items
+    )
+
+
 def infer_tests(target_files: list[str]) -> list[str]:
     tests: set[str] = set(path for path in target_files if path.startswith("tests/"))
     for path in target_files:
@@ -176,4 +235,3 @@ def _render_priority_block(priority: str, items: list[str]) -> list[str]:
     rendered = [f"- {priority}:"]
     rendered.extend(f"  - {item}" for item in items)
     return rendered
-

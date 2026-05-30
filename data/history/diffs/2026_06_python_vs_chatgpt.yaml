@@ -1,0 +1,77 @@
+- symbol: CIBR
+  python_price: 70.76
+  chatgpt_price: null
+  price_diff_pct: null
+  python_shares: 1
+  chatgpt_shares: 0
+  reason_summary: 'ルール上の判断: satellite_core が over target。Python候補は -5%、-8%、-12% の浅い押し目のみで、すべて
+    suppressed。今月の裁量判断としても、直近高騰後に追わない。'
+  added_warnings:
+  - 'core不足: 22.00% vs target 45.00%。'
+  - 'liquidity過多: 36.57% vs target 10.00%。'
+  - 'satellite_core過大: 21.36% vs target 15.00%。'
+  - '半導体エクスポージャが高め: direct 16.77%、direct+indirect 18.04%。'
+  - 住居兼資産として金山近辺の不動産をフルローン初期で保有しているため、日本国内不動産への実質エクスポージャも既にある。
+  - liquidityは大きいが、住宅ローン初期・子育て・大口支出不明を考えると、いきなり目標10%まで落とす必要はない。
+  - ただし月90万円程度のcoreスポットを数ヶ月続けても、生活防衛資金を壊す水準ではない。
+  - iDeCoのオルカン55,000円/月は pension として有効だが、tradable core とは分けて見るべき。effective core including
+    pension は32.65%だが、売買可能なcoreは22.00%で不足。
+  - BTC/ETHの週4,000円積立は、総資産比で年0.55%程度なので維持でよい。減額・停止は不要。
+  candidate_removed: true
+- symbol: MSFT
+  python_price: 394.06
+  chatgpt_price: 377.3
+  price_diff_pct: -4.25
+  python_shares: 1
+  chatgpt_shares: 2
+  reason_summary: '今月の裁量判断: -6%段は浅すぎるため見送り。jun_core不足はあるが、今月は broad market core を優先。'
+  added_warnings:
+  - 'core不足: 22.00% vs target 45.00%。'
+  - 'liquidity過多: 36.57% vs target 10.00%。'
+  - 'satellite_core過大: 21.36% vs target 15.00%。'
+  - '半導体エクスポージャが高め: direct 16.77%、direct+indirect 18.04%。'
+  - 住居兼資産として金山近辺の不動産をフルローン初期で保有しているため、日本国内不動産への実質エクスポージャも既にある。
+  - liquidityは大きいが、住宅ローン初期・子育て・大口支出不明を考えると、いきなり目標10%まで落とす必要はない。
+  - ただし月90万円程度のcoreスポットを数ヶ月続けても、生活防衛資金を壊す水準ではない。
+  - iDeCoのオルカン55,000円/月は pension として有効だが、tradable core とは分けて見るべき。effective core including
+    pension は32.65%だが、売買可能なcoreは22.00%で不足。
+  - BTC/ETHの週4,000円積立は、総資産比で年0.55%程度なので維持でよい。減額・停止は不要。
+  candidate_removed: false
+- symbol: PLTR
+  python_price: 118.8
+  chatgpt_price: 109.02
+  price_diff_pct: -8.23
+  python_shares: 2
+  chatgpt_shares: 2
+  reason_summary: '今月の裁量判断: -15%段は見送り、-22%のみ。高ボラ・高バリュエーション銘柄なので、core補強を優先し浅い押し目は買わない。'
+  added_warnings:
+  - 'core不足: 22.00% vs target 45.00%。'
+  - 'liquidity過多: 36.57% vs target 10.00%。'
+  - 'satellite_core過大: 21.36% vs target 15.00%。'
+  - '半導体エクスポージャが高め: direct 16.77%、direct+indirect 18.04%。'
+  - 住居兼資産として金山近辺の不動産をフルローン初期で保有しているため、日本国内不動産への実質エクスポージャも既にある。
+  - liquidityは大きいが、住宅ローン初期・子育て・大口支出不明を考えると、いきなり目標10%まで落とす必要はない。
+  - ただし月90万円程度のcoreスポットを数ヶ月続けても、生活防衛資金を壊す水準ではない。
+  - iDeCoのオルカン55,000円/月は pension として有効だが、tradable core とは分けて見るべき。effective core including
+    pension は32.65%だが、売買可能なcoreは22.00%で不足。
+  - BTC/ETHの週4,000円積立は、総資産比で年0.55%程度なので維持でよい。減額・停止は不要。
+  candidate_removed: false
+- symbol: URA
+  python_price: 45.38
+  chatgpt_price: 45.38
+  price_diff_pct: 0
+  python_shares: 2
+  chatgpt_shares: 2
+  reason_summary: 'ルール上の判断: satellite_core over target だが、-15%の深い押し目は許容。約定想定額も小さい。'
+  added_warnings:
+  - 'core不足: 22.00% vs target 45.00%。'
+  - 'liquidity過多: 36.57% vs target 10.00%。'
+  - 'satellite_core過大: 21.36% vs target 15.00%。'
+  - '半導体エクスポージャが高め: direct 16.77%、direct+indirect 18.04%。'
+  - 住居兼資産として金山近辺の不動産をフルローン初期で保有しているため、日本国内不動産への実質エクスポージャも既にある。
+  - liquidityは大きいが、住宅ローン初期・子育て・大口支出不明を考えると、いきなり目標10%まで落とす必要はない。
+  - ただし月90万円程度のcoreスポットを数ヶ月続けても、生活防衛資金を壊す水準ではない。
+  - iDeCoのオルカン55,000円/月は pension として有効だが、tradable core とは分けて見るべき。effective core including
+    pension は32.65%だが、売買可能なcoreは22.00%で不足。
+  - BTC/ETHの週4,000円積立は、総資産比で年0.55%程度なので維持でよい。減額・停止は不要。
+  candidate_removed: false

@@ -92,6 +92,8 @@ class CandidateOrder:
     avg20_gap_pct: Decimal | None = None
     suppression_reasons: list[str] = field(default_factory=list)
     explanation: dict = field(default_factory=dict)
+    snapshot_price_source_date: date | None = None
+    market_candidate_price_source_date: date | None = None
 
 
 @dataclass(slots=True)

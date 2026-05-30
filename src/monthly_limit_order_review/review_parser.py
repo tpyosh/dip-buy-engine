@@ -52,6 +52,9 @@ def split_sections(review_text: str) -> dict[str, str]:
         if heading is not None:
             current = heading
             continue
+        if is_untracked_heading(line):
+            current = None
+            continue
         if current is not None:
             sections[current].append(line)
     return {name: "\n".join(lines).strip() for name, lines in sections.items()}
@@ -67,18 +70,38 @@ def detect_heading(line: str) -> str | None:
     return None
 
 
+def is_untracked_heading(line: str) -> bool:
+    normalized = line.strip().lstrip("#").strip()
+    return normalized.startswith("【") and normalized.endswith("】")
+
+
 def extract_order_proposals(section_text: str) -> list[ReviewOrderProposal]:
     proposals: list[ReviewOrderProposal] = []
+    seen_symbols: set[str] = set()
     for raw_line in section_text.splitlines():
         line = raw_line.strip()
-        if not line or not line.startswith(("-", "*")):
+        if not line:
+            continue
+
+        table_proposal = extract_table_order_proposal(line)
+        if table_proposal is not None:
+            proposals.append(table_proposal)
+            seen_symbols.add(table_proposal.symbol)
+            continue
+
+        if not line.startswith(("-", "*")):
             continue
         symbol_match = re.search(r"\b([A-Z][A-Z0-9_]{1,})\b", line)
         if not symbol_match:
             continue
         symbol = symbol_match.group(1)
+        if symbol in seen_symbols:
+            continue
         shares_match = re.search(r"(\d+)\s*(?:株|shares?)", line, flags=re.IGNORECASE)
-        recommended_shares = int(shares_match.group(1)) if shares_match else None
+        if "0段" in line or "見送り" in line:
+            recommended_shares = 0
+        else:
+            recommended_shares = int(shares_match.group(1)) if shares_match else None
 
         price_match = re.search(
             r"(?:指値|価格|price|@|:)\s*([0-9]+(?:\.[0-9]+)?)\s*(USD|JPY)?",
@@ -103,6 +126,42 @@ def extract_order_proposals(section_text: str) -> list[ReviewOrderProposal]:
             )
         )
     return proposals
+
+
+def extract_table_order_proposal(line: str) -> ReviewOrderProposal | None:
+    if not line.startswith("|") or not line.endswith("|"):
+        return None
+    cells = [cell.strip() for cell in line.strip("|").split("|")]
+    if len(cells) < 2:
+        return None
+    first_cell = cells[0]
+    if not first_cell or set(first_cell) <= {"-"} or "銘柄" in first_cell:
+        return None
+    symbol_match = re.search(r"\b([A-Z][A-Z0-9_]{1,})\b", first_cell)
+    if not symbol_match:
+        return None
+    symbol = symbol_match.group(1)
+    proposal_text = cells[1]
+    reason = cells[2] if len(cells) >= 3 else line
+    if "見送り" in proposal_text or "0段" in proposal_text:
+        return ReviewOrderProposal(
+            symbol=symbol,
+            recommended_price=None,
+            recommended_shares=0,
+            reason=normalize_reason_text(reason or proposal_text),
+        )
+    price_match = re.search(r"(?:指値|価格|price|@|:)?\s*([0-9]+(?:\.[0-9]+)?)\s*(?:USD|JPY)?", proposal_text)
+    shares_match = re.search(r"(\d+)\s*(?:株|shares?)", proposal_text, flags=re.IGNORECASE)
+    return ReviewOrderProposal(
+        symbol=symbol,
+        recommended_price=to_optional_decimal(price_match.group(1)) if price_match else None,
+        recommended_shares=int(shares_match.group(1)) if shares_match else None,
+        reason=normalize_reason_text(reason or proposal_text),
+    )
+
+
+def normalize_reason_text(value: str) -> str:
+    return re.sub(r"\s+", " ", value).strip()
 
 
 def extract_sox_decision(section_text: str) -> str | None:

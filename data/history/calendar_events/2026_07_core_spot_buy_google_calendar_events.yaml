@@ -1,0 +1,180 @@
+review_target_month: '2026_07'
+source_review_text: data/history/reviews/chatgpt_review_2026_07.txt
+event_count: 4
+events:
+- event_key: core_spot_buy:2026_07:2026-07-01
+  execution_date: '2026-07-01'
+  review_target_month: '2026_07'
+  day_total_jpy: 300000
+  schedule_items:
+  - fund_name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    amount_jpy: 200000
+    raw_text: '7月1日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 200,000円'
+  - fund_name: eMAXIS Slim 米国株式(S&P500)
+    amount_jpy: 100000
+    raw_text: '7月1日: eMAXIS Slim 米国株式(S&P500) 100,000円'
+  google_calendar_request:
+    calendar_id: primary
+    title: Coreスポット買い 300,000円
+    start_time: '2026-07-01T09:00:00+09:00'
+    end_time: '2026-07-01T09:15:00+09:00'
+    timezone_str: Asia/Tokyo
+    attendees: []
+    add_google_meet: false
+    description: '2026_07 月次レビューで決めた core スポット買いの手動発注リマインダーです。
+
+      自動発注ではありません。証券会社で内容を確認してから手動で実行してください。
+
+
+      account_type: 特定口座
+
+      day_total_jpy: 300000
+
+
+      内訳:
+
+      - eMAXIS Slim 全世界株式(オール・カントリー)(オルカン): 200,000円
+
+      - eMAXIS Slim 米国株式(S&P500): 100,000円
+
+
+      source_review: data/history/reviews/chatgpt_review_2026_07.txt'
+    transparency: transparent
+    visibility: private
+    reminders:
+      use_default: false
+      overrides:
+      - method: popup
+        minutes: 60
+- event_key: core_spot_buy:2026_07:2026-07-08
+  execution_date: '2026-07-08'
+  review_target_month: '2026_07'
+  day_total_jpy: 210000
+  schedule_items:
+  - fund_name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    amount_jpy: 135000
+    raw_text: '7月8日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 135,000円'
+  - fund_name: eMAXIS Slim 米国株式(S&P500)
+    amount_jpy: 75000
+    raw_text: '7月8日: eMAXIS Slim 米国株式(S&P500) 75,000円'
+  google_calendar_request:
+    calendar_id: primary
+    title: Coreスポット買い 210,000円
+    start_time: '2026-07-08T09:00:00+09:00'
+    end_time: '2026-07-08T09:15:00+09:00'
+    timezone_str: Asia/Tokyo
+    attendees: []
+    add_google_meet: false
+    description: '2026_07 月次レビューで決めた core スポット買いの手動発注リマインダーです。
+
+      自動発注ではありません。証券会社で内容を確認してから手動で実行してください。
+
+
+      account_type: 特定口座
+
+      day_total_jpy: 210000
+
+
+      内訳:
+
+      - eMAXIS Slim 全世界株式(オール・カントリー)(オルカン): 135,000円
+
+      - eMAXIS Slim 米国株式(S&P500): 75,000円
+
+
+      source_review: data/history/reviews/chatgpt_review_2026_07.txt'
+    transparency: transparent
+    visibility: private
+    reminders:
+      use_default: false
+      overrides:
+      - method: popup
+        minutes: 60
+- event_key: core_spot_buy:2026_07:2026-07-15
+  execution_date: '2026-07-15'
+  review_target_month: '2026_07'
+  day_total_jpy: 195000
+  schedule_items:
+  - fund_name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    amount_jpy: 125000
+    raw_text: '7月15日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 125,000円'
+  - fund_name: eMAXIS Slim 米国株式(S&P500)
+    amount_jpy: 70000
+    raw_text: '7月15日: eMAXIS Slim 米国株式(S&P500) 70,000円'
+  google_calendar_request:
+    calendar_id: primary
+    title: Coreスポット買い 195,000円
+    start_time: '2026-07-15T09:00:00+09:00'
+    end_time: '2026-07-15T09:15:00+09:00'
+    timezone_str: Asia/Tokyo
+    attendees: []
+    add_google_meet: false
+    description: '2026_07 月次レビューで決めた core スポット買いの手動発注リマインダーです。
+
+      自動発注ではありません。証券会社で内容を確認してから手動で実行してください。
+
+
+      account_type: 特定口座
+
+      day_total_jpy: 195000
+
+
+      内訳:
+
+      - eMAXIS Slim 全世界株式(オール・カントリー)(オルカン): 125,000円
+
+      - eMAXIS Slim 米国株式(S&P500): 70,000円
+
+
+      source_review: data/history/reviews/chatgpt_review_2026_07.txt'
+    transparency: transparent
+    visibility: private
+    reminders:
+      use_default: false
+      overrides:
+      - method: popup
+        minutes: 60
+- event_key: core_spot_buy:2026_07:2026-07-22
+  execution_date: '2026-07-22'
+  review_target_month: '2026_07'
+  day_total_jpy: 195000
+  schedule_items:
+  - fund_name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    amount_jpy: 125000
+    raw_text: '7月22日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 125,000円'
+  - fund_name: eMAXIS Slim 米国株式(S&P500)
+    amount_jpy: 70000
+    raw_text: '7月22日: eMAXIS Slim 米国株式(S&P500) 70,000円'
+  google_calendar_request:
+    calendar_id: primary
+    title: Coreスポット買い 195,000円
+    start_time: '2026-07-22T09:00:00+09:00'
+    end_time: '2026-07-22T09:15:00+09:00'
+    timezone_str: Asia/Tokyo
+    attendees: []
+    add_google_meet: false
+    description: '2026_07 月次レビューで決めた core スポット買いの手動発注リマインダーです。
+
+      自動発注ではありません。証券会社で内容を確認してから手動で実行してください。
+
+
+      account_type: 特定口座
+
+      day_total_jpy: 195000
+
+
+      内訳:
+
+      - eMAXIS Slim 全世界株式(オール・カントリー)(オルカン): 125,000円
+
+      - eMAXIS Slim 米国株式(S&P500): 70,000円
+
+
+      source_review: data/history/reviews/chatgpt_review_2026_07.txt'
+    transparency: transparent
+    visibility: private
+    reminders:
+      use_default: false
+      overrides:
+      - method: popup
+        minutes: 60

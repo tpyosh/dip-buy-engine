@@ -1,0 +1,160 @@
+この Python CLI プロジェクトを修正してください。
+
+目的:
+- 月次の押し目買いレビュー支援システムの改善
+
+今回の修正理由:
+- ChatGPT の月次レビューで改善点が指摘されたため
+
+優先度別修正要求:
+- must:
+- should:
+- nice_to_have:
+
+守るべき制約:
+- 自動発注は実装しない
+- YAML 入力を前提にする
+- CLI ベースを維持する
+- 既存の月次ワークフローを壊さない
+- テストを更新する
+
+期待する作業:
+- 必要ファイルの修正
+- 必要テストの追加
+- README 更新
+
+現在の問題:
+- must: なし
+- should: README.md に最新月 `2026_07` の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する
+- should: README.md の最新月セクション内の見やすい位置に「今月の指値買い設定」を追加または更新し、銘柄、指値、株数、見送り対象、主な理由を一覧化する
+- should: ルート README に月次レビュー履歴を蓄積せず、既存の `## Monthly Review: YYYY_MM` を `2026_07` の内容で置換し、過去月の `Monthly Review` セクションは残さない
+- should: 6月レトロでは、投資信託カテゴリ増加を「実行済み購入」と断定せず、取引明細未確認のため「購入実行の可能性」として記述する
+- should: large_month_over_month_change warning がある銘柄について、README または月次レビュー内で「OCR・購入・評価額変動・口座分類差分の確認対象」と明示する
+- nice_to_have: 月次レビュー生成ロジックに、保有評価額差分だけでなく、約定履歴・口数変化・入出金の有無を取り込める入力欄を追加する
+- nice_to_have: SOX投信について、satellite_core over target かつ direct semiconductor exposure が高い場合は、買いゾーン内でも原則見送りとする説明文を自動生成できるようにする
+- nice_to_have: README 用の「今月の指値買い設定」テーブルをスクリプト出力からそのまま貼れる形式に整形する
+- nice_to_have: 取引明細がない月でも、購入実行を断定せず、事実・推定・不明点を分けた月次レビューにする
+- nice_to_have: 2026_07 の実行計画、coreスポット買い、指値設定、SOX見送り、ポートフォリオ歪みを README.md に反映する
+- nice_to_have: コード修正提案が少ない月でも、README.md に最新月の運用要約と指値買い設定を確実に残す
+- nice_to_have: README.md の `## Monthly Review: YYYY_MM` は常に最新月だけを保持し、過去月の Monthly Review セクションは残さない
+- nice_to_have: 最新月セクションには、月次サマリー、coreスポット買い計画、今月の指値買い設定、SOX判定、ポートフォリオサマリーを含める
+- nice_to_have: 今月の指値買い設定は、少なくとも以下を含む表にする:
+- nice_to_have: CIBR: 見送り。理由: satellite_core over target、eligible deep candidate なし
+- nice_to_have: URA: 40.65 USD、2株、20営業日平均47.8267 USD、平均比-15.01%
+- nice_to_have: PLTR: 104.15 USD、2株、20営業日平均133.5195 USD、平均比-22.00%
+- nice_to_have: MSFT: 365.67 USD、1株、20営業日平均406.2960 USD、平均比-10.00%
+- nice_to_have: SOX投信/SMH: 見送り。理由: satellite_core over target、direct semiconductor exposure 17.80%
+- nice_to_have: 6月レトロでは、投資信託カテゴリ増加を実行済み購入と断定せず、取引明細未確認の推定として扱う
+- nice_to_have: README.md
+- nice_to_have: 月次レビュー生成スクリプトの README 出力部分
+- nice_to_have: 可能なら月次レトロスペクティブの差分分類ロジック
+- nice_to_have: README.md の `## Monthly Review: 2026_07` が1つだけ存在し、過去月の Monthly Review セクションが残っていないことを確認
+- nice_to_have: coreスポット買い計画の合計が 900,000円、オルカン585,000円、S&P500315,000円に一致することを確認
+- nice_to_have: 固定core積立100,000円とスポット買い900,000円の合計core投入額が1,000,000円として記載されていることを確認
+- nice_to_have: 指値テーブルに、URA / PLTR / MSFT の20営業日平均と平均比が記載され、CIBR / SOX投信が見送りとして明記されていることを確認
+- nice_to_have: 6月レトロで「投資信託カテゴリ増加 = 購入実行済み」と断定していないことを確認
+- diff_observation: CIBR price_delta=n/a
+- diff_observation: MSFT price_delta=0.00
+- diff_observation: PLTR price_delta=0.00
+- diff_observation: URA price_delta=0.00
+
+修正目的:
+- ChatGPT の改善提案を、既存の CLI 月次ワークフローを壊さずに反映する。
+- Python 候補値と ChatGPT 提案との差分保存を継続しつつ、レビュー品質を高める。
+
+優先度別修正要求:
+- must:
+  - なし
+- should:
+  - README.md に最新月 `2026_07` の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する
+  - README.md の最新月セクション内の見やすい位置に「今月の指値買い設定」を追加または更新し、銘柄、指値、株数、見送り対象、主な理由を一覧化する
+  - ルート README に月次レビュー履歴を蓄積せず、既存の `## Monthly Review: YYYY_MM` を `2026_07` の内容で置換し、過去月の `Monthly Review` セクションは残さない
+  - 6月レトロでは、投資信託カテゴリ増加を「実行済み購入」と断定せず、取引明細未確認のため「購入実行の可能性」として記述する
+  - large_month_over_month_change warning がある銘柄について、README または月次レビュー内で「OCR・購入・評価額変動・口座分類差分の確認対象」と明示する
+- nice_to_have:
+  - 月次レビュー生成ロジックに、保有評価額差分だけでなく、約定履歴・口数変化・入出金の有無を取り込める入力欄を追加する
+  - SOX投信について、satellite_core over target かつ direct semiconductor exposure が高い場合は、買いゾーン内でも原則見送りとする説明文を自動生成できるようにする
+  - README 用の「今月の指値買い設定」テーブルをスクリプト出力からそのまま貼れる形式に整形する
+  - 取引明細がない月でも、購入実行を断定せず、事実・推定・不明点を分けた月次レビューにする
+  - 2026_07 の実行計画、coreスポット買い、指値設定、SOX見送り、ポートフォリオ歪みを README.md に反映する
+  - コード修正提案が少ない月でも、README.md に最新月の運用要約と指値買い設定を確実に残す
+  - README.md の `## Monthly Review: YYYY_MM` は常に最新月だけを保持し、過去月の Monthly Review セクションは残さない
+  - 最新月セクションには、月次サマリー、coreスポット買い計画、今月の指値買い設定、SOX判定、ポートフォリオサマリーを含める
+  - 今月の指値買い設定は、少なくとも以下を含む表にする:
+  - CIBR: 見送り。理由: satellite_core over target、eligible deep candidate なし
+  - URA: 40.65 USD、2株、20営業日平均47.8267 USD、平均比-15.01%
+  - PLTR: 104.15 USD、2株、20営業日平均133.5195 USD、平均比-22.00%
+  - MSFT: 365.67 USD、1株、20営業日平均406.2960 USD、平均比-10.00%
+  - SOX投信/SMH: 見送り。理由: satellite_core over target、direct semiconductor exposure 17.80%
+  - 6月レトロでは、投資信託カテゴリ増加を実行済み購入と断定せず、取引明細未確認の推定として扱う
+  - README.md
+  - 月次レビュー生成スクリプトの README 出力部分
+  - 可能なら月次レトロスペクティブの差分分類ロジック
+  - README.md の `## Monthly Review: 2026_07` が1つだけ存在し、過去月の Monthly Review セクションが残っていないことを確認
+  - coreスポット買い計画の合計が 900,000円、オルカン585,000円、S&P500315,000円に一致することを確認
+  - 固定core積立100,000円とスポット買い900,000円の合計core投入額が1,000,000円として記載されていることを確認
+  - 指値テーブルに、URA / PLTR / MSFT の20営業日平均と平均比が記載され、CIBR / SOX投信が見送りとして明記されていることを確認
+  - 6月レトロで「投資信託カテゴリ増加 = 購入実行済み」と断定していないことを確認
+
+修正対象ファイル:
+- README.md
+- src/monthly_limit_order_review/diff_analyzer.py
+- src/monthly_limit_order_review/portfolio.py
+- src/monthly_limit_order_review/review_parser.py
+- src/monthly_limit_order_review/rules.py
+- tests/test_diff_analyzer.py
+- tests/test_portfolio.py
+- tests/test_review_parser.py
+- tests/test_rules.py
+
+仕様差分:
+- must: なし
+- should: README.md に最新月 `2026_07` の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する
+- should: README.md の最新月セクション内の見やすい位置に「今月の指値買い設定」を追加または更新し、銘柄、指値、株数、見送り対象、主な理由を一覧化する
+- should: ルート README に月次レビュー履歴を蓄積せず、既存の `## Monthly Review: YYYY_MM` を `2026_07` の内容で置換し、過去月の `Monthly Review` セクションは残さない
+- should: 6月レトロでは、投資信託カテゴリ増加を「実行済み購入」と断定せず、取引明細未確認のため「購入実行の可能性」として記述する
+- should: large_month_over_month_change warning がある銘柄について、README または月次レビュー内で「OCR・購入・評価額変動・口座分類差分の確認対象」と明示する
+- nice_to_have: 月次レビュー生成ロジックに、保有評価額差分だけでなく、約定履歴・口数変化・入出金の有無を取り込める入力欄を追加する
+- nice_to_have: SOX投信について、satellite_core over target かつ direct semiconductor exposure が高い場合は、買いゾーン内でも原則見送りとする説明文を自動生成できるようにする
+- nice_to_have: README 用の「今月の指値買い設定」テーブルをスクリプト出力からそのまま貼れる形式に整形する
+- nice_to_have: 取引明細がない月でも、購入実行を断定せず、事実・推定・不明点を分けた月次レビューにする
+- nice_to_have: 2026_07 の実行計画、coreスポット買い、指値設定、SOX見送り、ポートフォリオ歪みを README.md に反映する
+- nice_to_have: コード修正提案が少ない月でも、README.md に最新月の運用要約と指値買い設定を確実に残す
+- nice_to_have: README.md の `## Monthly Review: YYYY_MM` は常に最新月だけを保持し、過去月の Monthly Review セクションは残さない
+- nice_to_have: 最新月セクションには、月次サマリー、coreスポット買い計画、今月の指値買い設定、SOX判定、ポートフォリオサマリーを含める
+- nice_to_have: 今月の指値買い設定は、少なくとも以下を含む表にする:
+- nice_to_have: CIBR: 見送り。理由: satellite_core over target、eligible deep candidate なし
+- nice_to_have: URA: 40.65 USD、2株、20営業日平均47.8267 USD、平均比-15.01%
+- nice_to_have: PLTR: 104.15 USD、2株、20営業日平均133.5195 USD、平均比-22.00%
+- nice_to_have: MSFT: 365.67 USD、1株、20営業日平均406.2960 USD、平均比-10.00%
+- nice_to_have: SOX投信/SMH: 見送り。理由: satellite_core over target、direct semiconductor exposure 17.80%
+- nice_to_have: 6月レトロでは、投資信託カテゴリ増加を実行済み購入と断定せず、取引明細未確認の推定として扱う
+- nice_to_have: README.md
+- nice_to_have: 月次レビュー生成スクリプトの README 出力部分
+- nice_to_have: 可能なら月次レトロスペクティブの差分分類ロジック
+- nice_to_have: README.md の `## Monthly Review: 2026_07` が1つだけ存在し、過去月の Monthly Review セクションが残っていないことを確認
+- nice_to_have: coreスポット買い計画の合計が 900,000円、オルカン585,000円、S&P500315,000円に一致することを確認
+- nice_to_have: 固定core積立100,000円とスポット買い900,000円の合計core投入額が1,000,000円として記載されていることを確認
+- nice_to_have: 指値テーブルに、URA / PLTR / MSFT の20営業日平均と平均比が記載され、CIBR / SOX投信が見送りとして明記されていることを確認
+- nice_to_have: 6月レトロで「投資信託カテゴリ増加 = 購入実行済み」と断定していないことを確認
+- diff_observation: CIBR price_delta=n/a
+- diff_observation: MSFT price_delta=0.00
+- diff_observation: PLTR price_delta=0.00
+- diff_observation: URA price_delta=0.00
+
+追加 / 更新テスト:
+- tests/test_diff_analyzer.py
+- tests/test_portfolio.py
+- tests/test_review_parser.py
+- tests/test_rules.py
+
+後方互換性の注意点:
+- 自動発注は追加しない。
+- YAML 入力と CLI ベースの運用を維持する。
+- 既存の生成物パス規約を変更する場合は README とテストも更新する。
+
+Python 候補 vs ChatGPT 提案の差分:
+- CIBR: python_price=80.71 | chatgpt_price=None | price_diff_pct=None | python_shares=1 | chatgpt_shares=0 | removed=True
+- MSFT: python_price=365.67 | chatgpt_price=365.67 | price_diff_pct=0.00 | python_shares=2 | chatgpt_shares=1 | removed=False
+- PLTR: python_price=104.15 | chatgpt_price=104.15 | price_diff_pct=0.00 | python_shares=2 | chatgpt_shares=2 | removed=False
+- URA: python_price=40.65 | chatgpt_price=40.65 | price_diff_pct=0.00 | python_shares=2 | chatgpt_shares=2 | removed=False

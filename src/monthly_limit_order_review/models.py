@@ -141,6 +141,34 @@ class ReviewOrderProposal:
 
 
 @dataclass(slots=True)
+class CoreSpotBuyAllocation:
+    fund_name: str
+    amount_jpy: int
+
+
+@dataclass(slots=True)
+class CoreSpotBuyScheduleItem:
+    execution_date: date | None
+    fund_name: str
+    amount_jpy: int
+    raw_text: str
+
+
+@dataclass(slots=True)
+class ReviewCoreSpotBuyPlan:
+    total_amount_jpy: int | None
+    account_type: str | None
+    fixed_core_auto_invest_amount_jpy: int | None
+    spot_buy_amount_jpy: int | None
+    total_core_deployment_jpy: int | None
+    rule_based_band: str | None
+    execution_method: str | None
+    allocations: list[CoreSpotBuyAllocation] = field(default_factory=list)
+    schedule: list[CoreSpotBuyScheduleItem] = field(default_factory=list)
+    parser_warnings: list[str] = field(default_factory=list)
+
+
+@dataclass(slots=True)
 class ReviewFeedback:
     raw_text: str
     sections: dict[str, str]
@@ -151,6 +179,7 @@ class ReviewFeedback:
     must: list[str]
     should: list[str]
     nice_to_have: list[str]
+    core_spot_buy_plan: ReviewCoreSpotBuyPlan | None = None
     parser_warnings: list[str] = field(default_factory=list)
 
 

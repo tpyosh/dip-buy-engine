@@ -1,0 +1,428 @@
+raw_text: "【要約】\n6月は、取引明細なしでは断定できないものの、投資信託カテゴリが大きく増え、前回方針どおり core 補強が進んだ可能性は高いです。ただし、実行済み購入と評価額変動・OCR差分を切り分けられないため、断定は避けます。\n\
+  7月は **core不足 24.30% vs 目標45.00%、流動性 34.60% vs 目標10.00%** の是正が最優先です。\n今月の core スポット買いは\
+  \ **900,000円**。SOX投信は買いゾーン内でも **追加購入見送り**。\n補強優先順位は **オルカン > S&P500 > MSFT深め > URA深い押し目\
+  \ > PLTRさらに深い押し目 > CIBR/SOX見送り**。\nルール面は大きな変更不要。ただし、6月レトロ用に「取引明細なしでは実行判定できない」点を改善余地として扱います。\n\
+  \n【今月のcoreスポット買い提案】\n**900,000円**\n\naccount_type: **特定口座**\n理由: 2026年のNISA成長投資枠は枯渇済み。NISA枠がないことを理由に\
+  \ core 購入を弱めるのではなく、core不足と現金過多の是正を優先します。\n税効率メモ: NISAより税効率は落ちますが、現在の主問題は税効率ではなく、**core不足・現金過多・satellite_core過多**です。ただし住宅ローン初期、生活防衛資金、大口支出不明リスクを考え、単月で現金を削りすぎない水準に留めます。\n\
+  \n固定core積立額: **100,000円**\n特定口座coreスポット買い提案額: **900,000円**\n固定積立 + スポット買いの合計core投入額:\
+  \ **1,000,000円**\n\nrule-based 判断:\nmonthly_core_budget_tier は **aggressive**。core_delta_pct\
+  \ が -20.70pt、cash_excess_pct が +24.60pt で、normal では不足、rebalance ほどではないため、700,000〜1,000,000円レンジの上寄りである\
+  \ **900,000円**が妥当です。\n\ndiscretionary adjustment:\n基準値どおり **調整なし**。ただし半導体・AIインフラ感応度が高いため、S&P500よりオルカンを厚めにします。\n\
+  \n配分先内訳\neMAXIS Slim 全世界株式(オール・カントリー)(オルカン): **585,000円**\neMAXIS Slim 米国株式(S&P500):\
+  \ **315,000円**\n\n実行方法: **4分割**\n実行スケジュール\n7月1日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)\
+  \ 200,000円\n7月1日: eMAXIS Slim 米国株式(S&P500) 100,000円\n7月8日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)\
+  \ 135,000円\n7月8日: eMAXIS Slim 米国株式(S&P500) 75,000円\n7月15日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)\
+  \ 125,000円\n7月15日: eMAXIS Slim 米国株式(S&P500) 70,000円\n7月22日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)\
+  \ 125,000円\n7月22日: eMAXIS Slim 米国株式(S&P500) 70,000円\n\n判断根拠\n相場面: VT/VOO/ACWI は直近高値から3〜4%程度の調整で、暴落局面ではありません。したがって\
+  \ rebalance 上限の1,280,000円〜1,500,000円までは上げず、aggressive の900,000円に留めます。\nポートフォリオ歪み:\
+  \ core 24.30%は目標45.00%に大きく不足。satellite_core は22.14%で目標15.00%を超過。今月はテーマ追加より broad\
+  \ market core 補強を優先。\n流動性水準: 現金・流動性13,620,505円は十分厚い一方、住宅ローン初期かつ大口支出不明なので、現金を一気に削りすぎない設計にします。\n\
+  \n【今月の指値提案】\n対象月: **2026_07**\n\nCIBR: **今月は見送り**\nルール上の判断: satellite_core が over\
+  \ target のため浅い候補は抑制。Python候補にも deep threshold 以下の eligible candidate がないため、0段にします。20営業日平均は\
+  \ **84.9617 USD**。候補の -5%、-8%、-12% はいずれも今月は採用しません。\n\nURA: **1段**\n指値 **40.65 USD**（20営業日平均\
+  \ **47.8267 USD**, 平均比 **-15.01%**）\n株数: **2株**\nルール上の判断: satellite_core over target\
+  \ のため、-6%・-10%の浅い段は見送り、deep扱いの -15% のみ採用。Python候補より少ない段数ですが、これは over target bucket\
+  \ のルール上の判断です。\n\nPLTR: **1段**\n指値 **104.15 USD**（20営業日平均 **133.5195 USD**, 平均比 **-22.00%**）\n\
+  株数: **2株**\nルール上の判断: 高ボラティリティ銘柄なので浅い -10% は抑制。-15%候補は現在値より上になってしまい即時約定リスクがあるため不採用。\n\
+  今月の裁量判断: core補強を優先するため、PLTRは1段だけに限定。\n\nMSFT: **1段**\n指値 **365.67 USD**（20営業日平均\
+  \ **406.2960 USD**, 平均比 **-10.00%**）\n株数: **1株**\n今月の裁量判断: MSFT は jun_core で不足側ですが、今月は\
+  \ broad market core を優先するため、Python候補の2株ではなく1株に圧縮します。-18%の深い段は設定してもよいですが、coreスポット買い予算を圧迫しないため今月は見送りします。\n\
+  \nSOX投信 / SMH: **指値・追加買いなし**\n理由: SOXは買いゾーン内ですが、半導体 direct exposure がすでに17.80%、satellite_core\
+  \ が22.14%で目標超過のため、7月は追加しません。\n\n【コア定額買い方針レビュー】\n今月最低買うべき core は、固定積立100,000円を含めて\
+  \ **1,000,000円**です。スポット分は **900,000円**。\n\n毎月一定額買う / 安ければ追加で厚く買う、という運用思想は妥当です。現在は「安いから買う」というより、**core不足と現金過多の構造是正**が主目的です。明確な下落局面ならスポット買いを1,200,000〜1,500,000円に上げる余地がありますが、今月は暴落ではないため900,000円で十分です。\n\
+  \n固定積立は維持。減額・停止は不要です。\niDeCoのオルカン55,000円/月も維持でよいですが、これは pension として扱い、特定口座で売買可能な\
+  \ tradable core とは分けて見ます。\n資金配分優先順位は、**特定口座coreスポット > NISAつみたて固定core > iDeCo > 深い指値のMSFT/URA/PLTR\
+  \ > SOX/CIBR追加見送り**です。\n\n【SOX投信判定】\n**買わない。**\n\n理由: SMHベースでは63日高値から -8.57%で、形式上は「-10%〜-5%」の買いゾーン内です。ただし、satellite_core\
+  \ が22.14%で目標15.00%を大きく超過し、半導体 direct exposure も17.80%あります。今月SOXを買うと、最も是正すべき core不足ではなく、すでに太い半導体テーマをさらに太らせることになります。\n\
+  したがって、7月のSOX投信は **見送り**。次に検討するなら、半導体がさらに大きく下げた局面、またはcore比率が十分改善した後です。\n\n【ポートフォリオ診断】\n\
+  現在の偏りは明確です。\ncore は **24.30%**で目標45.00%に対して大幅不足。\nliquidity は **34.60%**で目標10.00%に対して過大。\n\
+  satellite_core は **22.14%**で目標15.00%超過。\n半導体 direct は **17.80%**、AIインフラ込みでは **19.18%**なので、SOX・SMH・CIBR・URAのようなテーマ追加は慎重にすべき状態です。\n\
+  \n注意点:\n不動産は名古屋市中区・金山近くの流動性が比較的高いマンションとはいえ、生活防衛資金としては扱えません。しかもフルローン初期なので、日本国内不動産への実質エクスポージャはすでにあります。現金をゼロに近づける必要はなく、core補強と安全余力の両立が必要です。\n\
+  \n暗号資産のBTC/ETH週次4,000円は、総資産比で小さく、現時点では維持でよいです。停止・減額が必要なほどの比率ではありません。ただし、core不足が長期化するなら、暗号資産を増額する理由はありません。\n\
+  \n今月の補強優先順位:\n**1. オルカン**\n**2. S&P500**\n**3. MSFTは1株だけ深め指値**\n**4. URAは-15%の深い指値のみ**\n\
+  **5. PLTRは-22%のみ**\n**6. CIBR/SOXは見送り**\n\n【長期シナリオレビュー】\nURA / nuclear_revival\n\
+  Webで確認した主要事実: IEAは、電力需要がデータセンターやAIを含む用途で伸び、原子力について「新たな成長局面」の条件が整っていると整理しています。また、データセンター向け電力需要は2024年の460TWhから2030年に1,000TWh超へ伸びる見通しで、原子力は2030年以降に役割が増すとされています。([IEA][1])\
+  \ 米国では原子力サプライチェーン向けの大規模融資、インドや日本でも原子力拡大・建て替え計画が報じられており、政策面の追い風は残っています。([Reuters][2])\n\
+  推論: 長期仮説は崩れていません。ただし、建設遅延、コスト超過、冷却水・熱波リスク、政策変更リスクは残るため、買い増しは深い押し目限定。\n判定: **継続保有でよい**\n\
+  \nCIBR / persistent_cybersecurity_spending\nWebで確認した主要事実: Gartnerは世界の情報セキュリティ支出を2025年2130億ドル、2026年2398億ドル規模と予測し、AI利用・攻撃側の生成AI活用・規制圧力などが成長要因だとしています。([ガートナー][3])\n\
+  推論: サイバーセキュリティ支出の構造的成長仮説は継続。ただし、CIBR自体はすでにsatellite_coreの中で大きく、ポートフォリオ上は追加不要。\n\
+  判定: **継続保有でよい**\n\nMSFT / hyperscaler_ai_platform_compounding\nWebで確認した主要事実: MicrosoftのFY26\
+  \ Q3は売上829億ドル、営業利益384億ドルで、Azure and other cloud services revenue は40%増、AI business\
+  \ annual revenue run rate は370億ドル超と開示されています。([Microsoft][4])\n推論: クラウド・AI基盤・企業ソフトウェアの複合優位という仮説は維持可能です。リスクはAI投資回収の遅れや規制ですが、現時点で長期仮説が崩れたとは見ません。\n\
+  判定: **継続保有でよい**\n\nPLTR / defense_ai_gov_software_scaling\nWebで確認した主要事実: PalantirのQ1\
+  \ 2026は、売上が前年比85%増、米国商業売上が133%増、米国政府売上が84%増、Rule of 40が145%と会社資料で示されています。([Palantir\
+  \ IR][5])\n推論: 事業モメンタム上は長期仮説が崩れたとは言えません。一方で、政府・防衛・大企業AIというテーマは期待先行になりやすく、銘柄ボラティリティも大きいので、買い増しはさらに深い押し目限定にすべきです。\n\
+  判定: **要監視**\n\n【四半期ルール見直し】\n維持してよいルール:\n\n* core不足・現金過多が同時にある月は、satellite_coreが過大でも\
+  \ broad market core を優先するルールは妥当。\n* satellite_core over target 時に、SOX / CIBR / URA\
+  \ を深い押し目限定にするルールは妥当。\n* PLTRの浅い押し目候補を抑制するロジックは妥当。高ボラティリティ銘柄で -10% 程度を機械的に拾うと、core補強を邪魔しやすいです。\n\
+  * 半導体 direct と MSFTを含む indirect AI infra を別々に見つつ、合算watch metricも見る方針は妥当。\n\n改善した方がよいルール:\n\
+  \n* 6月レトロのように、投資信託カテゴリが大きく増えても、取引明細がなければ「購入実行済み」と断定できません。月次レビュー用には、保有評価額差分だけでなく、可能なら約定履歴・入出金・口数変化を別入力にするのが望ましいです。これは月次判断の安全性を上げる改善ですが、今月の執行判断に致命的な支障はありません。\n\
+  * large_month_over_month_change warning は有用ですが、「購入らしい」「OCR疑義」「市場変動」のどれに近いかを分類できると、レトロスペクティブの質が上がります。\n\
+  \n追加した方がよい制約:\n\n* satellite_core が over target かつ direct semiconductor が一定閾値超えの場合、SOX投信は買いゾーン内でも「原則見送り、例外は-15%以上の下落時のみ」と明文化してよいです。\n\
+  * MSFTはjun_coreだが、coreが大幅不足の月は株数上限を1株にするなど、broad core優先の裁量ルールを明文化してもよいです。\n\nスクリプト修正が望ましい点:\n\
+  \n* must: なし。\n* should: 取引明細なしの月次レトロでは、「購入実行済み」ではなく「購入実行の可能性」と出すガードを追加。\n* nice_to_have:\
+  \ README用に、今月の指値設定表を自動生成できる形式で出力。\n\n【Codex向け修正要約】\n\n```md\nmust:\n- なし\n\nshould:\n\
+  - README.md に最新月 `2026_07` の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する\n- README.md\
+  \ の最新月セクション内の見やすい位置に「今月の指値買い設定」を追加または更新し、銘柄、指値、株数、見送り対象、主な理由を一覧化する\n- ルート README\
+  \ に月次レビュー履歴を蓄積せず、既存の `## Monthly Review: YYYY_MM` を `2026_07` の内容で置換し、過去月の `Monthly\
+  \ Review` セクションは残さない\n- 6月レトロでは、投資信託カテゴリ増加を「実行済み購入」と断定せず、取引明細未確認のため「購入実行の可能性」として記述する\n\
+  - large_month_over_month_change warning がある銘柄について、README または月次レビュー内で「OCR・購入・評価額変動・口座分類差分の確認対象」と明示する\n\
+  \nnice_to_have:\n- 月次レビュー生成ロジックに、保有評価額差分だけでなく、約定履歴・口数変化・入出金の有無を取り込める入力欄を追加する\n-\
+  \ SOX投信について、satellite_core over target かつ direct semiconductor exposure が高い場合は、買いゾーン内でも原則見送りとする説明文を自動生成できるようにする\n\
+  - README 用の「今月の指値買い設定」テーブルをスクリプト出力からそのまま貼れる形式に整形する\n\n修正目的:\n- 取引明細がない月でも、購入実行を断定せず、事実・推定・不明点を分けた月次レビューにする\n\
+  - 2026_07 の実行計画、coreスポット買い、指値設定、SOX見送り、ポートフォリオ歪みを README.md に反映する\n- コード修正提案が少ない月でも、README.md\
+  \ に最新月の運用要約と指値買い設定を確実に残す\n\n変更すべき仕様:\n- README.md の `## Monthly Review: YYYY_MM`\
+  \ は常に最新月だけを保持し、過去月の Monthly Review セクションは残さない\n- 最新月セクションには、月次サマリー、coreスポット買い計画、今月の指値買い設定、SOX判定、ポートフォリオサマリーを含める\n\
+  - 今月の指値買い設定は、少なくとも以下を含む表にする:\n  - CIBR: 見送り。理由: satellite_core over target、eligible\
+  \ deep candidate なし\n  - URA: 40.65 USD、2株、20営業日平均47.8267 USD、平均比-15.01%\n  - PLTR:\
+  \ 104.15 USD、2株、20営業日平均133.5195 USD、平均比-22.00%\n  - MSFT: 365.67 USD、1株、20営業日平均406.2960\
+  \ USD、平均比-10.00%\n  - SOX投信/SMH: 見送り。理由: satellite_core over target、direct semiconductor\
+  \ exposure 17.80%\n- 6月レトロでは、投資信託カテゴリ増加を実行済み購入と断定せず、取引明細未確認の推定として扱う\n\n影響範囲:\n-\
+  \ README.md\n- 月次レビュー生成スクリプトの README 出力部分\n- 可能なら月次レトロスペクティブの差分分類ロジック\n\n推奨テスト:\n\
+  - README.md の `## Monthly Review: 2026_07` が1つだけ存在し、過去月の Monthly Review セクションが残っていないことを確認\n\
+  - coreスポット買い計画の合計が 900,000円、オルカン585,000円、S&P500315,000円に一致することを確認\n- 固定core積立100,000円とスポット買い900,000円の合計core投入額が1,000,000円として記載されていることを確認\n\
+  - 指値テーブルに、URA / PLTR / MSFT の20営業日平均と平均比が記載され、CIBR / SOX投信が見送りとして明記されていることを確認\n\
+  - 6月レトロで「投資信託カテゴリ増加 = 購入実行済み」と断定していないことを確認\n```\n\n[1]: https://www.iea.org/reports/the-path-to-a-new-era-for-nuclear-energy/executive-summary\
+  \ \"Executive Summary – The Path to a New Era for Nuclear Energy – Analysis - IEA\"\
+  \n[2]: https://www.reuters.com/business/energy/us-announces-175-billion-conditional-loans-nuclear-power-2026-06-23/?utm_source=chatgpt.com\
+  \ \"US announces $17.5 billion in loans for nuclear power supply chain\"\n[3]: https://www.gartner.com/en/newsroom/press-releases/2025-07-29-gartner-forecasts-worldwide-end-user-spending-on-information-security-to-total-213-billion-us-dollars-in-2025\
+  \ \"Gartner Forecasts Worldwide End-User Spending on Information Security to Total\
+  \ $213 Billion in 2025\"\n[4]: https://www.microsoft.com/en-us/investor/earnings/fy-2026-q3/press-release-webcast\
+  \ \"FY26 Q3 - Press Releases - Investor Relations - Microsoft\"\n[5]: https://investors.palantir.com/files/Palantir%20-%20Q1%202026%20Business%20Update.pdf\
+  \ \"Palantir - Q1 2026 Business Update\"\n"
+sections:
+  core_spot_buy: '**900,000円**
+
+
+    account_type: **特定口座**
+
+    理由: 2026年のNISA成長投資枠は枯渇済み。NISA枠がないことを理由に core 購入を弱めるのではなく、core不足と現金過多の是正を優先します。
+
+    税効率メモ: NISAより税効率は落ちますが、現在の主問題は税効率ではなく、**core不足・現金過多・satellite_core過多**です。ただし住宅ローン初期、生活防衛資金、大口支出不明リスクを考え、単月で現金を削りすぎない水準に留めます。
+
+
+    固定core積立額: **100,000円**
+
+    特定口座coreスポット買い提案額: **900,000円**
+
+    固定積立 + スポット買いの合計core投入額: **1,000,000円**
+
+
+    rule-based 判断:
+
+    monthly_core_budget_tier は **aggressive**。core_delta_pct が -20.70pt、cash_excess_pct
+    が +24.60pt で、normal では不足、rebalance ほどではないため、700,000〜1,000,000円レンジの上寄りである **900,000円**が妥当です。
+
+
+    discretionary adjustment:
+
+    基準値どおり **調整なし**。ただし半導体・AIインフラ感応度が高いため、S&P500よりオルカンを厚めにします。
+
+
+    配分先内訳
+
+    eMAXIS Slim 全世界株式(オール・カントリー)(オルカン): **585,000円**
+
+    eMAXIS Slim 米国株式(S&P500): **315,000円**
+
+
+    実行方法: **4分割**
+
+    実行スケジュール
+
+    7月1日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 200,000円
+
+    7月1日: eMAXIS Slim 米国株式(S&P500) 100,000円
+
+    7月8日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 135,000円
+
+    7月8日: eMAXIS Slim 米国株式(S&P500) 75,000円
+
+    7月15日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 125,000円
+
+    7月15日: eMAXIS Slim 米国株式(S&P500) 70,000円
+
+    7月22日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 125,000円
+
+    7月22日: eMAXIS Slim 米国株式(S&P500) 70,000円
+
+
+    判断根拠
+
+    相場面: VT/VOO/ACWI は直近高値から3〜4%程度の調整で、暴落局面ではありません。したがって rebalance 上限の1,280,000円〜1,500,000円までは上げず、aggressive
+    の900,000円に留めます。
+
+    ポートフォリオ歪み: core 24.30%は目標45.00%に大きく不足。satellite_core は22.14%で目標15.00%を超過。今月はテーマ追加より
+    broad market core 補強を優先。
+
+    流動性水準: 現金・流動性13,620,505円は十分厚い一方、住宅ローン初期かつ大口支出不明なので、現金を一気に削りすぎない設計にします。'
+  monthly_proposals: '対象月: **2026_07**
+
+
+    CIBR: **今月は見送り**
+
+    ルール上の判断: satellite_core が over target のため浅い候補は抑制。Python候補にも deep threshold 以下の
+    eligible candidate がないため、0段にします。20営業日平均は **84.9617 USD**。候補の -5%、-8%、-12% はいずれも今月は採用しません。
+
+
+    URA: **1段**
+
+    指値 **40.65 USD**（20営業日平均 **47.8267 USD**, 平均比 **-15.01%**）
+
+    株数: **2株**
+
+    ルール上の判断: satellite_core over target のため、-6%・-10%の浅い段は見送り、deep扱いの -15% のみ採用。Python候補より少ない段数ですが、これは
+    over target bucket のルール上の判断です。
+
+
+    PLTR: **1段**
+
+    指値 **104.15 USD**（20営業日平均 **133.5195 USD**, 平均比 **-22.00%**）
+
+    株数: **2株**
+
+    ルール上の判断: 高ボラティリティ銘柄なので浅い -10% は抑制。-15%候補は現在値より上になってしまい即時約定リスクがあるため不採用。
+
+    今月の裁量判断: core補強を優先するため、PLTRは1段だけに限定。
+
+
+    MSFT: **1段**
+
+    指値 **365.67 USD**（20営業日平均 **406.2960 USD**, 平均比 **-10.00%**）
+
+    株数: **1株**
+
+    今月の裁量判断: MSFT は jun_core で不足側ですが、今月は broad market core を優先するため、Python候補の2株ではなく1株に圧縮します。-18%の深い段は設定してもよいですが、coreスポット買い予算を圧迫しないため今月は見送りします。
+
+
+    SOX投信 / SMH: **指値・追加買いなし**
+
+    理由: SOXは買いゾーン内ですが、半導体 direct exposure がすでに17.80%、satellite_core が22.14%で目標超過のため、7月は追加しません。'
+  sox_decision: '**買わない。**
+
+
+    理由: SMHベースでは63日高値から -8.57%で、形式上は「-10%〜-5%」の買いゾーン内です。ただし、satellite_core が22.14%で目標15.00%を大きく超過し、半導体
+    direct exposure も17.80%あります。今月SOXを買うと、最も是正すべき core不足ではなく、すでに太い半導体テーマをさらに太らせることになります。
+
+    したがって、7月のSOX投信は **見送り**。次に検討するなら、半導体がさらに大きく下げた局面、またはcore比率が十分改善した後です。'
+  portfolio_diagnosis: '現在の偏りは明確です。
+
+    core は **24.30%**で目標45.00%に対して大幅不足。
+
+    liquidity は **34.60%**で目標10.00%に対して過大。
+
+    satellite_core は **22.14%**で目標15.00%超過。
+
+    半導体 direct は **17.80%**、AIインフラ込みでは **19.18%**なので、SOX・SMH・CIBR・URAのようなテーマ追加は慎重にすべき状態です。
+
+
+    注意点:
+
+    不動産は名古屋市中区・金山近くの流動性が比較的高いマンションとはいえ、生活防衛資金としては扱えません。しかもフルローン初期なので、日本国内不動産への実質エクスポージャはすでにあります。現金をゼロに近づける必要はなく、core補強と安全余力の両立が必要です。
+
+
+    暗号資産のBTC/ETH週次4,000円は、総資産比で小さく、現時点では維持でよいです。停止・減額が必要なほどの比率ではありません。ただし、core不足が長期化するなら、暗号資産を増額する理由はありません。
+
+
+    今月の補強優先順位:
+
+    **1. オルカン**
+
+    **2. S&P500**
+
+    **3. MSFTは1株だけ深め指値**
+
+    **4. URAは-15%の深い指値のみ**
+
+    **5. PLTRは-22%のみ**
+
+    **6. CIBR/SOXは見送り**'
+  rule_review: '維持してよいルール:
+
+
+    * core不足・現金過多が同時にある月は、satellite_coreが過大でも broad market core を優先するルールは妥当。
+
+    * satellite_core over target 時に、SOX / CIBR / URA を深い押し目限定にするルールは妥当。
+
+    * PLTRの浅い押し目候補を抑制するロジックは妥当。高ボラティリティ銘柄で -10% 程度を機械的に拾うと、core補強を邪魔しやすいです。
+
+    * 半導体 direct と MSFTを含む indirect AI infra を別々に見つつ、合算watch metricも見る方針は妥当。
+
+
+    改善した方がよいルール:
+
+
+    * 6月レトロのように、投資信託カテゴリが大きく増えても、取引明細がなければ「購入実行済み」と断定できません。月次レビュー用には、保有評価額差分だけでなく、可能なら約定履歴・入出金・口数変化を別入力にするのが望ましいです。これは月次判断の安全性を上げる改善ですが、今月の執行判断に致命的な支障はありません。
+
+    * large_month_over_month_change warning は有用ですが、「購入らしい」「OCR疑義」「市場変動」のどれに近いかを分類できると、レトロスペクティブの質が上がります。
+
+
+    追加した方がよい制約:
+
+
+    * satellite_core が over target かつ direct semiconductor が一定閾値超えの場合、SOX投信は買いゾーン内でも「原則見送り、例外は-15%以上の下落時のみ」と明文化してよいです。
+
+    * MSFTはjun_coreだが、coreが大幅不足の月は株数上限を1株にするなど、broad core優先の裁量ルールを明文化してもよいです。
+
+
+    スクリプト修正が望ましい点:
+
+
+    * must: なし。
+
+    * should: 取引明細なしの月次レトロでは、「購入実行済み」ではなく「購入実行の可能性」と出すガードを追加。
+
+    * nice_to_have: README用に、今月の指値設定表を自動生成できる形式で出力。'
+  codex_summary: "```md\nmust:\n- なし\n\nshould:\n- README.md に最新月 `2026_07` の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する\n\
+    - README.md の最新月セクション内の見やすい位置に「今月の指値買い設定」を追加または更新し、銘柄、指値、株数、見送り対象、主な理由を一覧化する\n\
+    - ルート README に月次レビュー履歴を蓄積せず、既存の `## Monthly Review: YYYY_MM` を `2026_07` の内容で置換し、過去月の\
+    \ `Monthly Review` セクションは残さない\n- 6月レトロでは、投資信託カテゴリ増加を「実行済み購入」と断定せず、取引明細未確認のため「購入実行の可能性」として記述する\n\
+    - large_month_over_month_change warning がある銘柄について、README または月次レビュー内で「OCR・購入・評価額変動・口座分類差分の確認対象」と明示する\n\
+    \nnice_to_have:\n- 月次レビュー生成ロジックに、保有評価額差分だけでなく、約定履歴・口数変化・入出金の有無を取り込める入力欄を追加する\n\
+    - SOX投信について、satellite_core over target かつ direct semiconductor exposure が高い場合は、買いゾーン内でも原則見送りとする説明文を自動生成できるようにする\n\
+    - README 用の「今月の指値買い設定」テーブルをスクリプト出力からそのまま貼れる形式に整形する\n\n修正目的:\n- 取引明細がない月でも、購入実行を断定せず、事実・推定・不明点を分けた月次レビューにする\n\
+    - 2026_07 の実行計画、coreスポット買い、指値設定、SOX見送り、ポートフォリオ歪みを README.md に反映する\n- コード修正提案が少ない月でも、README.md\
+    \ に最新月の運用要約と指値買い設定を確実に残す\n\n変更すべき仕様:\n- README.md の `## Monthly Review: YYYY_MM`\
+    \ は常に最新月だけを保持し、過去月の Monthly Review セクションは残さない\n- 最新月セクションには、月次サマリー、coreスポット買い計画、今月の指値買い設定、SOX判定、ポートフォリオサマリーを含める\n\
+    - 今月の指値買い設定は、少なくとも以下を含む表にする:\n  - CIBR: 見送り。理由: satellite_core over target、eligible\
+    \ deep candidate なし\n  - URA: 40.65 USD、2株、20営業日平均47.8267 USD、平均比-15.01%\n  -\
+    \ PLTR: 104.15 USD、2株、20営業日平均133.5195 USD、平均比-22.00%\n  - MSFT: 365.67 USD、1株、20営業日平均406.2960\
+    \ USD、平均比-10.00%\n  - SOX投信/SMH: 見送り。理由: satellite_core over target、direct semiconductor\
+    \ exposure 17.80%\n- 6月レトロでは、投資信託カテゴリ増加を実行済み購入と断定せず、取引明細未確認の推定として扱う\n\n影響範囲:\n\
+    - README.md\n- 月次レビュー生成スクリプトの README 出力部分\n- 可能なら月次レトロスペクティブの差分分類ロジック\n\n推奨テスト:\n\
+    - README.md の `## Monthly Review: 2026_07` が1つだけ存在し、過去月の Monthly Review セクションが残っていないことを確認\n\
+    - coreスポット買い計画の合計が 900,000円、オルカン585,000円、S&P500315,000円に一致することを確認\n- 固定core積立100,000円とスポット買い900,000円の合計core投入額が1,000,000円として記載されていることを確認\n\
+    - 指値テーブルに、URA / PLTR / MSFT の20営業日平均と平均比が記載され、CIBR / SOX投信が見送りとして明記されていることを確認\n\
+    - 6月レトロで「投資信託カテゴリ増加 = 購入実行済み」と断定していないことを確認\n```\n\n[1]: https://www.iea.org/reports/the-path-to-a-new-era-for-nuclear-energy/executive-summary\
+    \ \"Executive Summary – The Path to a New Era for Nuclear Energy – Analysis -\
+    \ IEA\"\n[2]: https://www.reuters.com/business/energy/us-announces-175-billion-conditional-loans-nuclear-power-2026-06-23/?utm_source=chatgpt.com\
+    \ \"US announces $17.5 billion in loans for nuclear power supply chain\"\n[3]:\
+    \ https://www.gartner.com/en/newsroom/press-releases/2025-07-29-gartner-forecasts-worldwide-end-user-spending-on-information-security-to-total-213-billion-us-dollars-in-2025\
+    \ \"Gartner Forecasts Worldwide End-User Spending on Information Security to Total\
+    \ $213 Billion in 2025\"\n[4]: https://www.microsoft.com/en-us/investor/earnings/fy-2026-q3/press-release-webcast\
+    \ \"FY26 Q3 - Press Releases - Investor Relations - Microsoft\"\n[5]: https://investors.palantir.com/files/Palantir%20-%20Q1%202026%20Business%20Update.pdf\
+    \ \"Palantir - Q1 2026 Business Update\""
+order_proposals:
+- symbol: CIBR
+  recommended_price: null
+  recommended_shares: 0
+  reason: '今月は見送り ルール上の判断: satellite_core が over target のため浅い候補は抑制。Python候補にも deep
+    threshold 以下の eligible candidate がないため、0段にします。20営業日平均は 84.9617 USD。候補の -5%、-8%、-12%
+    はいずれも今月は採用しません。'
+- symbol: URA
+  recommended_price: 40.65
+  recommended_shares: 2
+  reason: '1段 指値 40.65 USD（20営業日平均 47.8267 USD, 平均比 -15.01%） 株数: 2株 ルール上の判断: satellite_core
+    over target のため、-6%・-10%の浅い段は見送り、deep扱いの -15% のみ採用。Python候補より少ない段数ですが、これは over
+    target bucket のルール上の判断です。'
+- symbol: PLTR
+  recommended_price: 104.15
+  recommended_shares: 2
+  reason: '1段 指値 104.15 USD（20営業日平均 133.5195 USD, 平均比 -22.00%） 株数: 2株 ルール上の判断: 高ボラティリティ銘柄なので浅い
+    -10% は抑制。-15%候補は現在値より上になってしまい即時約定リスクがあるため不採用。 今月の裁量判断: core補強を優先するため、PLTRは1段だけに限定。'
+- symbol: MSFT
+  recommended_price: 365.67
+  recommended_shares: 1
+  reason: '1段 指値 365.67 USD（20営業日平均 406.2960 USD, 平均比 -10.00%） 株数: 1株 今月の裁量判断: MSFT
+    は jun_core で不足側ですが、今月は broad market core を優先するため、Python候補の2株ではなく1株に圧縮します。-18%の深い段は設定してもよいですが、coreスポット買い予算を圧迫しないため今月は見送りします。'
+sox_decision: 買わない
+portfolio_diagnosis:
+- 1. オルカン**
+- 2. S&P500**
+- 3. MSFTは1株だけ深め指値**
+- 4. URAは-15%の深い指値のみ**
+- 5. PLTRは-22%のみ**
+- 6. CIBR/SOXは見送り**
+rule_review:
+- core不足・現金過多が同時にある月は、satellite_coreが過大でも broad market core を優先するルールは妥当。
+- satellite_core over target 時に、SOX / CIBR / URA を深い押し目限定にするルールは妥当。
+- PLTRの浅い押し目候補を抑制するロジックは妥当。高ボラティリティ銘柄で -10% 程度を機械的に拾うと、core補強を邪魔しやすいです。
+- 半導体 direct と MSFTを含む indirect AI infra を別々に見つつ、合算watch metricも見る方針は妥当。
+- 6月レトロのように、投資信託カテゴリが大きく増えても、取引明細がなければ「購入実行済み」と断定できません。月次レビュー用には、保有評価額差分だけでなく、可能なら約定履歴・入出金・口数変化を別入力にするのが望ましいです。これは月次判断の安全性を上げる改善ですが、今月の執行判断に致命的な支障はありません。
+- large_month_over_month_change warning は有用ですが、「購入らしい」「OCR疑義」「市場変動」のどれに近いかを分類できると、レトロスペクティブの質が上がります。
+- satellite_core が over target かつ direct semiconductor が一定閾値超えの場合、SOX投信は買いゾーン内でも「原則見送り、例外は-15%以上の下落時のみ」と明文化してよいです。
+- MSFTはjun_coreだが、coreが大幅不足の月は株数上限を1株にするなど、broad core優先の裁量ルールを明文化してもよいです。
+- 'must: なし。'
+- 'should: 取引明細なしの月次レトロでは、「購入実行済み」ではなく「購入実行の可能性」と出すガードを追加。'
+- 'nice_to_have: README用に、今月の指値設定表を自動生成できる形式で出力。'
+must:
+- なし
+should:
+- README.md に最新月 `2026_07` の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する
+- README.md の最新月セクション内の見やすい位置に「今月の指値買い設定」を追加または更新し、銘柄、指値、株数、見送り対象、主な理由を一覧化する
+- 'ルート README に月次レビュー履歴を蓄積せず、既存の `## Monthly Review: YYYY_MM` を `2026_07` の内容で置換し、過去月の
+  `Monthly Review` セクションは残さない'
+- 6月レトロでは、投資信託カテゴリ増加を「実行済み購入」と断定せず、取引明細未確認のため「購入実行の可能性」として記述する
+- large_month_over_month_change warning がある銘柄について、README または月次レビュー内で「OCR・購入・評価額変動・口座分類差分の確認対象」と明示する
+nice_to_have:
+- 月次レビュー生成ロジックに、保有評価額差分だけでなく、約定履歴・口数変化・入出金の有無を取り込める入力欄を追加する
+- SOX投信について、satellite_core over target かつ direct semiconductor exposure が高い場合は、買いゾーン内でも原則見送りとする説明文を自動生成できるようにする
+- README 用の「今月の指値買い設定」テーブルをスクリプト出力からそのまま貼れる形式に整形する
+- 取引明細がない月でも、購入実行を断定せず、事実・推定・不明点を分けた月次レビューにする
+- 2026_07 の実行計画、coreスポット買い、指値設定、SOX見送り、ポートフォリオ歪みを README.md に反映する
+- コード修正提案が少ない月でも、README.md に最新月の運用要約と指値買い設定を確実に残す
+- 'README.md の `## Monthly Review: YYYY_MM` は常に最新月だけを保持し、過去月の Monthly Review セクションは残さない'
+- 最新月セクションには、月次サマリー、coreスポット買い計画、今月の指値買い設定、SOX判定、ポートフォリオサマリーを含める
+- '今月の指値買い設定は、少なくとも以下を含む表にする:'
+- 'CIBR: 見送り。理由: satellite_core over target、eligible deep candidate なし'
+- 'URA: 40.65 USD、2株、20営業日平均47.8267 USD、平均比-15.01%'
+- 'PLTR: 104.15 USD、2株、20営業日平均133.5195 USD、平均比-22.00%'
+- 'MSFT: 365.67 USD、1株、20営業日平均406.2960 USD、平均比-10.00%'
+- 'SOX投信/SMH: 見送り。理由: satellite_core over target、direct semiconductor exposure 17.80%'
+- 6月レトロでは、投資信託カテゴリ増加を実行済み購入と断定せず、取引明細未確認の推定として扱う
+- README.md
+- 月次レビュー生成スクリプトの README 出力部分
+- 可能なら月次レトロスペクティブの差分分類ロジック
+- 'README.md の `## Monthly Review: 2026_07` が1つだけ存在し、過去月の Monthly Review セクションが残っていないことを確認'
+- coreスポット買い計画の合計が 900,000円、オルカン585,000円、S&P500315,000円に一致することを確認
+- 固定core積立100,000円とスポット買い900,000円の合計core投入額が1,000,000円として記載されていることを確認
+- 指値テーブルに、URA / PLTR / MSFT の20営業日平均と平均比が記載され、CIBR / SOX投信が見送りとして明記されていることを確認
+- 6月レトロで「投資信託カテゴリ増加 = 購入実行済み」と断定していないことを確認
+core_spot_buy_plan:
+  total_amount_jpy: 900000
+  account_type: 特定口座
+  fixed_core_auto_invest_amount_jpy: 100000
+  spot_buy_amount_jpy: 900000
+  total_core_deployment_jpy: 1000000
+  rule_based_band: null
+  execution_method: 4分割
+  allocations:
+  - fund_name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    amount_jpy: 585000
+  - fund_name: eMAXIS Slim 米国株式(S&P500)
+    amount_jpy: 315000
+  schedule:
+  - execution_date: '2026-07-01'
+    fund_name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    amount_jpy: 200000
+    raw_text: '7月1日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 200,000円'
+  - execution_date: '2026-07-01'
+    fund_name: eMAXIS Slim 米国株式(S&P500)
+    amount_jpy: 100000
+    raw_text: '7月1日: eMAXIS Slim 米国株式(S&P500) 100,000円'
+  - execution_date: '2026-07-08'
+    fund_name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    amount_jpy: 135000
+    raw_text: '7月8日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 135,000円'
+  - execution_date: '2026-07-08'
+    fund_name: eMAXIS Slim 米国株式(S&P500)
+    amount_jpy: 75000
+    raw_text: '7月8日: eMAXIS Slim 米国株式(S&P500) 75,000円'
+  - execution_date: '2026-07-15'
+    fund_name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    amount_jpy: 125000
+    raw_text: '7月15日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 125,000円'
+  - execution_date: '2026-07-15'
+    fund_name: eMAXIS Slim 米国株式(S&P500)
+    amount_jpy: 70000
+    raw_text: '7月15日: eMAXIS Slim 米国株式(S&P500) 70,000円'
+  - execution_date: '2026-07-22'
+    fund_name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    amount_jpy: 125000
+    raw_text: '7月22日: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン) 125,000円'
+  - execution_date: '2026-07-22'
+    fund_name: eMAXIS Slim 米国株式(S&P500)
+    amount_jpy: 70000
+    raw_text: '7月22日: eMAXIS Slim 米国株式(S&P500) 70,000円'
+  parser_warnings: []
+parser_warnings: []

@@ -123,6 +123,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- broad market core 商品を優先し、むやみに新規商品を増やさないこと",
             "- coreスポット買いは原則として eMAXIS Slim 全世界株式（オール・カントリー）と eMAXIS Slim 米国株式（S&P500）に限定すること",
             "- 基本配分はオルカン60% / S&P500 40%、米国株・半導体・AIインフラ感応度が高い場合はオルカン65% / S&P500 35% などオルカン厚めにすること",
+            "- 実行スケジュールは Google Calendar の手動発注リマインダー作成に使うため、各行に具体日付、ファンド名、金額を必ず含めること",
             "- 債券や低リスク商品を提案してもよいが、core equity のスポット買い額は必ず別途提示すること",
             "- `積立しているからスポット買いは不要` とは結論しないこと",
             "",

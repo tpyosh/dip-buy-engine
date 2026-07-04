@@ -1,0 +1,66 @@
+- symbol: CIBR
+  python_price: 80.71
+  chatgpt_price: null
+  price_diff_pct: null
+  python_shares: 1
+  chatgpt_shares: 0
+  reason_summary: '今月は見送り ルール上の判断: satellite_core が over target のため浅い候補は抑制。Python候補にも
+    deep threshold 以下の eligible candidate がないため、0段にします。20営業日平均は 84.9617 USD。候補の -5%、-8%、-12%
+    はいずれも今月は採用しません。'
+  added_warnings:
+  - 1. オルカン**
+  - 2. S&P500**
+  - 3. MSFTは1株だけ深め指値**
+  - 4. URAは-15%の深い指値のみ**
+  - 5. PLTRは-22%のみ**
+  - 6. CIBR/SOXは見送り**
+  candidate_removed: true
+- symbol: MSFT
+  python_price: 365.67
+  chatgpt_price: 365.67
+  price_diff_pct: 0
+  python_shares: 2
+  chatgpt_shares: 1
+  reason_summary: '1段 指値 365.67 USD（20営業日平均 406.2960 USD, 平均比 -10.00%） 株数: 1株 今月の裁量判断:
+    MSFT は jun_core で不足側ですが、今月は broad market core を優先するため、Python候補の2株ではなく1株に圧縮します。-18%の深い段は設定してもよいですが、coreスポット買い予算を圧迫しないため今月は見送りします。'
+  added_warnings:
+  - 1. オルカン**
+  - 2. S&P500**
+  - 3. MSFTは1株だけ深め指値**
+  - 4. URAは-15%の深い指値のみ**
+  - 5. PLTRは-22%のみ**
+  - 6. CIBR/SOXは見送り**
+  candidate_removed: false
+- symbol: PLTR
+  python_price: 104.15
+  chatgpt_price: 104.15
+  price_diff_pct: 0
+  python_shares: 2
+  chatgpt_shares: 2
+  reason_summary: '1段 指値 104.15 USD（20営業日平均 133.5195 USD, 平均比 -22.00%） 株数: 2株 ルール上の判断:
+    高ボラティリティ銘柄なので浅い -10% は抑制。-15%候補は現在値より上になってしまい即時約定リスクがあるため不採用。 今月の裁量判断: core補強を優先するため、PLTRは1段だけに限定。'
+  added_warnings:
+  - 1. オルカン**
+  - 2. S&P500**
+  - 3. MSFTは1株だけ深め指値**
+  - 4. URAは-15%の深い指値のみ**
+  - 5. PLTRは-22%のみ**
+  - 6. CIBR/SOXは見送り**
+  candidate_removed: false
+- symbol: URA
+  python_price: 40.65
+  chatgpt_price: 40.65
+  price_diff_pct: 0
+  python_shares: 2
+  chatgpt_shares: 2
+  reason_summary: '1段 指値 40.65 USD（20営業日平均 47.8267 USD, 平均比 -15.01%） 株数: 2株 ルール上の判断:
+    satellite_core over target のため、-6%・-10%の浅い段は見送り、deep扱いの -15% のみ採用。Python候補より少ない段数ですが、これは
+    over target bucket のルール上の判断です。'
+  added_warnings:
+  - 1. オルカン**
+  - 2. S&P500**
+  - 3. MSFTは1株だけ深め指値**
+  - 4. URAは-15%の深い指値のみ**
+  - 5. PLTRは-22%のみ**
+  - 6. CIBR/SOXは見送り**
+  candidate_removed: false

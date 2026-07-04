@@ -8,6 +8,7 @@ from datetime import UTC, date, datetime
 from pathlib import Path
 from decimal import Decimal
 
+from .calendar_events import build_core_spot_buy_calendar_event_drafts, load_core_spot_buy_event_config
 from .candidate_metrics import compute_candidate_metrics
 from .codex_patch_builder import build_codex_patch_prompt, build_codex_patch_request
 from .diff_analyzer import build_proposal_diffs
@@ -109,15 +110,24 @@ def handle_ingest_review(args: argparse.Namespace) -> int:
     snapshot_path = Path(args.snapshot)
     computation = compute_monthly(snapshot_path, project_root=project_root)
     review_text = read_text(args.review_text)
-    review_feedback = parse_review_feedback(review_text)
+    month = target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path)
+    review_feedback = parse_review_feedback(review_text, review_target_month=month)
     diffs = build_proposal_diffs(computation.candidate_orders, review_feedback, computation.warnings)
-    paths = default_output_paths(project_root, target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path))
+    paths = default_output_paths(project_root, month)
+    calendar_event_artifact = build_core_spot_buy_calendar_event_artifact(
+        review_feedback=review_feedback,
+        review_target_month=month,
+        source_review_path=Path(args.review_text),
+        project_root=project_root,
+    )
 
     write_yaml(paths["computation"], computation)
     write_yaml(paths["review_structured"], review_feedback)
     write_yaml(paths["diff"], diffs)
+    write_yaml(paths["calendar_events"], calendar_event_artifact)
     LOGGER.info("Saved structured review to %s", paths["review_structured"])
     LOGGER.info("Saved proposal diffs to %s", paths["diff"])
+    LOGGER.info("Saved Google Calendar event drafts to %s", paths["calendar_events"])
     return 0
 
 
@@ -126,21 +136,29 @@ def handle_generate_codex_patch(args: argparse.Namespace) -> int:
     snapshot_path = Path(args.snapshot)
     computation = compute_monthly(snapshot_path, project_root=project_root)
     review_text = read_text(args.review_text)
-    review_feedback = parse_review_feedback(review_text)
-    diffs = build_proposal_diffs(computation.candidate_orders, review_feedback, computation.warnings)
     month = target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path)
+    review_feedback = parse_review_feedback(review_text, review_target_month=month)
+    diffs = build_proposal_diffs(computation.candidate_orders, review_feedback, computation.warnings)
     patch_request = build_codex_patch_request(month, review_feedback, diffs)
     paths = default_output_paths(project_root, month)
     output_path = Path(args.output) if args.output else paths["patch_prompt"]
     template_text = read_text(project_root / "prompts/templates/codex_patch_template.md")
     prompt = build_codex_patch_prompt(template_text, patch_request, diffs)
+    calendar_event_artifact = build_core_spot_buy_calendar_event_artifact(
+        review_feedback=review_feedback,
+        review_target_month=month,
+        source_review_path=Path(args.review_text),
+        project_root=project_root,
+    )
 
     write_yaml(paths["computation"], computation)
     write_yaml(paths["review_structured"], review_feedback)
     write_yaml(paths["diff"], diffs)
     write_yaml(paths["patch_request"], patch_request)
+    write_yaml(paths["calendar_events"], calendar_event_artifact)
     write_text(output_path, prompt)
     LOGGER.info("Saved Codex patch request to %s", paths["patch_request"])
+    LOGGER.info("Saved Google Calendar event drafts to %s", paths["calendar_events"])
     LOGGER.info("Saved Codex patch prompt to %s", output_path)
     return 0
 
@@ -165,6 +183,28 @@ def handle_monthly_run(args: argparse.Namespace) -> int:
     LOGGER.info("Saved review prompt to %s", paths["review_prompt"])
     LOGGER.info("Updated README portfolio section at %s", project_root / "README.md")
     return 0
+
+
+def build_core_spot_buy_calendar_event_artifact(
+    *,
+    review_feedback,
+    review_target_month: str,
+    source_review_path: Path,
+    project_root: Path,
+) -> dict:
+    event_config = load_core_spot_buy_event_config(project_root)
+    event_drafts = build_core_spot_buy_calendar_event_drafts(
+        review_feedback,
+        review_target_month=review_target_month,
+        source_review_path=source_review_path,
+        config=event_config,
+    )
+    return {
+        "review_target_month": review_target_month,
+        "source_review_text": str(source_review_path),
+        "event_count": len(event_drafts),
+        "events": event_drafts,
+    }
 
 
 def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComputation:

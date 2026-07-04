@@ -1,0 +1,362 @@
+snapshot_date: "2026-06-28"
+currency_base: "JPY"
+total_assets_jpy: 39370393
+liquidity_target_jpy: null
+category_totals_jpy:
+  預金・現金・暗号資産: 13620505
+  株式（現物）: 5193713
+  投資信託: 16476610
+  年金: 4063372
+  ポイント: 16193
+source_evidence:
+  primary_source: "moneyforward_screenshots_in_user_message"
+  auxiliary_source: null
+  screenshot_count: 6
+  snapshot_date_basis: "No visible date in screenshots; used session current date 2026-06-28."
+ocr_notes:
+  - "スクリーンショット内に取得日が見えないため、セッション日付 2026-06-28 を snapshot_date とした。"
+  - "預金・現金・暗号資産の明細合計は 13,620,505円でカテゴリ合計と一致。"
+  - "投資信託の明細合計は 16,476,610円でカテゴリ合計と一致。"
+  - "年金は詳細1行が確認でき、取得価額 3,340,695円、現在価値 4,063,372円、評価損益 722,677円、評価損益率 21.63%。"
+  - "株式（現物）の詳細スクリーンショットを追加確認。明細表示値の合計は 5,193,712円で、カテゴリ合計 5,193,713円との差は -1円。Money Forwardの表示丸め差として扱う。"
+validation_notes:
+  - "カテゴリ合計の合算は総資産 39,370,393円 と一致。"
+  - "株式（現物）の明細表示値合計はカテゴリ合計 5,193,713円 と 1円差。明細側の表示値を優先し、1円差は表示丸めとして許容。"
+  - "6月開始時のChatGPTレビューでは coreスポット買い900,000円、固定core積立100,000円、SOX投信見送り、broad market core優先が提案されていた。6月末スナップショットでは投資信託カテゴリが 14,480,913円 から 16,476,610円 へ増加しており、投信ベースの core 補強が進んだ可能性がある。"
+  - "預金・現金・暗号資産は 13,749,225円 から 13,620,505円 へ小幅減少。大きく現金を削った状態ではなく、7月レビューでは core不足と現金過多の継続有無を確認対象にする。"
+holdings:
+  - symbol: "LIQUIDITY"
+    name: "預金・現金・暗号資産"
+    source_category: "預金・現金・暗号資産"
+    institution: null
+    account_type: null
+    asset_class: "liquidity"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    unit_price: null
+    profit_loss_jpy: null
+    valuation_jpy: 13620505
+    market_value_jpy: 13620505
+    currency: "JPY"
+    notes: "内訳: PayPay -130,485円; モバイルSuica 1,915円; 三菱UFJ銀行 普通 2,928,471円; 楽天銀行 円預金(普通預金) 8,471,062円; 楽天証券 米ドル 606,738円; 野村証券 MRF 1,742,804円。"
+
+  - symbol: "7203"
+    name: "トヨタ自動車"
+    source_category: "株式（現物）"
+    institution: "野村証券"
+    account_type: null
+    asset_class: "jun_core"
+    quantity: 800
+    avg_cost: 532
+    current_price: 2768
+    unit_price: null
+    profit_loss_jpy: 1788800
+    valuation_jpy: 2214400
+    market_value_jpy: 2214400
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 420.30%。"
+
+  - symbol: "9444"
+    name: "トーシンホールディングス"
+    source_category: "株式（現物）"
+    institution: "野村証券"
+    account_type: null
+    asset_class: "satellite"
+    quantity: 1500
+    avg_cost: 628
+    current_price: 249
+    unit_price: null
+    profit_loss_jpy: -568500
+    valuation_jpy: 373500
+    market_value_jpy: 373500
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 -60.35%。"
+
+  - symbol: "2353"
+    name: "日本駐車場開発"
+    source_category: "株式（現物）"
+    institution: "野村証券"
+    account_type: null
+    asset_class: "satellite"
+    quantity: 100
+    avg_cost: 265
+    current_price: 246
+    unit_price: null
+    profit_loss_jpy: -1900
+    valuation_jpy: 24600
+    market_value_jpy: 24600
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 -7.17%。"
+
+  - symbol: "7201"
+    name: "日産自動車"
+    source_category: "株式（現物）"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "satellite"
+    quantity: 100
+    avg_cost: 368
+    current_price: 300
+    unit_price: null
+    profit_loss_jpy: -6755
+    valuation_jpy: 30000
+    market_value_jpy: 30000
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 -18.38%。"
+
+  - symbol: "SMH"
+    name: "ヴァンエック・半導体株ETF"
+    source_category: "株式（現物）"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "satellite_core"
+    quantity: 1
+    avg_cost: 369.63
+    current_price: 611.61
+    unit_price: null
+    profit_loss_jpy: 39138
+    valuation_jpy: 98921
+    market_value_jpy: 98921
+    currency: "USD"
+    notes: "前日比 0円、評価損益率 65.47%。"
+
+  - symbol: "PLTR"
+    name: "パランティア・テクノロジーズ"
+    source_category: "株式（現物）"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "satellite"
+    quantity: 11
+    avg_cost: 151.22
+    current_price: 112.93
+    unit_price: null
+    profit_loss_jpy: -68130
+    valuation_jpy: 200918
+    market_value_jpy: 200918
+    currency: "USD"
+    notes: "前日比 0円、評価損益率 -25.32%。"
+
+  - symbol: "CIBR"
+    name: "ファーストトラスト ナスダック サイバーセキュリティ ETF"
+    source_category: "株式（現物）"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "satellite_core"
+    quantity: 88
+    avg_cost: 76.66
+    current_price: 85.36
+    unit_price: null
+    profit_loss_jpy: 123869
+    valuation_jpy: 1214939
+    market_value_jpy: 1214939
+    currency: "USD"
+    notes: "前日比 0円、評価損益率 11.35%。"
+
+  - symbol: "MSFT"
+    name: "マイクロソフト"
+    source_category: "株式（現物）"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "jun_core"
+    quantity: 9
+    avg_cost: 398.74
+    current_price: 372.97
+    unit_price: null
+    profit_loss_jpy: -37507
+    valuation_jpy: 542917
+    market_value_jpy: 542917
+    currency: "USD"
+    notes: "前日比 0円、評価損益率 -6.46%。"
+
+  - symbol: "URA"
+    name: "グローバルX ウラニウム ETF"
+    source_category: "株式（現物）"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "satellite"
+    quantity: 70
+    avg_cost: 46.25
+    current_price: 43.59
+    unit_price: null
+    profit_loss_jpy: -30107
+    valuation_jpy: 493517
+    market_value_jpy: 493517
+    currency: "USD"
+    notes: "前日比 0円、評価損益率 -5.75%。config/portfolio_policy.yaml では satellite_core に解決される。"
+
+  - symbol: "NISSEI_SOX_1"
+    name: "ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>"
+    source_category: "投資信託"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "satellite_core"
+    quantity: 860960
+    avg_cost: 15802
+    current_price: 54131
+    unit_price: null
+    profit_loss_jpy: 3300005
+    valuation_jpy: 4660463
+    market_value_jpy: 4660463
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 242.57%。"
+
+  - symbol: "NISSEI_SOX_2"
+    name: "ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>"
+    source_category: "投資信託"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "satellite_core"
+    quantity: 415654
+    avg_cost: 14435
+    current_price: 54131
+    unit_price: null
+    profit_loss_jpy: 1649977
+    valuation_jpy: 2249977
+    market_value_jpy: 2249977
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 275.00%。"
+
+  - symbol: "RAKUTEN_PLUS_ALL_COUNTRY_1"
+    name: "楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)"
+    source_category: "投資信託"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "core"
+    quantity: 1059568
+    avg_cost: 14157
+    current_price: 19442
+    unit_price: null
+    profit_loss_jpy: 560012
+    valuation_jpy: 2060012
+    market_value_jpy: 2060012
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 37.33%。"
+
+  - symbol: "RAKUTEN_PLUS_ALL_COUNTRY_2"
+    name: "楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)"
+    source_category: "投資信託"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "core"
+    quantity: 846995
+    avg_cost: 17710
+    current_price: 19442
+    unit_price: null
+    profit_loss_jpy: 146727
+    valuation_jpy: 1646728
+    market_value_jpy: 1646728
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 9.78%。"
+
+  - symbol: "RAKUTEN_PLUS_SP500"
+    name: "楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)"
+    source_category: "投資信託"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "core"
+    quantity: 106530
+    avg_cost: 11715
+    current_price: 19477
+    unit_price: null
+    profit_loss_jpy: 82688
+    valuation_jpy: 207488
+    market_value_jpy: 207488
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 66.26%。"
+
+  - symbol: "EMAXIS_SLIM_SP500_1"
+    name: "eMAXIS Slim 米国株式(S&P500)"
+    source_category: "投資信託"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "core"
+    quantity: 266949
+    avg_cost: 41693
+    current_price: 43772
+    unit_price: null
+    profit_loss_jpy: 55489
+    valuation_jpy: 1168489
+    market_value_jpy: 1168489
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 4.99%。"
+
+  - symbol: "EMAXIS_SLIM_SP500_2"
+    name: "eMAXIS Slim 米国株式(S&P500)"
+    source_category: "投資信託"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "core"
+    quantity: 397525
+    avg_cost: 33080
+    current_price: 43772
+    unit_price: null
+    profit_loss_jpy: 425046
+    valuation_jpy: 1740046
+    market_value_jpy: 1740046
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 32.32%。"
+
+  - symbol: "EMAXIS_SLIM_SP500_3"
+    name: "eMAXIS Slim 米国株式(S&P500)"
+    source_category: "投資信託"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "core"
+    quantity: 228995
+    avg_cost: 39302
+    current_price: 43772
+    unit_price: null
+    profit_loss_jpy: 102357
+    valuation_jpy: 1002357
+    market_value_jpy: 1002357
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 11.37%。"
+
+  - symbol: "EMAXIS_SLIM_ALL_COUNTRY"
+    name: "eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)"
+    source_category: "投資信託"
+    institution: "楽天証券"
+    account_type: null
+    asset_class: "core"
+    quantity: 461462
+    avg_cost: 35908
+    current_price: 37729
+    unit_price: null
+    profit_loss_jpy: 84050
+    valuation_jpy: 1741050
+    market_value_jpy: 1741050
+    currency: "JPY"
+    notes: "前日比 0円、評価損益率 5.07%。"
+
+  - symbol: "PENSION_EMAXIS_SLIM_ALL_COUNTRY"
+    name: "eMAXIS Slim 全世界株式(オール・カントリー)"
+    source_category: "年金"
+    institution: null
+    account_type: "iDeCo"
+    asset_class: "pension"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    unit_price: null
+    profit_loss_jpy: 722677
+    valuation_jpy: 4063372
+    market_value_jpy: 4063372
+    currency: "JPY"
+    notes: "Money Forward画面では年金カテゴリの詳細1行を確認。取得価額 3,340,695円、現在価値 4,063,372円、評価損益率 21.63%。"
+
+  - symbol: "POINTS_MILES"
+    name: "ポイント"
+    source_category: "ポイント"
+    institution: null
+    account_type: null
+    asset_class: "other"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    unit_price: null
+    profit_loss_jpy: null
+    valuation_jpy: 16193
+    market_value_jpy: 16193
+    currency: "JPY"
+    notes: "内訳詳細は今回の画像に含まれていないため、カテゴリ合計のみ記録。"

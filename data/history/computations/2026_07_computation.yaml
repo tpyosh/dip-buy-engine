@@ -1,0 +1,2168 @@
+snapshot:
+  snapshot_date: '2026-06-28'
+  currency_base: JPY
+  total_assets_jpy: 39370393
+  liquidity_target_jpy: null
+  holdings:
+  - symbol: LIQUIDITY
+    name: 預金・現金・暗号資産
+    asset_class: liquidity
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 13620505
+    currency: JPY
+    source_category: 預金・現金・暗号資産
+    institution: null
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: null
+    valuation_jpy: 13620505
+    notes: '内訳: PayPay -130,485円; モバイルSuica 1,915円; 三菱UFJ銀行 普通 2,928,471円; 楽天銀行 円預金(普通預金)
+      8,471,062円; 楽天証券 米ドル 606,738円; 野村証券 MRF 1,742,804円。'
+  - symbol: '7203'
+    name: トヨタ自動車
+    asset_class: jun_core
+    quantity: 800
+    avg_cost: 532
+    current_price: 2768
+    market_value_jpy: 2214400
+    currency: JPY
+    source_category: 株式（現物）
+    institution: 野村証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 1788800
+    valuation_jpy: 2214400
+    notes: 前日比 0円、評価損益率 420.30%。
+  - symbol: '9444'
+    name: トーシンホールディングス
+    asset_class: satellite
+    quantity: 1500
+    avg_cost: 628
+    current_price: 249
+    market_value_jpy: 373500
+    currency: JPY
+    source_category: 株式（現物）
+    institution: 野村証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: -568500
+    valuation_jpy: 373500
+    notes: 前日比 0円、評価損益率 -60.35%。
+  - symbol: '2353'
+    name: 日本駐車場開発
+    asset_class: satellite
+    quantity: 100
+    avg_cost: 265
+    current_price: 246
+    market_value_jpy: 24600
+    currency: JPY
+    source_category: 株式（現物）
+    institution: 野村証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: -1900
+    valuation_jpy: 24600
+    notes: 前日比 0円、評価損益率 -7.17%。
+  - symbol: '7201'
+    name: 日産自動車
+    asset_class: satellite
+    quantity: 100
+    avg_cost: 368
+    current_price: 300
+    market_value_jpy: 30000
+    currency: JPY
+    source_category: 株式（現物）
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: -6755
+    valuation_jpy: 30000
+    notes: 前日比 0円、評価損益率 -18.38%。
+  - symbol: SMH
+    name: ヴァンエック・半導体株ETF
+    asset_class: satellite_core
+    quantity: 1
+    avg_cost: 369.63
+    current_price: 611.61
+    market_value_jpy: 98921
+    currency: USD
+    source_category: 株式（現物）
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 39138
+    valuation_jpy: 98921
+    notes: 前日比 0円、評価損益率 65.47%。
+  - symbol: PLTR
+    name: パランティア・テクノロジーズ
+    asset_class: satellite
+    quantity: 11
+    avg_cost: 151.22
+    current_price: 112.93
+    market_value_jpy: 200918
+    currency: USD
+    source_category: 株式（現物）
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: -68130
+    valuation_jpy: 200918
+    notes: 前日比 0円、評価損益率 -25.32%。
+  - symbol: CIBR
+    name: ファーストトラスト ナスダック サイバーセキュリティ ETF
+    asset_class: satellite_core
+    quantity: 88
+    avg_cost: 76.66
+    current_price: 85.36
+    market_value_jpy: 1214939
+    currency: USD
+    source_category: 株式（現物）
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 123869
+    valuation_jpy: 1214939
+    notes: 前日比 0円、評価損益率 11.35%。
+  - symbol: MSFT
+    name: マイクロソフト
+    asset_class: jun_core
+    quantity: 9
+    avg_cost: 398.74
+    current_price: 372.97
+    market_value_jpy: 542917
+    currency: USD
+    source_category: 株式（現物）
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: -37507
+    valuation_jpy: 542917
+    notes: 前日比 0円、評価損益率 -6.46%。
+  - symbol: URA
+    name: グローバルX ウラニウム ETF
+    asset_class: satellite
+    quantity: 70
+    avg_cost: 46.25
+    current_price: 43.59
+    market_value_jpy: 493517
+    currency: USD
+    source_category: 株式（現物）
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: -30107
+    valuation_jpy: 493517
+    notes: 前日比 0円、評価損益率 -5.75%。config/portfolio_policy.yaml では satellite_core に解決される。
+  - symbol: NISSEI_SOX_1
+    name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
+    asset_class: satellite_core
+    quantity: 860960
+    avg_cost: 15802
+    current_price: 54131
+    market_value_jpy: 4660463
+    currency: JPY
+    source_category: 投資信託
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 3300005
+    valuation_jpy: 4660463
+    notes: 前日比 0円、評価損益率 242.57%。
+  - symbol: NISSEI_SOX_2
+    name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
+    asset_class: satellite_core
+    quantity: 415654
+    avg_cost: 14435
+    current_price: 54131
+    market_value_jpy: 2249977
+    currency: JPY
+    source_category: 投資信託
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 1649977
+    valuation_jpy: 2249977
+    notes: 前日比 0円、評価損益率 275.00%。
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+    asset_class: core
+    quantity: 1059568
+    avg_cost: 14157
+    current_price: 19442
+    market_value_jpy: 2060012
+    currency: JPY
+    source_category: 投資信託
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 560012
+    valuation_jpy: 2060012
+    notes: 前日比 0円、評価損益率 37.33%。
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+    asset_class: core
+    quantity: 846995
+    avg_cost: 17710
+    current_price: 19442
+    market_value_jpy: 1646728
+    currency: JPY
+    source_category: 投資信託
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 146727
+    valuation_jpy: 1646728
+    notes: 前日比 0円、評価損益率 9.78%。
+  - symbol: RAKUTEN_PLUS_SP500
+    name: 楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)
+    asset_class: core
+    quantity: 106530
+    avg_cost: 11715
+    current_price: 19477
+    market_value_jpy: 207488
+    currency: JPY
+    source_category: 投資信託
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 82688
+    valuation_jpy: 207488
+    notes: 前日比 0円、評価損益率 66.26%。
+  - symbol: EMAXIS_SLIM_SP500_1
+    name: eMAXIS Slim 米国株式(S&P500)
+    asset_class: core
+    quantity: 266949
+    avg_cost: 41693
+    current_price: 43772
+    market_value_jpy: 1168489
+    currency: JPY
+    source_category: 投資信託
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 55489
+    valuation_jpy: 1168489
+    notes: 前日比 0円、評価損益率 4.99%。
+  - symbol: EMAXIS_SLIM_SP500_2
+    name: eMAXIS Slim 米国株式(S&P500)
+    asset_class: core
+    quantity: 397525
+    avg_cost: 33080
+    current_price: 43772
+    market_value_jpy: 1740046
+    currency: JPY
+    source_category: 投資信託
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 425046
+    valuation_jpy: 1740046
+    notes: 前日比 0円、評価損益率 32.32%。
+  - symbol: EMAXIS_SLIM_SP500_3
+    name: eMAXIS Slim 米国株式(S&P500)
+    asset_class: core
+    quantity: 228995
+    avg_cost: 39302
+    current_price: 43772
+    market_value_jpy: 1002357
+    currency: JPY
+    source_category: 投資信託
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 102357
+    valuation_jpy: 1002357
+    notes: 前日比 0円、評価損益率 11.37%。
+  - symbol: EMAXIS_SLIM_ALL_COUNTRY
+    name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    asset_class: core
+    quantity: 461462
+    avg_cost: 35908
+    current_price: 37729
+    market_value_jpy: 1741050
+    currency: JPY
+    source_category: 投資信託
+    institution: 楽天証券
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: 84050
+    valuation_jpy: 1741050
+    notes: 前日比 0円、評価損益率 5.07%。
+  - symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
+    name: eMAXIS Slim 全世界株式(オール・カントリー)
+    asset_class: pension
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 4063372
+    currency: JPY
+    source_category: 年金
+    institution: null
+    account_type: iDeCo
+    unit_price: null
+    profit_loss_jpy: 722677
+    valuation_jpy: 4063372
+    notes: Money Forward画面では年金カテゴリの詳細1行を確認。取得価額 3,340,695円、現在価値 4,063,372円、評価損益率 21.63%。
+  - symbol: POINTS_MILES
+    name: ポイント
+    asset_class: other
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 16193
+    currency: JPY
+    source_category: ポイント
+    institution: null
+    account_type: null
+    unit_price: null
+    profit_loss_jpy: null
+    valuation_jpy: 16193
+    notes: 内訳詳細は今回の画像に含まれていないため、カテゴリ合計のみ記録。
+  warnings:
+  - Holding LIQUIDITY is missing quantity; stored as null.
+  - Holding LIQUIDITY is missing avg_cost; stored as null.
+  - Holding LIQUIDITY is missing current_price; stored as null.
+  - Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing quantity; stored as null.
+  - Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing avg_cost; stored as null.
+  - Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing current_price; stored as null.
+  - Holding POINTS_MILES is missing quantity; stored as null.
+  - Holding POINTS_MILES is missing avg_cost; stored as null.
+  - Holding POINTS_MILES is missing current_price; stored as null.
+  source_evidence:
+    primary_source: moneyforward_screenshots_in_user_message
+    auxiliary_source: null
+    screenshot_count: 6
+    snapshot_date_basis: No visible date in screenshots; used session current date
+      2026-06-28.
+  category_totals_jpy:
+    預金・現金・暗号資産: 13620505
+    株式（現物）: 5193713
+    投資信託: 16476610
+    年金: 4063372
+    ポイント: 16193
+  ocr_notes:
+  - スクリーンショット内に取得日が見えないため、セッション日付 2026-06-28 を snapshot_date とした。
+  - 預金・現金・暗号資産の明細合計は 13,620,505円でカテゴリ合計と一致。
+  - 投資信託の明細合計は 16,476,610円でカテゴリ合計と一致。
+  - 年金は詳細1行が確認でき、取得価額 3,340,695円、現在価値 4,063,372円、評価損益 722,677円、評価損益率 21.63%。
+  - 株式（現物）の詳細スクリーンショットを追加確認。明細表示値の合計は 5,193,712円で、カテゴリ合計 5,193,713円との差は -1円。Money
+    Forwardの表示丸め差として扱う。
+  validation_notes:
+  - カテゴリ合計の合算は総資産 39,370,393円 と一致。
+  - 株式（現物）の明細表示値合計はカテゴリ合計 5,193,713円 と 1円差。明細側の表示値を優先し、1円差は表示丸めとして許容。
+  - 6月開始時のChatGPTレビューでは coreスポット買い900,000円、固定core積立100,000円、SOX投信見送り、broad market
+    core優先が提案されていた。6月末スナップショットでは投資信託カテゴリが 14,480,913円 から 16,476,610円 へ増加しており、投信ベースの
+    core 補強が進んだ可能性がある。
+  - 預金・現金・暗号資産は 13,749,225円 から 13,620,505円 へ小幅減少。大きく現金を削った状態ではなく、7月レビューでは core不足と現金過多の継続有無を確認対象にする。
+generated_at: '2026-06-28T08:16:12Z'
+bucket_allocations:
+- bucket: core
+  market_value_jpy: 9566170
+  actual_pct: 0.243
+  target_pct: 0.45
+  delta_pct: -0.207
+  preferred_min_pct: 0.35
+  preferred_max_pct: 0.55
+- bucket: jun_core
+  market_value_jpy: 2757317
+  actual_pct: 0.07
+  target_pct: 0.2
+  delta_pct: -0.13
+  preferred_min_pct: 0.1
+  preferred_max_pct: 0.3
+- bucket: liquidity
+  market_value_jpy: 13620505
+  actual_pct: 0.346
+  target_pct: 0.1
+  delta_pct: 0.246
+  preferred_min_pct: 0.05
+  preferred_max_pct: 0.15
+- bucket: other
+  market_value_jpy: 16193
+  actual_pct: 0.0004
+  target_pct: null
+  delta_pct: null
+  preferred_min_pct: null
+  preferred_max_pct: null
+- bucket: pension
+  market_value_jpy: 4063372
+  actual_pct: 0.1032
+  target_pct: null
+  delta_pct: null
+  preferred_min_pct: null
+  preferred_max_pct: null
+- bucket: satellite
+  market_value_jpy: 629018
+  actual_pct: 0.016
+  target_pct: 0.1
+  delta_pct: -0.084
+  preferred_min_pct: 0
+  preferred_max_pct: 0.15
+- bucket: satellite_core
+  market_value_jpy: 8717817
+  actual_pct: 0.2214
+  target_pct: 0.15
+  delta_pct: 0.0714
+  preferred_min_pct: 0.1
+  preferred_max_pct: 0.25
+market_references:
+- symbol: CIBR
+  yfinance_symbol: CIBR
+  current_price: 85.36
+  mean_close_20d: 84.9617
+  recent_high_21d: 94.32
+  recent_high_63d: 94.32
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 84.9617
+  prior_close_21d: 82.04
+  prior_close_63d: 63.14
+- symbol: URA
+  yfinance_symbol: URA
+  current_price: 43.59
+  mean_close_20d: 47.8267
+  recent_high_21d: 53.42
+  recent_high_63d: 58.26
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 47.8267
+  prior_close_21d: 50.16
+  prior_close_63d: 46.7
+- symbol: PLTR
+  yfinance_symbol: PLTR
+  current_price: 112.93
+  mean_close_20d: 133.5195
+  recent_high_21d: 160.65
+  recent_high_63d: 160.65
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 133.5195
+  prior_close_21d: 132.51
+  prior_close_63d: 147.56
+- symbol: MSFT
+  yfinance_symbol: MSFT
+  current_price: 372.97
+  mean_close_20d: 406.296
+  recent_high_21d: 460.52
+  recent_high_63d: 460.52
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 406.296
+  prior_close_21d: 412.67
+  prior_close_63d: 365.97
+- symbol: SMH
+  yfinance_symbol: SMH
+  current_price: 611.61
+  mean_close_20d: 603.3337
+  recent_high_21d: 668.91
+  recent_high_63d: 668.91
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 603.3337
+  prior_close_21d: 595.5
+  prior_close_63d: 380.84
+- symbol: USDJPY
+  yfinance_symbol: USDJPY=X
+  current_price: 161.685
+  mean_close_20d: 160.152
+  recent_high_21d: 161.805
+  recent_high_63d: 161.805
+  currency: JPY
+  as_of: '2026-06-28'
+  mean_close_30d: 160.152
+  prior_close_21d: 159.27
+  prior_close_63d: 158.579
+- symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
+  yfinance_symbol: VT
+  current_price: 153.95
+  mean_close_20d: 155.9423
+  recent_high_21d: 159.35
+  recent_high_63d: 159.35
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 155.9423
+  prior_close_21d: 157.16
+  prior_close_63d: 136.44
+- symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
+  yfinance_symbol: VT
+  current_price: 153.95
+  mean_close_20d: 155.9423
+  recent_high_21d: 159.35
+  recent_high_63d: 159.35
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 155.9423
+  prior_close_21d: 157.16
+  prior_close_63d: 136.44
+- symbol: RAKUTEN_PLUS_SP500
+  yfinance_symbol: VOO
+  current_price: 670.26
+  mean_close_20d: 684.1597
+  recent_high_21d: 698.26
+  recent_high_63d: 698.26
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 684.1597
+  prior_close_21d: 689.96
+  prior_close_63d: 594.92
+- symbol: EMAXIS_SLIM_SP500_1
+  yfinance_symbol: VOO
+  current_price: 670.26
+  mean_close_20d: 684.1597
+  recent_high_21d: 698.26
+  recent_high_63d: 698.26
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 684.1597
+  prior_close_21d: 689.96
+  prior_close_63d: 594.92
+- symbol: EMAXIS_SLIM_SP500_2
+  yfinance_symbol: VOO
+  current_price: 670.26
+  mean_close_20d: 684.1597
+  recent_high_21d: 698.26
+  recent_high_63d: 698.26
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 684.1597
+  prior_close_21d: 689.96
+  prior_close_63d: 594.92
+- symbol: EMAXIS_SLIM_SP500_3
+  yfinance_symbol: VOO
+  current_price: 670.26
+  mean_close_20d: 684.1597
+  recent_high_21d: 698.26
+  recent_high_63d: 698.26
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 684.1597
+  prior_close_21d: 689.96
+  prior_close_63d: 594.92
+- symbol: EMAXIS_SLIM_ALL_COUNTRY
+  yfinance_symbol: ACWI
+  current_price: 154.28
+  mean_close_20d: 156.225
+  recent_high_21d: 159.97
+  recent_high_63d: 159.97
+  currency: USD
+  as_of: '2026-06-26'
+  mean_close_30d: 156.225
+  prior_close_21d: 157.64
+  prior_close_63d: 136.38
+candidate_orders:
+- symbol: CIBR
+  bucket: satellite_core
+  base_price: 84.9617
+  avg20_base_price: 84.9617
+  current_price: 85.36
+  limit_price: 80.71
+  shares: 1
+  estimated_cost: 80.71
+  estimated_cost_jpy: 13050
+  currency: USD
+  drawdown_pct: -5
+  drawdown_rule: -5% x 1
+  reference_method: mean_close_30d
+  suppressed: true
+  suppressed_reason_code: bucket_over_target_shallow_suppressed
+  suppressed_reason_text: Shallow candidate suppressed because related bucket is over
+    target.
+  note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_deep_only_due_to_bucket_over_target,mode_context:normal,mode_priority_weight:0,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -5
+  suppression_reasons:
+  - Shallow candidate suppressed because related bucket is over target.
+  explanation:
+    rule_based_reason:
+    - auto_tranche_adjustment_bucket_over_target:medium
+    - bucket_over_target_deep_threshold_pct:-15
+    - default_deep_only_due_to_bucket_over_target
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: satellite_core
+      actual_pct: 0.2214
+      target_pct: 0.15
+      is_over_target: true
+    mode_context:
+      active_mode: normal
+      priority_weight: 0
+    suppression:
+      suppressed: true
+      reason_code: bucket_over_target_shallow_suppressed
+      reason_text: Shallow candidate suppressed because related bucket is over target.
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: CIBR
+  bucket: satellite_core
+  base_price: 84.9617
+  avg20_base_price: 84.9617
+  current_price: 85.36
+  limit_price: 78.16
+  shares: 1
+  estimated_cost: 78.16
+  estimated_cost_jpy: 12637
+  currency: USD
+  drawdown_pct: -8
+  drawdown_rule: -8% x 1
+  reference_method: mean_close_30d
+  suppressed: true
+  suppressed_reason_code: bucket_over_target_shallow_suppressed
+  suppressed_reason_text: Shallow candidate suppressed because related bucket is over
+    target.
+  note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_deep_only_due_to_bucket_over_target,mode_context:normal,mode_priority_weight:0,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -8.01
+  suppression_reasons:
+  - Shallow candidate suppressed because related bucket is over target.
+  explanation:
+    rule_based_reason:
+    - auto_tranche_adjustment_bucket_over_target:medium
+    - bucket_over_target_deep_threshold_pct:-15
+    - default_deep_only_due_to_bucket_over_target
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: satellite_core
+      actual_pct: 0.2214
+      target_pct: 0.15
+      is_over_target: true
+    mode_context:
+      active_mode: normal
+      priority_weight: 0
+    suppression:
+      suppressed: true
+      reason_code: bucket_over_target_shallow_suppressed
+      reason_text: Shallow candidate suppressed because related bucket is over target.
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: CIBR
+  bucket: satellite_core
+  base_price: 84.9617
+  avg20_base_price: 84.9617
+  current_price: 85.36
+  limit_price: 74.77
+  shares: 1
+  estimated_cost: 74.77
+  estimated_cost_jpy: 12089
+  currency: USD
+  drawdown_pct: -12
+  drawdown_rule: -12% x 1
+  reference_method: mean_close_30d
+  suppressed: true
+  suppressed_reason_code: bucket_over_target_shallow_suppressed
+  suppressed_reason_text: Shallow candidate suppressed because related bucket is over
+    target.
+  note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_deep_only_due_to_bucket_over_target,mode_context:normal,mode_priority_weight:0,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -12
+  suppression_reasons:
+  - Shallow candidate suppressed because related bucket is over target.
+  explanation:
+    rule_based_reason:
+    - auto_tranche_adjustment_bucket_over_target:medium
+    - bucket_over_target_deep_threshold_pct:-15
+    - default_deep_only_due_to_bucket_over_target
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: satellite_core
+      actual_pct: 0.2214
+      target_pct: 0.15
+      is_over_target: true
+    mode_context:
+      active_mode: normal
+      priority_weight: 0
+    suppression:
+      suppressed: true
+      reason_code: bucket_over_target_shallow_suppressed
+      reason_text: Shallow candidate suppressed because related bucket is over target.
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: URA
+  bucket: satellite_core
+  base_price: 47.8267
+  avg20_base_price: 47.8267
+  current_price: 43.59
+  limit_price: 44.96
+  shares: 2
+  estimated_cost: 89.92
+  estimated_cost_jpy: 14539
+  currency: USD
+  drawdown_pct: -6
+  drawdown_rule: -6% x 2
+  reference_method: mean_close_30d
+  suppressed: true
+  suppressed_reason_code: limit_above_current
+  suppressed_reason_text: Calculated limit price is not below the current price.
+  note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_deep_only_due_to_bucket_over_target,mode_context:normal,mode_priority_weight:0,limit_above_current
+  avg20_gap_pct: -5.99
+  suppression_reasons:
+  - Shallow candidate suppressed because related bucket is over target.
+  - Calculated limit price is not below the current price.
+  explanation:
+    rule_based_reason:
+    - auto_tranche_adjustment_bucket_over_target:medium
+    - bucket_over_target_deep_threshold_pct:-15
+    - default_deep_only_due_to_bucket_over_target
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: satellite_core
+      actual_pct: 0.2214
+      target_pct: 0.15
+      is_over_target: true
+    mode_context:
+      active_mode: normal
+      priority_weight: 0
+    suppression:
+      suppressed: true
+      reason_code: bucket_over_target_shallow_suppressed
+      reason_text: Shallow candidate suppressed because related bucket is over target.
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: URA
+  bucket: satellite_core
+  base_price: 47.8267
+  avg20_base_price: 47.8267
+  current_price: 43.59
+  limit_price: 43.04
+  shares: 2
+  estimated_cost: 86.08
+  estimated_cost_jpy: 13918
+  currency: USD
+  drawdown_pct: -10
+  drawdown_rule: -10% x 2
+  reference_method: mean_close_30d
+  suppressed: true
+  suppressed_reason_code: bucket_over_target_shallow_suppressed
+  suppressed_reason_text: Shallow candidate suppressed because related bucket is over
+    target.
+  note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_deep_only_due_to_bucket_over_target,mode_context:normal,mode_priority_weight:0,bucket_over_target_shallow_suppressed
+  avg20_gap_pct: -10.01
+  suppression_reasons:
+  - Shallow candidate suppressed because related bucket is over target.
+  explanation:
+    rule_based_reason:
+    - auto_tranche_adjustment_bucket_over_target:medium
+    - bucket_over_target_deep_threshold_pct:-15
+    - default_deep_only_due_to_bucket_over_target
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: satellite_core
+      actual_pct: 0.2214
+      target_pct: 0.15
+      is_over_target: true
+    mode_context:
+      active_mode: normal
+      priority_weight: 0
+    suppression:
+      suppressed: true
+      reason_code: bucket_over_target_shallow_suppressed
+      reason_text: Shallow candidate suppressed because related bucket is over target.
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: URA
+  bucket: satellite_core
+  base_price: 47.8267
+  avg20_base_price: 47.8267
+  current_price: 43.59
+  limit_price: 40.65
+  shares: 2
+  estimated_cost: 81.3
+  estimated_cost_jpy: 13145
+  currency: USD
+  drawdown_pct: -15
+  drawdown_rule: -15% x 2
+  reference_method: mean_close_30d
+  suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: drawdown_profile:deep,deep_drawdown_candidate,bucket_over_target,auto_tranche_adjustment_bucket_over_target:medium,bucket_over_target_deep_threshold_pct:-15,default_allow_deep_drawdown_even_if_bucket_over_target,mode_context:normal,mode_priority_weight:0
+  avg20_gap_pct: -15.01
+  suppression_reasons: []
+  explanation:
+    rule_based_reason:
+    - auto_tranche_adjustment_bucket_over_target:medium
+    - bucket_over_target_deep_threshold_pct:-15
+    - default_allow_deep_drawdown_even_if_bucket_over_target
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: satellite_core
+      actual_pct: 0.2214
+      target_pct: 0.15
+      is_over_target: true
+    mode_context:
+      active_mode: normal
+      priority_weight: 0
+    suppression:
+      suppressed: false
+      reason_code: null
+      reason_text: null
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: PLTR
+  bucket: satellite
+  base_price: 133.5195
+  avg20_base_price: 133.5195
+  current_price: 112.93
+  limit_price: 120.17
+  shares: 1
+  estimated_cost: 120.17
+  estimated_cost_jpy: 19430
+  currency: USD
+  drawdown_pct: -10
+  drawdown_rule: -10% x 1
+  reference_method: mean_close_30d
+  suppressed: true
+  suppressed_reason_code: limit_above_current
+  suppressed_reason_text: Calculated limit price is not below the current price.
+  note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,high_volatility_name,high_volatility_shallow_threshold_pct:-12,rule_based_high_volatility_shallow_suppression,mode_context:normal,mode_priority_weight:-1,limit_above_current
+  avg20_gap_pct: -10
+  suppression_reasons:
+  - High-volatility names default to deeper pullbacks before adding.
+  - Calculated limit price is not below the current price.
+  explanation:
+    rule_based_reason:
+    - high_volatility_shallow_threshold_pct:-12
+    - rule_based_high_volatility_shallow_suppression
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: satellite
+      actual_pct: 0.016
+      target_pct: 0.1
+      is_over_target: false
+    mode_context:
+      active_mode: normal
+      priority_weight: -1
+    suppression:
+      suppressed: true
+      reason_code: high_volatility_shallow_suppressed
+      reason_text: High-volatility names default to deeper pullbacks before adding.
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: PLTR
+  bucket: satellite
+  base_price: 133.5195
+  avg20_base_price: 133.5195
+  current_price: 112.93
+  limit_price: 113.49
+  shares: 2
+  estimated_cost: 226.98
+  estimated_cost_jpy: 36699
+  currency: USD
+  drawdown_pct: -15
+  drawdown_rule: -15% x 2
+  reference_method: mean_close_30d
+  suppressed: true
+  suppressed_reason_code: limit_above_current
+  suppressed_reason_text: Calculated limit price is not below the current price.
+  note_for_chatgpt: drawdown_profile:deep,deep_drawdown_candidate,high_volatility_name,high_volatility_shallow_threshold_pct:-12,mode_context:normal,mode_priority_weight:-1,limit_above_current
+  avg20_gap_pct: -15
+  suppression_reasons:
+  - Calculated limit price is not below the current price.
+  explanation:
+    rule_based_reason:
+    - high_volatility_shallow_threshold_pct:-12
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: satellite
+      actual_pct: 0.016
+      target_pct: 0.1
+      is_over_target: false
+    mode_context:
+      active_mode: normal
+      priority_weight: -1
+    suppression:
+      suppressed: false
+      reason_code: null
+      reason_text: null
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: PLTR
+  bucket: satellite
+  base_price: 133.5195
+  avg20_base_price: 133.5195
+  current_price: 112.93
+  limit_price: 104.15
+  shares: 2
+  estimated_cost: 208.3
+  estimated_cost_jpy: 33679
+  currency: USD
+  drawdown_pct: -22
+  drawdown_rule: -22% x 2
+  reference_method: mean_close_30d
+  suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: drawdown_profile:deep,deep_drawdown_candidate,high_volatility_name,high_volatility_shallow_threshold_pct:-12,mode_context:normal,mode_priority_weight:-1
+  avg20_gap_pct: -22
+  suppression_reasons: []
+  explanation:
+    rule_based_reason:
+    - high_volatility_shallow_threshold_pct:-12
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: satellite
+      actual_pct: 0.016
+      target_pct: 0.1
+      is_over_target: false
+    mode_context:
+      active_mode: normal
+      priority_weight: -1
+    suppression:
+      suppressed: false
+      reason_code: null
+      reason_text: null
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: MSFT
+  bucket: jun_core
+  base_price: 406.296
+  avg20_base_price: 406.296
+  current_price: 372.97
+  limit_price: 381.92
+  shares: 1
+  estimated_cost: 381.92
+  estimated_cost_jpy: 61751
+  currency: USD
+  drawdown_pct: -6
+  drawdown_rule: -6% x 1
+  reference_method: mean_close_30d
+  suppressed: true
+  suppressed_reason_code: limit_above_current
+  suppressed_reason_text: Calculated limit price is not below the current price.
+  note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,mode_context:normal,mode_priority_weight:1,limit_above_current
+  avg20_gap_pct: -6
+  suppression_reasons:
+  - Calculated limit price is not below the current price.
+  explanation:
+    rule_based_reason: []
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: jun_core
+      actual_pct: 0.07
+      target_pct: 0.2
+      is_over_target: false
+    mode_context:
+      active_mode: normal
+      priority_weight: 1
+    suppression:
+      suppressed: false
+      reason_code: null
+      reason_text: null
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: MSFT
+  bucket: jun_core
+  base_price: 406.296
+  avg20_base_price: 406.296
+  current_price: 372.97
+  limit_price: 365.67
+  shares: 2
+  estimated_cost: 731.34
+  estimated_cost_jpy: 118247
+  currency: USD
+  drawdown_pct: -10
+  drawdown_rule: -10% x 2
+  reference_method: mean_close_30d
+  suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,mode_context:normal,mode_priority_weight:1
+  avg20_gap_pct: -10
+  suppression_reasons: []
+  explanation:
+    rule_based_reason: []
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: jun_core
+      actual_pct: 0.07
+      target_pct: 0.2
+      is_over_target: false
+    mode_context:
+      active_mode: normal
+      priority_weight: 1
+    suppression:
+      suppressed: false
+      reason_code: null
+      reason_text: null
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+- symbol: MSFT
+  bucket: jun_core
+  base_price: 406.296
+  avg20_base_price: 406.296
+  current_price: 372.97
+  limit_price: 333.16
+  shares: 2
+  estimated_cost: 666.32
+  estimated_cost_jpy: 107734
+  currency: USD
+  drawdown_pct: -18
+  drawdown_rule: -18% x 2
+  reference_method: mean_close_30d
+  suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: drawdown_profile:deep,deep_drawdown_candidate,mode_context:normal,mode_priority_weight:1
+  avg20_gap_pct: -18
+  suppression_reasons: []
+  explanation:
+    rule_based_reason: []
+    discretionary_reason: null
+    related_bucket_status:
+      bucket: jun_core
+      actual_pct: 0.07
+      target_pct: 0.2
+      is_over_target: false
+    mode_context:
+      active_mode: normal
+      priority_weight: 1
+    suppression:
+      suppressed: false
+      reason_code: null
+      reason_text: null
+  snapshot_price_source_date: '2026-06-28'
+  market_candidate_price_source_date: '2026-06-26'
+warnings:
+- code: core_below_range
+  message: 'Bucket core is below preferred range: 24.30% < 35.00%'
+  severity: info
+  related_symbols: []
+- code: jun_core_below_range
+  message: 'Bucket jun_core is below preferred range: 7.00% < 10.00%'
+  severity: info
+  related_symbols: []
+- code: liquidity_above_range
+  message: 'Bucket liquidity is above preferred range: 34.60% > 15.00%'
+  severity: warning
+  related_symbols: []
+- code: cash_above_preferred
+  message: 'Liquidity is above preferred total-assets band: 34.60% > 10.00%'
+  severity: info
+  related_symbols:
+  - liquidity
+- code: bucket_over_target_shallow_suppressed
+  message: 'CIBR: Shallow candidate suppressed because related bucket is over target.'
+  severity: warning
+  related_symbols:
+  - CIBR
+- code: bucket_over_target_shallow_suppressed
+  message: 'CIBR: Shallow candidate suppressed because related bucket is over target.'
+  severity: warning
+  related_symbols:
+  - CIBR
+- code: bucket_over_target_shallow_suppressed
+  message: 'CIBR: Shallow candidate suppressed because related bucket is over target.'
+  severity: warning
+  related_symbols:
+  - CIBR
+- code: limit_above_current
+  message: 'URA: Calculated limit price is not below the current price.'
+  severity: warning
+  related_symbols:
+  - URA
+- code: bucket_over_target_shallow_suppressed
+  message: 'URA: Shallow candidate suppressed because related bucket is over target.'
+  severity: warning
+  related_symbols:
+  - URA
+- code: limit_above_current
+  message: 'PLTR: Calculated limit price is not below the current price.'
+  severity: warning
+  related_symbols:
+  - PLTR
+- code: limit_above_current
+  message: 'PLTR: Calculated limit price is not below the current price.'
+  severity: warning
+  related_symbols:
+  - PLTR
+- code: limit_above_current
+  message: 'MSFT: Calculated limit price is not below the current price.'
+  severity: warning
+  related_symbols:
+  - MSFT
+- code: asset_class_resolved_by_rules
+  message: 'URA: raw asset_class=satellite was resolved to satellite_core by symbol_to_bucket.'
+  severity: info
+  related_symbols:
+  - URA
+- code: large_month_over_month_change
+  message: 'EMAXIS_SLIM_SP500_1: market_value_jpy changed from 735693 to 1168489 (gap=432796,
+    pct=0.5882834280059753185092151210). Verify OCR digits, purchases/sales, and account
+    grouping.'
+  severity: warning
+  related_symbols:
+  - EMAXIS_SLIM_SP500_1
+- code: large_month_over_month_change
+  message: 'EMAXIS_SLIM_ALL_COUNTRY: market_value_jpy changed from 964412 to 1741050
+    (gap=776638, pct=0.8052969063014562241033914966). Verify OCR digits, purchases/sales,
+    and account grouping.'
+  severity: warning
+  related_symbols:
+  - EMAXIS_SLIM_ALL_COUNTRY
+- code: missing_quantity
+  message: Holding LIQUIDITY is missing quantity; stored as null.
+  severity: info
+  related_symbols: []
+- code: missing_avg_cost
+  message: Holding LIQUIDITY is missing avg_cost; stored as null.
+  severity: info
+  related_symbols: []
+- code: missing_current_price
+  message: Holding LIQUIDITY is missing current_price; stored as null.
+  severity: info
+  related_symbols: []
+- code: missing_quantity
+  message: Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing quantity; stored as
+    null.
+  severity: info
+  related_symbols: []
+- code: missing_avg_cost
+  message: Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing avg_cost; stored as
+    null.
+  severity: info
+  related_symbols: []
+- code: missing_current_price
+  message: Holding PENSION_EMAXIS_SLIM_ALL_COUNTRY is missing current_price; stored
+    as null.
+  severity: info
+  related_symbols: []
+- code: missing_quantity
+  message: Holding POINTS_MILES is missing quantity; stored as null.
+  severity: info
+  related_symbols: []
+- code: missing_avg_cost
+  message: Holding POINTS_MILES is missing avg_cost; stored as null.
+  severity: info
+  related_symbols: []
+- code: missing_current_price
+  message: Holding POINTS_MILES is missing current_price; stored as null.
+  severity: info
+  related_symbols: []
+semi_exposure_pct: 0.178
+liquidity_jpy: 13620505
+sox_buy_signal:
+  proxy_symbol: SMH
+  current_price: 611.61
+  recent_high_21d: 668.91
+  recent_high_63d: 668.91
+  drawdown_pct: -8.57
+  drawdown_pct_from_21d_high: -8.57
+  drawdown_pct_from_63d_high: -8.57
+  buy_zone: -10% to -5%
+  buy_zone_rule_text: drawdown from 63d high between -10% and -5%
+  within_buy_zone: true
+  within_buy_zone_boolean: true
+  near_boundary_boolean: false
+  monthly_buy_budget_jpy:
+    min: 100000
+    max: 200000
+  related_bucket_actual_pct: 0.2214
+  related_bucket_target_pct: 0.15
+  semiconductor_exposure_total_pct: 0.178
+  direct_semiconductor_exposure_pct: 0.178
+  semiconductor_direct_exposure_pct: 0.178
+  indirect_ai_infra_exposure_pct: 0.0138
+  explanation:
+    buy_zone_assessment:
+      within_buy_zone: true
+      near_boundary: false
+      drawdown_pct_from_63d_high: -8.57
+      rule: -10% <= drawdown <= -5%
+    bucket_context:
+      related_bucket: satellite_core
+      related_bucket_actual_pct: 0.2214
+      related_bucket_target_pct: 0.15
+    exposure_context:
+      semiconductor_direct_exposure_pct: 0.178
+      indirect_ai_infra_exposure_pct: 0.0138
+  priority_lowered_boolean: true
+  priority_lowered_reason: related_bucket_over_target
+portfolio_summary:
+  core_actual_pct: 0.243
+  core_target_pct: 0.45
+  core_delta_pct: -0.207
+  liquidity_actual_pct: 0.346
+  liquidity_target_pct: 0.1
+  cash_excess_pct: 0.246
+  core_bucket_total_jpy: 9566170
+  total_assets_jpy: 39370393
+core_buy_materials:
+  core_actual_pct: 0.243
+  core_target_pct: 0.45
+  core_delta_pct: -0.207
+  liquidity_actual_pct: 0.346
+  liquidity_target_pct: 0.1
+  cash_excess_pct: 0.246
+  core_bucket_total_jpy: 9566170
+  monthly_core_budget_policy:
+    base_monthly_buy_amount_jpy: 100000
+    monthly_core_buy_budget_min_jpy: 300000
+    monthly_core_buy_budget_max_jpy: 1500000
+    budget_tiers:
+      standard:
+        budget_jpy: 300000
+        min_jpy: 300000
+        max_jpy: 600000
+        description: 'Normal mode: core不足はあるが現金過多が軽度、または相場が高値圏'
+      aggressive:
+        budget_jpy: 900000
+        min_jpy: 700000
+        max_jpy: 1000000
+        description: 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'
+      rebalance:
+        budget_jpy: 1280000
+        min_jpy: 1000000
+        max_jpy: 1500000
+        description: 'Rebalance mode: 現在の固定積立等を踏まえて特定口座スポットで補う'
+    override_conditions:
+      core_shortfall_pct_gte: 0.15
+      cash_excess_pct_gte: 0.15
+      budget_tier: aggressive
+      reason_code: nisa_exhaustion_core_underweight_and_cash_overweight
+    rebalance_mode:
+      enabled: true
+      core_shortfall_pct_gte: 0.25
+      cash_excess_pct_gte: 0.25
+      monthly_core_buy_budget_max_jpy: 1500000
+      budget_tier: rebalance
+      reason_code: nisa_exhaustion_rebalance_core_underweight_and_cash_overweight
+      description: 2026年5月〜12月は固定core積立が100,000円/月のため、core不足と現金過多が大きい月は特定口座スポット買いで是正速度を維持する
+    active_from: 2026-05
+    active_to: 2026-12
+    reason_code: nisa_growth_quota_exhausted_2026
+    reason: 2026年NISA成長投資枠を使い切ったため
+    nisa_growth_quota_status: exhausted
+    taxable_core_spot_buy_required: true
+    core_spot_buy_account_type: 特定口座
+    fixed_core_auto_invest_jpy: 100000
+    baseline_total_core_deployment_target_jpy: 1380000
+    baseline_core_spot_buy_jpy: 1280000
+    hard_cap_core_spot_buy_jpy: 1500000
+    spot_buy_bands:
+      normal:
+        min_jpy: 300000
+        max_jpy: 600000
+        conditions:
+        - core不足はあるが、現金過多が軽度
+        - 相場が高値圏で、急いで投入する必要が低い
+      aggressive:
+        min_jpy: 700000
+        max_jpy: 1000000
+        conditions:
+        - core不足が大きい
+        - liquidity が target を大きく上回る
+        - ただし rebalance mode ほどではない
+      rebalance:
+        min_jpy: 1000000
+        max_jpy: 1500000
+        conditions:
+        - core_delta_pct <= -25pt 程度
+        - cash_excess_pct >= +25pt 程度
+        - 生活防衛資金を残しても現金過多が明確
+        - 現在の固定積立等を踏まえて特定口座スポットで補う必要がある
+    hard_cap_note: 単月のcoreスポット買いは原則1,500,000円を上限とし、例外的に大きな下落局面で上限超過を提案する場合は明確な理由を出す
+    satellite_interaction_policy:
+    - satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定
+    - PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定
+    - MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先
+    - 指値候補が出ても、coreスポット買い予算を削ってまでテーマ銘柄を買わない
+    date_based_override_active: true
+    active_date_based_override:
+      active_from: 2026-05
+      active_to: 2026-12
+      reason_code: nisa_growth_quota_exhausted_2026
+      reason: 2026年NISA成長投資枠を使い切ったため
+      nisa_growth_quota_status: exhausted
+      taxable_core_spot_buy_required: true
+      core_spot_buy_account_type: 特定口座
+      fixed_core_auto_invest_jpy: 100000
+      baseline_total_core_deployment_target_jpy: 1380000
+      baseline_core_spot_buy_jpy: 1280000
+      hard_cap_core_spot_buy_jpy: 1500000
+      monthly_core_buy_budget_min_jpy: 300000
+      monthly_core_buy_budget_max_jpy: 1500000
+      budget_tiers:
+        standard:
+          budget_jpy: 300000
+          min_jpy: 300000
+          max_jpy: 600000
+          description: 'Normal mode: core不足はあるが現金過多が軽度、または相場が高値圏'
+        aggressive:
+          budget_jpy: 900000
+          min_jpy: 700000
+          max_jpy: 1000000
+          description: 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'
+        rebalance:
+          budget_jpy: 1280000
+          min_jpy: 1000000
+          max_jpy: 1500000
+          description: 'Rebalance mode: 現在の固定積立等を踏まえて特定口座スポットで補う'
+      override_conditions:
+        core_shortfall_pct_gte: 0.15
+        cash_excess_pct_gte: 0.15
+        budget_tier: aggressive
+        reason_code: nisa_exhaustion_core_underweight_and_cash_overweight
+      rebalance_mode:
+        enabled: true
+        core_shortfall_pct_gte: 0.25
+        cash_excess_pct_gte: 0.25
+        monthly_core_buy_budget_max_jpy: 1500000
+        budget_tier: rebalance
+        reason_code: nisa_exhaustion_rebalance_core_underweight_and_cash_overweight
+        description: 2026年5月〜12月は固定core積立が100,000円/月のため、core不足と現金過多が大きい月は特定口座スポット買いで是正速度を維持する
+      spot_buy_bands:
+        normal:
+          min_jpy: 300000
+          max_jpy: 600000
+          conditions:
+          - core不足はあるが、現金過多が軽度
+          - 相場が高値圏で、急いで投入する必要が低い
+        aggressive:
+          min_jpy: 700000
+          max_jpy: 1000000
+          conditions:
+          - core不足が大きい
+          - liquidity が target を大きく上回る
+          - ただし rebalance mode ほどではない
+        rebalance:
+          min_jpy: 1000000
+          max_jpy: 1500000
+          conditions:
+          - core_delta_pct <= -25pt 程度
+          - cash_excess_pct >= +25pt 程度
+          - 生活防衛資金を残しても現金過多が明確
+          - 現在の固定積立等を踏まえて特定口座スポットで補う必要がある
+      hard_cap_note: 単月のcoreスポット買いは原則1,500,000円を上限とし、例外的に大きな下落局面で上限超過を提案する場合は明確な理由を出す
+      satellite_interaction_policy:
+      - satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定
+      - PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定
+      - MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先
+      - 指値候補が出ても、coreスポット買い予算を削ってまでテーマ銘柄を買わない
+  monthly_core_buy_budget_min_jpy: 300000
+  monthly_core_buy_budget_max_jpy: 1500000
+  recommended_monthly_core_buy_budget_jpy: 900000
+  monthly_core_budget_tier: aggressive
+  monthly_core_budget_band:
+    min_jpy: 700000
+    max_jpy: 1000000
+    description: 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'
+  monthly_core_budget_override_active: true
+  monthly_core_budget_override_reason: nisa_exhaustion_core_underweight_and_cash_overweight
+  portfolio_management_mode: normal_with_override
+  rebalance_mode_active: false
+  rebalance_mode_reason: null
+  date_based_core_budget_override_active: true
+  active_date_based_core_budget_override:
+    active_from: 2026-05
+    active_to: 2026-12
+    reason_code: nisa_growth_quota_exhausted_2026
+    reason: 2026年NISA成長投資枠を使い切ったため
+    nisa_growth_quota_status: exhausted
+    taxable_core_spot_buy_required: true
+    core_spot_buy_account_type: 特定口座
+    fixed_core_auto_invest_jpy: 100000
+    baseline_total_core_deployment_target_jpy: 1380000
+    baseline_core_spot_buy_jpy: 1280000
+    hard_cap_core_spot_buy_jpy: 1500000
+    monthly_core_buy_budget_min_jpy: 300000
+    monthly_core_buy_budget_max_jpy: 1500000
+    budget_tiers:
+      standard:
+        budget_jpy: 300000
+        min_jpy: 300000
+        max_jpy: 600000
+        description: 'Normal mode: core不足はあるが現金過多が軽度、または相場が高値圏'
+      aggressive:
+        budget_jpy: 900000
+        min_jpy: 700000
+        max_jpy: 1000000
+        description: 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'
+      rebalance:
+        budget_jpy: 1280000
+        min_jpy: 1000000
+        max_jpy: 1500000
+        description: 'Rebalance mode: 現在の固定積立等を踏まえて特定口座スポットで補う'
+    override_conditions:
+      core_shortfall_pct_gte: 0.15
+      cash_excess_pct_gte: 0.15
+      budget_tier: aggressive
+      reason_code: nisa_exhaustion_core_underweight_and_cash_overweight
+    rebalance_mode:
+      enabled: true
+      core_shortfall_pct_gte: 0.25
+      cash_excess_pct_gte: 0.25
+      monthly_core_buy_budget_max_jpy: 1500000
+      budget_tier: rebalance
+      reason_code: nisa_exhaustion_rebalance_core_underweight_and_cash_overweight
+      description: 2026年5月〜12月は固定core積立が100,000円/月のため、core不足と現金過多が大きい月は特定口座スポット買いで是正速度を維持する
+    spot_buy_bands:
+      normal:
+        min_jpy: 300000
+        max_jpy: 600000
+        conditions:
+        - core不足はあるが、現金過多が軽度
+        - 相場が高値圏で、急いで投入する必要が低い
+      aggressive:
+        min_jpy: 700000
+        max_jpy: 1000000
+        conditions:
+        - core不足が大きい
+        - liquidity が target を大きく上回る
+        - ただし rebalance mode ほどではない
+      rebalance:
+        min_jpy: 1000000
+        max_jpy: 1500000
+        conditions:
+        - core_delta_pct <= -25pt 程度
+        - cash_excess_pct >= +25pt 程度
+        - 生活防衛資金を残しても現金過多が明確
+        - 現在の固定積立等を踏まえて特定口座スポットで補う必要がある
+    hard_cap_note: 単月のcoreスポット買いは原則1,500,000円を上限とし、例外的に大きな下落局面で上限超過を提案する場合は明確な理由を出す
+    satellite_interaction_policy:
+    - satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定
+    - PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定
+    - MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先
+    - 指値候補が出ても、coreスポット買い予算を削ってまでテーマ銘柄を買わない
+  nisa_growth_quota_status: exhausted
+  taxable_core_spot_buy_required: true
+  core_spot_buy_account_type: 特定口座
+  fixed_core_auto_invest_jpy: 100000
+  baseline_total_core_deployment_target_jpy: 1380000
+  baseline_core_spot_buy_jpy: 1280000
+  hard_cap_core_spot_buy_jpy: 1500000
+  spot_buy_bands:
+    normal:
+      min_jpy: 300000
+      max_jpy: 600000
+      conditions:
+      - core不足はあるが、現金過多が軽度
+      - 相場が高値圏で、急いで投入する必要が低い
+    aggressive:
+      min_jpy: 700000
+      max_jpy: 1000000
+      conditions:
+      - core不足が大きい
+      - liquidity が target を大きく上回る
+      - ただし rebalance mode ほどではない
+    rebalance:
+      min_jpy: 1000000
+      max_jpy: 1500000
+      conditions:
+      - core_delta_pct <= -25pt 程度
+      - cash_excess_pct >= +25pt 程度
+      - 生活防衛資金を残しても現金過多が明確
+      - 現在の固定積立等を踏まえて特定口座スポットで補う必要がある
+  hard_cap_note: 単月のcoreスポット買いは原則1,500,000円を上限とし、例外的に大きな下落局面で上限超過を提案する場合は明確な理由を出す
+  satellite_interaction_policy:
+  - satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定
+  - PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定
+  - MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先
+  - 指値候補が出ても、coreスポット買い予算を削ってまでテーマ銘柄を買わない
+  explanation:
+    rule_based_reason: nisa_exhaustion_core_underweight_and_cash_overweight
+    discretionary_reason: null
+    related_bucket_status:
+      core_actual_pct: 0.243
+      core_target_pct: 0.45
+      liquidity_actual_pct: 0.346
+      liquidity_target_pct: 0.1
+    mode_context:
+      active_mode: normal_with_override
+      rebalance_mode_active: false
+      rebalance_mode_reason: null
+      selected_budget_band:
+        min_jpy: 700000
+        max_jpy: 1000000
+        description: 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'
+      rebalance_mode_description: null
+  core_constituents:
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+    quantity: 1059568
+    value_jpy: 2060012
+    current_price: 19442
+    suggested_proxy_symbol: ACWI
+    reference_symbol: VT
+    reference_current_price: 153.95
+    recent_high_21d: 159.35
+    recent_high_63d: 159.35
+    drawdown_pct_from_recent_high: -3.39
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+    quantity: 846995
+    value_jpy: 1646728
+    current_price: 19442
+    suggested_proxy_symbol: ACWI
+    reference_symbol: VT
+    reference_current_price: 153.95
+    recent_high_21d: 159.35
+    recent_high_63d: 159.35
+    drawdown_pct_from_recent_high: -3.39
+  - symbol: RAKUTEN_PLUS_SP500
+    name: 楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)
+    quantity: 106530
+    value_jpy: 207488
+    current_price: 19477
+    suggested_proxy_symbol: VOO
+    reference_symbol: VOO
+    reference_current_price: 670.26
+    recent_high_21d: 698.26
+    recent_high_63d: 698.26
+    drawdown_pct_from_recent_high: -4.01
+  - symbol: EMAXIS_SLIM_SP500_1
+    name: eMAXIS Slim 米国株式(S&P500)
+    quantity: 266949
+    value_jpy: 1168489
+    current_price: 43772
+    suggested_proxy_symbol: VOO
+    reference_symbol: VOO
+    reference_current_price: 670.26
+    recent_high_21d: 698.26
+    recent_high_63d: 698.26
+    drawdown_pct_from_recent_high: -4.01
+  - symbol: EMAXIS_SLIM_SP500_2
+    name: eMAXIS Slim 米国株式(S&P500)
+    quantity: 397525
+    value_jpy: 1740046
+    current_price: 43772
+    suggested_proxy_symbol: VOO
+    reference_symbol: VOO
+    reference_current_price: 670.26
+    recent_high_21d: 698.26
+    recent_high_63d: 698.26
+    drawdown_pct_from_recent_high: -4.01
+  - symbol: EMAXIS_SLIM_SP500_3
+    name: eMAXIS Slim 米国株式(S&P500)
+    quantity: 228995
+    value_jpy: 1002357
+    current_price: 43772
+    suggested_proxy_symbol: VOO
+    reference_symbol: VOO
+    reference_current_price: 670.26
+    recent_high_21d: 698.26
+    recent_high_63d: 698.26
+    drawdown_pct_from_recent_high: -4.01
+  - symbol: EMAXIS_SLIM_ALL_COUNTRY
+    name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    quantity: 461462
+    value_jpy: 1741050
+    current_price: 37729
+    suggested_proxy_symbol: ACWI
+    reference_symbol: ACWI
+    reference_current_price: 154.28
+    recent_high_21d: 159.97
+    recent_high_63d: 159.97
+    drawdown_pct_from_recent_high: -3.56
+exposure_breakdown:
+  direct_semiconductor_exposure_pct: 0.178
+  direct_semiconductor_exposure_jpy: 7009361
+  indirect_ai_infra_exposure_pct: 0.0138
+  indirect_ai_infra_exposure_jpy: 542917
+  combined_semiconductor_ai_infra_watch_pct: 0.1918
+  combined_semiconductor_ai_infra_watch_jpy: 7552278
+  semiconductor_exposure_total_pct: 0.178
+  semiconductor_exposure_total_jpy: 7009361
+  breakdown:
+  - symbol: SMH
+    value_jpy: 98921
+    bucket: satellite_core
+    exposure_type: direct_semiconductor
+    included_in_semiconductor_exposure: 'yes'
+    included_in_direct_semiconductor_exposure: 'yes'
+    included_in_indirect_ai_infra_exposure: 'no'
+    inclusion_reason: matched_exposure_group_rule
+  - symbol: MSFT
+    value_jpy: 542917
+    bucket: jun_core
+    exposure_type: indirect_ai_infra
+    included_in_semiconductor_exposure: 'no'
+    included_in_direct_semiconductor_exposure: 'no'
+    included_in_indirect_ai_infra_exposure: 'yes'
+    inclusion_reason: matched_indirect_ai_infra_rule
+  - symbol: NISSEI_SOX_1
+    value_jpy: 4660463
+    bucket: satellite_core
+    exposure_type: direct_semiconductor
+    included_in_semiconductor_exposure: 'yes'
+    included_in_direct_semiconductor_exposure: 'yes'
+    included_in_indirect_ai_infra_exposure: 'no'
+    inclusion_reason: matched_exposure_group_rule
+  - symbol: NISSEI_SOX_2
+    value_jpy: 2249977
+    bucket: satellite_core
+    exposure_type: direct_semiconductor
+    included_in_semiconductor_exposure: 'yes'
+    included_in_direct_semiconductor_exposure: 'yes'
+    included_in_indirect_ai_infra_exposure: 'no'
+    inclusion_reason: matched_exposure_group_rule
+long_term_thesis_targets:
+- symbol: URA
+  bucket: satellite_core
+  current_value_jpy: 493517
+  portfolio_pct: 0.0125
+  thesis_id: nuclear_revival
+  long_term_thesis_summary: '脱炭素、電力需要増、エネルギー安全保障を背景に、 原子力需要が中長期で再評価されるという仮説。
+
+    '
+  key_risk_if_thesis_breaks:
+  - 炭素回収技術の量産化・低コスト化
+  - 再エネ＋蓄電の経済性改善
+  - 政策転換
+  - 原子力新設の採算悪化
+  review_priority: high
+  web_review_required: 'yes'
+- symbol: CIBR
+  bucket: satellite_core
+  current_value_jpy: 1214939
+  portfolio_pct: 0.0309
+  thesis_id: persistent_cybersecurity_spending
+  long_term_thesis_summary: 'サイバーセキュリティ支出は構造的に維持・拡大するという仮説。
+
+    '
+  key_risk_if_thesis_breaks:
+  - 支出成長の鈍化
+  - バリュエーション過熱後の長期低迷
+  review_priority: medium
+  web_review_required: 'yes'
+- symbol: MSFT
+  bucket: jun_core
+  current_value_jpy: 542917
+  portfolio_pct: 0.0138
+  thesis_id: hyperscaler_ai_platform_compounding
+  long_term_thesis_summary: 'クラウド・AI基盤・企業ソフトウェアの複合優位により、 長期で利益成長が継続するという仮説。
+
+    '
+  key_risk_if_thesis_breaks:
+  - AI投資回収の停滞
+  - 規制強化
+  - 競争優位の低下
+  review_priority: medium
+  web_review_required: 'yes'
+- symbol: PLTR
+  bucket: satellite
+  current_value_jpy: 200918
+  portfolio_pct: 0.0051
+  thesis_id: defense_ai_gov_software_scaling
+  long_term_thesis_summary: '政府・防衛・大企業向けの高付加価値ソフトウェア需要が継続し、 AI時代のプラットフォーム企業として拡大するという仮説。
+
+    '
+  key_risk_if_thesis_breaks:
+  - 政府需要の鈍化
+  - 競争激化
+  - 収益化の鈍化
+  review_priority: medium
+  web_review_required: 'yes'
+monthly_execution_outputs:
+  review_target_month: '2026_07'
+  nisa_growth_quota_status: exhausted
+  fixed_core_auto_invest_amount_jpy: 100000
+  taxable_core_spot_buy_required: true
+  recommended_taxable_core_spot_buy_jpy: 900000
+  core_spot_buy_account_type: 特定口座
+  portfolio_management_mode: normal_with_override
+  monthly_core_budget_tier: aggressive
+  recommended_monthly_core_buy_budget_jpy: 900000
+  monthly_total_core_deployment_jpy: 1000000
+  candidate_count: 12
+  core_recurring_contributions_total_jpy: 100000
+  pension_monthly_dca_total_jpy: 55000
+  annualized_pension_dca_jpy: 660000
+  annualized_pension_dca_pct_of_total_assets: 0.0168
+  crypto_weekly_dca_total_jpy: 4000
+  annualized_crypto_dca_jpy: 208000
+  annualized_crypto_dca_pct_of_total_assets: 0.0053
+  taxable_account_note: NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う
+  nisa_exhaustion_adjustment_reason: NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う
+quarterly_rule_review_outputs:
+  no_change: false
+  classification_override_count: 1
+  classification_audit:
+  - symbol: LIQUIDITY
+    raw_bucket: liquidity
+    resolved_bucket: liquidity
+    reason: raw_bucket
+    note: null
+  - symbol: '7203'
+    raw_bucket: jun_core
+    resolved_bucket: jun_core
+    reason: japan_large_cap_core_position_treated_as_jun_core
+    note: トヨタは運用上、準コア株式として管理
+  - symbol: '9444'
+    raw_bucket: satellite
+    resolved_bucket: satellite
+    reason: raw_bucket
+    note: null
+  - symbol: '2353'
+    raw_bucket: satellite
+    resolved_bucket: satellite
+    reason: raw_bucket
+    note: null
+  - symbol: '7201'
+    raw_bucket: satellite
+    resolved_bucket: satellite
+    reason: raw_bucket
+    note: null
+  - symbol: SMH
+    raw_bucket: satellite_core
+    resolved_bucket: satellite_core
+    reason: symbol_to_bucket
+    note: null
+  - symbol: PLTR
+    raw_bucket: satellite
+    resolved_bucket: satellite
+    reason: symbol_to_bucket
+    note: null
+  - symbol: CIBR
+    raw_bucket: satellite_core
+    resolved_bucket: satellite_core
+    reason: symbol_to_bucket
+    note: null
+  - symbol: MSFT
+    raw_bucket: jun_core
+    resolved_bucket: jun_core
+    reason: explicit_bucket_lock_for_ai_infra_compounder
+    note: null
+  - symbol: URA
+    raw_bucket: satellite
+    resolved_bucket: satellite_core
+    reason: symbol_to_bucket
+    note: null
+  - symbol: NISSEI_SOX_1
+    raw_bucket: satellite_core
+    resolved_bucket: satellite_core
+    reason: semiconductor_auto_classification
+    note: null
+  - symbol: NISSEI_SOX_2
+    raw_bucket: satellite_core
+    resolved_bucket: satellite_core
+    reason: semiconductor_auto_classification
+    note: null
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: RAKUTEN_PLUS_SP500
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: EMAXIS_SLIM_SP500_1
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: EMAXIS_SLIM_SP500_2
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: EMAXIS_SLIM_SP500_3
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: EMAXIS_SLIM_ALL_COUNTRY
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
+    raw_bucket: pension
+    resolved_bucket: pension
+    reason: raw_bucket
+    note: null
+  - symbol: POINTS_MILES
+    raw_bucket: other
+    resolved_bucket: other
+    reason: raw_bucket
+    note: null
+  core_reference_missing_symbols: []
+  core_reference_proxy_suggestions: {}
+  tradable_core_pct: 0.243
+  effective_core_including_pension_pct: 0.3462
+  cash_normalization_months_estimate:
+    gross_deployment_months: 9.7
+    net_cash_reduction_months: 27.7
+    assumed_monthly_cash_inflow_jpy: 650000
+    net_cash_reduction_jpy: 350000
+  direct_semiconductor_exposure_pct: 0.178
+  combined_semiconductor_ai_infra_watch_pct: 0.1918
+  indirect_ai_infra_exposure_pct: 0.0138
+metadata:
+  snapshot_path: data/normalized/snapshot_2026_07.yaml
+  previous_snapshot_path: data/normalized/snapshot_2026_06.yaml
+  review_target_month: '2026_07'
+  review_target_month_start: '2026-07-01'
+  resolved_buckets:
+    LIQUIDITY: liquidity
+    '7203': jun_core
+    '9444': satellite
+    '2353': satellite
+    '7201': satellite
+    SMH: satellite_core
+    PLTR: satellite
+    CIBR: satellite_core
+    MSFT: jun_core
+    URA: satellite_core
+    NISSEI_SOX_1: satellite_core
+    NISSEI_SOX_2: satellite_core
+    RAKUTEN_PLUS_ALL_COUNTRY_1: core
+    RAKUTEN_PLUS_ALL_COUNTRY_2: core
+    RAKUTEN_PLUS_SP500: core
+    EMAXIS_SLIM_SP500_1: core
+    EMAXIS_SLIM_SP500_2: core
+    EMAXIS_SLIM_SP500_3: core
+    EMAXIS_SLIM_ALL_COUNTRY: core
+    PENSION_EMAXIS_SLIM_ALL_COUNTRY: pension
+    POINTS_MILES: other
+  classification_audit:
+  - symbol: LIQUIDITY
+    raw_bucket: liquidity
+    resolved_bucket: liquidity
+    reason: raw_bucket
+    note: null
+  - symbol: '7203'
+    raw_bucket: jun_core
+    resolved_bucket: jun_core
+    reason: japan_large_cap_core_position_treated_as_jun_core
+    note: トヨタは運用上、準コア株式として管理
+  - symbol: '9444'
+    raw_bucket: satellite
+    resolved_bucket: satellite
+    reason: raw_bucket
+    note: null
+  - symbol: '2353'
+    raw_bucket: satellite
+    resolved_bucket: satellite
+    reason: raw_bucket
+    note: null
+  - symbol: '7201'
+    raw_bucket: satellite
+    resolved_bucket: satellite
+    reason: raw_bucket
+    note: null
+  - symbol: SMH
+    raw_bucket: satellite_core
+    resolved_bucket: satellite_core
+    reason: symbol_to_bucket
+    note: null
+  - symbol: PLTR
+    raw_bucket: satellite
+    resolved_bucket: satellite
+    reason: symbol_to_bucket
+    note: null
+  - symbol: CIBR
+    raw_bucket: satellite_core
+    resolved_bucket: satellite_core
+    reason: symbol_to_bucket
+    note: null
+  - symbol: MSFT
+    raw_bucket: jun_core
+    resolved_bucket: jun_core
+    reason: explicit_bucket_lock_for_ai_infra_compounder
+    note: null
+  - symbol: URA
+    raw_bucket: satellite
+    resolved_bucket: satellite_core
+    reason: symbol_to_bucket
+    note: null
+  - symbol: NISSEI_SOX_1
+    raw_bucket: satellite_core
+    resolved_bucket: satellite_core
+    reason: semiconductor_auto_classification
+    note: null
+  - symbol: NISSEI_SOX_2
+    raw_bucket: satellite_core
+    resolved_bucket: satellite_core
+    reason: semiconductor_auto_classification
+    note: null
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: RAKUTEN_PLUS_SP500
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: EMAXIS_SLIM_SP500_1
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: EMAXIS_SLIM_SP500_2
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: EMAXIS_SLIM_SP500_3
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: EMAXIS_SLIM_ALL_COUNTRY
+    raw_bucket: core
+    resolved_bucket: core
+    reason: raw_bucket
+    note: null
+  - symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
+    raw_bucket: pension
+    resolved_bucket: pension
+    reason: raw_bucket
+    note: null
+  - symbol: POINTS_MILES
+    raw_bucket: other
+    resolved_bucket: other
+    reason: raw_bucket
+    note: null
+  core_recurring_contributions:
+    total_monthly_jpy: 100000
+    monthly_core_auto_invest_amount_jpy: 100000
+    nisa_growth_quota_status: exhausted
+    taxable_core_spot_buy_required: true
+    plans:
+    - day_of_month: 8
+      fund_name: eMAXIS Slim 全世界株式（オール・カントリー）
+      amount_jpy: 50000
+      settlement_type: クレジットカード決済
+      account_type: NISAつみたて投資枠
+      distribution_course: 再投資型
+    - day_of_month: 8
+      fund_name: eMAXIS Slim 米国株式（S&P500）
+      amount_jpy: 50000
+      settlement_type: クレジットカード決済
+      account_type: NISAつみたて投資枠
+      distribution_course: 再投資型
+    review_guidance:
+    - この固定積立は毎月すでに執行される前提で評価する
+    - core不足の指摘は、固定積立の寄与を織り込んだうえで必要時のみ行う
+    - 長期シナリオ悪化やリスク管理上の理由がある場合は、固定積立の減額・停止提案を明示する
+    - 2026年5月〜12月は、NISA成長投資枠の固定積立750,000円/月を前提にしない
+    - 固定core積立は100,000円/月として扱う
+    - core不足と現金過多が続く限り、特定口座でのcoreスポット買いを厚めに提案する
+    - 税効率よりも、core不足と現金過多の是正を優先する
+    - 生活防衛資金・住宅ローン・大口支出不明リスクを考慮し、現金を一気に削りすぎない
+    pension_monthly_dca:
+    - symbol: IDECO_ALL_COUNTRY
+      fund_name: eMAXIS Slim 全世界株式（オール・カントリー）
+      amount_jpy_per_month: 55000
+      account_type: iDeCo
+      asset_class: pension
+    pension_review_guidance:
+    - iDeCoのオルカン月次積立はpensionとして既存で実行中の前提で評価する
+    - tradable coreとは分け、effective_core_including_pension_pctの文脈で補助的に扱う
+    crypto_weekly_dca:
+    - symbol: BTC
+      amount_jpy_per_week: 2000
+    - symbol: ETH
+      amount_jpy_per_week: 2000
+    crypto_review_guidance:
+    - 暗号資産の週次積立は既存で実行中の前提で評価する
+    - 継続・減額・停止の提案が必要な場合は、理由とトリガー条件を明示する
+    active_from: 2026-05
+    active_to: 2026-12
+    reason_code: nisa_growth_quota_exhausted_2026
+    reason: 2026年NISA成長投資枠を使い切ったため
+    core_spot_buy_account_type: 特定口座
+    baseline_total_core_deployment_target_jpy: 1380000
+    rebalance_mode_core_spot_buy_reference_jpy: 1280000
+    taxable_account_note: NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う
+    tax_note: NISAより税効率は落ちるが、現在の主問題はcore不足と現金過多であるため、特定口座でのcore積増しを許容する
+    nisa_exhaustion_adjustment_reason: NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う
+    core_spot_buy_allocation_rule:
+      allowed_products_only: true
+      default_allocation:
+        eMAXIS Slim 全世界株式（オール・カントリー）: 0.6
+        eMAXIS Slim 米国株式（S&P500）: 0.4
+      high_us_ai_infra_sensitivity_allocation:
+        eMAXIS Slim 全世界株式（オール・カントリー）: 0.65
+        eMAXIS Slim 米国株式（S&P500）: 0.35
+      note: 既存core商品に限定し、米国株・半導体・AIインフラ感応度が高い月はオルカン比率を厚めにする
+    requires_explicit_followup_rule: true
+    followup_warning_code: post_2026_nisa_growth_quota_rule_missing
+    date_based_override_active: true
+    active_date_based_override:
+      active_from: 2026-05
+      active_to: 2026-12
+      reason_code: nisa_growth_quota_exhausted_2026
+      reason: 2026年NISA成長投資枠を使い切ったため
+      nisa_growth_quota_status: exhausted
+      total_monthly_jpy: 100000
+      monthly_core_auto_invest_amount_jpy: 100000
+      taxable_core_spot_buy_required: true
+      core_spot_buy_account_type: 特定口座
+      baseline_total_core_deployment_target_jpy: 1380000
+      rebalance_mode_core_spot_buy_reference_jpy: 1280000
+      taxable_account_note: NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う
+      tax_note: NISAより税効率は落ちるが、現在の主問題はcore不足と現金過多であるため、特定口座でのcore積増しを許容する
+      nisa_exhaustion_adjustment_reason: NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う
+      core_spot_buy_allocation_rule:
+        allowed_products_only: true
+        default_allocation:
+          eMAXIS Slim 全世界株式（オール・カントリー）: 0.6
+          eMAXIS Slim 米国株式（S&P500）: 0.4
+        high_us_ai_infra_sensitivity_allocation:
+          eMAXIS Slim 全世界株式（オール・カントリー）: 0.65
+          eMAXIS Slim 米国株式（S&P500）: 0.35
+        note: 既存core商品に限定し、米国株・半導体・AIインフラ感応度が高い月はオルカン比率を厚めにする
+      requires_explicit_followup_rule: true
+      followup_warning_code: post_2026_nisa_growth_quota_rule_missing
+    pension_monthly_dca_total_jpy: 55000
+    annualized_pension_dca_jpy: 660000
+    annualized_pension_dca_pct_of_total_assets: 0.0168
+    crypto_weekly_dca_total_jpy: 4000
+    annualized_crypto_dca_jpy: 208000
+    annualized_crypto_dca_pct_of_total_assets: 0.0053
+  core_spot_buy_materials:
+    liquidity_actual_pct: 0.346
+    liquidity_target_pct: 0.1
+    cash_excess_pct: 0.246
+    core_actual_pct: 0.243
+    core_target_pct: 0.45
+    core_delta_pct: -0.207
+    jun_core_actual_pct: 0.07
+    jun_core_target_pct: 0.2
+    jun_core_delta_pct: -0.13
+    nisa_growth_quota_status: exhausted
+    nisa_exhaustion_adjustment_reason: NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う
+    taxable_core_spot_buy_required: true
+    core_spot_buy_account_type: 特定口座
+    taxable_account_note: NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う
+    tax_note: NISAより税効率は落ちるが、現在の主問題はcore不足と現金過多であるため、特定口座でのcore積増しを許容する
+    fixed_core_auto_invest_amount_jpy: 100000
+    current_monthly_core_auto_invest_amount_jpy: 100000
+    annualized_core_auto_invest_amount_jpy: 1200000
+    recommended_taxable_core_spot_buy_jpy: 900000
+    recommended_monthly_core_buy_budget_jpy: 900000
+    total_monthly_core_deployment_jpy: 1000000
+    baseline_total_core_deployment_target_jpy: 1380000
+    baseline_core_spot_buy_jpy: 1280000
+    hard_cap_core_spot_buy_jpy: 1500000
+    monthly_core_budget_band:
+      min_jpy: 700000
+      max_jpy: 1000000
+      description: 'Aggressive mode: core不足が大きく、liquidityがtargetを大きく上回る'
+    spot_buy_bands:
+      normal:
+        min_jpy: 300000
+        max_jpy: 600000
+        conditions:
+        - core不足はあるが、現金過多が軽度
+        - 相場が高値圏で、急いで投入する必要が低い
+      aggressive:
+        min_jpy: 700000
+        max_jpy: 1000000
+        conditions:
+        - core不足が大きい
+        - liquidity が target を大きく上回る
+        - ただし rebalance mode ほどではない
+      rebalance:
+        min_jpy: 1000000
+        max_jpy: 1500000
+        conditions:
+        - core_delta_pct <= -25pt 程度
+        - cash_excess_pct >= +25pt 程度
+        - 生活防衛資金を残しても現金過多が明確
+        - 現在の固定積立等を踏まえて特定口座スポットで補う必要がある
+    core_spot_buy_allocation_rule:
+      allowed_products_only: true
+      default_allocation:
+        eMAXIS Slim 全世界株式（オール・カントリー）: 0.6
+        eMAXIS Slim 米国株式（S&P500）: 0.4
+      high_us_ai_infra_sensitivity_allocation:
+        eMAXIS Slim 全世界株式（オール・カントリー）: 0.65
+        eMAXIS Slim 米国株式（S&P500）: 0.35
+      note: 既存core商品に限定し、米国株・半導体・AIインフラ感応度が高い月はオルカン比率を厚めにする
+    date_based_override_active: true
+    active_date_based_override:
+      active_from: 2026-05
+      active_to: 2026-12
+      reason_code: nisa_growth_quota_exhausted_2026
+      reason: 2026年NISA成長投資枠を使い切ったため
+      nisa_growth_quota_status: exhausted
+      total_monthly_jpy: 100000
+      monthly_core_auto_invest_amount_jpy: 100000
+      taxable_core_spot_buy_required: true
+      core_spot_buy_account_type: 特定口座
+      baseline_total_core_deployment_target_jpy: 1380000
+      rebalance_mode_core_spot_buy_reference_jpy: 1280000
+      taxable_account_note: NISA成長投資枠枯渇のため、2026年5月〜12月のcoreスポット買いは原則として特定口座で行う
+      tax_note: NISAより税効率は落ちるが、現在の主問題はcore不足と現金過多であるため、特定口座でのcore積増しを許容する
+      nisa_exhaustion_adjustment_reason: NISA枠がないからcore購入を弱めるのではなく、iDeCoと暗号資産の既存積立もキャッシュアウトとして考慮しつつ特定口座スポットで補う
+      core_spot_buy_allocation_rule:
+        allowed_products_only: true
+        default_allocation:
+          eMAXIS Slim 全世界株式（オール・カントリー）: 0.6
+          eMAXIS Slim 米国株式（S&P500）: 0.4
+        high_us_ai_infra_sensitivity_allocation:
+          eMAXIS Slim 全世界株式（オール・カントリー）: 0.65
+          eMAXIS Slim 米国株式（S&P500）: 0.35
+        note: 既存core商品に限定し、米国株・半導体・AIインフラ感応度が高い月はオルカン比率を厚めにする
+      requires_explicit_followup_rule: true
+      followup_warning_code: post_2026_nisa_growth_quota_rule_missing
+    configuration_warnings: []
+    major_core_proxy_stats:
+    - reference_symbol: VT
+      one_month_return_pct: -2.04
+      three_month_return_pct: 12.83
+      one_month_drawdown_from_high_pct: -3.39
+      three_month_drawdown_from_high_pct: -3.39
+    - reference_symbol: VOO
+      one_month_return_pct: -2.86
+      three_month_return_pct: 12.66
+      one_month_drawdown_from_high_pct: -4.01
+      three_month_drawdown_from_high_pct: -4.01
+    - reference_symbol: ACWI
+      one_month_return_pct: -2.13
+      three_month_return_pct: 13.13
+      one_month_drawdown_from_high_pct: -3.56
+      three_month_drawdown_from_high_pct: -3.56
+    portfolio_risk_bucket_summary:
+    - bucket: core
+      actual_pct: 0.243
+      target_pct: 0.45
+      delta_pct: -0.207
+    - bucket: jun_core
+      actual_pct: 0.07
+      target_pct: 0.2
+      delta_pct: -0.13
+    - bucket: liquidity
+      actual_pct: 0.346
+      target_pct: 0.1
+      delta_pct: 0.246
+    - bucket: other
+      actual_pct: 0.0004
+      target_pct: null
+      delta_pct: null
+    - bucket: pension
+      actual_pct: 0.1032
+      target_pct: null
+      delta_pct: null
+    - bucket: satellite
+      actual_pct: 0.016
+      target_pct: 0.1
+      delta_pct: -0.084
+    - bucket: satellite_core
+      actual_pct: 0.2214
+      target_pct: 0.15
+      delta_pct: 0.0714
+    current_cash_jpy: 13620505
+    bond_like_holdings_present: false
+    bond_like_holdings: null
+    emergency_fund_managed_separately: null
+    near_term_large_expense: null
+    real_estate_exposure_present: true
+    real_estate_use: residence_and_asset
+    mortgage_status: full_loan_early_stage
+    liquidity_comment: residential real estate should not be treated as emergency
+      liquidity

@@ -1,0 +1,14 @@
+core_spot_buy_events:
+  enabled: true
+  calendar_id: primary
+  timezone: Asia/Tokyo
+  default_start_time: "09:00"
+  duration_minutes: 15
+  title_prefix: "Coreスポット買い"
+  transparency: transparent
+  visibility: private
+  reminders:
+    use_default: false
+    overrides:
+      - method: popup
+        minutes: 60

@@ -35,7 +35,9 @@ Python CLI プロジェクトを作成したい。
 8. ChatGPT がその月の最新モデルとして、Codex / Python が正規化・検証した数値を前提に、今月の指値提案・ポートフォリオ診断・購入提案・ルール改善提案を返す
 9. ユーザがその提案を参考に最終判断し、証券会社で手動発注する
 10. Python は ChatGPT の回答を保存し、改善提案を抽出し、**Codex 向け修正プロンプト**を生成する
-11. ユーザは必要に応じてその修正プロンプトを Codex に渡し、スクリプトを改善する
+11. Python は ChatGPT が決めた coreスポット買い実行スケジュールを、Google Calendarイベント作成用ドラフトとして保存する
+12. Codex はそのドラフトを使い、証券会社への自動発注ではなく、手動発注リマインダーとして Google Calendar イベントを作成する
+13. ユーザは必要に応じてその修正プロンプトを Codex に渡し、スクリプトを改善する
 
 ---
 
@@ -55,6 +57,7 @@ Codex は以下を行ってよい。
 - 入力データの欠損・表記ゆれ・不明点を検出する
 - ChatGPTに渡す投資判断依頼プロンプトを作成する
 - ChatGPTから返ってきた内容を、ユーザが明示的に貼り付けた場合のみ、レポジトリ内のアセットへ反映する
+- ChatGPTから返ってきた coreスポット買い実行スケジュールを、手動発注リマインダーとして Google Calendar イベントにする
 - プロンプト、フォーマット、チェックリスト、正規化スクリプトを改善する
 - 投資判断に必要な材料を整理する
 
@@ -105,6 +108,7 @@ Python が担当すること:
 - ChatGPT の回答保存
 - ChatGPT の改善提案の抽出
 - Codex 用修正プロンプト生成
+- coreスポット買い実行スケジュールの Google Calendar イベントドラフト生成
 - 履歴保存
 - Python の候補値と ChatGPT の最終提案の差分保存
 
@@ -180,6 +184,7 @@ ChatGPT に価格計算や比率計算を主担当させない。
 - Python 候補と ChatGPT 提案の差分
 - 改善提案
 - 生成した Codex 用修正プロンプト
+- coreスポット買い実行スケジュールから生成した Google Calendar イベントドラフト
 - README の最新月セクションに反映した月次サマリー、購入計画、今月の指値買い設定、ポートフォリオサマリー
 - ルート README には月次レビュー履歴を蓄積しない。過去月の月次レビュー原文、構造化レビュー、差分、計算結果は `data/history/` 配下を正とする
 
@@ -625,6 +630,7 @@ yfinance_symbols:
 - chatgpt review
 - python vs chatgpt diff
 - codex patch request
+- core spot buy Google Calendar event drafts
 
 ---
 
@@ -658,6 +664,13 @@ data/history/computations/2026_03_computation.yaml
 data/history/diffs/2026_03_python_vs_chatgpt.yaml
 ```
 
+### 5. Core spot buy Google Calendar event draft
+生成ファイル例:
+
+```text
+data/history/calendar_events/2026_03_core_spot_buy_google_calendar_events.yaml
+```
+
 ---
 
 ## Exact ChatGPT output contract
@@ -665,6 +678,12 @@ data/history/diffs/2026_03_python_vs_chatgpt.yaml
 Python が生成する月次レビュー用プロンプトでは、ChatGPT に以下の形式で出力させること。
 
 ```text
+【今月のcoreスポット買い提案】
+- 今月の推奨スポット買い総額
+- 配分先内訳
+- 実行スケジュール
+- Google Calendar イベント作成に使える具体日付、ファンド名、金額
+
 【今月の指値提案】
 - 銘柄ごとの推奨指値
 - 推奨株数

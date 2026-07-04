@@ -49,9 +49,11 @@ def default_output_paths(project_root: Path, snapshot_month: str) -> dict[str, P
         "review_prompt_history": project_root / "data/history/prompts" / f"{snapshot_month}_monthly_review_prompt.md",
         "review_structured": project_root / "data/history/reviews" / f"{snapshot_month}_review_structured.yaml",
         "diff": project_root / "data/history/diffs" / f"{snapshot_month}_python_vs_chatgpt.yaml",
+        "calendar_events": project_root
+        / "data/history/calendar_events"
+        / f"{snapshot_month}_core_spot_buy_google_calendar_events.yaml",
         "patch_request": project_root
         / "data/history/codex_patch_requests"
         / f"{snapshot_month}_codex_patch_request.yaml",
         "patch_prompt": project_root / "prompts/generated" / f"codex_patch_prompt_{snapshot_month}.md",
     }
-

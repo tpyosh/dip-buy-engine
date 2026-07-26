@@ -24,6 +24,59 @@ def test_review_parser_warns_when_sections_are_missing() -> None:
     assert any("Section not found" in warning for warning in feedback.parser_warnings)
 
 
+def test_review_parser_flags_self_contained_contract_violations() -> None:
+    feedback = parse_review_feedback(
+        "【Codex向け修正要約】\n"
+        "```md\n"
+        "must:\n"
+        "- active plan金額の各表現を単一計算結果へ統一する。"
+        "basis_planned_amount_jpy=12620505 は不整合\n"
+        "should:\n"
+        "- なし\n"
+        "nice_to_have:\n"
+        "- なし\n"
+        "```\n"
+        "なお、stale_table.csv は受信に失敗しています。"
+        "分析する場合は再アップロードしてください。\n"
+    )
+
+    assert (
+        "Self-contained review mentions an external data file or asks for re-upload."
+        in feedback.parser_warnings
+    )
+    assert (
+        "Review may misclassify the historical active-plan basis amount and current recalculation as fields that must be equal."
+        in feedback.parser_warnings
+    )
+    assert (
+        "Review contains content after the final Codex summary code block."
+        in feedback.parser_warnings
+    )
+
+
+def test_review_parser_allows_explicit_statement_that_amount_delta_is_not_an_error() -> None:
+    feedback = parse_review_feedback(
+        "【Codex向け修正要約】\n"
+        "```md\n"
+        "must:\n"
+        "- なし。basis_planned_amount_jpyとの差は不整合ではない\n"
+        "should:\n"
+        "- なし\n"
+        "nice_to_have:\n"
+        "- なし\n"
+        "```\n"
+    )
+
+    assert not any(
+        "historical active-plan basis amount" in warning
+        for warning in feedback.parser_warnings
+    )
+    assert not any(
+        "content after the final Codex summary" in warning
+        for warning in feedback.parser_warnings
+    )
+
+
 def test_review_parser_accepts_quarterly_rule_review_heading() -> None:
     feedback = parse_review_feedback(
         "【今月の指値提案】\n- MSFT: 指値 468.00 USD, 1株\n"

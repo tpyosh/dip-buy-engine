@@ -1,0 +1,68 @@
+schema_version: 1
+record_type: "workflow_retrospective"
+retrospective_id: "2026-07-26_chatgpt_monthly_review_handoff"
+period:
+  start: "2026-07-26"
+  end: "2026-07-26"
+prepared_at: "2026-07-26"
+strategy_ref: "strategy/current.yaml"
+plan_refs:
+  - "plans/2026/2026-07-25_cash_redeployment.yaml"
+transaction_refs: []
+information_available_at_decision_time:
+  - "自己完結型の月次レビュー依頼: reports/generated/monthly/2026_08/review_request.md"
+  - "ChatGPTの応答: reports/generated/monthly/2026_08/review_response.md"
+  - "計算結果: reports/generated/monthly/2026_08/computation.yaml"
+  - "現行戦略と承認済みactive plan、定期積立、住宅ローン前提"
+  - "active planのbasis snapshotは2026-06-28、planned_amount_jpyは12,620,505円"
+  - "月次レビューのcurrent snapshotは2026-07-26、現金13,622,664円、趣味枠現金1,000,000円、再計算額12,622,664円"
+  - "OpenAI公式のreasoning prompt guidanceとevaluation guidance"
+assumptions_at_decision_time:
+  - "添付ファイルを要求しないという否定指示だけで、周辺会話に残る古い外部ファイル情報も応答から排除できると想定した"
+  - "basis_planned_amount_jpyとrecommended_monthly_core_buy_budget_jpyの名前だけで、前者が判断時点の履歴値、後者が現在スナップショットによる再計算値だと伝わると想定した"
+  - "must / should / nice_to_haveの区分を要求すれば、現行source of truthにない新しい安全ルールはmustへ昇格されないと想定した"
+  - "住宅ローンの世帯64,900,000円と本人50%という表現から、それらが当初借入額であり現在残高ではないと解釈されると想定した"
+  - "プロンプト生成時の自己完結検査だけで十分であり、ChatGPT応答側の契約違反検査は不要と想定した"
+decision_process:
+  - "正規化済みスナップショット、現行戦略、active plan、定期積立、計算結果を単一Markdownへ埋め込んだ"
+  - "ローカル参照と外部表データの再アップロード要求を禁止した"
+  - "ChatGPT応答を現行戦略、active plan、FINANCIAL_ASSUMPTIONS.md、生成計算結果と項目単位で照合した"
+  - "応答の正しい検出と誤検出を分離し、誤検出が生じた入力契約上の曖昧さを逆算した"
+decisions_made:
+  - "単一Markdownハンドオフを採用し、レビュー時の追加添付を不要にした"
+  - "初版ではactive planの判断時点値と現在再計算値の関係を明示する専用セマンティクスを設けなかった"
+  - "初版ではChatGPT応答を機械検査するacceptance gateを設けなかった"
+  - "今回、自己完結性だけでなく金額意味論、severity、住宅ローン表示、引用、出力終端を明示的な契約にする方針を採用した"
+observed_outcomes:
+  - "主要な資産額、broad core不足、趣味枠現金1,000,000円の分離、半導体と高ボラ閾値、月650,000円を使わない点は概ね正しくレビューされた"
+  - "URA候補のtop-level suppressed=trueとexplanation内suppressed=falseの不一致を正しく検出した"
+  - "現行戦略の全世界株式100%と観測済み定期積立50/50の競合を正しく検出した"
+  - "判断時点計画額12,620,505円と現在再計算額12,622,664円の2,159円差を、日付差に伴う期待された差ではなく不整合と誤判定した"
+  - "生活防衛資金の新規確認ルールを、四半期should提案ではなく承認済み計画を無効化するmustとして扱った"
+  - "本人当初借入額32,450,000円を現在の住宅ローン残高のように表現した"
+  - "自己完結Markdownだけでレビューを完了した後に、古い外部ファイル名と再アップロード案内を追記した"
+process_evaluation_without_outcome_bias:
+  - "単一Markdownへのデータ集約は成功し、追加ファイルがなくても主要レビューを完了できたため、ハンドオフ方式自体は妥当だった"
+  - "否定指示は存在したが、周辺会話より本文契約を優先する規則、禁止する最終出力、応答終端の受入条件が不足していた"
+  - "金額を複数表示すること自体ではなく、各金額の基準日、役割、比較可能性、不変性を明示しなかったことが誤読の主因だった"
+  - "severityの分類名だけを指定し、mustへ入れてよい根拠を限定しなかったため、新規ガバナンス提案が現行計画の欠陥へ格上げされた"
+  - "生成プロンプトだけを検査し、生成応答に対するinstruction-following評価をしなかったため、明示的な禁止違反を自動検出できなかった"
+lessons:
+  - "複雑なハンドオフでは、データ値だけでなくsource role、基準日、比較規則、不変条件を近接した専用セクションに記載する"
+  - "active planのhistorical basisとcurrent recalculationは別フィールドとし、日付が異なる場合の差は期待され、履歴値を上書きしないと明示する"
+  - "mustは現行source of truth違反、計算誤り、危険な外部書込み、出力を壊す機械的不整合に限定する"
+  - "現行戦略にない新しい安全ルールはshouldの四半期提案とし、承認済み計画へ遡及適用しない"
+  - "周辺会話に外部ファイル情報があっても無視し、ファイル名、取得状況、再アップロード案内を最終出力へ含めないと明示する"
+  - "住宅ローンの当初借入額と現在残高を別概念として表示し、現在残高が本文にない場合は不明とする"
+  - "自己完結プロンプト検査に加え、ChatGPT応答へ契約違反lintと回帰テストを適用する"
+followup_decision_refs:
+  - "prompts/templates/monthly_review_template.md"
+  - "src/monthly_limit_order_review/prompt_renderer.py"
+  - "src/monthly_limit_order_review/portfolio_metrics.py"
+  - "src/monthly_limit_order_review/review_parser.py"
+  - "tests/test_prompt_builder.py"
+  - "tests/test_active_strategy_runtime.py"
+  - "tests/test_review_parser.py"
+unknowns:
+  - "ChatGPTの周辺会話またはProject参照情報が、末尾の古い外部ファイル案内へ与えた正確な寄与率"
+  - "プロンプト改善だけで全モデル・全会話状態の契約遵守を保証できるか"

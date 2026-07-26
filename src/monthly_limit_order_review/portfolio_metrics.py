@@ -344,6 +344,38 @@ def build_core_buy_materials(
             else None
         )
     )
+    active_plan_basis = (
+        active_core_plan.get("basis", {})
+        if active_core_plan is not None
+        else {}
+    )
+    active_plan_allocation = (
+        active_core_plan.get("allocation", {})
+        if active_core_plan is not None
+        else {}
+    )
+    active_plan_basis_snapshot_date = active_plan_basis.get("snapshot_date")
+    active_plan_basis_planned_amount_jpy = (
+        int(active_plan_allocation.get("planned_amount_jpy", 0))
+        if active_core_plan is not None
+        else None
+    )
+    active_plan_current_recalculated_amount_jpy = (
+        int(budget_plan["recommended_monthly_core_buy_budget_jpy"])
+        if active_core_plan is not None
+        else None
+    )
+    active_plan_amount_delta_jpy = (
+        active_plan_current_recalculated_amount_jpy
+        - active_plan_basis_planned_amount_jpy
+        if active_plan_current_recalculated_amount_jpy is not None
+        and active_plan_basis_planned_amount_jpy is not None
+        else None
+    )
+    active_plan_amount_difference_expected = (
+        active_core_plan is not None
+        and str(active_plan_basis_snapshot_date) != snapshot.snapshot_date.isoformat()
+    )
     return (
         {
             "strategy_id": (active_strategy or {}).get("strategy_id"),
@@ -367,12 +399,63 @@ def build_core_buy_materials(
                 if active_core_plan is not None
                 else None
             ),
+            "active_plan_target_group": (
+                active_core_plan.get("allocation", {}).get("target_group")
+                if active_core_plan is not None
+                else None
+            ),
+            "active_plan_product": (
+                active_core_plan.get("allocation", {}).get("product")
+                if active_core_plan is not None
+                else None
+            ),
+            "active_plan_product_allocation_pct": (
+                active_core_plan.get("allocation", {}).get("product_allocation_pct")
+                if active_core_plan is not None
+                else None
+            ),
+            "active_plan_execution_method": (
+                active_core_plan.get("allocation", {}).get("execution_method")
+                if active_core_plan is not None
+                else None
+            ),
             "active_plan_requires_pretrade_balance_confirmation": (
                 active_core_plan.get("allocation", {}).get(
                     "requires_pretrade_balance_confirmation"
                 )
                 if active_core_plan is not None
                 else None
+            ),
+            "active_plan_user_executes_order_manually": (
+                active_core_plan.get("allocation", {}).get(
+                    "user_executes_order_manually"
+                )
+                if active_core_plan is not None
+                else None
+            ),
+            "active_plan_basis_snapshot_date": active_plan_basis_snapshot_date,
+            "active_plan_basis_liquidity_jpy": (
+                active_plan_basis.get("liquidity_jpy")
+                if active_core_plan is not None
+                else None
+            ),
+            "active_plan_basis_planned_amount_jpy": (
+                active_plan_basis_planned_amount_jpy
+            ),
+            "active_plan_current_snapshot_date": (
+                snapshot.snapshot_date
+                if active_core_plan is not None
+                else None
+            ),
+            "active_plan_current_recalculated_amount_jpy": (
+                active_plan_current_recalculated_amount_jpy
+            ),
+            "active_plan_amount_delta_jpy": active_plan_amount_delta_jpy,
+            "active_plan_amount_difference_expected": (
+                active_plan_amount_difference_expected
+            ),
+            "active_plan_historical_basis_must_not_be_overwritten": (
+                active_core_plan is not None
             ),
             "core_actual_pct": core_allocation.actual_pct if core_allocation is not None else None,
             "core_target_pct": core_allocation.target_pct if core_allocation is not None else None,

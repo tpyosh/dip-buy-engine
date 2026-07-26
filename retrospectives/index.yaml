@@ -14,3 +14,7 @@ entries:
     classification: "historical_review_not_full_retrospective"
     original_review_ref: "data/history/reviews/chatgpt_review_2026_07.txt"
     structured_review_ref: "data/history/reviews/2026_07_review_structured.yaml"
+  - period: "2026-08"
+    classification: "workflow_retrospective_full"
+    original_review_ref: "reports/generated/monthly/2026_08/review_response.md"
+    structured_review_ref: "retrospectives/2026-07-26_chatgpt_monthly_review_handoff.yaml"

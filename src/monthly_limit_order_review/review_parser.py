@@ -29,6 +29,7 @@ def parse_review_feedback(review_text: str, *, review_target_month: str | None =
         for section_name in SECTION_HEADINGS
         if not sections.get(section_name)
     ]
+    parser_warnings.extend(find_review_contract_violations(review_text))
     monthly_text = sections.get("monthly_proposals", "")
     codex_text = sections.get("codex_summary", "")
 
@@ -59,6 +60,52 @@ def parse_review_feedback(review_text: str, *, review_target_month: str | None =
         core_spot_buy_plan=core_spot_buy_plan,
         parser_warnings=parser_warnings,
     )
+
+
+def find_review_contract_violations(review_text: str) -> list[str]:
+    violations: list[str] = []
+    if re.search(
+        r"(?i)(?:[^\s`]+\.csv\b|再アップロード|アップロードしてください)",
+        review_text,
+    ):
+        violations.append(
+            "Self-contained review mentions an external data file or asks for re-upload."
+        )
+
+    if re.search(
+        r"(?:"
+        r"active plan金額.{0,300}単一計算結果へ統一"
+        r"|basis_planned_amount_jpy\s*=\s*[0-9]+\s*は不整合"
+        r"|basis_planned_amount_jpy.{0,200}(?:統一|一致させ)"
+        r")",
+        review_text,
+        flags=re.DOTALL | re.IGNORECASE,
+    ):
+        violations.append(
+            "Review may misclassify the historical active-plan basis amount and current recalculation as fields that must be equal."
+        )
+
+    codex_summary = re.search(
+        r"【Codex\s*向け修正要約】",
+        review_text,
+        flags=re.IGNORECASE,
+    )
+    if codex_summary is not None:
+        summary_tail = review_text[codex_summary.end():]
+        summary_code_block = re.search(
+            r"```(?:md|markdown)?[^\n]*\n.*?\n```",
+            summary_tail,
+            flags=re.DOTALL | re.IGNORECASE,
+        )
+        if (
+            summary_code_block is not None
+            and summary_tail[summary_code_block.end():].strip()
+        ):
+            violations.append(
+                "Review contains content after the final Codex summary code block."
+            )
+
+    return violations
 
 
 def split_sections(review_text: str) -> dict[str, str]:

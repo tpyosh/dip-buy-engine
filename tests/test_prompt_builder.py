@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from monthly_limit_order_review.prompt_builder import build_monthly_review_prompt
 
 
@@ -13,6 +15,21 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "Codex が Money Forward スクリーンショットを一次情報として OCR・正規化" in prompt
     assert "ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しません。" in prompt
     assert "ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しないこと。" in prompt
+    assert "## 0. 自己完結ハンドオフ" in prompt
+    assert "handoff_mode: self_contained_single_markdown" in prompt
+    assert "external_files_required: false" in prompt
+    assert "normalized_snapshot: embedded_below" in prompt
+    assert "active_strategy: embedded_below" in prompt
+    assert "active_plans: embedded_below" in prompt
+    assert "market_references: embedded_below" in prompt
+    assert "## 0-1. Active plan金額セマンティクス（最優先）" in prompt
+    assert "active_plan_basis_planned_amount_jpy:" in prompt
+    assert "active_plan_current_recalculated_amount_jpy:" in prompt
+    assert "active_plan_amount_difference_expected:" in prompt
+    assert "active_plan_historical_basis_must_not_be_overwritten:" in prompt
+    assert "差だけを理由に不整合や統一対象と判定しない" in prompt
+    assert ".csv" not in prompt.lower()
+    assert "file://" not in prompt.lower()
     assert "## 1. 前提" in prompt
     assert "【要約】" in prompt
     assert "## 5. コア定額買い判定材料" in prompt
@@ -43,14 +60,8 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "必ず単一の ```md コードブロックで出力すること" in prompt
     assert "無理に改善提案を作らない" in prompt
     assert "`must: なし`" in prompt
-    assert (
-        "README.md の最新月セクションにサマリーと今月の指値買い設定を反映し、"
-        "過去月の Monthly Review セクションを残さない依頼は必ず Codex向け修正要約に含めてください。"
-        in prompt
-    )
-    assert "README.md に最新月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する" in prompt
-    assert "今月の指値買い設定は、銘柄、指値、株数、見送り対象、主な理由が一目で分かる表" in prompt
-    assert "ルートREADMEには月次レビュー履歴を蓄積せず、過去月の Monthly Review セクションは残さないでください。" in prompt
+    assert "新規生成物は reports/generated/ に限定" in prompt
+    assert "data/history と prompts/generated は不変履歴" in prompt
     assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
     assert "monthly_core_budget_tier" in prompt
     assert "recommended_monthly_core_buy_budget_jpy" in prompt
@@ -63,11 +74,13 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "((指値 / 直近20営業日終値平均) - 1) * 100" in prompt
     assert "承認済みactive planがある場合" in prompt
     assert "確認済み利用可能現金から趣味枠現金1,000,000円を控除" in prompt
+    assert "根拠のない月650,000円の現金流入" in prompt
     assert "積立しているからスポット買いは不要" in prompt
     assert "total_monthly_jpy: 750000" in prompt
     assert "給与収入額と毎月の正確な余剰額は未記録" in prompt
     assert "通常生活費300,000円/月と本人分住宅ローン74,171円/月" in prompt
-    assert "住宅ローンはペアローン世帯合計64,900,000円、本人負担50%、年1.120%" in prompt
+    assert "住宅ローンはペアローンの世帯当初借入額64,900,000円、本人当初借入額32,450,000円、年1.120%" in prompt
+    assert "これらは現在残高ではない" in prompt
     assert "既存の毎月固定積立（Core積立設定）を前提に評価すること" in prompt
     assert "| IDECO_ALL_COUNTRY | eMAXIS Slim 全世界株式（オール・カントリー） | 55000 | iDeCo | pension |" in prompt
     assert "pension_monthly_dca_total_jpy: 55000" in prompt
@@ -95,4 +108,24 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "annualized_crypto_dca_jpy" in prompt
     assert "real_estate_exposure_present" in prompt
     assert "月次の執行判断と、四半期単位のルール見直し提案は明確に分離してください。" in prompt
+    assert "## 15. 回答前の必須acceptance check" in prompt
+    assert "外部ファイル名、添付状況、取得失敗、再アップロード案内が最終回答にない" in prompt
+    assert "現行source of truthにない新しい方針をmustへ入れたり" in prompt
+    assert "コードブロックを閉じた後に何も追記していない" in prompt
     assert "指値設定対象月キー" in prompt
+
+
+def test_monthly_review_prompt_rejects_unresolved_local_file_reference(
+    sample_computation,
+) -> None:
+    template_path = (
+        Path(__file__).resolve().parents[1]
+        / "prompts/templates/monthly_review_template.md"
+    )
+    template = (
+        template_path.read_text(encoding="utf-8")
+        + "\nローカル参照: stale_reference.csv\n"
+    )
+
+    with pytest.raises(ValueError, match="unresolved local references"):
+        build_monthly_review_prompt(sample_computation, template)

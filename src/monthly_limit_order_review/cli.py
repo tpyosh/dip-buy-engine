@@ -23,7 +23,6 @@ from .on_demand import (
 )
 from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics, suggest_core_proxy_symbol
 from .prompt_renderer import render_chatgpt_prompt
-from .readme_portfolio import refresh_readme_portfolio
 from .repository_records import (
     audit_repository,
     load_recurring_contribution_context,
@@ -149,15 +148,8 @@ def handle_generate_review_prompt(args: argparse.Namespace) -> int:
     write_yaml(paths["computation"], computation)
     write_text(output_path, prompt)
     write_text(paths["review_prompt_history"], prompt)
-    refresh_readme_portfolio(
-        readme_path=project_root / "README.md",
-        snapshot_date=computation.snapshot.snapshot_date.isoformat(),
-        total_assets_jpy=computation.snapshot.total_assets_jpy,
-        bucket_allocations=computation.bucket_allocations,
-    )
     LOGGER.info("Saved computation to %s", paths["computation"])
     LOGGER.info("Saved review prompt to %s", output_path)
-    LOGGER.info("Updated README portfolio section at %s", project_root / "README.md")
     return 0
 
 
@@ -229,15 +221,8 @@ def handle_monthly_run(args: argparse.Namespace) -> int:
     write_yaml(paths["computation"], computation)
     write_text(paths["review_prompt"], prompt)
     write_text(paths["review_prompt_history"], prompt)
-    refresh_readme_portfolio(
-        readme_path=project_root / "README.md",
-        snapshot_date=computation.snapshot.snapshot_date.isoformat(),
-        total_assets_jpy=computation.snapshot.total_assets_jpy,
-        bucket_allocations=computation.bucket_allocations,
-    )
     LOGGER.info("Saved computation to %s", paths["computation"])
     LOGGER.info("Saved review prompt to %s", paths["review_prompt"])
-    LOGGER.info("Updated README portfolio section at %s", project_root / "README.md")
     return 0
 
 
@@ -555,10 +540,11 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     recurring_total_jpy = recurring_contributions.get("total_monthly_jpy")
     recommended_spot_buy_jpy = core_buy_materials.get("recommended_monthly_core_buy_budget_jpy")
     active_plan_account_type = core_buy_materials.get("active_plan_account_type")
+    active_plan_id = core_buy_materials.get("active_plan_id")
     monthly_taxable_core_spot_buy_required = bool(
         recurring_contributions.get("taxable_core_spot_buy_required", False)
         or (
-            core_buy_materials.get("active_plan_id")
+            active_plan_id
             and active_plan_account_type
             and "特定口座" in str(active_plan_account_type)
         )
@@ -985,10 +971,11 @@ def build_core_spot_buy_materials(
     )
     recommended_core_spot_buy = core_buy_materials.get("recommended_monthly_core_buy_budget_jpy")
     active_plan_account_type = core_buy_materials.get("active_plan_account_type")
+    active_plan_id = core_buy_materials.get("active_plan_id")
     taxable_core_spot_buy_required = bool(
         recurring_contributions.get("taxable_core_spot_buy_required", False)
         or (
-            core_buy_materials.get("active_plan_id")
+            active_plan_id
             and active_plan_account_type
             and "特定口座" in str(active_plan_account_type)
         )
@@ -1025,6 +1012,40 @@ def build_core_spot_buy_materials(
     jun_core_allocation = allocation_map.get("jun_core")
     bond_like_holdings = detect_bond_like_holdings(snapshot.holdings)
     real_estate_risk_profile = build_real_estate_risk_profile()
+    if active_plan_id:
+        core_spot_buy_allocation_rule = {
+            "source_role": "approved_active_plan",
+            "target_group": core_buy_materials.get("active_plan_target_group"),
+            "product": core_buy_materials.get("active_plan_product"),
+            "product_allocation_pct": core_buy_materials.get(
+                "active_plan_product_allocation_pct"
+            ),
+        }
+        baseline_total_core_deployment_target_jpy = None
+        baseline_core_spot_buy_jpy = None
+        date_based_override_active = False
+        active_date_based_override = None
+    else:
+        core_spot_buy_allocation_rule = recurring_contributions.get(
+            "core_spot_buy_allocation_rule"
+        )
+        baseline_total_core_deployment_target_jpy = (
+            recurring_contributions.get("baseline_total_core_deployment_target_jpy")
+            or core_buy_materials.get("baseline_total_core_deployment_target_jpy")
+        )
+        baseline_core_spot_buy_jpy = (
+            core_buy_materials.get("baseline_core_spot_buy_jpy")
+            or recurring_contributions.get(
+                "rebalance_mode_core_spot_buy_reference_jpy"
+            )
+        )
+        date_based_override_active = recurring_contributions.get(
+            "date_based_override_active",
+            False,
+        )
+        active_date_based_override = recurring_contributions.get(
+            "active_date_based_override"
+        )
     return {
         "strategy_id": core_buy_materials.get("strategy_id"),
         "active_plan_id": core_buy_materials.get("active_plan_id"),
@@ -1033,8 +1054,19 @@ def build_core_spot_buy_materials(
         "active_plan_execution_amount_rule": core_buy_materials.get(
             "active_plan_execution_amount_rule"
         ),
+        "active_plan_target_group": core_buy_materials.get("active_plan_target_group"),
+        "active_plan_product": core_buy_materials.get("active_plan_product"),
+        "active_plan_product_allocation_pct": core_buy_materials.get(
+            "active_plan_product_allocation_pct"
+        ),
+        "active_plan_execution_method": core_buy_materials.get(
+            "active_plan_execution_method"
+        ),
         "active_plan_requires_pretrade_balance_confirmation": core_buy_materials.get(
             "active_plan_requires_pretrade_balance_confirmation"
+        ),
+        "active_plan_user_executes_order_manually": core_buy_materials.get(
+            "active_plan_user_executes_order_manually"
         ),
         "broad_core_actual_pct": (
             strategy_allocation_map["broad_core"].actual_pct
@@ -1084,18 +1116,14 @@ def build_core_spot_buy_materials(
         ),
         "recommended_monthly_core_buy_budget_jpy": recommended_core_spot_buy,
         "total_monthly_core_deployment_jpy": total_monthly_core_deployment,
-        "baseline_total_core_deployment_target_jpy": recurring_contributions.get(
-            "baseline_total_core_deployment_target_jpy"
-        )
-        or core_buy_materials.get("baseline_total_core_deployment_target_jpy"),
-        "baseline_core_spot_buy_jpy": core_buy_materials.get("baseline_core_spot_buy_jpy")
-        or recurring_contributions.get("rebalance_mode_core_spot_buy_reference_jpy"),
+        "baseline_total_core_deployment_target_jpy": baseline_total_core_deployment_target_jpy,
+        "baseline_core_spot_buy_jpy": baseline_core_spot_buy_jpy,
         "hard_cap_core_spot_buy_jpy": core_buy_materials.get("hard_cap_core_spot_buy_jpy"),
         "monthly_core_budget_band": core_buy_materials.get("monthly_core_budget_band"),
         "spot_buy_bands": core_buy_materials.get("spot_buy_bands"),
-        "core_spot_buy_allocation_rule": recurring_contributions.get("core_spot_buy_allocation_rule"),
-        "date_based_override_active": recurring_contributions.get("date_based_override_active", False),
-        "active_date_based_override": recurring_contributions.get("active_date_based_override"),
+        "core_spot_buy_allocation_rule": core_spot_buy_allocation_rule,
+        "date_based_override_active": date_based_override_active,
+        "active_date_based_override": active_date_based_override,
         "configuration_warnings": recurring_contributions.get("configuration_warnings", []),
         "major_core_proxy_stats": major_core_proxy_stats,
         "portfolio_risk_bucket_summary": [

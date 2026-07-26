@@ -92,6 +92,14 @@ def test_approved_cash_plan_overrides_legacy_monthly_core_budget() -> None:
     assert materials["active_plan_id"] == "2026-07-25_cash_redeployment"
     assert materials["monthly_core_budget_tier"] == "approved_lump_sum_plan"
     assert materials["recommended_monthly_core_buy_budget_jpy"] == 12620505
+    assert materials["active_plan_basis_snapshot_date"] == "2026-06-28"
+    assert materials["active_plan_basis_liquidity_jpy"] == 13620505
+    assert materials["active_plan_basis_planned_amount_jpy"] == 12620505
+    assert materials["active_plan_current_snapshot_date"].isoformat() == "2026-06-28"
+    assert materials["active_plan_current_recalculated_amount_jpy"] == 12620505
+    assert materials["active_plan_amount_delta_jpy"] == 0
+    assert materials["active_plan_amount_difference_expected"] is False
+    assert materials["active_plan_historical_basis_must_not_be_overwritten"] is True
     assert materials["active_plan_requires_pretrade_balance_confirmation"] is True
 
 
@@ -138,6 +146,16 @@ def test_monthly_cli_records_current_strategy_and_approved_plan(
     assert computation.core_buy_materials[
         "recommended_monthly_core_buy_budget_jpy"
     ] == 12620505
+    assert computation.core_buy_materials["active_plan_product"] == (
+        "楽天・プラス・オールカントリー株式インデックス・ファンド"
+    )
+    assert computation.core_buy_materials[
+        "active_plan_product_allocation_pct"
+    ] == 1
+    assert computation.core_buy_materials["active_plan_execution_method"] == "lump_sum"
+    assert computation.core_buy_materials[
+        "active_plan_user_executes_order_manually"
+    ] is True
     assert computation.sox_buy_signal["routine_additions_allowed"] is False
     assert "core_recurring_plan_conflicts_with_current_strategy" in warning_codes
     assert "legacy_candidate_heuristic_review_only" in warning_codes
@@ -166,5 +184,52 @@ def test_monthly_cli_records_current_strategy_and_approved_plan(
     assert "| broad_core | 13629542 | 34.62% | 70.00% | -35.38% |" in prompt
     assert "| active_hobby | 13104152 | 33.28% | 30.00% | 3.28% |" in prompt
     assert "recommended_monthly_core_buy_budget_jpy: 12620505" in prompt
+    assert (
+        "active_plan_product: 楽天・プラス・オールカントリー株式インデックス・ファンド"
+        in prompt
+    )
+    assert "active_plan_product_allocation_pct: 100.00%" in prompt
+    assert "active_plan_execution_method: lump_sum" in prompt
+    assert "active_plan_user_executes_order_manually: True" in prompt
+    assert "core_spot_buy_allocation_rule: {'source_role': 'approved_active_plan'" in prompt
+    assert "baseline_total_core_deployment_target_jpy: 1380000" not in prompt
+    assert "rebalance_mode_core_spot_buy_reference_jpy: 1280000" not in prompt
+    assert "external_files_required: false" in prompt
     assert "routine_additions_allowed: False" in prompt
     assert "inherited_pending_review" in prompt
+
+
+def test_current_snapshot_keeps_active_plan_basis_separate_from_recalculation(
+    monkeypatch,
+    sample_market_references,
+) -> None:
+    monkeypatch.setattr(
+        "monthly_limit_order_review.cli.fetch_market_references",
+        lambda requests: sample_market_references,
+    )
+
+    computation = compute_monthly(
+        ROOT / "data/normalized/snapshot_2026_08.yaml",
+        project_root=ROOT,
+    )
+    materials = computation.core_buy_materials
+
+    assert materials["active_plan_basis_snapshot_date"] == "2026-06-28"
+    assert materials["active_plan_basis_planned_amount_jpy"] == 12620505
+    assert materials["active_plan_current_snapshot_date"].isoformat() == "2026-07-26"
+    assert materials["active_plan_current_recalculated_amount_jpy"] == 12622664
+    assert materials["active_plan_amount_delta_jpy"] == 2159
+    assert materials["active_plan_amount_difference_expected"] is True
+    assert materials["active_plan_historical_basis_must_not_be_overwritten"] is True
+
+    prompt = render_chatgpt_prompt(
+        computation,
+        (ROOT / "prompts/templates/monthly_review_template.md").read_text(
+            encoding="utf-8"
+        ),
+    )
+    assert "active_plan_basis_planned_amount_jpy: 12620505" in prompt
+    assert "active_plan_current_recalculated_amount_jpy: 12622664" in prompt
+    assert "active_plan_amount_delta_jpy: 2159" in prompt
+    assert "active_plan_amount_difference_expected: true" in prompt
+    assert "active_plan_historical_basis_must_not_be_overwritten: true" in prompt

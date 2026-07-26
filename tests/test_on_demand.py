@@ -213,5 +213,9 @@ def test_cli_exposes_on_demand_command() -> None:
 
 def test_on_demand_uses_latest_snapshot_as_symbol_inventory_by_default() -> None:
     path = resolve_on_demand_inventory_path(ROOT, None)
+    expected = max(
+        (ROOT / "data/normalized").glob("snapshot_20??_??.yaml"),
+        key=lambda candidate: candidate.stem,
+    )
 
-    assert path.name == "snapshot_2026_07.yaml"
+    assert path == expected

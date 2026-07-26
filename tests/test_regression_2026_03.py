@@ -200,7 +200,9 @@ def test_taxable_all_country_drawdown_is_not_null_after_reference_mapping(monkey
     assert taxable["drawdown_pct_from_recent_high"] is not None
 
 
-def test_snapshot_2026_04_is_treated_as_april_limit_order_cycle(monkeypatch) -> None:
+def test_snapshot_2026_04_is_treated_as_april_limit_order_cycle_without_forced_schedule(
+    monkeypatch,
+) -> None:
     monkeypatch.setattr("monthly_limit_order_review.cli.fetch_market_references", fake_references)
 
     snapshot_path = ROOT / "data/normalized/snapshot_2026_04.yaml"
@@ -212,10 +214,13 @@ def test_snapshot_2026_04_is_treated_as_april_limit_order_cycle(monkeypatch) -> 
     assert computation.monthly_execution_outputs["review_target_month"] == "2026_04"
     assert "review_target_month: 2026_04" in prompt
     assert "指値設定対象月キー: 2026_04" in prompt
-    assert "4月1日:" in prompt
+    assert "実行前残高確認後にユーザーが手動で一括発注" in prompt
+    assert "4月1日:" not in prompt
 
 
-def test_snapshot_2026_05_core_references_are_not_missing_and_schedule_uses_may(monkeypatch) -> None:
+def test_snapshot_2026_05_core_references_are_not_missing_without_forced_schedule(
+    monkeypatch,
+) -> None:
     monkeypatch.setattr("monthly_limit_order_review.cli.fetch_market_references", fake_references)
 
     snapshot_path = ROOT / "data/normalized/snapshot_2026_05.yaml"
@@ -255,7 +260,8 @@ def test_snapshot_2026_05_core_references_are_not_missing_and_schedule_uses_may(
     assert "account_type: 特定口座" in prompt
     assert "total_monthly_core_deployment_jpy: 1380000" in prompt
     assert "指値設定対象月キー: 2026_05" in prompt
-    assert "5月1日:" in prompt
+    assert "実行前残高確認後にユーザーが手動で一括発注" in prompt
+    assert "5月1日:" not in prompt
 
 
 def test_snapshot_2026_06_applies_nisa_exhaustion_core_deployment_override(monkeypatch, tmp_path) -> None:

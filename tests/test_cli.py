@@ -53,7 +53,10 @@ def test_build_reference_requests_includes_2026_05_core_proxies() -> None:
     assert requests["RAKUTEN_PLUS_SP500"]["yfinance_symbol"] == "VOO"
 
 
-def test_generate_review_prompt_updates_readme(monkeypatch, tmp_path: Path) -> None:
+def test_generate_review_prompt_writes_only_generated_reports(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
     project_root = tmp_path
     (project_root / "config").mkdir()
     (project_root / "prompts/templates").mkdir(parents=True)
@@ -110,12 +113,10 @@ def test_generate_review_prompt_updates_readme(monkeypatch, tmp_path: Path) -> N
     result = handle_generate_review_prompt(Namespace(snapshot=str(snapshot_path), output=None, verbose=False))
 
     assert result == 0
-    updated_readme = readme_path.read_text(encoding="utf-8")
-    assert "<!-- portfolio-piechart:start -->" in updated_readme
-    assert "## Latest Portfolio Snapshot" in updated_readme
-    assert "snapshot_date: 2026-03-29" in updated_readme
+    assert readme_path.read_text(encoding="utf-8") == "# Title\n\n## 目的\nbody\n"
     assert (project_root / "reports/generated/monthly/2026_04/computation.yaml").exists()
     assert (project_root / "reports/generated/monthly/2026_04/review_request.md").exists()
+    assert not (project_root / "docs/portfolio_allocation_latest.svg").exists()
 
 
 def test_cash_normalization_estimate_separates_gross_and_net_reduction() -> None:

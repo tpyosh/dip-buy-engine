@@ -1,8 +1,17 @@
 from __future__ import annotations
 
+import re
+from decimal import Decimal
+
 from .models import MonthlyComputation, PortfolioWarning
 from .portfolio_metrics import format_pct
 from .utils import month_key
+
+
+SELF_CONTAINED_HANDOFF_MODE = "self_contained_single_markdown"
+UNRESOLVED_LOCAL_REFERENCE_RE = re.compile(
+    r"(?i)(?:file://\S+|(?:^|[\s`\"'(])[^`\s\"']+\.csv\b)"
+)
 
 
 def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -> str:
@@ -17,7 +26,44 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             review_target_month_to_japanese_month(review_target_month),
         )
     )
-    lines: list[str] = [rendered_template.strip(), "", "## 1. 前提"]
+    lines: list[str] = [
+        rendered_template.strip(),
+        "",
+        "## 0. 自己完結ハンドオフ",
+        f"- handoff_mode: {SELF_CONTAINED_HANDOFF_MODE}",
+        "- external_files_required: false",
+        "- normalized_snapshot: embedded_below",
+        "- active_strategy: embedded_below",
+        "- active_plans: embedded_below",
+        "- recurring_contribution_observation: embedded_below",
+        "- market_references: embedded_below",
+        "- computed_metrics_and_warnings: embedded_below",
+        "- このMarkdown本文だけをレビュー対象にすること",
+        "- 添付ファイル、ローカルファイル、Project/GPTの参照ファイルを探さないこと",
+        "- 外部表データの再アップロードを要求しないこと",
+        "- 本文にない値は不明として扱い、ゼロや推測値で補完しないこと",
+        "",
+        "## 0-1. Active plan金額セマンティクス（最優先）",
+    ]
+
+    core_buy_materials = computation.core_buy_materials
+    lines.extend(
+        [
+            f"- active_plan_basis_snapshot_date: {core_buy_materials.get('active_plan_basis_snapshot_date') or '-'}",
+            f"- active_plan_basis_liquidity_jpy: {core_buy_materials.get('active_plan_basis_liquidity_jpy')}",
+            f"- active_plan_basis_planned_amount_jpy: {core_buy_materials.get('active_plan_basis_planned_amount_jpy')}",
+            f"- active_plan_current_snapshot_date: {core_buy_materials.get('active_plan_current_snapshot_date') or '-'}",
+            f"- active_plan_current_recalculated_amount_jpy: {core_buy_materials.get('active_plan_current_recalculated_amount_jpy')}",
+            f"- active_plan_amount_delta_jpy: {core_buy_materials.get('active_plan_amount_delta_jpy')}",
+            f"- active_plan_amount_difference_expected: {str(bool(core_buy_materials.get('active_plan_amount_difference_expected'))).lower()}",
+            f"- active_plan_historical_basis_must_not_be_overwritten: {str(bool(core_buy_materials.get('active_plan_historical_basis_must_not_be_overwritten'))).lower()}",
+            "- basisは承認時の履歴値、current recalculated amountは今回スナップショットによる再計算値であり、同じ意味の重複フィールドではない",
+            "- 基準日または現金が異なる場合の差は期待される。差だけを理由に不整合や統一対象と判定しない",
+            "- 承認時のbasis値を現在値で上書きしない。今月はcurrent recalculated amountを実行前残高確認付きの計画額として扱う",
+            "",
+            "## 1. 前提",
+        ]
+    )
 
     lines.extend(
         [
@@ -30,13 +76,20 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             f"- strategy_effective_from: {computation.strategy_summary.get('effective_from') or '-'}",
             f"- active_plan_ids: {computation.strategy_summary.get('active_plan_ids') or []}",
             f"- holdings_count: {len(snapshot.holdings)}",
+            "- source_role_snapshot: observed_fact",
+            "- source_role_active_strategy: approved_policy",
+            "- source_role_active_plan: approved_pending_execution",
+            "- source_role_candidate_orders: proposal_only",
+            "- source_role_recurring_contributions: observed_setting",
+            "- 取引実績、承認済み計画、分析上の提案を相互に読み替えないこと",
             "- スナップショットは Money Forward スクリーンショットを一次情報として Codex が OCR・正規化したものとして扱うこと",
             "- ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しないこと。画像読取は Codex 側で完了済みとして扱い、このプロンプト内の構造化データだけをレビューすること",
             "- Money Forward から貼り付けられたテキストがある場合でも、それは補助情報であり、HTML由来でレイアウト・列・階層・並び順が崩れている可能性がある",
             "- OCR・正規化・前月差分の検証警告は後続の警告一覧に含めているため、投資レビューでは警告を前提条件として扱うこと",
             "- 給与で通常生活費300,000円/月と本人分住宅ローン74,171円/月を賄っており、日常生活費に投資資産の売却を前提としていない",
             "- 給与収入額と毎月の正確な余剰額は未記録であり、推測で補完しないこと",
-            "- 住宅ローンはペアローン世帯合計64,900,000円、本人負担50%、年1.120%としてリスク評価に含めること",
+            "- 住宅ローンはペアローンの世帯当初借入額64,900,000円、本人当初借入額32,450,000円、年1.120%としてリスク評価に含めること。これらは現在残高ではない",
+            "- 現在の住宅ローン残高が本文に明示されていない場合は不明とし、当初借入額を現在残高と表現しないこと",
             f"- 半導体エクスポージャ(Direct): {format_pct(computation.exposure_breakdown.get('direct_semiconductor_exposure_pct'))}",
             f"- AIインフラ感応度(Indirect): {format_pct(computation.exposure_breakdown.get('indirect_ai_infra_exposure_pct'))}",
             "- 指値設定は前月末または当月初に実施しうるため、snapshot_date が月末でも翌月の指値設定として解釈してよい",
@@ -63,7 +116,14 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
     lines.extend(build_core_spot_buy_materials(computation.metadata.get("core_spot_buy_materials", {})))
 
     lines.extend(["", "## 5-2. Core積立設定（毎月固定）"])
-    lines.extend(build_core_recurring_contributions(computation.metadata.get("core_recurring_contributions", {})))
+    lines.extend(
+        build_core_recurring_contributions(
+            computation.metadata.get("core_recurring_contributions", {}),
+            include_legacy_policy=not bool(
+                computation.strategy_summary.get("active_plan_ids")
+            ),
+        )
+    )
 
     lines.extend(["", "## 5-3. iDeCo積立設定（毎月固定）"])
     lines.extend(build_pension_monthly_dca(computation.metadata.get("core_recurring_contributions", {})))
@@ -115,20 +175,19 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 今月の推奨スポット買い総額を、JPY の単一具体額で最初に明示すること",
             "- 承認済みactive planがある場合は、その計画額と実行前残高確認条件を優先し、別の金額を作らないこと",
             "- `多めに` `厚めに` `数十万円` `50〜100万円` のような曖昧表現は禁止",
-            "- 2026年5月〜12月で `nisa_growth_quota_status: exhausted` の場合は、固定core積立額を100,000円として明示すること",
-            "- 2026年5月〜12月で `taxable_core_spot_buy_required: True` の場合は、`account_type: 特定口座`、NISA成長投資枠枯渇の理由、税効率メモを明示すること",
-            "- 2026年5月〜12月は、固定core積立額 + coreスポット買い提案額 = total_monthly_core_deployment_jpy を明示すること",
-            "- NISA枠がないからcore購入を弱めるのではなく、core不足と現金過多の是正を優先して特定口座スポットで補うこと",
-            "- 税効率低下よりもbroad core不足と未配分現金の是正を優先し、承認済み趣味枠現金1,000,000円は維持すること",
-            "- 2026年5月〜12月の提案額は、normal / aggressive / rebalance のどの rule-based band に基づくか、また今月の discretionary adjustment があるかを分けて書くこと",
+            "- 定期積立額とcoreスポット買い提案額は別項目として明示し、合算値には内訳を付けること",
+            "- 承認済みactive planは計画であって取引実績ではない。注文済み・約定済みと表現しないこと",
+            "- active planの商品、配分、口座、execution_method、実行前確認条件を優先し、別案を作らないこと",
+            "- broad core不足と未配分現金の是正時も、承認済み趣味枠現金1,000,000円は維持すること",
+            "- 根拠のない月650,000円の現金流入を計算や提案に使わないこと",
             "- 配分先内訳を明示すること",
-            "- 実行方法を `一括` / `2〜4分割` / `押し目待ち併用` のいずれかで明示すること",
+            "- active_plan_execution_method がある場合はその実行方法をそのまま明示すること",
             "- 判断根拠は `相場面` / `ポートフォリオ歪み` / `流動性水準` を分けて書くこと",
             "- その判断が `ルール上の判断` か `今月の裁量判断` かを分離すること",
             "- broad market core 商品を優先し、むやみに新規商品を増やさないこと",
             "- 新規のbroad core購入は、承認済み戦略どおり全世界株式100%とすること",
             "- 既存S&P500は強制売却しないが、通常の新規購入先にはしないこと",
-            "- 実行スケジュールは Google Calendar の手動発注リマインダー作成に使うため、各行に具体日付、ファンド名、金額を必ず含めること",
+            "- 証券注文、送金、Calendar登録を実行したと表現しないこと",
             "- 債券や低リスク商品を提案してもよいが、core equity のスポット買い額は必ず別途提示すること",
             "- `積立しているからスポット買いは不要` とは結論しないこと",
             "",
@@ -138,7 +197,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 0段の場合は『今月は見送り』と明記する",
             "- Python 候補より段数を減らした場合は、その理由が『ルール上の判断』か『今月の裁量判断』かを明記する",
             "- Python 候補より段数を増やした場合も、その理由を明記する",
-            "- 2026年5月〜12月は coreスポット買いの優先度を上げ、coreスポット買い予算を削ってまでテーマ銘柄を買わないこと",
+            "- 承認済みcore計画の資金を削ってまでテーマ銘柄を買わないこと",
             "- 直接半導体比率が15%を超える間は通常買い増しを行わず、20%超ではリバランスを人間へ提案すること",
             "- 高ボラ単一銘柄は5%を通常上限、8%超をリバランス提案閾値として扱うこと",
             "- MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先すること",
@@ -155,7 +214,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 安ければ追加でどの程度厚くする考え方が妥当か",
             "- コアとサテライトの資金配分優先順位",
             "- 既存の毎月固定積立（Core積立設定）を前提に評価すること",
-            "- 2026年5月〜12月で NISA成長投資枠が枯渇している場合は、固定core積立100,000円/月を前提にし、特定口座スポット買いで補う方針を明示すること",
+            "- `plans/recurring/`由来の観測済み積立設定を前提にし、active planの商品配分や取引実績とは分けること",
             "- 積立設定が大きくても、それだけでスポット買い免除にしないこと",
             "- 固定積立を維持するか、減額/停止すべきかを明示すること（必要な場合のみ）",
             "- ルール上の判断と今月の裁量判断を分けて説明すること",
@@ -186,40 +245,38 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 大きな問題がない場合は『大きなルール変更提案なし』と明記してよい",
             "- ハルシネーション防止のため、推測で問題点や改善案を作らないこと",
             "- must には月次判断に実害があるものだけを入れること",
+            "- must は現行source of truthとの矛盾、算術誤り、危険な外部書込み、またはレビュー出力へ実害がある機械的不整合に限定すること",
+            "- 現行source of truthにない新しい運用・安全・ガバナンス方針はshouldの四半期提案とし、承認済み計画を遡及的に無効化しないこと",
             "",
             "【Codex向け修正要約】",
             "- このセクションの本文全体を、必ず単一の ```md コードブロックで出力すること",
             "- コードブロック外に Codex向け修正要約を書かないこと",
             "- 問題がない場合でもコードブロックは省略せず、`must: なし` のように明記すること",
             "- must / should / nice_to_have は空欄不可だが、該当なしの場合は `なし` と書いてよい",
-            "- コードやルールへの修正指摘が実質的にない月でも、`README.md` の最新月セクションに月次サマリーと今月の指値買い設定を反映する依頼は必ず含めること",
-            "- 修正指摘がない月は、少なくとも `should` に `README.md` へ最新月サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する` と書くこと",
-            "- README.md では、今月の指値買い設定を最新月セクション内の見やすい位置に置き、銘柄、指値、株数、見送り対象、主な理由を一覧化すること",
-            "- README.md 更新依頼には、ルートREADMEに月次レビュー履歴を蓄積せず、既存の `## Monthly Review: YYYY_MM` を最新月の内容で置換し、過去月の `Monthly Review` セクションを残さない前提を必ず含めること",
+            "- 新規生成物の反映先は `reports/generated/` とし、不変履歴や過去生成物の書換えを依頼しないこと",
             "- 出力例:",
             "```md",
             "must:",
             "- なし",
             "",
             "should:",
-            "- README.md に最新月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映し、過去月の Monthly Review セクションは残さない",
+            "- なし",
             "",
             "nice_to_have:",
             "- なし",
             "",
             "修正目的:",
-            "- コード修正提案がない月でも README.md に最新月の運用要約と指値買い設定を反映できるようにする",
+            "- 現行戦略と生成物の整合性を維持する",
             "",
             "変更すべき仕様:",
-            "- 修正提案がない月でも README.md 更新依頼は必ず含める",
-            "- README.md の最新月セクションには、今月の指値買い設定を見やすい表で含める",
-            "- ルートREADMEには月次レビュー履歴を蓄積せず、新規生成物は reports/generated、2026-07以前の旧履歴は data/history と prompts/generated に任せる",
+            "- 新規生成物は reports/generated に限定する",
+            "- data/history と prompts/generated は不変履歴として扱う",
             "",
             "影響範囲:",
-            "- README.md",
+            "- reports/generated/",
             "",
             "推奨テスト:",
-            "- README.md の見出し、表、Mermaid が壊れず、Monthly Review セクションが最新月だけであることを確認",
+            "- repository-audit と関連テストを実行する",
             "```",
         ]
     )
@@ -237,26 +294,23 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 指値を出す場合は、各段で直近20営業日（約1ヶ月）の終値平均と平均比の乖離率を併記してください。",
             "- 乖離率は `((指値 / 直近20営業日終値平均) - 1) * 100` に基づくマイナス値で記述してください。",
             "- コアについては『毎月一定額買う / 安ければ追加で厚く買う』という運用思想の妥当性も評価してください。",
-            "- 月次レビューでは、毎回必ず core スポット買い額を提案してください。",
             "- 承認済みactive planがある場合は、確認済み利用可能現金から趣味枠現金1,000,000円を控除した額を提示してください。",
             "- 金額はその月の portfolio 歪み、相場状況、流動性水準で変動してよいです。",
-            "- 2026年5月〜12月は、NISA成長投資枠の固定積立750,000円/月を前提にせず、固定core積立100,000円/月として扱ってください。",
-            "- 2026年5月〜12月は、NISA枠枯渇により特定口座でcoreスポット買いを行う旨を明示してください。",
-            "- 2026年5月〜12月は、税効率よりもcore不足と現金過多の是正を優先する理由を明示してください。",
-            "- 2026年5月〜12月は、固定core積立100,000円とスポット買い提案額の合計core投入額を明示してください。",
+            "- 定期積立は観測済み設定、active planは承認済み未実行計画として分離してください。",
+            "- 税制、NISA枠、商品仕様を判断に使う場合は公式一次情報の参照日とURLを示してください。",
             "- iDeCo55,000円/月とBTC/ETH週次積立は、承認済み現金再配分計画とは別の継続キャッシュアウトとして表示してください。",
-            "- 2026年5月〜12月は、coreスポット買いの提案が rule-based なのか discretionary なのかを明示してください。",
+            "- coreスポット買いの提案が rule-based なのか discretionary なのかを明示してください。",
             "- cash_excess_pct が大きいほど、core スポット買い額を増やしてください。",
             "- core_delta_pct が大きいほど、core スポット買い額を増やしてください。",
             "- broad market ベースで明確に下落している月は、core スポット買い額を増やしてください。",
             "- 高値圏でも cash_excess と core不足が大きい場合は、一定額は必ず実行してください。",
-            "- satellite_core が過大でも、core不足是正を優先してください。",
+            "- 互換用の旧バケットを現行戦略の目標値として使わず、broad_core不足是正を優先してください。",
             "- 既存の broad market core 商品を優先し、新規商品追加は最小限にしてください。",
             "- 債券や低リスク商品を提案する場合でも、core equity スポット買い額そのものは別で必ず提示してください。",
             "- `全部債券` `全部現金維持` は不可です。",
             "- 大口支出情報は未記録として扱い、存在を推測しないでください。",
             "- 給与で通常生活費と本人分住宅ローンを賄えている一方、給与額と毎月余剰額は未記録として扱ってください。",
-            "- 住宅ローンは世帯当初借入64,900,000円、本人負担50%、年1.120%、返済初期である点を考慮してください。",
+            "- 住宅ローンは世帯当初借入64,900,000円、本人当初借入32,450,000円、年1.120%、返済初期である点を考慮してください。当初借入額を現在残高と表現しないでください。",
             "- 上記不動産保有により、日本国内不動産セクターへの実質的なエクスポージャが既にある前提で配分やリスクを評価してください。",
             "- Core積立設定（毎月固定）は既に実行される前提として扱い、同じ強化提案の反復は避けてください。",
             "- ただし長期シナリオ悪化やリスク管理上の妥当性がある場合は、固定積立の減額・停止提案を明示してください。",
@@ -271,23 +325,58 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- ハルシネーション防止のため、明確な根拠がある改善提案のみを挙げてください。",
             "- must / should / nice_to_have は空欄不可ですが、該当なしの場合は `なし` と明記してください。",
             "- Codex向け修正要約は必ず md コードブロックで出力してください。",
-            "- コード修正提案がない月でも、README.md の最新月セクションにサマリーと今月の指値買い設定を反映し、過去月の Monthly Review セクションを残さない依頼は必ず Codex向け修正要約に含めてください。",
             "- ルール改善が不要な場合は、その旨を明記してください。",
             "",
             "## 14. 必須の Codex 向け修正要約観点",
             "- must / should / nice_to_have は必ず埋めてください。",
             "- 空欄は不可ですが、該当なしの場合は `なし` と明記してください。",
             "- 【Codex向け修正要約】 全体を単一の ```md コードブロックで出力してください。",
-            "- コード修正提案がない月でも、README.md に最新月の月次サマリー・購入計画・今月の指値買い設定・ポートフォリオサマリーを反映する依頼を必ず 1件以上含めてください。",
-            "- 今月の指値買い設定は、銘柄、指値、株数、見送り対象、主な理由が一目で分かる表としてREADME.mdの最新月セクションに置いてください。",
-            "- ルートREADMEには月次レビュー履歴を蓄積せず、過去月の Monthly Review セクションは残さないでください。",
+            "- 新規生成物は reports/generated/ に限定し、不変履歴の書換えを依頼しないでください。",
             "- monthly review と quarterly rule review を分けて整理してください。",
             "- 修正対象ファイルと必要テストを、Codex が編集に入れる粒度で書いてください。",
+            "",
+            "## 15. 回答前の必須acceptance check",
+            "- 外部ファイル名、添付状況、取得失敗、再アップロード案内が最終回答にない",
+            "- active planのbasis値とcurrent recalculated amountの差を、基準日差を無視して不整合や統一対象にしていない",
+            "- 現行source of truthにない新しい方針をmustへ入れたり、承認済み計画へ遡及適用したりしていない",
+            "- 住宅ローンの当初借入額を現在残高と表現していない",
+            "- 定期積立の変更提案には現行戦略の商品名を正確に記載し、ユーザー確認前に変更済みと表現していない",
+            "- Webの各主張は、それを直接支える公式一次情報へ重複なしでリンクし、事実と推論を分離している",
+            "- 【Codex向け修正要約】のコードブロックを閉じた後に何も追記していない",
+            "- 上記を満たさない場合は、回答を送信せず修正してから再点検する",
             "",
             f"指値設定対象月キー: {review_target_month}",
         ]
     )
-    return "\n".join(lines).strip() + "\n"
+    prompt = "\n".join(lines).strip() + "\n"
+    validate_self_contained_prompt(prompt)
+    return prompt
+
+
+def validate_self_contained_prompt(prompt: str) -> None:
+    required_markers = (
+        f"handoff_mode: {SELF_CONTAINED_HANDOFF_MODE}",
+        "external_files_required: false",
+        "normalized_snapshot: embedded_below",
+        "active_strategy: embedded_below",
+        "active_plans: embedded_below",
+        "market_references: embedded_below",
+        "active_plan_amount_difference_expected:",
+        "active_plan_historical_basis_must_not_be_overwritten:",
+        "## 15. 回答前の必須acceptance check",
+    )
+    missing = [marker for marker in required_markers if marker not in prompt]
+    if missing:
+        raise ValueError(
+            "Self-contained review prompt is missing embedded-source markers: "
+            + ", ".join(missing)
+        )
+    unresolved = UNRESOLVED_LOCAL_REFERENCE_RE.findall(prompt)
+    if unresolved:
+        raise ValueError(
+            "Self-contained review prompt contains unresolved local references: "
+            + ", ".join(item.strip() for item in unresolved)
+        )
 
 
 def build_portfolio_summary(
@@ -394,7 +483,20 @@ def build_core_buy_materials(core_buy_materials: dict) -> list[str]:
         f"- active_plan_status: {core_buy_materials.get('active_plan_status') or '-'}",
         f"- active_plan_account_type: {core_buy_materials.get('active_plan_account_type') or '-'}",
         f"- active_plan_execution_amount_rule: {core_buy_materials.get('active_plan_execution_amount_rule') or '-'}",
+        f"- active_plan_target_group: {core_buy_materials.get('active_plan_target_group') or '-'}",
+        f"- active_plan_product: {core_buy_materials.get('active_plan_product') or '-'}",
+        f"- active_plan_product_allocation_pct: {format_numeric_pct(core_buy_materials.get('active_plan_product_allocation_pct'))}",
+        f"- active_plan_execution_method: {core_buy_materials.get('active_plan_execution_method') or '-'}",
         f"- active_plan_requires_pretrade_balance_confirmation: {core_buy_materials.get('active_plan_requires_pretrade_balance_confirmation')}",
+        f"- active_plan_user_executes_order_manually: {core_buy_materials.get('active_plan_user_executes_order_manually')}",
+        f"- active_plan_basis_snapshot_date: {core_buy_materials.get('active_plan_basis_snapshot_date') or '-'}",
+        f"- active_plan_basis_liquidity_jpy: {core_buy_materials.get('active_plan_basis_liquidity_jpy')}",
+        f"- active_plan_basis_planned_amount_jpy: {core_buy_materials.get('active_plan_basis_planned_amount_jpy')}",
+        f"- active_plan_current_snapshot_date: {core_buy_materials.get('active_plan_current_snapshot_date') or '-'}",
+        f"- active_plan_current_recalculated_amount_jpy: {core_buy_materials.get('active_plan_current_recalculated_amount_jpy')}",
+        f"- active_plan_amount_delta_jpy: {core_buy_materials.get('active_plan_amount_delta_jpy')}",
+        f"- active_plan_amount_difference_expected: {str(bool(core_buy_materials.get('active_plan_amount_difference_expected'))).lower()}",
+        f"- active_plan_historical_basis_must_not_be_overwritten: {str(bool(core_buy_materials.get('active_plan_historical_basis_must_not_be_overwritten'))).lower()}",
         f"- core_actual_pct: {format_pct(core_buy_materials.get('core_actual_pct'))}",
         f"- core_target_pct: {format_pct(core_buy_materials.get('core_target_pct'))}",
         f"- core_delta_pct: {format_pct(core_buy_materials.get('core_delta_pct'))}",
@@ -447,7 +549,12 @@ def build_core_spot_buy_materials(spot_buy_materials: dict) -> list[str]:
         f"- active_plan_status: {spot_buy_materials.get('active_plan_status') or '-'}",
         f"- active_plan_account_type: {spot_buy_materials.get('active_plan_account_type') or '-'}",
         f"- active_plan_execution_amount_rule: {spot_buy_materials.get('active_plan_execution_amount_rule') or '-'}",
+        f"- active_plan_target_group: {spot_buy_materials.get('active_plan_target_group') or '-'}",
+        f"- active_plan_product: {spot_buy_materials.get('active_plan_product') or '-'}",
+        f"- active_plan_product_allocation_pct: {format_numeric_pct(spot_buy_materials.get('active_plan_product_allocation_pct'))}",
+        f"- active_plan_execution_method: {spot_buy_materials.get('active_plan_execution_method') or '-'}",
         f"- active_plan_requires_pretrade_balance_confirmation: {spot_buy_materials.get('active_plan_requires_pretrade_balance_confirmation')}",
+        f"- active_plan_user_executes_order_manually: {spot_buy_materials.get('active_plan_user_executes_order_manually')}",
         f"- broad_core_actual_pct: {format_pct(spot_buy_materials.get('broad_core_actual_pct'))}",
         f"- broad_core_target_pct: {format_pct(spot_buy_materials.get('broad_core_target_pct'))}",
         f"- active_hobby_actual_pct: {format_pct(spot_buy_materials.get('active_hobby_actual_pct'))}",
@@ -515,25 +622,33 @@ def build_core_spot_buy_materials(spot_buy_materials: dict) -> list[str]:
     return lines
 
 
-def build_core_recurring_contributions(recurring_config: dict) -> list[str]:
+def build_core_recurring_contributions(
+    recurring_config: dict,
+    *,
+    include_legacy_policy: bool = True,
+) -> list[str]:
     plans = recurring_config.get("plans", [])
     lines = [
+        "- source_role: observed_setting",
         f"- total_monthly_jpy: {recurring_config.get('total_monthly_jpy', 'null')}",
         f"- monthly_core_auto_invest_amount_jpy: {recurring_config.get('monthly_core_auto_invest_amount_jpy', recurring_config.get('total_monthly_jpy', 'null'))}",
         f"- nisa_growth_quota_status: {recurring_config.get('nisa_growth_quota_status')}",
-        f"- taxable_core_spot_buy_required: {recurring_config.get('taxable_core_spot_buy_required', False)}",
-        f"- core_spot_buy_account_type: {recurring_config.get('core_spot_buy_account_type') or '-'}",
-        f"- date_based_override_active: {recurring_config.get('date_based_override_active')}",
-        f"- active_date_based_override: {recurring_config.get('active_date_based_override') or '-'}",
-        f"- taxable_account_note: {recurring_config.get('taxable_account_note') or '-'}",
-        f"- tax_note: {recurring_config.get('tax_note') or '-'}",
-        f"- nisa_exhaustion_adjustment_reason: {recurring_config.get('nisa_exhaustion_adjustment_reason') or '-'}",
-        f"- baseline_total_core_deployment_target_jpy: {recurring_config.get('baseline_total_core_deployment_target_jpy')}",
-        f"- rebalance_mode_core_spot_buy_reference_jpy: {recurring_config.get('rebalance_mode_core_spot_buy_reference_jpy')}",
         f"- configuration_warnings: {recurring_config.get('configuration_warnings') or []}",
         "| day_of_month | fund_name | amount_jpy | settlement_type | account_type | distribution_course |",
         "| ---: | --- | ---: | --- | --- | --- |",
     ]
+    if include_legacy_policy:
+        lines[4:4] = [
+            f"- taxable_core_spot_buy_required: {recurring_config.get('taxable_core_spot_buy_required', False)}",
+            f"- core_spot_buy_account_type: {recurring_config.get('core_spot_buy_account_type') or '-'}",
+            f"- date_based_override_active: {recurring_config.get('date_based_override_active')}",
+            f"- active_date_based_override: {recurring_config.get('active_date_based_override') or '-'}",
+            f"- taxable_account_note: {recurring_config.get('taxable_account_note') or '-'}",
+            f"- tax_note: {recurring_config.get('tax_note') or '-'}",
+            f"- nisa_exhaustion_adjustment_reason: {recurring_config.get('nisa_exhaustion_adjustment_reason') or '-'}",
+            f"- baseline_total_core_deployment_target_jpy: {recurring_config.get('baseline_total_core_deployment_target_jpy')}",
+            f"- rebalance_mode_core_spot_buy_reference_jpy: {recurring_config.get('rebalance_mode_core_spot_buy_reference_jpy')}",
+        ]
     if not plans:
         lines.append("| - | - | - | - | - | - |")
     for plan in plans:
@@ -542,7 +657,15 @@ def build_core_recurring_contributions(recurring_config: dict) -> list[str]:
             f"{plan.get('settlement_type', '-')} | {plan.get('account_type', '-')} | {plan.get('distribution_course', '-')} |"
         )
 
-    guidance = recurring_config.get("review_guidance", [])
+    guidance = (
+        recurring_config.get("review_guidance", [])
+        if include_legacy_policy
+        else [
+            "この設定はplans/recurring由来の観測済み設定であり、取引実績ではない",
+            "証券会社での変更確認までは、実際に変更・停止・約定したとみなさない",
+            "承認済み現金再配分計画の商品配分や実行額とは分離して評価する",
+        ]
+    )
     if guidance:
         lines.append("- review_guidance:")
         for item in guidance:
@@ -659,6 +782,7 @@ def build_review_partition_section(computation: MonthlyComputation) -> list[str]
         f"  - reserved_hobby_cash_jpy: {computation.strategy_summary.get('reserved_hobby_cash_jpy')}",
         f"  - unallocated_liquidity_jpy: {computation.strategy_summary.get('unallocated_liquidity_jpy')}",
         "- monthly_execution_outputs:",
+        "  - source_role: calculated_review_material_not_transaction_record",
         f"  - review_target_month: {monthly.get('review_target_month')}",
         f"  - nisa_growth_quota_status: {monthly.get('nisa_growth_quota_status')}",
         f"  - fixed_core_auto_invest_amount_jpy: {monthly.get('fixed_core_auto_invest_amount_jpy')}",
@@ -741,6 +865,12 @@ def format_value(value) -> str:
     if value is None:
         return "null"
     return str(value)
+
+
+def format_numeric_pct(value) -> str:
+    if value is None:
+        return "null"
+    return format_pct(Decimal(str(value)))
 
 
 def normalize_text(value: str | None) -> str:

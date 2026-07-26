@@ -1,3 +1,9 @@
+policy_status: "legacy_runtime_fallback"
+current_strategy_ref: "strategy/current.yaml"
+policy_note: >
+  portfolio_bucketsの旧targetは、過去計算と単体テストを再現するためのfallback。
+  通常の月次CLIはstrategy/current.yamlを読み、旧targetを現在方針として使用しない。
+
 portfolio_buckets:
   liquidity:
     target_pct: 0.10

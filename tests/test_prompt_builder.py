@@ -61,14 +61,13 @@ def test_monthly_review_prompt_contains_required_sections(sample_computation) ->
     assert "直近20営業日（約1ヶ月）の終値平均" in prompt
     assert "その指値が直近20営業日終値平均から何%下かを必ず明示すること" in prompt
     assert "((指値 / 直近20営業日終値平均) - 1) * 100" in prompt
-    assert "0円は禁止" in prompt
-    assert "単一具体額" in prompt
+    assert "承認済みactive planがある場合" in prompt
+    assert "確認済み利用可能現金から趣味枠現金1,000,000円を控除" in prompt
     assert "積立しているからスポット買いは不要" in prompt
     assert "total_monthly_jpy: 750000" in prompt
-    assert "毎月の税引前キャッシュ流入はおおむね60万〜70万円ある前提" in prompt
-    assert "名古屋市中区・金山駅近くの流動性が高いマンション（約6500万円）" in prompt
-    assert "フルローンで購入しており、ローン返済はまだほとんど進んでいない" in prompt
-    assert "日本国内不動産セクターに対して実質的な積立投資エクスポージャがある前提" in prompt
+    assert "給与収入額と毎月の正確な余剰額は未記録" in prompt
+    assert "通常生活費300,000円/月と本人分住宅ローン74,171円/月" in prompt
+    assert "住宅ローンはペアローン世帯合計64,900,000円、本人負担50%、年1.120%" in prompt
     assert "既存の毎月固定積立（Core積立設定）を前提に評価すること" in prompt
     assert "| IDECO_ALL_COUNTRY | eMAXIS Slim 全世界株式（オール・カントリー） | 55000 | iDeCo | pension |" in prompt
     assert "pension_monthly_dca_total_jpy: 55000" in prompt

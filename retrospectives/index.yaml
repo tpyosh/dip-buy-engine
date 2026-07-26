@@ -1,0 +1,16 @@
+schema_version: 1
+record_type: "retrospective_index"
+updated_at: "2026-07-26"
+entries:
+  - period: "2026-03"
+    classification: "historical_review_not_full_retrospective"
+    original_review_ref: "data/history/reviews/chatgpt_review_2026_03.txt"
+    structured_review_ref: null
+  - period: "2026-06"
+    classification: "historical_review_not_full_retrospective"
+    original_review_ref: "data/history/reviews/chatgpt_review_2026_06.txt"
+    structured_review_ref: "data/history/reviews/2026_06_review_structured.yaml"
+  - period: "2026-07"
+    classification: "historical_review_not_full_retrospective"
+    original_review_ref: "data/history/reviews/chatgpt_review_2026_07.txt"
+    structured_review_ref: "data/history/reviews/2026_07_review_structured.yaml"

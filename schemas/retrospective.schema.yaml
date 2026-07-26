@@ -1,0 +1,18 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Investment retrospective"
+type: object
+required:
+  - retrospective_id
+  - period
+  - information_available_at_decision_time
+  - assumptions_at_decision_time
+  - decision_process
+  - decisions_made
+  - observed_outcomes
+  - process_evaluation_without_outcome_bias
+properties:
+  retrospective_id:
+    type: string
+  period:
+    type: object
+    required: ["start", "end"]

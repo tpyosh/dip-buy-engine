@@ -1,0 +1,24 @@
+schema_version: 1
+record_type: "raw_evidence_index"
+updated_at: "2026-07-26"
+entries:
+  - normalized_snapshot_ref: "data/normalized/snapshot_2026_03.yaml"
+    snapshot_date: "2026-03-07"
+    raw_evidence_in_repository: false
+    evidence_status: "not_recorded"
+  - normalized_snapshot_ref: "data/normalized/snapshot_2026_04.yaml"
+    snapshot_date: "2026-03-29"
+    raw_evidence_in_repository: false
+    evidence_status: "not_recorded"
+  - normalized_snapshot_ref: "data/normalized/snapshot_2026_05.yaml"
+    snapshot_date: "2026-04-25"
+    raw_evidence_in_repository: false
+    evidence_status: "not_recorded"
+  - normalized_snapshot_ref: "data/normalized/snapshot_2026_06.yaml"
+    snapshot_date: "2026-05-30"
+    raw_evidence_in_repository: false
+    evidence_status: "chat_attachment_not_persisted"
+  - normalized_snapshot_ref: "data/normalized/snapshot_2026_07.yaml"
+    snapshot_date: "2026-06-28"
+    raw_evidence_in_repository: false
+    evidence_status: "chat_attachment_not_persisted"

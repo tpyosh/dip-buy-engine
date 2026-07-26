@@ -1,0 +1,368 @@
+kind: on_demand_held_symbol_market_data
+generated_at: '2026-07-14T22:34:57Z'
+inventory:
+  source_path: /Users/tappeiyoshida/projects/stock/data/normalized/snapshot_2026_07.yaml
+  snapshot_date: '2026-06-28'
+  freshness:
+    status: fresh
+    snapshot_date: '2026-06-28'
+    requested_at: '2026-07-14T22:34:57Z'
+    requested_at_local: '2026-07-15T07:34:57+09:00'
+    timezone: Asia/Tokyo
+    age_days: 17
+    max_age_days: 45
+  usage: held_symbol_names_only
+news_lookback_days: 14
+instruments:
+  stocks:
+  - symbol: '7203'
+    name: トヨタ自動車
+    market_reference:
+      symbol: '7203'
+      yfinance_symbol: 7203.T
+      current_price: 2839
+      mean_close_20d: 2806.1167
+      recent_high_21d: 2946
+      recent_high_63d: 3392
+      currency: JPY
+      as_of: '2026-07-14'
+      mean_close_30d: 2806.1167
+      prior_close_1d: 2806
+      prior_close_5d: 2946
+      prior_close_21d: 2902.5
+      prior_close_63d: 3319
+  - symbol: '9444'
+    name: トーシンホールディングス
+    market_reference:
+      symbol: '9444'
+      yfinance_symbol: 9444.T
+      current_price: 259
+      mean_close_20d: 229.9
+      recent_high_21d: 278
+      recent_high_63d: 373
+      currency: JPY
+      as_of: '2026-07-14'
+      mean_close_30d: 229.9
+      prior_close_1d: 246
+      prior_close_5d: 247
+      prior_close_21d: 225
+      prior_close_63d: 336
+  - symbol: '2353'
+    name: 日本駐車場開発
+    market_reference:
+      symbol: '2353'
+      yfinance_symbol: 2353.T
+      current_price: 263
+      mean_close_20d: 249.7
+      recent_high_21d: 263
+      recent_high_63d: 280
+      currency: JPY
+      as_of: '2026-07-14'
+      mean_close_30d: 249.7
+      prior_close_1d: 261
+      prior_close_5d: 259
+      prior_close_21d: 249
+      prior_close_63d: 280
+  - symbol: '7201'
+    name: 日産自動車
+    market_reference:
+      symbol: '7201'
+      yfinance_symbol: 7201.T
+      current_price: 305.1
+      mean_close_20d: 323.1733
+      recent_high_21d: 352.9
+      recent_high_63d: 399
+      currency: JPY
+      as_of: '2026-07-14'
+      mean_close_30d: 323.1733
+      prior_close_1d: 305.1
+      prior_close_5d: 321.8
+      prior_close_21d: 356.9
+      prior_close_63d: 355.8
+  - symbol: SMH
+    name: ヴァンエック・半導体株ETF
+    market_reference:
+      symbol: SMH
+      yfinance_symbol: SMH
+      current_price: 600.31
+      mean_close_20d: 615.1337
+      recent_high_21d: 668.91
+      recent_high_63d: 668.91
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 615.1337
+      prior_close_1d: 585.62
+      prior_close_5d: 581.45
+      prior_close_21d: 609.45
+      prior_close_63d: 443.34
+  - symbol: PLTR
+    name: パランティア・テクノロジーズ
+    market_reference:
+      symbol: PLTR
+      yfinance_symbol: PLTR
+      current_price: 133.72
+      mean_close_20d: 129.7717
+      recent_high_21d: 134.71
+      recent_high_63d: 160.65
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 129.7717
+      prior_close_1d: 130.04
+      prior_close_5d: 134.37
+      prior_close_21d: 131.08
+      prior_close_63d: 132.37
+  - symbol: CIBR
+    name: ファーストトラスト ナスダック サイバーセキュリティ ETF
+    market_reference:
+      symbol: CIBR
+      yfinance_symbol: CIBR
+      current_price: 94.73
+      mean_close_20d: 88.4137
+      recent_high_21d: 94.73
+      recent_high_63d: 94.73
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 88.4137
+      prior_close_1d: 91.84
+      prior_close_5d: 92.21
+      prior_close_21d: 85.47
+      prior_close_63d: 63.19
+  - symbol: MSFT
+    name: マイクロソフト
+    market_reference:
+      symbol: MSFT
+      yfinance_symbol: MSFT
+      current_price: 384.93
+      mean_close_20d: 392.4193
+      recent_high_21d: 399.76
+      recent_high_63d: 460.52
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 392.4193
+      prior_close_1d: 390.99
+      prior_close_5d: 388.84
+      prior_close_21d: 390.34
+      prior_close_63d: 384.37
+  - symbol: URA
+    name: グローバルX ウラニウム ETF
+    market_reference:
+      symbol: URA
+      yfinance_symbol: URA
+      current_price: 41.55
+      mean_close_20d: 45.234
+      recent_high_21d: 48.06
+      recent_high_63d: 58.26
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 45.234
+      prior_close_1d: 40.72
+      prior_close_5d: 41.75
+      prior_close_21d: 44.83
+      prior_close_63d: 52.18
+  investment_funds:
+  - symbol: NISSEI_SOX_1
+    name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
+    market_reference:
+      symbol: NISSEI_SOX_1
+      yfinance_symbol: SOXX
+      current_price: 567.92
+      mean_close_20d: 590.9413
+      recent_high_21d: 655.01
+      recent_high_63d: 655.01
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 590.9413
+      prior_close_1d: 553.61
+      prior_close_5d: 551.69
+      prior_close_21d: 586.93
+      prior_close_63d: 393.34
+  - symbol: NISSEI_SOX_2
+    name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
+    market_reference:
+      symbol: NISSEI_SOX_2
+      yfinance_symbol: SOXX
+      current_price: 567.92
+      mean_close_20d: 590.9413
+      recent_high_21d: 655.01
+      recent_high_63d: 655.01
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 590.9413
+      prior_close_1d: 553.61
+      prior_close_5d: 551.69
+      prior_close_21d: 586.93
+      prior_close_63d: 393.34
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+    market_reference:
+      symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
+      yfinance_symbol: VT
+      current_price: 156.78
+      mean_close_20d: 156.29
+      recent_high_21d: 158.72
+      recent_high_63d: 159.35
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 156.29
+      prior_close_1d: 155.81
+      prior_close_5d: 156.34
+      prior_close_21d: 155.61
+      prior_close_63d: 146.4
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+    market_reference:
+      symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
+      yfinance_symbol: VT
+      current_price: 156.78
+      mean_close_20d: 156.29
+      recent_high_21d: 158.72
+      recent_high_63d: 159.35
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 156.29
+      prior_close_1d: 155.81
+      prior_close_5d: 156.34
+      prior_close_21d: 155.61
+      prior_close_63d: 146.4
+  - symbol: RAKUTEN_PLUS_SP500
+    name: 楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)
+    market_reference:
+      symbol: RAKUTEN_PLUS_SP500
+      yfinance_symbol: VOO
+      current_price: 691.1
+      mean_close_20d: 685.0007
+      recent_high_21d: 693.86
+      recent_high_63d: 698.26
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 685.0007
+      prior_close_1d: 688.5
+      prior_close_5d: 687.08
+      prior_close_21d: 678.23
+      prior_close_63d: 630.72
+  - symbol: EMAXIS_SLIM_SP500_1
+    name: eMAXIS Slim 米国株式(S&P500)
+    market_reference:
+      symbol: EMAXIS_SLIM_SP500_1
+      yfinance_symbol: VOO
+      current_price: 691.1
+      mean_close_20d: 685.0007
+      recent_high_21d: 693.86
+      recent_high_63d: 698.26
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 685.0007
+      prior_close_1d: 688.5
+      prior_close_5d: 687.08
+      prior_close_21d: 678.23
+      prior_close_63d: 630.72
+  - symbol: EMAXIS_SLIM_SP500_2
+    name: eMAXIS Slim 米国株式(S&P500)
+    market_reference:
+      symbol: EMAXIS_SLIM_SP500_2
+      yfinance_symbol: VOO
+      current_price: 691.1
+      mean_close_20d: 685.0007
+      recent_high_21d: 693.86
+      recent_high_63d: 698.26
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 685.0007
+      prior_close_1d: 688.5
+      prior_close_5d: 687.08
+      prior_close_21d: 678.23
+      prior_close_63d: 630.72
+  - symbol: EMAXIS_SLIM_SP500_3
+    name: eMAXIS Slim 米国株式(S&P500)
+    market_reference:
+      symbol: EMAXIS_SLIM_SP500_3
+      yfinance_symbol: VOO
+      current_price: 691.1
+      mean_close_20d: 685.0007
+      recent_high_21d: 693.86
+      recent_high_63d: 698.26
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 685.0007
+      prior_close_1d: 688.5
+      prior_close_5d: 687.08
+      prior_close_21d: 678.23
+      prior_close_63d: 630.72
+  - symbol: EMAXIS_SLIM_ALL_COUNTRY
+    name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    market_reference:
+      symbol: EMAXIS_SLIM_ALL_COUNTRY
+      yfinance_symbol: ACWI
+      current_price: 156.94
+      mean_close_20d: 156.4147
+      recent_high_21d: 158.04
+      recent_high_63d: 159.97
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 156.4147
+      prior_close_1d: 155.94
+      prior_close_5d: 156.46
+      prior_close_21d: 155.83
+      prior_close_63d: 146.41
+  pension:
+  - symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
+    name: eMAXIS Slim 全世界株式(オール・カントリー)
+    market_reference:
+      symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
+      yfinance_symbol: ACWI
+      current_price: 156.94
+      mean_close_20d: 156.4147
+      recent_high_21d: 158.04
+      recent_high_63d: 159.97
+      currency: USD
+      as_of: '2026-07-14'
+      mean_close_30d: 156.4147
+      prior_close_1d: 155.94
+      prior_close_5d: 156.46
+      prior_close_21d: 155.83
+      prior_close_63d: 146.41
+market_reference_collection:
+  requested_symbols:
+  - '2353'
+  - '7201'
+  - '7203'
+  - '9444'
+  - CIBR
+  - EMAXIS_SLIM_ALL_COUNTRY
+  - EMAXIS_SLIM_SP500_1
+  - EMAXIS_SLIM_SP500_2
+  - EMAXIS_SLIM_SP500_3
+  - MSFT
+  - NISSEI_SOX_1
+  - NISSEI_SOX_2
+  - PENSION_EMAXIS_SLIM_ALL_COUNTRY
+  - PLTR
+  - RAKUTEN_PLUS_ALL_COUNTRY_1
+  - RAKUTEN_PLUS_ALL_COUNTRY_2
+  - RAKUTEN_PLUS_SP500
+  - SMH
+  - URA
+  already_available_symbols: []
+  fetched_symbols:
+  - '2353'
+  - '7201'
+  - '7203'
+  - '9444'
+  - CIBR
+  - EMAXIS_SLIM_ALL_COUNTRY
+  - EMAXIS_SLIM_SP500_1
+  - EMAXIS_SLIM_SP500_2
+  - EMAXIS_SLIM_SP500_3
+  - MSFT
+  - NISSEI_SOX_1
+  - NISSEI_SOX_2
+  - PENSION_EMAXIS_SLIM_ALL_COUNTRY
+  - PLTR
+  - RAKUTEN_PLUS_ALL_COUNTRY_1
+  - RAKUTEN_PLUS_ALL_COUNTRY_2
+  - RAKUTEN_PLUS_SP500
+  - SMH
+  - URA
+  missing_mapping_symbols: []
+  failed_symbols: {}
+warnings: []

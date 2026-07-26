@@ -26,15 +26,17 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             f"- currency_base: {snapshot.currency_base}",
             f"- total_assets_jpy: {snapshot.total_assets_jpy}",
             f"- liquidity_target_jpy: {snapshot.liquidity_target_jpy or 'null'}",
+            f"- active_strategy_id: {computation.strategy_summary.get('strategy_id') or '-'}",
+            f"- strategy_effective_from: {computation.strategy_summary.get('effective_from') or '-'}",
+            f"- active_plan_ids: {computation.strategy_summary.get('active_plan_ids') or []}",
             f"- holdings_count: {len(snapshot.holdings)}",
             "- スナップショットは Money Forward スクリーンショットを一次情報として Codex が OCR・正規化したものとして扱うこと",
             "- ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しないこと。画像読取は Codex 側で完了済みとして扱い、このプロンプト内の構造化データだけをレビューすること",
             "- Money Forward から貼り付けられたテキストがある場合でも、それは補助情報であり、HTML由来でレイアウト・列・階層・並び順が崩れている可能性がある",
             "- OCR・正規化・前月差分の検証警告は後続の警告一覧に含めているため、投資レビューでは警告を前提条件として扱うこと",
-            "- 毎月の税引前キャッシュ流入はおおむね60万〜70万円ある前提で、生活防衛資金の必要水準を評価すること",
-            "- 名古屋市中区・金山駅近くの流動性が高いマンション（約6500万円）を住居兼資産として保有している",
-            "- 上記マンションはフルローンで購入しており、ローン返済はまだほとんど進んでいない",
-            "- そのため、日本国内不動産セクターに対して実質的な積立投資エクスポージャがある前提もポートフォリオ文脈に含めること",
+            "- 給与で通常生活費300,000円/月と本人分住宅ローン74,171円/月を賄っており、日常生活費に投資資産の売却を前提としていない",
+            "- 給与収入額と毎月の正確な余剰額は未記録であり、推測で補完しないこと",
+            "- 住宅ローンはペアローン世帯合計64,900,000円、本人負担50%、年1.120%としてリスク評価に含めること",
             f"- 半導体エクスポージャ(Direct): {format_pct(computation.exposure_breakdown.get('direct_semiconductor_exposure_pct'))}",
             f"- AIインフラ感応度(Indirect): {format_pct(computation.exposure_breakdown.get('indirect_ai_infra_exposure_pct'))}",
             "- 指値設定は前月末または当月初に実施しうるため、snapshot_date が月末でも翌月の指値設定として解釈してよい",
@@ -45,7 +47,10 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
     lines.extend(["", "## 2. この月の snapshot 要約"])
     lines.extend(build_portfolio_summary(snapshot.holdings, resolved_buckets, classification_reason_map))
 
-    lines.extend(["", "## 3. 現在の資産配分"])
+    lines.extend(["", "## 3. 現在戦略に基づく資産配分"])
+    lines.extend(build_bucket_allocation_table(computation.strategy_allocations))
+
+    lines.extend(["", "## 3-1. 互換用の旧バケット内訳（目標値として使用しない）"])
     lines.extend(build_bucket_allocation_table(computation.bucket_allocations))
 
     lines.extend(["", "## 4. 対象銘柄ごとの候補"])
@@ -108,21 +113,21 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "【今月のcoreスポット買い提案】",
             "- このセクションは毎回必須とする",
             "- 今月の推奨スポット買い総額を、JPY の単一具体額で最初に明示すること",
-            "- 0円は禁止。必ず non-zero の執行額を出すこと",
+            "- 承認済みactive planがある場合は、その計画額と実行前残高確認条件を優先し、別の金額を作らないこと",
             "- `多めに` `厚めに` `数十万円` `50〜100万円` のような曖昧表現は禁止",
             "- 2026年5月〜12月で `nisa_growth_quota_status: exhausted` の場合は、固定core積立額を100,000円として明示すること",
             "- 2026年5月〜12月で `taxable_core_spot_buy_required: True` の場合は、`account_type: 特定口座`、NISA成長投資枠枯渇の理由、税効率メモを明示すること",
             "- 2026年5月〜12月は、固定core積立額 + coreスポット買い提案額 = total_monthly_core_deployment_jpy を明示すること",
             "- NISA枠がないからcore購入を弱めるのではなく、core不足と現金過多の是正を優先して特定口座スポットで補うこと",
-            "- 税効率低下よりもcore不足と現金過多の是正を優先するが、住宅ローン・生活防衛資金・大口支出不明を理由に現金を一気に削りすぎないこと",
+            "- 税効率低下よりもbroad core不足と未配分現金の是正を優先し、承認済み趣味枠現金1,000,000円は維持すること",
             "- 2026年5月〜12月の提案額は、normal / aggressive / rebalance のどの rule-based band に基づくか、また今月の discretionary adjustment があるかを分けて書くこと",
             "- 配分先内訳を明示すること",
             "- 実行方法を `一括` / `2〜4分割` / `押し目待ち併用` のいずれかで明示すること",
             "- 判断根拠は `相場面` / `ポートフォリオ歪み` / `流動性水準` を分けて書くこと",
             "- その判断が `ルール上の判断` か `今月の裁量判断` かを分離すること",
             "- broad market core 商品を優先し、むやみに新規商品を増やさないこと",
-            "- coreスポット買いは原則として eMAXIS Slim 全世界株式（オール・カントリー）と eMAXIS Slim 米国株式（S&P500）に限定すること",
-            "- 基本配分はオルカン60% / S&P500 40%、米国株・半導体・AIインフラ感応度が高い場合はオルカン65% / S&P500 35% などオルカン厚めにすること",
+            "- 新規のbroad core購入は、承認済み戦略どおり全世界株式100%とすること",
+            "- 既存S&P500は強制売却しないが、通常の新規購入先にはしないこと",
             "- 実行スケジュールは Google Calendar の手動発注リマインダー作成に使うため、各行に具体日付、ファンド名、金額を必ず含めること",
             "- 債券や低リスク商品を提案してもよいが、core equity のスポット買い額は必ず別途提示すること",
             "- `積立しているからスポット買いは不要` とは結論しないこと",
@@ -134,8 +139,8 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- Python 候補より段数を減らした場合は、その理由が『ルール上の判断』か『今月の裁量判断』かを明記する",
             "- Python 候補より段数を増やした場合も、その理由を明記する",
             "- 2026年5月〜12月は coreスポット買いの優先度を上げ、coreスポット買い予算を削ってまでテーマ銘柄を買わないこと",
-            "- satellite_core が over target の場合、SOX / CIBR / URA の追加は深い押し目限定とすること",
-            "- PLTR など高ボラティリティ銘柄は、core補強を圧迫しない範囲に限定すること",
+            "- 直接半導体比率が15%を超える間は通常買い増しを行わず、20%超ではリバランスを人間へ提案すること",
+            "- 高ボラ単一銘柄は5%を通常上限、8%超をリバランス提案閾値として扱うこと",
             "- MSFT は jun_core だが、core不足が大きい月は MSFT より broad market core を優先すること",
             "- 指値設定基準値はスクリプト実行時点から直近20営業日（約1ヶ月）の終値平均ベースとして扱うこと",
             "- 指値を提案する各段で、直近20営業日（約1ヶ月）の終値平均の実数値を必ず明示すること",
@@ -208,7 +213,7 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "変更すべき仕様:",
             "- 修正提案がない月でも README.md 更新依頼は必ず含める",
             "- README.md の最新月セクションには、今月の指値買い設定を見やすい表で含める",
-            "- ルートREADMEには月次レビュー履歴を蓄積せず、過去月の Monthly Review セクションは data/history 側の履歴に任せる",
+            "- ルートREADMEには月次レビュー履歴を蓄積せず、新規生成物は reports/generated、2026-07以前の旧履歴は data/history と prompts/generated に任せる",
             "",
             "影響範囲:",
             "- README.md",
@@ -233,13 +238,13 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 乖離率は `((指値 / 直近20営業日終値平均) - 1) * 100` に基づくマイナス値で記述してください。",
             "- コアについては『毎月一定額買う / 安ければ追加で厚く買う』という運用思想の妥当性も評価してください。",
             "- 月次レビューでは、毎回必ず core スポット買い額を提案してください。",
-            "- core スポット買い額は 0円不可で、最初に単一の具体額を出してください。",
+            "- 承認済みactive planがある場合は、確認済み利用可能現金から趣味枠現金1,000,000円を控除した額を提示してください。",
             "- 金額はその月の portfolio 歪み、相場状況、流動性水準で変動してよいです。",
             "- 2026年5月〜12月は、NISA成長投資枠の固定積立750,000円/月を前提にせず、固定core積立100,000円/月として扱ってください。",
             "- 2026年5月〜12月は、NISA枠枯渇により特定口座でcoreスポット買いを行う旨を明示してください。",
             "- 2026年5月〜12月は、税効率よりもcore不足と現金過多の是正を優先する理由を明示してください。",
             "- 2026年5月〜12月は、固定core積立100,000円とスポット買い提案額の合計core投入額を明示してください。",
-            "- 2026年5月〜12月は、iDeCo55,000円/月とBTC/ETH週次積立もキャッシュアウトとして別枠で考慮し、総投資額は月145万円程度を目安にしてください。",
+            "- iDeCo55,000円/月とBTC/ETH週次積立は、承認済み現金再配分計画とは別の継続キャッシュアウトとして表示してください。",
             "- 2026年5月〜12月は、coreスポット買いの提案が rule-based なのか discretionary なのかを明示してください。",
             "- cash_excess_pct が大きいほど、core スポット買い額を増やしてください。",
             "- core_delta_pct が大きいほど、core スポット買い額を増やしてください。",
@@ -249,9 +254,9 @@ def render_chatgpt_prompt(computation: MonthlyComputation, template_text: str) -
             "- 既存の broad market core 商品を優先し、新規商品追加は最小限にしてください。",
             "- 債券や低リスク商品を提案する場合でも、core equity スポット買い額そのものは別で必ず提示してください。",
             "- `全部債券` `全部現金維持` は不可です。",
-            "- 生活防衛資金や大口支出情報が不明なら、不明として保守的に扱ってください。",
-            "- 毎月の税引前キャッシュ流入が60万〜70万円ある前提を、生活防衛資金の残し方判断に反映してください。",
-            "- 名古屋市中区・金山駅近くの約6500万円のマンションを住居兼資産として保有し、しかもフルローンで返済初期である点を考慮してください。",
+            "- 大口支出情報は未記録として扱い、存在を推測しないでください。",
+            "- 給与で通常生活費と本人分住宅ローンを賄えている一方、給与額と毎月余剰額は未記録として扱ってください。",
+            "- 住宅ローンは世帯当初借入64,900,000円、本人負担50%、年1.120%、返済初期である点を考慮してください。",
             "- 上記不動産保有により、日本国内不動産セクターへの実質的なエクスポージャが既にある前提で配分やリスクを評価してください。",
             "- Core積立設定（毎月固定）は既に実行される前提として扱い、同じ強化提案の反復は避けてください。",
             "- ただし長期シナリオ悪化やリスク管理上の妥当性がある場合は、固定積立の減額・停止提案を明示してください。",
@@ -384,12 +389,20 @@ def build_candidate_availability_notes(candidate_orders: list) -> list[str]:
 
 def build_core_buy_materials(core_buy_materials: dict) -> list[str]:
     lines = [
+        f"- strategy_id: {core_buy_materials.get('strategy_id') or '-'}",
+        f"- active_plan_id: {core_buy_materials.get('active_plan_id') or '-'}",
+        f"- active_plan_status: {core_buy_materials.get('active_plan_status') or '-'}",
+        f"- active_plan_account_type: {core_buy_materials.get('active_plan_account_type') or '-'}",
+        f"- active_plan_execution_amount_rule: {core_buy_materials.get('active_plan_execution_amount_rule') or '-'}",
+        f"- active_plan_requires_pretrade_balance_confirmation: {core_buy_materials.get('active_plan_requires_pretrade_balance_confirmation')}",
         f"- core_actual_pct: {format_pct(core_buy_materials.get('core_actual_pct'))}",
         f"- core_target_pct: {format_pct(core_buy_materials.get('core_target_pct'))}",
         f"- core_delta_pct: {format_pct(core_buy_materials.get('core_delta_pct'))}",
         f"- liquidity_actual_pct: {format_pct(core_buy_materials.get('liquidity_actual_pct'))}",
         f"- liquidity_target_pct: {format_pct(core_buy_materials.get('liquidity_target_pct'))}",
         f"- cash_excess_pct: {format_pct(core_buy_materials.get('cash_excess_pct'))}",
+        f"- unallocated_liquidity_jpy: {core_buy_materials.get('unallocated_liquidity_jpy')}",
+        f"- reserved_hobby_cash_jpy: {core_buy_materials.get('reserved_hobby_cash_jpy')}",
         f"- core_bucket_total_jpy: {core_buy_materials.get('core_bucket_total_jpy')}",
         f"- monthly_core_budget_policy: {core_buy_materials.get('monthly_core_budget_policy')}",
         f"- monthly_core_buy_budget_min_jpy: {core_buy_materials.get('monthly_core_buy_budget_min_jpy')}",
@@ -429,6 +442,18 @@ def build_core_buy_materials(core_buy_materials: dict) -> list[str]:
 
 def build_core_spot_buy_materials(spot_buy_materials: dict) -> list[str]:
     lines = [
+        f"- strategy_id: {spot_buy_materials.get('strategy_id') or '-'}",
+        f"- active_plan_id: {spot_buy_materials.get('active_plan_id') or '-'}",
+        f"- active_plan_status: {spot_buy_materials.get('active_plan_status') or '-'}",
+        f"- active_plan_account_type: {spot_buy_materials.get('active_plan_account_type') or '-'}",
+        f"- active_plan_execution_amount_rule: {spot_buy_materials.get('active_plan_execution_amount_rule') or '-'}",
+        f"- active_plan_requires_pretrade_balance_confirmation: {spot_buy_materials.get('active_plan_requires_pretrade_balance_confirmation')}",
+        f"- broad_core_actual_pct: {format_pct(spot_buy_materials.get('broad_core_actual_pct'))}",
+        f"- broad_core_target_pct: {format_pct(spot_buy_materials.get('broad_core_target_pct'))}",
+        f"- active_hobby_actual_pct: {format_pct(spot_buy_materials.get('active_hobby_actual_pct'))}",
+        f"- active_hobby_target_pct: {format_pct(spot_buy_materials.get('active_hobby_target_pct'))}",
+        f"- reserved_hobby_cash_jpy: {spot_buy_materials.get('reserved_hobby_cash_jpy')}",
+        f"- unallocated_liquidity_jpy: {spot_buy_materials.get('unallocated_liquidity_jpy')}",
         f"- liquidity_actual_pct: {format_pct(spot_buy_materials.get('liquidity_actual_pct'))}",
         f"- liquidity_target_pct: {format_pct(spot_buy_materials.get('liquidity_target_pct'))}",
         f"- cash_excess_pct: {format_pct(spot_buy_materials.get('cash_excess_pct'))}",
@@ -584,6 +609,10 @@ def build_sox_materials(sox_buy_signal: dict) -> list[str]:
         f"- buy_zone_rule_text: {sox_buy_signal.get('buy_zone_rule_text')}",
         f"- within_buy_zone_boolean: {sox_buy_signal.get('within_buy_zone_boolean')}",
         f"- near_boundary_boolean: {sox_buy_signal.get('near_boundary_boolean')}",
+        f"- routine_additions_allowed: {sox_buy_signal.get('routine_additions_allowed')}",
+        f"- rebalance_proposal_required: {sox_buy_signal.get('rebalance_proposal_required')}",
+        f"- semiconductor_preferred_max_pct: {format_pct(sox_buy_signal.get('semiconductor_preferred_max_pct'))}",
+        f"- semiconductor_rebalance_proposal_above_pct: {format_pct(sox_buy_signal.get('semiconductor_rebalance_proposal_above_pct'))}",
         f"- monthly_buy_budget_jpy: {sox_buy_signal.get('monthly_buy_budget_jpy')}",
         f"- related_bucket_actual_pct: {format_pct(sox_buy_signal.get('related_bucket_actual_pct'))}",
         f"- related_bucket_target_pct: {format_pct(sox_buy_signal.get('related_bucket_target_pct'))}",
@@ -623,6 +652,12 @@ def build_review_partition_section(computation: MonthlyComputation) -> list[str]
     raw_cash_normalization = quarterly.get("cash_normalization_months_estimate")
     cash_normalization = raw_cash_normalization if isinstance(raw_cash_normalization, dict) else {}
     return [
+        "- strategy_context:",
+        f"  - strategy_id: {computation.strategy_summary.get('strategy_id')}",
+        f"  - effective_from: {computation.strategy_summary.get('effective_from')}",
+        f"  - active_plan_ids: {computation.strategy_summary.get('active_plan_ids')}",
+        f"  - reserved_hobby_cash_jpy: {computation.strategy_summary.get('reserved_hobby_cash_jpy')}",
+        f"  - unallocated_liquidity_jpy: {computation.strategy_summary.get('unallocated_liquidity_jpy')}",
         "- monthly_execution_outputs:",
         f"  - review_target_month: {monthly.get('review_target_month')}",
         f"  - nisa_growth_quota_status: {monthly.get('nisa_growth_quota_status')}",
@@ -668,14 +703,14 @@ def build_long_term_thesis_targets_table(long_term_thesis_targets: list[dict]) -
         return ["- 対象銘柄はありません"]
 
     lines = [
-        "| symbol | bucket | current_value_jpy | portfolio_pct | thesis_id | long_term_thesis_summary | key_risk_if_thesis_breaks | review_priority | web_review_required |",
-        "| --- | --- | ---: | ---: | --- | --- | --- | --- | --- |",
+        "| symbol | bucket | current_value_jpy | portfolio_pct | thesis_id | thesis_status | long_term_thesis_summary | key_risk_if_thesis_breaks | review_priority | web_review_required |",
+        "| --- | --- | ---: | ---: | --- | --- | --- | --- | --- | --- |",
     ]
     for item in long_term_thesis_targets:
         key_risks = item.get("key_risk_if_thesis_breaks", [])
         lines.append(
             f"| {item['symbol']} | {item['bucket']} | {item['current_value_jpy']} | "
-            f"{format_pct(item['portfolio_pct'])} | {item['thesis_id']} | "
+            f"{format_pct(item['portfolio_pct'])} | {item['thesis_id']} | {item.get('thesis_status')} | "
             f"{normalize_text(item['long_term_thesis_summary'])} | {normalize_text('; '.join(key_risks))} | "
             f"{item['review_priority']} | {item['web_review_required']} |"
         )

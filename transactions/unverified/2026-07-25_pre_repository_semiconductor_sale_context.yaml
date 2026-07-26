@@ -1,0 +1,19 @@
+schema_version: 1
+record_type: "unverified_historical_transaction_context"
+status: "insufficient_for_confirmed_transaction"
+recorded_at: "2026-07-25"
+owner: "husband"
+facts_from_user:
+  - "半導体資産が上昇してサテライト配分が偏ったため、他銘柄を買うリバランス目的で売却した"
+  - "現在の流動現金の多くは、その半導体銘柄売却益に由来する"
+unknown_fields:
+  - "trade_date"
+  - "symbols"
+  - "quantity"
+  - "execution_price"
+  - "gross_proceeds"
+  - "realized_gain"
+  - "tax"
+  - "fees"
+treatment: >
+  意思決定の背景としてのみ参照する。確認資料なしにtransactions/ledger.yamlへ転記しない。

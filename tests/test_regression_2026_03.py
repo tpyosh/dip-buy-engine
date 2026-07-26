@@ -158,8 +158,7 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert "net_cash_reduction_jpy: 800000" in prompt
     assert "direct_cap_monitor_pct: 11.83%" in prompt
     assert "direct_plus_indirect_watch_metric_pct: 12.62%" in prompt
-    assert "0円は禁止" in prompt
-    assert "単一具体額" in prompt
+    assert "承認済みactive planがある場合" in prompt
     assert "current_monthly_core_auto_invest_amount_jpy: 750000" in prompt
     assert "annualized_core_auto_invest_amount_jpy: 9000000" in prompt
     assert "current_cash_jpy:" in prompt
@@ -327,8 +326,11 @@ def test_snapshot_after_2026_12_requires_explicit_nisa_rule(monkeypatch, tmp_pat
     assert monthly["review_target_month"] == "2027_01"
     assert monthly["nisa_growth_quota_status"] == "requires_explicit_configuration"
     assert monthly["fixed_core_auto_invest_amount_jpy"] == 750000
-    assert monthly["recommended_monthly_core_buy_budget_jpy"] == 700000
+    assert monthly["recommended_monthly_core_buy_budget_jpy"] == 13644262
     assert monthly["recommended_monthly_core_buy_budget_jpy"] != 1280000
-    assert monthly["taxable_core_spot_buy_required"] is False
+    assert monthly["taxable_core_spot_buy_required"] is True
+    assert monthly["recommended_taxable_core_spot_buy_jpy"] == 13644262
+    assert monthly["core_spot_buy_account_type"] == "特定口座（源泉徴収あり）"
+    assert monthly["monthly_core_budget_tier"] == "approved_lump_sum_plan"
     assert recurring["date_based_override_active"] is False
     assert "post_2026_nisa_growth_quota_rule_missing" in warning_codes

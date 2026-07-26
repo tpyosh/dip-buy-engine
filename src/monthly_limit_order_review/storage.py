@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -43,17 +44,35 @@ def write_yaml(path: str | Path, data: Any) -> Path:
 
 
 def default_output_paths(project_root: Path, snapshot_month: str) -> dict[str, Path]:
+    output_root = project_root / "reports/generated/monthly" / snapshot_month
     return {
-        "computation": project_root / "data/history/computations" / f"{snapshot_month}_computation.yaml",
-        "review_prompt": project_root / "prompts/generated" / f"monthly_review_prompt_{snapshot_month}.md",
-        "review_prompt_history": project_root / "data/history/prompts" / f"{snapshot_month}_monthly_review_prompt.md",
-        "review_structured": project_root / "data/history/reviews" / f"{snapshot_month}_review_structured.yaml",
-        "diff": project_root / "data/history/diffs" / f"{snapshot_month}_python_vs_chatgpt.yaml",
-        "calendar_events": project_root
-        / "data/history/calendar_events"
-        / f"{snapshot_month}_core_spot_buy_google_calendar_events.yaml",
-        "patch_request": project_root
-        / "data/history/codex_patch_requests"
-        / f"{snapshot_month}_codex_patch_request.yaml",
-        "patch_prompt": project_root / "prompts/generated" / f"codex_patch_prompt_{snapshot_month}.md",
+        "output_root": output_root,
+        "computation": output_root / "computation.yaml",
+        "review_prompt": output_root / "review_request.md",
+        "review_prompt_history": output_root / "review_request.md",
+        "review_structured": output_root / "review_response.yaml",
+        "diff": output_root / "proposal_diff.yaml",
+        "calendar_events": output_root / "calendar_events.yaml",
+        "patch_request": output_root / "codex_patch_request.yaml",
+        "patch_prompt": output_root / "codex_patch_request.md",
+    }
+
+
+def on_demand_output_paths(
+    project_root: Path,
+    requested_at: datetime | None = None,
+) -> dict[str, Path]:
+    current = requested_at or datetime.now(UTC)
+    timestamp = current.astimezone(UTC).strftime("%Y_%m_%dT%H%M%SZ")
+    output_root = (
+        project_root
+        / "reports/generated/on_demand"
+        / current.astimezone(UTC).strftime("%Y")
+        / timestamp
+    )
+    return {
+        "output_root": output_root,
+        "market_data": output_root / "market_data.yaml",
+        "prompt": output_root / "assessment_request.md",
+        "prompt_history": output_root / "assessment_request.md",
     }

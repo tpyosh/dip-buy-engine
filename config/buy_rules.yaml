@@ -1,3 +1,9 @@
+policy_status: "legacy_analytical_heuristic"
+current_strategy_ref: "strategy/current.yaml"
+policy_note: >
+  指値段階と価格下落率は、承認済み注文計画ではなく旧来の分析ヒューリスティック。
+  現行戦略下で生成される候補は人間レビュー材料に限り、transactionsへ自動反映しない。
+
 base_price_method:
   type: "mean_close"
   lookback_trading_days: 20

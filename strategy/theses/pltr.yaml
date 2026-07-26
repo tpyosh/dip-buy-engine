@@ -1,0 +1,14 @@
+schema_version: 1
+thesis_id: "defense_ai_gov_software_scaling"
+status: "inherited_pending_review"
+migrated_at: "2026-07-26"
+source_ref: "config/portfolio_policy.yaml#long_term_thesis.PLTR"
+symbol: "PLTR"
+legacy_summary: >
+  政府・防衛・大企業向けの高付加価値ソフトウェア需要が継続し、
+  AI時代のプラットフォーム企業として拡大するという仮説。
+legacy_break_conditions:
+  - "政府需要の鈍化"
+  - "競争激化"
+  - "収益化の鈍化"
+treatment: "現在有効な戦略仮説として未承認。保有理由の確認対象。"

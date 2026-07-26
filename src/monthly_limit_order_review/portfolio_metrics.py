@@ -5,6 +5,11 @@ from decimal import Decimal
 
 from .exposure_metrics import build_exposure_breakdown, get_exposure_group, holding_matches_exposure_group
 from .models import BucketAllocation, Holding, MarketReference, PortfolioSnapshot, PortfolioWarning
+from .strategy_metrics import (
+    build_strategy_warnings,
+    compute_strategy_allocations,
+    get_active_core_deployment_plan,
+)
 from .utils import percent, quantize, to_optional_decimal
 
 
@@ -30,19 +35,50 @@ def compute_portfolio_metrics(snapshot: PortfolioSnapshot, policy_config: dict) 
             }
         )
 
-    bucket_allocations = compute_bucket_allocations(snapshot, policy_config, bucket_values)
-    exposure_breakdown = build_exposure_breakdown(snapshot, policy_config, resolved_buckets)
-    warnings = compute_bucket_warnings(
-        snapshot=snapshot,
-        policy_config=policy_config,
-        bucket_values=bucket_values,
-        symbol_weights=symbol_weights,
-        bucket_allocations=bucket_allocations,
-        resolved_buckets=resolved_buckets,
+    active_strategy = policy_config.get("active_strategy")
+    active_plans = policy_config.get("active_plans", [])
+    bucket_allocations = compute_bucket_allocations(
+        snapshot,
+        policy_config,
+        bucket_values,
+        include_policy_targets=active_strategy is None,
     )
+    exposure_breakdown = build_exposure_breakdown(snapshot, policy_config, resolved_buckets)
+    strategy_metrics = (
+        compute_strategy_allocations(
+            snapshot,
+            dict(bucket_values),
+            active_strategy,
+            active_plans,
+        )
+        if active_strategy is not None
+        else None
+    )
+    if active_strategy is None:
+        warnings = compute_bucket_warnings(
+            snapshot=snapshot,
+            policy_config=policy_config,
+            bucket_values=bucket_values,
+            symbol_weights=symbol_weights,
+            bucket_allocations=bucket_allocations,
+            resolved_buckets=resolved_buckets,
+        )
+    else:
+        warnings = build_strategy_warnings(
+            strategy=active_strategy,
+            strategy_metrics=strategy_metrics or {},
+            exposure_breakdown=exposure_breakdown,
+            symbol_weights=symbol_weights,
+        )
 
     return {
         "bucket_allocations": bucket_allocations,
+        "strategy_allocations": (
+            strategy_metrics.get("allocations", [])
+            if strategy_metrics is not None
+            else []
+        ),
+        "strategy_metrics": strategy_metrics or {},
         "bucket_values": dict(bucket_values),
         "warnings": warnings,
         "liquidity_jpy": bucket_values.get("liquidity", Decimal("0")),
@@ -51,7 +87,12 @@ def compute_portfolio_metrics(snapshot: PortfolioSnapshot, policy_config: dict) 
         "semi_exposure_pct": exposure_breakdown["semiconductor_exposure_total_pct"],
         "semi_exposure_jpy": exposure_breakdown["semiconductor_exposure_total_jpy"],
         "exposure_breakdown": exposure_breakdown,
-        "portfolio_summary": build_portfolio_summary(snapshot, bucket_allocations, policy_config),
+        "portfolio_summary": build_portfolio_summary(
+            snapshot,
+            bucket_allocations,
+            policy_config,
+            strategy_metrics=strategy_metrics,
+        ),
         "classification_audit": classification_audit,
     }
 
@@ -85,6 +126,8 @@ def compute_bucket_allocations(
     snapshot: PortfolioSnapshot,
     policy_config: dict,
     bucket_values: dict[str, Decimal],
+    *,
+    include_policy_targets: bool = True,
 ) -> list[BucketAllocation]:
     allocations: list[BucketAllocation] = []
     bucket_policies = policy_config.get("portfolio_buckets", {})
@@ -92,8 +135,16 @@ def compute_bucket_allocations(
     for bucket in all_buckets:
         value = bucket_values.get(bucket, Decimal("0"))
         bucket_policy = bucket_policies.get(bucket, {})
-        target_pct = to_optional_decimal(bucket_policy.get("target_pct"))
-        preferred_range = bucket_policy.get("preferred_pct_range") or [None, None]
+        target_pct = (
+            to_optional_decimal(bucket_policy.get("target_pct"))
+            if include_policy_targets
+            else None
+        )
+        preferred_range = (
+            bucket_policy.get("preferred_pct_range") or [None, None]
+            if include_policy_targets
+            else [None, None]
+        )
         preferred_min = to_optional_decimal(preferred_range[0]) if preferred_range[0] is not None else None
         preferred_max = to_optional_decimal(preferred_range[1]) if preferred_range[1] is not None else None
         actual_pct = percent(value, snapshot.total_assets_jpy)
@@ -129,12 +180,52 @@ def build_portfolio_summary(
     snapshot: PortfolioSnapshot,
     bucket_allocations: list[BucketAllocation],
     policy_config: dict,
+    *,
+    strategy_metrics: dict | None = None,
 ) -> dict:
     allocations = {allocation.bucket: allocation for allocation in bucket_allocations}
     core = allocations.get("core")
     liquidity = allocations.get("liquidity")
     liquidity_target_pct = liquidity.target_pct if liquidity is not None else None
     liquidity_actual_pct = liquidity.actual_pct if liquidity is not None else None
+    if strategy_metrics is not None:
+        strategic_allocations = {
+            allocation.bucket: allocation
+            for allocation in strategy_metrics.get("allocations", [])
+        }
+        broad_core = strategic_allocations.get("broad_core")
+        active_hobby = strategic_allocations.get("active_hobby")
+        unallocated_liquidity_jpy = strategy_metrics.get(
+            "unallocated_liquidity_jpy",
+            Decimal("0"),
+        )
+        return {
+            "strategy_id": policy_config.get("active_strategy", {}).get("strategy_id"),
+            "core_actual_pct": broad_core.actual_pct if broad_core is not None else None,
+            "core_target_pct": broad_core.target_pct if broad_core is not None else None,
+            "core_delta_pct": broad_core.delta_pct if broad_core is not None else None,
+            "broad_core_actual_pct": broad_core.actual_pct if broad_core is not None else None,
+            "broad_core_target_pct": broad_core.target_pct if broad_core is not None else None,
+            "broad_core_delta_pct": broad_core.delta_pct if broad_core is not None else None,
+            "active_hobby_actual_pct": active_hobby.actual_pct if active_hobby is not None else None,
+            "active_hobby_target_pct": active_hobby.target_pct if active_hobby is not None else None,
+            "active_hobby_delta_pct": active_hobby.delta_pct if active_hobby is not None else None,
+            "tradable_core_actual_pct": core.actual_pct if core is not None else None,
+            "liquidity_actual_pct": liquidity_actual_pct,
+            "liquidity_target_pct": None,
+            "cash_excess_pct": percent(unallocated_liquidity_jpy, snapshot.total_assets_jpy),
+            "unallocated_liquidity_jpy": unallocated_liquidity_jpy,
+            "reserved_hobby_cash_jpy": strategy_metrics.get(
+                "recognized_reserved_cash_jpy",
+                Decimal("0"),
+            ),
+            "core_bucket_total_jpy": (
+                broad_core.market_value_jpy
+                if broad_core is not None
+                else Decimal("0")
+            ),
+            "total_assets_jpy": snapshot.total_assets_jpy,
+        }
     cash_excess_pct = None
     if liquidity_actual_pct is not None and liquidity_target_pct is not None:
         cash_excess_pct = quantize(liquidity_actual_pct - liquidity_target_pct, 4)
@@ -157,6 +248,11 @@ def build_core_buy_materials(
     resolved_buckets: dict[str, str],
     market_references: list[MarketReference],
     buy_rules_config: dict,
+    *,
+    strategy_allocations: list[BucketAllocation] | None = None,
+    strategy_metrics: dict | None = None,
+    active_strategy: dict | None = None,
+    active_plans: list[dict] | None = None,
 ) -> tuple[dict, list[PortfolioWarning]]:
     reference_map = {reference.symbol: reference for reference in market_references}
     allocations = {allocation.bucket: allocation for allocation in bucket_allocations}
@@ -223,20 +319,70 @@ def build_core_buy_materials(
         )
 
     budget_policy = buy_rules_config.get("core_budget_policy", {})
-    core_allocation = allocations.get("core")
+    strategic_allocation_map = {
+        allocation.bucket: allocation
+        for allocation in (strategy_allocations or [])
+    }
+    core_allocation = strategic_allocation_map.get("broad_core") or allocations.get("core")
     liquidity_allocation = allocations.get("liquidity")
-    budget_plan = determine_core_budget_plan(core_allocation, liquidity_allocation, budget_policy)
+    active_core_plan = get_active_core_deployment_plan(active_plans or [])
+    if active_core_plan is not None:
+        budget_plan = build_active_plan_budget(
+            snapshot=snapshot,
+            strategy_metrics=strategy_metrics or {},
+            active_core_plan=active_core_plan,
+        )
+    else:
+        budget_plan = determine_core_budget_plan(core_allocation, liquidity_allocation, budget_policy)
+    unallocated_liquidity_jpy = (strategy_metrics or {}).get("unallocated_liquidity_jpy")
+    cash_excess_pct = (
+        percent(unallocated_liquidity_jpy, snapshot.total_assets_jpy)
+        if unallocated_liquidity_jpy is not None
+        else (
+            quantize(liquidity_allocation.actual_pct - liquidity_allocation.target_pct, 4)
+            if liquidity_allocation is not None and liquidity_allocation.target_pct is not None
+            else None
+        )
+    )
     return (
         {
+            "strategy_id": (active_strategy or {}).get("strategy_id"),
+            "active_plan_id": (
+                active_core_plan.get("plan_id")
+                if active_core_plan is not None
+                else None
+            ),
+            "active_plan_status": (
+                active_core_plan.get("status")
+                if active_core_plan is not None
+                else None
+            ),
+            "active_plan_account_type": (
+                active_core_plan.get("basis", {}).get("account_type")
+                if active_core_plan is not None
+                else None
+            ),
+            "active_plan_execution_amount_rule": (
+                active_core_plan.get("allocation", {}).get("execution_amount_rule")
+                if active_core_plan is not None
+                else None
+            ),
+            "active_plan_requires_pretrade_balance_confirmation": (
+                active_core_plan.get("allocation", {}).get(
+                    "requires_pretrade_balance_confirmation"
+                )
+                if active_core_plan is not None
+                else None
+            ),
             "core_actual_pct": core_allocation.actual_pct if core_allocation is not None else None,
             "core_target_pct": core_allocation.target_pct if core_allocation is not None else None,
             "core_delta_pct": core_allocation.delta_pct if core_allocation is not None else None,
             "liquidity_actual_pct": liquidity_allocation.actual_pct if liquidity_allocation is not None else None,
             "liquidity_target_pct": liquidity_allocation.target_pct if liquidity_allocation is not None else None,
-            "cash_excess_pct": (
-                quantize(liquidity_allocation.actual_pct - liquidity_allocation.target_pct, 4)
-                if liquidity_allocation is not None and liquidity_allocation.target_pct is not None
-                else None
+            "cash_excess_pct": cash_excess_pct,
+            "unallocated_liquidity_jpy": unallocated_liquidity_jpy,
+            "reserved_hobby_cash_jpy": (strategy_metrics or {}).get(
+                "recognized_reserved_cash_jpy"
             ),
             "core_bucket_total_jpy": core_allocation.market_value_jpy if core_allocation is not None else Decimal("0"),
             "monthly_core_budget_policy": budget_policy,
@@ -269,6 +415,52 @@ def build_core_buy_materials(
         },
         warnings,
     )
+
+
+def build_active_plan_budget(
+    *,
+    snapshot: PortfolioSnapshot,
+    strategy_metrics: dict,
+    active_core_plan: dict,
+) -> dict:
+    unallocated_liquidity_jpy = strategy_metrics.get(
+        "unallocated_liquidity_jpy",
+        Decimal("0"),
+    )
+    allocation = active_core_plan.get("allocation", {})
+    planned_amount_jpy = int(allocation.get("planned_amount_jpy", 0))
+    calculated_amount_jpy = max(0, int(unallocated_liquidity_jpy))
+    return {
+        "recommended_monthly_core_buy_budget_jpy": calculated_amount_jpy,
+        "monthly_core_budget_tier": "approved_lump_sum_plan",
+        "monthly_core_budget_band": {
+            "min_jpy": calculated_amount_jpy,
+            "max_jpy": calculated_amount_jpy,
+            "description": "Approved transition plan; reconfirm available cash before execution.",
+        },
+        "monthly_core_budget_override_active": True,
+        "monthly_core_budget_override_reason": active_core_plan.get("plan_id"),
+        "portfolio_management_mode": "approved_transition_plan",
+        "rebalance_mode_active": True,
+        "rebalance_mode_reason": active_core_plan.get("plan_id"),
+        "explanation": {
+            "rule_based_reason": active_core_plan.get("plan_id"),
+            "discretionary_reason": None,
+            "related_bucket_status": {
+                "unallocated_liquidity_jpy": unallocated_liquidity_jpy,
+                "snapshot_date": snapshot.snapshot_date,
+            },
+            "mode_context": {
+                "active_mode": "approved_transition_plan",
+                "requires_pretrade_balance_confirmation": allocation.get(
+                    "requires_pretrade_balance_confirmation",
+                    True,
+                ),
+                "basis_planned_amount_jpy": planned_amount_jpy,
+                "execution_amount_rule": allocation.get("execution_amount_rule"),
+            },
+        },
+    }
 
 
 def suggest_core_proxy_symbol(holding: Holding) -> str | None:

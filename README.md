@@ -1,44 +1,40 @@
 # Monthly Limit Order Review System
 
-Codex が Money Forward キャプチャを直接読み取り・正規化した月次の資産スナップショット YAML を入力にして、ChatGPT 向けの月次レビュー用プロンプトと、Codex 向けの修正プロンプトを生成する Python CLI です。
+Codex が Money Forward キャプチャを直接読み取り・正規化した資産スナップショット YAML を入力にして、ChatGPT 向けの月次レビュー用プロンプト、株式・投資信託・年金のオンデマンド・アセスメント依頼プロンプト、Codex 向けの修正プロンプトを生成する Python CLI です。
 
 本ツールは自動売買ツールではありません。Codex がキャプチャ読取と YAML 正規化、Python が数値計算と履歴保存、ChatGPT が構造化済みデータに対する月次レビューと改善提案を担当し、最終判断と発注はユーザが手動で行います。ChatGPT に Money Forward キャプチャを読ませ、その結果を Codex がドキュメント化する運用は行いません。
 
-## Codex Responsibility Gate
+## Current Strategy Source of Truth
 
-Codex は投資判断者ではありません。Money Forwardキャプチャを扱う月次セッションでは、Codex の責務は以下に限定します。
+現在有効な長期方針は [strategy/current.yaml](/Users/tappeiyoshida/projects/stock/strategy/current.yaml) が指す不変の戦略版です。期間限定の承認済み計画は同ファイルの `active_plan_paths` から参照します。
 
-- Money ForwardキャプチャやCSV等の入力データを正規化する
-- 資産クラス、口座種別、銘柄名、数量、評価額、損益などを構造化する
-- 入力データの欠損・表記ゆれ・不明点を検出する
-- ChatGPTに渡す投資判断依頼プロンプトを作成する
-- ChatGPTから返ってきた内容を、ユーザが明示的に貼り付けた場合のみ、レポジトリ内のアセットへ反映する
-- プロンプト、フォーマット、チェックリスト、正規化スクリプトを改善する
-- 投資判断に必要な材料を整理する
+月次CLIはこの戦略と計画を読み込み、旧 `config/portfolio_policy.yaml` のバケット目標値を現在方針として使用しません。旧目標値は過去計算と単体テストの再現用fallbackとしてのみ残しています。生成済みの過去レビューは書き換えません。
 
-Codex は以下をしてはいけません。
+## Human Approval and Task-Scope Gate
 
-- 買い・売り・保有・利確・損切り・積立停止・リバランスなどの投資判断を確定する
-- 「おすすめ」「判断」「結論」「実行すべき」などの形で投資助言を完結する
-- ChatGPTを介さずに投資判断を生成する
-- ChatGPTの出力がない状態で、投資判断をレポジトリアセットへ反映する
-- 正規化結果から自動的に売買方針を導く
-- ユーザが明示していない投資方針を補完して決定する
-- 月次レビューのChatGPTフィードバックループを省略する
+AIの役割はブランド名ではなく、ユーザが依頼したタスクのスコープで分けます。
 
-Codex は、Money Forwardキャプチャの正規化、ChatGPT向け投資判断依頼プロンプトの作成、または投資判断が必要な論点整理が完了した時点で停止し、ユーザにChatGPTへの貼り付けを促します。この時点で出力してよいものは、正規化済みデータ、不明点・欠損・注意点、ChatGPTに貼り付けるためのプロンプト、ChatGPTに確認してほしい論点、Codex側プロンプトや運用ルール改善の相談事項だけです。
+### Normalization / preparation task
 
-ユーザがChatGPTの出力を明示的に貼り付けた後にのみ、Codex はChatGPTの投資判断を記録フォーマットへ転記し、ChatGPTからの改善提案をAIアセットへ反映し、次回の月次レビュー用プロンプトを改善できます。ChatGPTの結論をCodexが独自に上書きしてはいけません。
+Money Forwardキャプチャの正規化だけを依頼された場合、AIはデータ確定、欠損検出、計算、レビュー材料の生成までで停止します。正規化タスクから売買提案へ暗黙に拡張しません。
 
-### Failure Example
+### Strategy / portfolio review task
 
-- 問題: Codex が Money Forwardキャプチャの正規化タスクから勝手に投資判断へ進み、ChatGPTを介さずにアセット更新まで完結した。
-- 原因: Codex の責務境界、禁止事項、ハンドオフ条件、ChatGPTフィードバックゲートが十分に明文化されていなかった、またはCodexがそれを優先制約として扱わなかった。
-- 再発防止: 投資判断を必要とする箇所では、Codex は必ずChatGPT向けプロンプトを作成して停止する。ChatGPT出力がユーザから貼り付けられるまで、判断・反映・最適化を進めない。
+ユーザが明示的に戦略検証、ポートフォリオ診断、購入・売却・リバランス案を求めた場合、AIは `strategy/current.yaml`、対象期間の計画、基準日時点のデータ、最新の一次情報に基づいて提案できます。
 
-## Human Quick Start: Codex Session Prompt
+ただし、次はすべてのタスクで禁止します。
 
-Money Forward月次レビューを始めるときは、Codexの新規セッション冒頭に以下をそのまま貼り付けてください。
+- AIによる証券注文、送金、自動発注
+- 提案を約定・実績として記録すること
+- ユーザ未承認の戦略変更
+- 値下がりだけを理由にした機械的売却
+- 未確認の税制、価格、商品仕様を前提にした確定判断
+
+最終的な採否と発注は常にユーザが行います。
+
+## Human Quick Start: Normalization-only Codex Session Prompt
+
+Money Forwardの正規化だけを始めるときは、Codexの新規セッション冒頭に以下をそのまま貼り付けてください。
 
 ```md
 あなたはこの `stock` レポジトリのAIアセット保守・月次レビュー準備担当です。
@@ -76,7 +72,7 @@ Codexは以下をしてはいけません。
 
 ## README履歴ルール
 
-ChatGPT出力をREADMEへ反映する場合でも、ルートREADMEには最新月の `Monthly Review` だけを残し、過去月の `Monthly Review` セクションは残さないでください。過去月のレビュー原文、構造化レビュー、差分、計算結果は `data/history/` 配下を履歴として扱ってください。
+レビュー出力をREADMEへ反映する場合でも、ルートREADMEには最新月の `Monthly Review` だけを残してください。新規生成物は `reports/generated/`、2026-07以前の旧履歴は `data/history/` と `prompts/generated/` で扱います。
 
 ## 必ず最初に読むもの
 
@@ -120,6 +116,8 @@ ChatGPT出力をREADMEへ反映する場合でも、ルートREADMEには最新�
 ```
 
 ## Monthly Review: 2026_07
+
+> このセクションは `strategy/versions/2026-07-25.yaml` 承認前の旧ルールで生成された履歴表示です。現在の判断には、上記の Current Strategy Source of Truth と active plan を使用してください。
 
 - snapshot_date: 2026-06-28
 - total_assets_jpy: 39,370,393円
@@ -219,7 +217,9 @@ pie showData
     "other" : 16193
 ```
 
-## Monthly Purchase Policy: 2026_05 to 2026_12
+## Superseded Monthly Purchase Policy: 2026_05 to 2026_12
+
+> 以下は `strategy/versions/2026-07-25.yaml` の承認前に使っていた旧方針です。履歴再現のため残しますが、現在の購入判断には使用しません。現行の期間限定計画は `strategy/current.yaml` の `active_plan_paths` を参照してください。
 
 2026年5月〜12月は、2026年NISA成長投資枠枯渇により、core固定積立はNISAつみたて投資枠100,000円/月のみとして扱う。
 
@@ -273,15 +273,43 @@ coreスポット買いの配分は既存core商品に限定し、基本は eMAXI
 - ChatGPT の改善提案を Codex 向けの編集粒度に落とし込む
 - Python 候補値と ChatGPT 最終提案の差分を保存する
 - ルート README には月次レビュー履歴を蓄積せず、最新月の `Monthly Review` だけを見やすい順序で残す
-- 過去月の月次レビュー原文、構造化レビュー、差分、計算結果は `data/history/` 配下を正とする
+- 2026-07以前の生成履歴は `data/history/` と `prompts/generated/` に凍結し、新規生成物は `reports/generated/` に保存する
+- 月次レビューを待たず、保有銘柄の直近価格変動と信頼性の高いニュースを突き合わせる ChatGPT 向けアセスメント依頼プロンプトを生成する
+
+## オンデマンド・アセスメント
+
+オンデマンド機能の対象は、現在の保有額・数量・取得単価・含み損益・配分ではありません。最新の保存済みスナップショットを保有銘柄リストとしてだけ使い、Python が各銘柄・プロキシの直近価格変動を取得し、ChatGPT が一次情報と信頼性の高い市場報道を調査して、値動きの背景と因果関係の確度を評価します。
+
+オンデマンド作成を始めるときは `prompts/templates/on_demand_market_assessment_session_start_prompt.md` を Codex に渡します。保有銘柄の変更がなければ、Money Forward の最新画面を撮り直す必要はありません。
+
+1. 最新の `data/normalized/snapshot_*.yaml` から株式・投資信託・年金の銘柄名だけを抽出する
+2. `on-demand-run` で各銘柄・プロキシの最新日足終値と1日、5日、1か月、3か月の変化を取得する
+3. 取得時点、プロキシ使用、欠損を明示した ChatGPT向けプロンプトを生成する
+4. ChatGPT が企業IR、取引所、政府・中央銀行等の一次情報と信頼性の高い市場報道をWeb調査する
+5. 値動きの事実、市場報道上の背景、推論を分け、因果関係の確度を含むアセスメントを返す
+
+```bash
+.venv/bin/python -m monthly_limit_order_review.cli on-demand-run \
+  --news-lookback-days 14
+```
+
+`--snapshot` を省略すると、日付が最も新しい正規化済みスナップショットを銘柄リストとして使います。銘柄リストが古くても価格取得は止めず、その可能性を注記します。`yfinance` の価格は最新取得可能な日足終値であり、リアルタイム気配値ではありません。
+
+オンデマンド処理は次を行いません。
+
+- `README.md` の `Monthly Review` 更新
+- 月次計算・月次プロンプト履歴の上書き
+- coreスポット買いの Google Calendar イベント作成
+- 保有額、損益、配分、現金余力のポートフォリオ診断
+- ChatGPT出力なしでの売買判断の確定
 
 ## 毎月のワークフロー
 
 1. ユーザが Codex セッションに Money Forward のスクリーンショットを添付する
 2. 必要に応じて、Money Forward の画面からコピーしたテキストも Codex に貼る
-3. Codex が [prompts/moneyforward_normalization_prompt.md](/Users/tappeiyoshida/Documents/stock/prompts/moneyforward_normalization_prompt.md) のルールに従い、スクリーンショットを一次情報として OCR・正規化する
+3. Codex が [prompts/moneyforward_normalization_prompt.md](/Users/tappeiyoshida/projects/stock/prompts/moneyforward_normalization_prompt.md) のルールに従い、スクリーンショットを一次情報として OCR・正規化する
 4. Codex が `data/normalized/snapshot_YYYY_MM.yaml` を作成または更新する
-5. 例として [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/Documents/stock/data/normalized/snapshot_2026_03.yaml) の形式を使う
+5. 例として [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/projects/stock/data/normalized/snapshot_2026_03.yaml) の形式を使う
 6. Codex / CLI が合計、カテゴリ、通貨、分類、前月差分、重複、OCR由来の不確実性を検証する
 7. CLI で市場データ取得、比率計算、ルール計算、警告抽出を実行する
 8. 生成された月次レビュー用プロンプトだけを ChatGPT に貼る。Money Forward のスクリーンショットや OCR 前の貼り付けテキストは ChatGPT に渡さない
@@ -292,15 +320,15 @@ coreスポット買いの配分は既存core商品に限定し、基本は eMAXI
 13. ユーザがChatGPT出力またはCodex向け修正プロンプトを明示的に貼り付けた場合のみ、Codex がREADME の最新月セクションに月次サマリー、購入計画、今月の指値買い設定、ポートフォリオサマリーを反映する
 14. README 更新時は既存の `## Monthly Review: YYYY_MM` を最新月の内容に置換し、過去月の `Monthly Review` セクションをルートREADMEに残さない
 
-将来の月次レビュー開始時は [prompts/templates/moneyforward_monthly_session_start_prompt.md](/Users/tappeiyoshida/Documents/stock/prompts/templates/moneyforward_monthly_session_start_prompt.md) を Codex に貼り、スクリーンショット添付から始める。
+将来の月次レビュー開始時は [prompts/templates/moneyforward_monthly_session_start_prompt.md](/Users/tappeiyoshida/projects/stock/prompts/templates/moneyforward_monthly_session_start_prompt.md) を Codex に貼り、スクリーンショット添付から始める。
 
 ## 役割分担
 
-- Python: YAML ロード、`yfinance` 取得、20日平均、63日高値、バケット比率、警告、候補価格、差分保存、coreスポット買いのGoogle Calendarイベントドラフト生成、履歴保存
-- Codex: Money Forward スクリーンショットの OCR、補助テキストとの照合、YAML 正規化、検証警告の整理、ChatGPT 向け月次レビュープロンプト生成、ユーザが明示的に貼り付けたChatGPT出力に基づくコードとテストへの反映、Google Calendarへの手動発注リマインダー作成
-- ChatGPT: Codex / CLI で正規化・検証済みの数値を前提にした今月の指値提案、SOX 投信判定、ポートフォリオ診断、購入提案、改善提案、Codex 向け修正要約。Money Forward キャプチャ読取、OCR、YAML 作成は担当しない
+- Python: YAMLロード、市場参照取得、配分・集中度計算、警告、候補価格、差分、生成物保存、リポジトリ監査
+- AI: 依頼されたタスク範囲でOCR・正規化・検証・戦略評価・購入案・仮説レビューを行う。正規化だけを依頼された場合は売買提案へ拡張しない
+- ユーザ: 戦略変更、購入・売却・リバランスの採否を決め、証券会社で手動実行する
 
-Codex は、ChatGPT出力がない状態で月次サマリー、購入計画、指値設定、売買方針、ルール改善を確定または反映してはいけません。
+AIのブランド名を承認境界にせず、`strategy/current.yaml`、active plan、基準日時点のデータ、ユーザが明示したタスク範囲で役割を決めます。
 
 ## セットアップ
 
@@ -313,36 +341,44 @@ python -m pip install -e .
 
 ## Quick Start (ユーザ向け)
 
-1. サンプル YAML をそのまま使って、まずは 1 回実行します
+1. リポジトリの参照整合性を検証します
+
+```bash
+python -m monthly_limit_order_review.cli repository-audit
+```
+
+2. 対象スナップショットで月次処理を実行します
 
 ```bash
 python -m monthly_limit_order_review.cli monthly-run \
-  --snapshot data/normalized/snapshot_2026_03.yaml
+  --snapshot data/normalized/snapshot_2026_07.yaml
 ```
 
-2. 生成されたレビュー用プロンプトを ChatGPT に貼り、回答を保存します
+3. `reports/generated/monthly/2026_07/review_request.md`をレビューに使い、回答原文を保存します
 
-- 保存先例: `data/history/reviews/chatgpt_review_2026_03.txt`
+- 保存先例: `reports/review_inputs/2026_07_chatgpt_review.txt`
 
-3. ChatGPT の回答を取り込み、差分と Codex 向け修正プロンプトを作成します
+4. 回答を取り込み、差分と実装修正依頼を生成します
 
 ```bash
 python -m monthly_limit_order_review.cli ingest-review \
-  --snapshot data/normalized/snapshot_2026_03.yaml \
-  --review-text data/history/reviews/chatgpt_review_2026_03.txt
+  --snapshot data/normalized/snapshot_2026_07.yaml \
+  --review-text reports/review_inputs/2026_07_chatgpt_review.txt
 
 python -m monthly_limit_order_review.cli generate-codex-patch \
-  --snapshot data/normalized/snapshot_2026_03.yaml \
-  --review-text data/history/reviews/chatgpt_review_2026_03.txt \
-  --output prompts/generated/codex_patch_prompt_2026_03.md
+  --snapshot data/normalized/snapshot_2026_07.yaml \
+  --review-text reports/review_inputs/2026_07_chatgpt_review.txt
 ```
 
-4. 出力を確認します
+5. `reports/generated/monthly/2026_07/`を確認します
 
-- 月次レビュー用プロンプト: `prompts/generated/monthly_review_prompt_2026_03.md`
-- 計算結果: `data/history/computations/2026_03_computation.yaml`
-- 差分結果: `data/history/diffs/2026_03_python_vs_chatgpt.yaml`
-- Codex 向け修正プロンプト: `prompts/generated/codex_patch_prompt_2026_03.md`
+- `computation.yaml`
+- `review_request.md`
+- `review_response.yaml`
+- `proposal_diff.yaml`
+- `calendar_events.yaml`
+- `codex_patch_request.yaml`
+- `codex_patch_request.md`
 
 ## 入力 YAML の作り方
 
@@ -356,7 +392,7 @@ python -m monthly_limit_order_review.cli generate-codex-patch \
 - 推測した値は `notes`、`ocr_notes`、`validation_notes` のいずれかで推測であることを明示します
 - `asset_class` は `liquidity`, `core`, `jun_core`, `satellite_core`, `satellite`, `pension`, `other` のいずれかを付けます
 - `currency_base` は原則 `JPY` を入れます
-- サンプルは [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/Documents/stock/data/normalized/snapshot_2026_03.yaml) を参照してください
+- サンプルは [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/projects/stock/data/normalized/snapshot_2026_03.yaml) を参照してください
 
 ## Evidence Priority
 
@@ -403,52 +439,52 @@ Money Forward スクリーンショットから読み取れる範囲で以下を
 
 ```bash
 python -m monthly_limit_order_review.cli generate-review-prompt \
-  --snapshot data/normalized/snapshot_2026_03.yaml \
-  --output prompts/generated/monthly_review_prompt_2026_03.md
+  --snapshot data/normalized/snapshot_2026_07.yaml
 ```
 
 ChatGPT レビュー取り込み:
 
 ```bash
 python -m monthly_limit_order_review.cli ingest-review \
-  --snapshot data/normalized/snapshot_2026_03.yaml \
-  --review-text data/history/reviews/chatgpt_review_2026_03.txt
+  --snapshot data/normalized/snapshot_2026_07.yaml \
+  --review-text reports/review_inputs/2026_07_chatgpt_review.txt
 ```
 
-このコマンドは `data/history/calendar_events/YYYY_MM_core_spot_buy_google_calendar_events.yaml` も生成する。`events[].google_calendar_request` が Codex の Google Calendar connector に渡すイベント作成リクエストで、証券会社への自動発注ではなく手動発注リマインダーとして扱う。
+このコマンドは `reports/generated/monthly/YYYY_MM/calendar_events.yaml` も生成する。`events[].google_calendar_request` は証券会社への自動発注ではなく、手動発注リマインダーのドラフトとして扱う。
 
 Codex 向け修正プロンプト生成:
 
 ```bash
 python -m monthly_limit_order_review.cli generate-codex-patch \
-  --snapshot data/normalized/snapshot_2026_03.yaml \
-  --review-text data/history/reviews/chatgpt_review_2026_03.txt \
-  --output prompts/generated/codex_patch_prompt_2026_03.md
+  --snapshot data/normalized/snapshot_2026_07.yaml \
+  --review-text reports/review_inputs/2026_07_chatgpt_review.txt
 ```
 
 月次の計算とプロンプト生成をまとめて実行:
 
 ```bash
 python -m monthly_limit_order_review.cli monthly-run \
-  --snapshot data/normalized/snapshot_2026_03.yaml
+  --snapshot data/normalized/snapshot_2026_07.yaml
 ```
 
-## 生成物一覧
+オンデマンド・アセスメント依頼プロンプト生成:
 
-- 月次レビュー用プロンプト: [prompts/generated/monthly_review_prompt_2026_03.md](/Users/tappeiyoshida/Documents/stock/prompts/generated/monthly_review_prompt_2026_03.md)
-- Codex 向け修正プロンプト: [prompts/generated/codex_patch_prompt_2026_03.md](/Users/tappeiyoshida/Documents/stock/prompts/generated/codex_patch_prompt_2026_03.md)
-- 計算結果: [data/history/computations/2026_03_computation.yaml](/Users/tappeiyoshida/Documents/stock/data/history/computations/2026_03_computation.yaml)
-- 差分結果: [data/history/diffs/2026_03_python_vs_chatgpt.yaml](/Users/tappeiyoshida/Documents/stock/data/history/diffs/2026_03_python_vs_chatgpt.yaml)
-- Codex 修正要求: [data/history/codex_patch_requests/2026_03_codex_patch_request.yaml](/Users/tappeiyoshida/Documents/stock/data/history/codex_patch_requests/2026_03_codex_patch_request.yaml)
+```bash
+python -m monthly_limit_order_review.cli on-demand-run \
+  --news-lookback-days 14
+```
 
-## 履歴ファイルの説明
+このコマンドは月次アーティファクトやREADMEを更新せず、タイムスタンプ付きのプロンプトと計算履歴だけを保存する。
 
-- `data/history/snapshots/`: 月次スナップショットの保管先
-- `data/history/computations/`: Python の市場参照、候補値、警告
-- `data/history/prompts/`: 毎月生成したレビュー用プロンプト
-- `data/history/reviews/`: ChatGPT レビュー原文と構造化レビュー
-- `data/history/diffs/`: Python 候補と ChatGPT 提案の差分
-- `data/history/codex_patch_requests/`: 改善提案を編集粒度に整理した要求
+## 生成物と旧履歴
+
+- 新しい月次生成物: `reports/generated/monthly/YYYY_MM/`
+- 新しいオンデマンド生成物: `reports/generated/on_demand/YYYY/<timestamp>/`
+- 外部レビュー原文: `reports/review_inputs/`
+- 2026-07以前の旧生成物: `data/history/`と`prompts/generated/`
+- 旧生成物の分類: [reports/legacy-index.yaml](/Users/tappeiyoshida/projects/stock/reports/legacy-index.yaml)
+
+旧履歴は再配置や再生成を行わず、不変のアーカイブとして保持します。
 
 ## 差分保存の意味
 
@@ -460,6 +496,7 @@ python -m monthly_limit_order_review.cli monthly-run \
 
 ```bash
 .venv/bin/python -m pytest -q
+PYTHONPATH=src .venv/bin/python -m monthly_limit_order_review.cli repository-audit
 ```
 
 ## 注意事項

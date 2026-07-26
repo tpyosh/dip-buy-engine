@@ -1,0 +1,11 @@
+schema_version: 1
+thesis_id: "persistent_cybersecurity_spending"
+status: "inherited_pending_review"
+migrated_at: "2026-07-26"
+source_ref: "config/portfolio_policy.yaml#long_term_thesis.CIBR"
+symbol: "CIBR"
+legacy_summary: "サイバーセキュリティ支出は構造的に維持・拡大するという仮説。"
+legacy_break_conditions:
+  - "支出成長の鈍化"
+  - "バリュエーション過熱後の長期低迷"
+treatment: "現在有効な戦略仮説として未承認。保有理由の確認対象。"

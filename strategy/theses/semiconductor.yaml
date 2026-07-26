@@ -1,0 +1,102 @@
+schema_version: 1
+thesis_id: "semiconductor_structural_growth_2026-07-25"
+status: "active"
+approved_at: "2026-07-25"
+applies_to_exposure_group: "direct_semiconductor"
+strategy_ref: "strategy/versions/2026-07-25.yaml"
+
+role:
+  portfolio_role: "active_hobby_growth_driver"
+  not_a_role:
+    - "AI景気破綻に対する防御資産"
+    - "元本保全資産"
+
+claims:
+  supported:
+    - >
+      AI、データセンター、車載、産業機器、通信などを通じ、
+      半導体需要と産業の価値プールは長期的に拡大する可能性が高い。
+    - >
+      半導体産業はAIだけに依存せず、AI成長ストーリーが破綻しても
+      産業そのものが不要になるとは考えにくい。
+    - >
+      高い参入障壁と技術・製造・装置の複雑性により、
+      一部企業には超過利益を維持できる余地がある。
+  not_established_as_fact:
+    - >
+      現在の株価に織り込まれた市場期待を、将来の利益成長が継続的に上回ること。
+    - >
+      半導体需要の増加が、そのままSOXまたはSMHの市場超過収益になること。
+
+critical_distinctions:
+  - "需要成長と利益成長を分ける"
+  - "利益成長と市場期待を上回る利益成長を分ける"
+  - "産業の存続と指数価格の下落耐性を分ける"
+  - "過去のポートフォリオ寄与と将来期待収益を分ける"
+
+current_assessment:
+  as_of: "2026-07-25"
+  fundamentals: "strong"
+  valuation_expectations: "demanding"
+  expected_excess_return: "uncertain"
+  conclusion: >
+    保有継続に合理性はあるが、現在の直接半導体比率が戦略上のpreferred maxを超える間は
+    通常の買い増しを行わない。価格と期待が大きく低下しても仮説が維持される場合だけ、
+    人間の承認を前提に例外提案を検討する。
+
+review_metrics:
+  horizon: "3_to_5_year_full_cycle"
+  metrics:
+    - "SOX構成企業のaggregate EPS growth"
+    - "SOX構成企業のaggregate free cash flow growth"
+    - "SOX構成企業のaggregate ROIC"
+    - "global equityとの相対成長"
+    - "forward earnings revisionsとvaluation"
+    - "memory pricing、inventory、capacity utilization"
+    - "hyperscaler capexとAI monetization"
+    - "自動車・産業・通信など非AI需要"
+    - "指数上位銘柄集中度"
+
+invalidation_or_reduction_review:
+  - >
+    AI設備投資が持続的に縮小し、inference、edge、車載、産業用途などから
+    十分な代替需要が確認できない。
+  - >
+    供給能力増強後の慢性的な過剰供給により、売上成長に反して
+    margin、free cash flow、ROICがフルサイクルで悪化する。
+  - >
+    技術変化、競争、規制、輸出管理によって、保有指数の構成企業が
+    半導体産業の成長価値を獲得できなくなる。
+  - >
+    指数集中度の上昇により、期待している半導体産業全体への分散投資ではなくなる。
+
+allocation_rules:
+  preferred_max_pct_of_total_assets: 0.15
+  routine_additions_above_preferred_max: false
+  rebalance_proposal_above_pct_of_total_assets: 0.20
+  automatic_sell: false
+  automatic_buy: false
+
+evidence:
+  - as_of: "2026-06-24"
+    source_type: "industry_primary"
+    title: "WSTS Spring 2026 semiconductor market forecast"
+    url: "https://www.wsts.org/76/Recent-News-Release"
+    relevance: >
+      2026年市場を1.51兆ドル、前年比90%増と予測。
+      成長はmemoryとAI infrastructureへの依存が大きい。
+  - as_of: "2026-07-06"
+    source_type: "industry_primary"
+    title: "SIA May 2026 global semiconductor sales"
+    url: "https://www.semiconductors.org/global-semiconductor-sales-increase-9-2-month-to-month-in-may/"
+    relevance: "2026年5月売上は前年同月比104.1%増、15か月連続の前月比増加。"
+  - as_of: "2026-06-30"
+    source_type: "index_provider_primary"
+    title: "Nasdaq PHLX Semiconductor Sector Index factsheet"
+    url: "https://indexes.nasdaq.com/docs/FS_SOX.pdf"
+    relevance: "SOXの騰落率と上位構成銘柄集中を確認する基準資料。"
+  - as_of: "2026-06-30"
+    source_type: "fund_provider_primary"
+    title: "VanEck Semiconductor ETF factsheet"
+    url: "https://www.vaneck.com/us/en/investments/semiconductor-etf-smh-fact-sheet.pdf"
+    relevance: "SMHのvaluation、構成銘柄、集中度を確認する基準資料。"

@@ -1,0 +1,26 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Normalized portfolio snapshot"
+type: object
+required:
+  - snapshot_date
+  - currency_base
+  - total_assets_jpy
+  - holdings
+properties:
+  snapshot_date:
+    type: string
+    format: date
+  currency_base:
+    const: "JPY"
+  total_assets_jpy:
+    type: number
+  holdings:
+    type: array
+    items:
+      type: object
+      required:
+        - symbol
+        - name
+        - asset_class
+        - market_value_jpy
+        - currency

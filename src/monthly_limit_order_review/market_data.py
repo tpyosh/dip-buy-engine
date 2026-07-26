@@ -28,9 +28,9 @@ class MarketDataFetcher:
     def fetch_reference(self, symbol: str, yfinance_symbol: str, currency: str) -> MarketReference:
         history = self.history_provider(yfinance_symbol)
         closes = self._extract_close_series(history)
-        if len(closes) < 63:
+        if len(closes) < 64:
             raise MarketDataError(
-                f"Insufficient trading days for {symbol}: need at least 63 rows, got {len(closes)}"
+                f"Insufficient trading days for {symbol}: need at least 64 rows, got {len(closes)}"
             )
 
         as_of = pd.Timestamp(closes.index[-1]).date()
@@ -38,6 +38,8 @@ class MarketDataFetcher:
         mean_close_30d = quantize(Decimal(str(closes.tail(30).mean())), 4)
         recent_high_21d = quantize(Decimal(str(closes.tail(21).max())), 4)
         recent_high_63d = quantize(Decimal(str(closes.tail(63).max())), 4)
+        prior_close_1d = quantize(Decimal(str(closes.iloc[-2])), 4)
+        prior_close_5d = quantize(Decimal(str(closes.iloc[-6])), 4)
         prior_close_21d = quantize(Decimal(str(closes.iloc[-22])), 4)
         prior_close_63d = quantize(Decimal(str(closes.iloc[-64])), 4)
         return MarketReference(
@@ -50,6 +52,8 @@ class MarketDataFetcher:
             currency=currency,
             as_of=as_of,
             mean_close_30d=mean_close_30d,
+            prior_close_1d=prior_close_1d,
+            prior_close_5d=prior_close_5d,
             prior_close_21d=prior_close_21d,
             prior_close_63d=prior_close_63d,
         )

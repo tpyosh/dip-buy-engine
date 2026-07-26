@@ -4,7 +4,7 @@ Money Forward スクリーンショットを OCR し、投資判断ロジック�
 
 ## Scope Boundary
 
-Codex は投資判断者ではありません。このプロンプトで行ってよいことは、Money Forwardキャプチャの正規化、検証、欠損・不明点の整理、ChatGPTに渡す月次レビュー依頼プロンプトの作成までです。
+この正規化タスクで行ってよいことは、Money Forwardキャプチャの正規化、検証、欠損・不明点の整理、月次レビュー依頼プロンプトの作成までです。明示的な戦略レビュー依頼とは別タスクとして扱います。
 
 Codex は以下をしてはいけません。
 
@@ -18,7 +18,7 @@ Codex は以下をしてはいけません。
 
 正規化とChatGPT向け月次レビュー依頼プロンプトの生成が完了したら、Codex は停止し、ユーザにChatGPTへ貼り付けるよう促してください。ChatGPTの出力がユーザから明示的に貼り付けられた後にのみ、Codex はREADME、月次サマリー、購入計画、指値設定、プロンプト改善をレポジトリへ反映できます。
 
-ChatGPTの出力をREADMEへ反映する場合でも、ルートREADMEには最新月の `Monthly Review` だけを残し、過去月の `Monthly Review` セクションは残さないでください。過去月のレビュー原文、構造化レビュー、差分、計算結果は `data/history/` 配下を履歴として扱ってください。
+レビュー出力をREADMEへ反映する場合でも、ルートREADMEには最新月の `Monthly Review` だけを残してください。新規生成物は `reports/generated/`、2026-07以前の旧履歴は `data/history/` と `prompts/generated/` で扱います。
 
 ## Source Priority
 

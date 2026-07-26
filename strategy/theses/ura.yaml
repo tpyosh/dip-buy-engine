@@ -1,0 +1,15 @@
+schema_version: 1
+thesis_id: "nuclear_revival"
+status: "inherited_pending_review"
+migrated_at: "2026-07-26"
+source_ref: "config/portfolio_policy.yaml#long_term_thesis.URA"
+symbol: "URA"
+legacy_summary: >
+  脱炭素、電力需要増、エネルギー安全保障を背景に、
+  原子力需要が中長期で再評価されるという仮説。
+legacy_break_conditions:
+  - "炭素回収技術の量産化・低コスト化"
+  - "再エネ＋蓄電の経済性改善"
+  - "政策転換"
+  - "原子力新設の採算悪化"
+treatment: "現在有効な戦略仮説として未承認。保有理由の確認対象。"

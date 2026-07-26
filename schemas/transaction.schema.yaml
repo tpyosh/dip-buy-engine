@@ -1,0 +1,21 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Confirmed transaction"
+type: object
+required:
+  - transaction_id
+  - status
+  - transaction_type
+  - trade_date
+  - account
+  - currency
+  - source_evidence
+properties:
+  transaction_id:
+    type: string
+  status:
+    const: "confirmed"
+  transaction_type:
+    enum: ["buy", "sell", "deposit", "withdrawal", "transfer", "fee", "tax"]
+  trade_date:
+    type: string
+    format: date

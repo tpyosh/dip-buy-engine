@@ -1,0 +1,12 @@
+schema_version: 1
+record_type: "confirmed_transaction_ledger"
+owner: "husband"
+currency_reporting: "JPY"
+updated_at: "2026-07-26"
+transactions: []
+known_gaps:
+  - period: "before_2026-07-26"
+    status: "transaction_details_not_available"
+    note: >
+      過去のスナップショットとレビューは存在するが、注文・約定明細は確認されていない。
+      評価額や数量の差分を取引実績として逆算しない。

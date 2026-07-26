@@ -5,8 +5,8 @@ import logging
 import sys
 from copy import deepcopy
 from datetime import UTC, date, datetime
-from pathlib import Path
 from decimal import Decimal
+from pathlib import Path
 
 from .calendar_events import build_core_spot_buy_calendar_event_drafts, load_core_spot_buy_event_config
 from .candidate_metrics import compute_candidate_metrics
@@ -15,13 +15,26 @@ from .diff_analyzer import build_proposal_diffs
 from .exposure_metrics import build_exposure_breakdown
 from .market_data import fetch_market_references
 from .models import MonthlyComputation, PortfolioSnapshot, PortfolioWarning
+from .on_demand import (
+    assess_snapshot_freshness,
+    build_on_demand_market_data_artifact,
+    enrich_on_demand_market_references,
+    render_on_demand_assessment_prompt,
+)
 from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics, suggest_core_proxy_symbol
 from .prompt_renderer import render_chatgpt_prompt
 from .readme_portfolio import refresh_readme_portfolio
+from .repository_records import (
+    audit_repository,
+    load_recurring_contribution_context,
+    load_thesis_monitoring_policy,
+    raise_for_repository_errors,
+)
 from .review_parser import parse_review_feedback
 from .rules import calculate_sox_buy_signal
 from .snapshot_loader import load_snapshot
-from .storage import default_output_paths, load_yaml, read_text, write_text, write_yaml
+from .storage import default_output_paths, load_yaml, on_demand_output_paths, read_text, write_text, write_yaml
+from .strategy_policy import load_current_strategy_context
 from .thesis_metrics import build_long_term_thesis_targets
 from .utils import infer_target_month_start, month_key, percent, quantize, target_month_key
 from .validation import (
@@ -32,7 +45,7 @@ from .validation import (
 )
 
 LOGGER = logging.getLogger(__name__)
-ASSUMED_MONTHLY_CASH_INFLOW_JPY = Decimal("650000")
+LEGACY_ASSUMED_MONTHLY_CASH_INFLOW_JPY = Decimal("650000")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -71,6 +84,36 @@ def build_parser() -> argparse.ArgumentParser:
     monthly_parser = subparsers.add_parser("monthly-run", help="Run monthly computation and prompt generation")
     monthly_parser.add_argument("--snapshot", required=True, help="Path to normalized snapshot YAML")
     monthly_parser.set_defaults(func=handle_monthly_run)
+
+    on_demand_parser = subparsers.add_parser(
+        "on-demand-run",
+        help="Fetch current prices for held symbols and generate a news-based ChatGPT assessment prompt",
+    )
+    on_demand_parser.add_argument(
+        "--snapshot",
+        required=False,
+        help="Path to a snapshot used only as a held-symbol inventory (latest normalized snapshot by default)",
+    )
+    on_demand_parser.add_argument("--output", required=False, help="Path to output markdown prompt")
+    on_demand_parser.add_argument(
+        "--inventory-max-age-days",
+        type=int,
+        default=45,
+        help="Age after which the held-symbol inventory is labeled stale (default: 45; never blocks price fetch)",
+    )
+    on_demand_parser.add_argument(
+        "--news-lookback-days",
+        type=int,
+        default=14,
+        help="Authoritative-news lookback requested from ChatGPT (default: 14)",
+    )
+    on_demand_parser.set_defaults(func=handle_on_demand_run)
+
+    audit_parser = subparsers.add_parser(
+        "repository-audit",
+        help="Validate repository sources of truth and cross-file references without writing files",
+    )
+    audit_parser.set_defaults(func=handle_repository_audit)
     return parser
 
 
@@ -79,6 +122,19 @@ def configure_logging(*, verbose: bool) -> None:
         level=logging.DEBUG if verbose else logging.INFO,
         format="%(levelname)s %(name)s: %(message)s",
     )
+
+
+def handle_repository_audit(args: argparse.Namespace) -> int:
+    del args
+    project_root = get_project_root()
+    issues = audit_repository(project_root)
+    for issue in issues:
+        log = LOGGER.warning if issue["severity"] == "warning" else LOGGER.error
+        log("%s: %s", issue["code"], issue["message"])
+    raise_for_repository_errors(issues)
+    warning_count = sum(issue["severity"] == "warning" for issue in issues)
+    LOGGER.info("Repository audit passed with %s warning(s).", warning_count)
+    return 0
 
 
 def handle_generate_review_prompt(args: argparse.Namespace) -> int:
@@ -185,6 +241,101 @@ def handle_monthly_run(args: argparse.Namespace) -> int:
     return 0
 
 
+def handle_on_demand_run(args: argparse.Namespace) -> int:
+    project_root = get_project_root()
+    snapshot_path = resolve_on_demand_inventory_path(project_root, args.snapshot)
+    requested_at = datetime.now(UTC)
+    snapshot = load_snapshot(snapshot_path)
+    inventory_freshness = assess_snapshot_freshness(
+        snapshot.snapshot_date,
+        requested_at=requested_at,
+        max_age_days=args.inventory_max_age_days,
+    )
+    if inventory_freshness["status"] == "future_dated":
+        raise ValueError("Held-symbol inventory snapshot_date is in the future; verify the source file.")
+
+    computation = compute_on_demand(
+        snapshot_path,
+        project_root=project_root,
+        requested_at=requested_at,
+    )
+    tickers = load_yaml(project_root / "config/tickers.yaml")
+    market_reference_path = project_root / "config/market_reference.yaml"
+    if market_reference_path.exists():
+        tickers.setdefault("yfinance_symbols", {}).update(
+            load_yaml(market_reference_path).get("yfinance_symbols", {})
+        )
+    collection = enrich_on_demand_market_references(computation, tickers)
+    computation.metadata["on_demand"] = {
+        "inventory_freshness": inventory_freshness,
+        "market_reference_collection": collection,
+        "news_lookback_days": args.news_lookback_days,
+        "monthly_side_effects_disabled": True,
+    }
+
+    paths = on_demand_output_paths(project_root, requested_at)
+    output_path = Path(args.output) if args.output else paths["prompt"]
+    template_text = read_text(project_root / "prompts/templates/on_demand_assessment_template.md")
+    prompt = render_on_demand_assessment_prompt(
+        computation,
+        template_text,
+        inventory_freshness=inventory_freshness,
+        news_lookback_days=args.news_lookback_days,
+    )
+
+    market_data_artifact = build_on_demand_market_data_artifact(computation)
+    write_yaml(paths["market_data"], market_data_artifact)
+    write_text(output_path, prompt)
+    write_text(paths["prompt_history"], prompt)
+    LOGGER.info("Saved on-demand market data to %s", paths["market_data"])
+    LOGGER.info("Saved on-demand assessment prompt to %s", output_path)
+    LOGGER.info("Saved on-demand prompt history to %s", paths["prompt_history"])
+    return 0
+
+
+def resolve_on_demand_inventory_path(project_root: Path, snapshot_arg: str | None) -> Path:
+    if snapshot_arg:
+        return Path(snapshot_arg)
+
+    candidates: list[tuple[date, int, Path]] = []
+    for path in (project_root / "data/normalized").glob("snapshot_*.yaml"):
+        try:
+            snapshot = load_snapshot(path)
+        except Exception:  # noqa: BLE001
+            continue
+        candidates.append((snapshot.snapshot_date, path.stat().st_mtime_ns, path))
+    if not candidates:
+        raise ValueError("No readable normalized snapshot is available as a held-symbol inventory.")
+    return max(candidates, key=lambda item: (item[0], item[1]))[2]
+
+
+def compute_on_demand(
+    snapshot_path: Path,
+    *,
+    project_root: Path,
+    requested_at: datetime,
+) -> MonthlyComputation:
+    snapshot = load_snapshot(snapshot_path)
+    resolved_buckets = {holding.symbol: holding.asset_class for holding in snapshot.holdings}
+
+    return MonthlyComputation(
+        snapshot=snapshot,
+        generated_at=requested_at.astimezone(UTC).isoformat(timespec="seconds").replace("+00:00", "Z"),
+        bucket_allocations=[],
+        market_references=[],
+        candidate_orders=[],
+        warnings=[],
+        semi_exposure_pct=Decimal("0"),
+        liquidity_jpy=Decimal("0"),
+        sox_buy_signal={},
+        metadata={
+            "snapshot_path": str(snapshot_path),
+            "inventory_only": True,
+            "resolved_buckets": resolved_buckets,
+        },
+    )
+
+
 def build_core_spot_buy_calendar_event_artifact(
     *,
     review_feedback,
@@ -221,10 +372,17 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     allocation_rules_path = project_root / "config/allocation_rules.yaml"
     market_reference_path = project_root / "config/market_reference.yaml"
     classification_overrides_path = project_root / "config/classification_overrides.yaml"
-    recurring_contributions_path = project_root / "config/core_recurring_contributions.yaml"
+    strategy_context = load_applicable_strategy_context(
+        project_root,
+        review_target_month_start,
+    )
+    active_strategy = strategy_context.get("strategy")
+    active_plans = strategy_context.get("active_plans", [])
 
     merged_buy_rules = deepcopy(buy_rules)
-    if allocation_rules_path.exists():
+    if active_strategy is not None:
+        merged_buy_rules.pop("core_budget_policy", None)
+    elif allocation_rules_path.exists():
         allocation_rules = load_yaml(allocation_rules_path)
         if "core_budget_policy" in allocation_rules:
             merged_buy_rules["core_budget_policy"] = allocation_rules["core_budget_policy"]
@@ -241,17 +399,27 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         merged_tickers.setdefault("yfinance_symbols", {}).update(market_reference.get("yfinance_symbols", {}))
 
     merged_policy = deepcopy(portfolio_policy)
+    if active_strategy is not None:
+        merged_policy["active_strategy"] = active_strategy
+        merged_policy["active_plans"] = active_plans
+        merged_policy["long_term_thesis"] = load_thesis_monitoring_policy(
+            project_root
+        )
     if classification_overrides_path.exists():
         merged_policy["classification_overrides"] = load_yaml(classification_overrides_path)
-    recurring_contributions = (
-        deepcopy(load_yaml(recurring_contributions_path).get("core_recurring_contributions", {}))
-        if recurring_contributions_path.exists()
-        else {}
-    )
+    recurring_context = load_recurring_contribution_context(project_root)
+    recurring_contributions = recurring_context["contributions"]
     recurring_contributions, recurring_contribution_warnings = resolve_core_recurring_contributions_for_month(
         recurring_contributions,
         review_target_month_start,
     )
+    if active_strategy is not None:
+        recurring_contribution_warnings.extend(
+            build_recurring_strategy_alignment_warnings(
+                recurring_contributions,
+                active_strategy,
+            )
+        )
     pension_monthly_total_jpy = sum(
         int(item.get("amount_jpy_per_month", 0))
         for item in recurring_contributions.get("pension_monthly_dca", [])
@@ -291,6 +459,10 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         portfolio_analysis["resolved_buckets"],
         market_references,
         merged_buy_rules,
+        strategy_allocations=portfolio_analysis["strategy_allocations"],
+        strategy_metrics=portfolio_analysis["strategy_metrics"],
+        active_strategy=active_strategy,
+        active_plans=active_plans,
     )
     raw_candidates = compute_candidate_metrics(
         snapshot,
@@ -307,6 +479,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         market_references,
         bucket_allocations=portfolio_analysis["bucket_allocations"],
         exposure_breakdown=exposure_breakdown,
+        active_strategy=active_strategy,
     )
     long_term_thesis_targets = build_long_term_thesis_targets(
         snapshot,
@@ -337,6 +510,20 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         )
     )
     warnings.extend(build_validation_warnings(snapshot.warnings))
+    if (
+        active_strategy is not None
+        and buy_rules.get("policy_status") == "legacy_analytical_heuristic"
+    ):
+        warnings.append(
+            PortfolioWarning(
+                code="legacy_candidate_heuristic_review_only",
+                severity="info",
+                message=(
+                    "Limit-order candidates come from a legacy analytical heuristic, "
+                    "not an approved order plan. They are review material only."
+                ),
+            )
+        )
     core_reference_missing_symbols = sorted(
         {
             symbol
@@ -367,6 +554,15 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
     )
     recurring_total_jpy = recurring_contributions.get("total_monthly_jpy")
     recommended_spot_buy_jpy = core_buy_materials.get("recommended_monthly_core_buy_budget_jpy")
+    active_plan_account_type = core_buy_materials.get("active_plan_account_type")
+    monthly_taxable_core_spot_buy_required = bool(
+        recurring_contributions.get("taxable_core_spot_buy_required", False)
+        or (
+            core_buy_materials.get("active_plan_id")
+            and active_plan_account_type
+            and "特定口座" in str(active_plan_account_type)
+        )
+    )
     monthly_total_core_deployment_jpy = (
         recurring_total_jpy + recommended_spot_buy_jpy
         if recurring_total_jpy is not None and recommended_spot_buy_jpy is not None
@@ -376,7 +572,11 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         liquidity_allocation=bucket_allocations_by_name.get("liquidity"),
         total_assets_jpy=snapshot.total_assets_jpy,
         monthly_total_core_deployment_jpy=monthly_total_core_deployment_jpy,
-        monthly_cash_inflow_jpy=ASSUMED_MONTHLY_CASH_INFLOW_JPY,
+        monthly_cash_inflow_jpy=(
+            None
+            if active_strategy is not None
+            else LEGACY_ASSUMED_MONTHLY_CASH_INFLOW_JPY
+        ),
     )
     quarterly_no_change = classification_override_count == 0 and not core_reference_missing_symbols
     return MonthlyComputation(
@@ -389,6 +589,23 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         semi_exposure_pct=exposure_breakdown["semiconductor_exposure_total_pct"],
         liquidity_jpy=portfolio_analysis["liquidity_jpy"],
         sox_buy_signal=sox_buy_signal,
+        strategy_allocations=portfolio_analysis["strategy_allocations"],
+        strategy_summary={
+            "strategy_id": (active_strategy or {}).get("strategy_id"),
+            "effective_from": (active_strategy or {}).get("effective_from"),
+            "reserved_hobby_cash_jpy": portfolio_analysis["strategy_metrics"].get(
+                "recognized_reserved_cash_jpy"
+            ),
+            "unallocated_liquidity_jpy": portfolio_analysis["strategy_metrics"].get(
+                "unallocated_liquidity_jpy"
+            ),
+            "residual_jpy": portfolio_analysis["strategy_metrics"].get("residual_jpy"),
+            "active_plan_ids": [
+                plan.get("plan_id")
+                for plan in active_plans
+                if plan.get("plan_id") is not None
+            ],
+        },
         portfolio_summary=portfolio_analysis["portfolio_summary"],
         core_buy_materials=core_buy_materials,
         exposure_breakdown=exposure_breakdown,
@@ -397,13 +614,16 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "review_target_month": review_target_month,
             "nisa_growth_quota_status": recurring_contributions.get("nisa_growth_quota_status"),
             "fixed_core_auto_invest_amount_jpy": recurring_total_jpy,
-            "taxable_core_spot_buy_required": recurring_contributions.get("taxable_core_spot_buy_required", False),
+            "taxable_core_spot_buy_required": monthly_taxable_core_spot_buy_required,
             "recommended_taxable_core_spot_buy_jpy": (
                 recommended_spot_buy_jpy
-                if recurring_contributions.get("taxable_core_spot_buy_required", False)
+                if monthly_taxable_core_spot_buy_required
                 else None
             ),
-            "core_spot_buy_account_type": recurring_contributions.get("core_spot_buy_account_type"),
+            "core_spot_buy_account_type": (
+                active_plan_account_type
+                or recurring_contributions.get("core_spot_buy_account_type")
+            ),
             "portfolio_management_mode": core_buy_materials.get("portfolio_management_mode"),
             "monthly_core_budget_tier": core_buy_materials.get("monthly_core_budget_tier"),
             "recommended_monthly_core_buy_budget_jpy": core_buy_materials.get(
@@ -445,9 +665,20 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             else None,
             "review_target_month": review_target_month,
             "review_target_month_start": review_target_month_start.isoformat(),
+            "strategy_id": (active_strategy or {}).get("strategy_id"),
+            "strategy_effective_from": (active_strategy or {}).get("effective_from"),
+            "active_strategy_path": strategy_context.get("pointer", {}).get(
+                "active_strategy_path"
+            ),
+            "active_plan_paths": strategy_context.get("pointer", {}).get(
+                "active_plan_paths",
+                [],
+            ),
             "resolved_buckets": portfolio_analysis["resolved_buckets"],
             "classification_audit": portfolio_analysis["classification_audit"],
             "core_recurring_contributions": recurring_contributions,
+            "core_recurring_contributions_source": recurring_context["source_path"],
+            "candidate_policy_status": buy_rules.get("policy_status"),
             "core_spot_buy_materials": core_spot_buy_materials,
         },
     )
@@ -578,6 +809,43 @@ def resolve_core_recurring_contributions_for_month(
     return resolved, warnings
 
 
+def build_recurring_strategy_alignment_warnings(
+    recurring_contributions: dict,
+    active_strategy: dict,
+) -> list[PortfolioWarning]:
+    existing_sp500_policy = active_strategy.get("core_policy", {}).get(
+        "existing_sp500",
+        {},
+    )
+    if existing_sp500_policy.get("new_routine_purchase") is not False:
+        return []
+
+    conflicting_plans = [
+        plan
+        for plan in recurring_contributions.get("plans", [])
+        if "S&P500" in str(plan.get("fund_name", "")).upper()
+        and int(plan.get("amount_jpy", 0)) > 0
+    ]
+    if not conflicting_plans:
+        return []
+
+    return [
+        PortfolioWarning(
+            code="core_recurring_plan_conflicts_with_current_strategy",
+            severity="warning",
+            message=(
+                "The recorded recurring plan still buys S&P500, while the active strategy "
+                "routes new broad-core purchases to all-country only. Treat the recurring plan "
+                "as an observed fact until the user changes it; do not silently mark it updated."
+            ),
+            related_symbols=[
+                str(plan.get("fund_name"))
+                for plan in conflicting_plans
+            ],
+        )
+    ]
+
+
 def find_active_month_override(overrides: list[dict], review_target_month_start: date) -> dict | None:
     for override in overrides:
         active_from = override.get("active_from") or override.get("period", {}).get("start")
@@ -676,6 +944,26 @@ def get_project_root() -> Path:
     return Path(__file__).resolve().parents[2]
 
 
+def load_applicable_strategy_context(
+    project_root: Path,
+    review_target_month_start: date,
+) -> dict:
+    pointer_path = project_root / "strategy/current.yaml"
+    if not pointer_path.exists():
+        return {"pointer": {}, "strategy": None, "active_plans": []}
+
+    context = load_current_strategy_context(project_root)
+    effective_from = date.fromisoformat(str(context["strategy"]["effective_from"]))
+    effective_month = date(effective_from.year, effective_from.month, 1)
+    if review_target_month_start < effective_month:
+        return {
+            "pointer": context["pointer"],
+            "strategy": None,
+            "active_plans": [],
+        }
+    return context
+
+
 def build_core_spot_buy_materials(
     *,
     snapshot,
@@ -685,6 +973,10 @@ def build_core_spot_buy_materials(
     recurring_contributions: dict,
 ) -> dict:
     allocation_map = {allocation.bucket: allocation for allocation in portfolio_analysis["bucket_allocations"]}
+    strategy_allocation_map = {
+        allocation.bucket: allocation
+        for allocation in portfolio_analysis.get("strategy_allocations", [])
+    }
     reference_map = {reference.symbol: reference for reference in market_references}
     current_monthly_core_auto_invest = recurring_contributions.get("total_monthly_jpy")
     fixed_core_auto_invest = recurring_contributions.get(
@@ -692,7 +984,15 @@ def build_core_spot_buy_materials(
         current_monthly_core_auto_invest,
     )
     recommended_core_spot_buy = core_buy_materials.get("recommended_monthly_core_buy_budget_jpy")
-    taxable_core_spot_buy_required = bool(recurring_contributions.get("taxable_core_spot_buy_required", False))
+    active_plan_account_type = core_buy_materials.get("active_plan_account_type")
+    taxable_core_spot_buy_required = bool(
+        recurring_contributions.get("taxable_core_spot_buy_required", False)
+        or (
+            core_buy_materials.get("active_plan_id")
+            and active_plan_account_type
+            and "特定口座" in str(active_plan_account_type)
+        )
+    )
     total_monthly_core_deployment = (
         fixed_core_auto_invest + recommended_core_spot_buy
         if fixed_core_auto_invest is not None and recommended_core_spot_buy is not None
@@ -726,6 +1026,38 @@ def build_core_spot_buy_materials(
     bond_like_holdings = detect_bond_like_holdings(snapshot.holdings)
     real_estate_risk_profile = build_real_estate_risk_profile()
     return {
+        "strategy_id": core_buy_materials.get("strategy_id"),
+        "active_plan_id": core_buy_materials.get("active_plan_id"),
+        "active_plan_status": core_buy_materials.get("active_plan_status"),
+        "active_plan_account_type": core_buy_materials.get("active_plan_account_type"),
+        "active_plan_execution_amount_rule": core_buy_materials.get(
+            "active_plan_execution_amount_rule"
+        ),
+        "active_plan_requires_pretrade_balance_confirmation": core_buy_materials.get(
+            "active_plan_requires_pretrade_balance_confirmation"
+        ),
+        "broad_core_actual_pct": (
+            strategy_allocation_map["broad_core"].actual_pct
+            if "broad_core" in strategy_allocation_map
+            else None
+        ),
+        "broad_core_target_pct": (
+            strategy_allocation_map["broad_core"].target_pct
+            if "broad_core" in strategy_allocation_map
+            else None
+        ),
+        "active_hobby_actual_pct": (
+            strategy_allocation_map["active_hobby"].actual_pct
+            if "active_hobby" in strategy_allocation_map
+            else None
+        ),
+        "active_hobby_target_pct": (
+            strategy_allocation_map["active_hobby"].target_pct
+            if "active_hobby" in strategy_allocation_map
+            else None
+        ),
+        "reserved_hobby_cash_jpy": core_buy_materials.get("reserved_hobby_cash_jpy"),
+        "unallocated_liquidity_jpy": core_buy_materials.get("unallocated_liquidity_jpy"),
         "liquidity_actual_pct": core_buy_materials.get("liquidity_actual_pct"),
         "liquidity_target_pct": core_buy_materials.get("liquidity_target_pct"),
         "cash_excess_pct": core_buy_materials.get("cash_excess_pct"),
@@ -738,7 +1070,10 @@ def build_core_spot_buy_materials(
         "nisa_growth_quota_status": recurring_contributions.get("nisa_growth_quota_status"),
         "nisa_exhaustion_adjustment_reason": recurring_contributions.get("nisa_exhaustion_adjustment_reason"),
         "taxable_core_spot_buy_required": taxable_core_spot_buy_required,
-        "core_spot_buy_account_type": recurring_contributions.get("core_spot_buy_account_type"),
+        "core_spot_buy_account_type": (
+            active_plan_account_type
+            or recurring_contributions.get("core_spot_buy_account_type")
+        ),
         "taxable_account_note": recurring_contributions.get("taxable_account_note"),
         "tax_note": recurring_contributions.get("tax_note"),
         "fixed_core_auto_invest_amount_jpy": fixed_core_auto_invest,

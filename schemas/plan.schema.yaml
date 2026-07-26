@@ -1,0 +1,17 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Time-bounded investment plan"
+type: object
+required:
+  - schema_version
+  - plan_id
+  - status
+  - strategy_ref
+  - basis
+  - execution_gate
+properties:
+  plan_id:
+    type: string
+  status:
+    enum: ["draft", "approved_pending_execution", "active", "completed", "cancelled", "superseded"]
+  strategy_ref:
+    type: string

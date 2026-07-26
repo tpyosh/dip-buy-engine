@@ -36,6 +36,7 @@ def calculate_sox_buy_signal(
     *,
     bucket_allocations: list | None = None,
     exposure_breakdown: dict | None = None,
+    active_strategy: dict | None = None,
 ) -> dict:
     reference_map = {reference.symbol: reference for reference in market_references}
     sox_config = buy_rules_config.get("sox_buy_judgement", {})
@@ -66,7 +67,42 @@ def calculate_sox_buy_signal(
     related_bucket = allocation_map.get("satellite_core")
     priority_lowered = False
     priority_lowered_reason = None
-    if bool(sox_config.get("deprioritize_when_related_bucket_over_target", False)) and related_bucket is not None:
+    routine_additions_allowed = True
+    rebalance_proposal_required = False
+    semiconductor_preferred_max_pct = None
+    semiconductor_rebalance_proposal_above_pct = None
+    direct_semiconductor_exposure_pct = (
+        exposure_breakdown.get("direct_semiconductor_exposure_pct")
+        if exposure_breakdown
+        else None
+    )
+    if active_strategy is not None:
+        semiconductor_policy = (
+            active_strategy.get("risk_limits", {})
+            .get("direct_themes", {})
+            .get("semiconductor", {})
+        )
+        semiconductor_preferred_max_pct = to_decimal(
+            semiconductor_policy.get("preferred_max_pct"),
+            field_name="semiconductor.preferred_max_pct",
+        )
+        semiconductor_rebalance_proposal_above_pct = to_decimal(
+            semiconductor_policy.get("rebalance_proposal_above_pct"),
+            field_name="semiconductor.rebalance_proposal_above_pct",
+        )
+        if (
+            direct_semiconductor_exposure_pct is not None
+            and direct_semiconductor_exposure_pct > semiconductor_preferred_max_pct
+        ):
+            priority_lowered = True
+            priority_lowered_reason = "direct_semiconductor_above_preferred_max"
+            routine_additions_allowed = False
+        if (
+            direct_semiconductor_exposure_pct is not None
+            and direct_semiconductor_exposure_pct > semiconductor_rebalance_proposal_above_pct
+        ):
+            rebalance_proposal_required = True
+    elif bool(sox_config.get("deprioritize_when_related_bucket_over_target", False)) and related_bucket is not None:
         if related_bucket.target_pct is not None and related_bucket.actual_pct > related_bucket.target_pct:
             priority_lowered = True
             priority_lowered_reason = sox_config.get("priority_lowered_note", "related_bucket_over_target")
@@ -83,6 +119,10 @@ def calculate_sox_buy_signal(
         "within_buy_zone": within_buy_zone,
         "within_buy_zone_boolean": within_buy_zone,
         "near_boundary_boolean": near_boundary,
+        "routine_additions_allowed": routine_additions_allowed,
+        "rebalance_proposal_required": rebalance_proposal_required,
+        "semiconductor_preferred_max_pct": semiconductor_preferred_max_pct,
+        "semiconductor_rebalance_proposal_above_pct": semiconductor_rebalance_proposal_above_pct,
         "monthly_buy_budget_jpy": sox_config.get("monthly_buy_budget_jpy", {}),
         "related_bucket_actual_pct": related_bucket.actual_pct if related_bucket is not None else None,
         "related_bucket_target_pct": related_bucket.target_pct if related_bucket is not None else None,

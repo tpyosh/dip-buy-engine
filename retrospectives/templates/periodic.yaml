@@ -1,0 +1,19 @@
+schema_version: 1
+record_type: "investment_retrospective"
+retrospective_id: null
+period:
+  start: null
+  end: null
+prepared_at: null
+strategy_ref: null
+plan_refs: []
+transaction_refs: []
+information_available_at_decision_time: []
+assumptions_at_decision_time: []
+decision_process: []
+decisions_made: []
+observed_outcomes: []
+process_evaluation_without_outcome_bias: []
+lessons: []
+followup_decision_refs: []
+unknowns: []

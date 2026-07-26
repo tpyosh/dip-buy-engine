@@ -58,8 +58,7 @@ def test_generate_review_prompt_updates_readme(monkeypatch, tmp_path: Path) -> N
     (project_root / "config").mkdir()
     (project_root / "prompts/templates").mkdir(parents=True)
     (project_root / "prompts/generated").mkdir(parents=True)
-    (project_root / "data/history/prompts").mkdir(parents=True)
-    (project_root / "data/history/computations").mkdir(parents=True)
+    (project_root / "plans/recurring/versions").mkdir(parents=True)
     readme_path = project_root / "README.md"
     readme_path.write_text("# Title\n\n## 目的\nbody\n", encoding="utf-8")
 
@@ -73,6 +72,12 @@ def test_generate_review_prompt_updates_readme(monkeypatch, tmp_path: Path) -> N
         ROOT / "config/core_recurring_contributions.yaml",
     ]:
         (project_root / "config" / path.name).write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
+    for path in [
+        ROOT / "plans/recurring/current.yaml",
+        ROOT / "plans/recurring/versions/2026-03-01.yaml",
+    ]:
+        destination = project_root / path.relative_to(ROOT)
+        destination.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
     (project_root / "prompts/templates/monthly_review_template.md").write_text(
         (ROOT / "prompts/templates/monthly_review_template.md").read_text(encoding="utf-8"),
         encoding="utf-8",
@@ -109,8 +114,8 @@ def test_generate_review_prompt_updates_readme(monkeypatch, tmp_path: Path) -> N
     assert "<!-- portfolio-piechart:start -->" in updated_readme
     assert "## Latest Portfolio Snapshot" in updated_readme
     assert "snapshot_date: 2026-03-29" in updated_readme
-    assert (project_root / "data/history/computations/2026_04_computation.yaml").exists()
-    assert (project_root / "data/history/prompts/2026_04_monthly_review_prompt.md").exists()
+    assert (project_root / "reports/generated/monthly/2026_04/computation.yaml").exists()
+    assert (project_root / "reports/generated/monthly/2026_04/review_request.md").exists()
 
 
 def test_cash_normalization_estimate_separates_gross_and_net_reduction() -> None:

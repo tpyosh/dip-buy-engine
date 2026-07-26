@@ -1,0 +1,15 @@
+schema_version: 1
+record_type: "investment_thesis_index"
+updated_at: "2026-07-26"
+entries:
+  - thesis_ref: "strategy/theses/semiconductor.yaml"
+    status: "active"
+    approval_ref: "decisions/2026-07-25_strategy_baseline.md"
+  - thesis_ref: "strategy/theses/ura.yaml"
+    status: "inherited_pending_review"
+  - thesis_ref: "strategy/theses/pltr.yaml"
+    status: "inherited_pending_review"
+  - thesis_ref: "strategy/theses/cibr.yaml"
+    status: "inherited_pending_review"
+  - thesis_ref: "strategy/theses/msft.yaml"
+    status: "inherited_pending_review"

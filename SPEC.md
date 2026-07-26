@@ -19,6 +19,10 @@ Python CLI プロジェクトを作成したい。
 このプロジェクトは「売買を自動化するツール」ではなく、  
 **月初の指値設定を一貫したルールでレビューし、毎月改善可能な形で運用するための半自動システム** である。
 
+加えて、月次レビューとは独立して、保存済みスナップショットから保有銘柄名だけを抽出し、直近価格変動と信頼性の高いニュースを突き合わせる **ChatGPT向けオンデマンド市場アセスメント依頼プロンプト** を生成する。保有額、数量、取得単価、損益、配分はオンデマンド評価の対象にしない。
+
+> **戦略値のsource of truth:** この文書内の配分・購入額・閾値は、既存機能と履歴を説明する旧仕様または例示を含む。現在有効な戦略値は `strategy/current.yaml` が参照する不変バージョン、期間限定の購入・売却計画は同ファイルの `active_plan_paths` を唯一の参照元とする。実行時に本文中の旧数値へfallbackしてはならない。
+
 ---
 
 ## Intended monthly workflow
@@ -39,53 +43,41 @@ Python CLI プロジェクトを作成したい。
 12. Codex はそのドラフトを使い、証券会社への自動発注ではなく、手動発注リマインダーとして Google Calendar イベントを作成する
 13. ユーザは必要に応じてその修正プロンプトを Codex に渡し、スクリプトを改善する
 
+## Intended on-demand workflow
+
+1. ユーザが保有銘柄のオンデマンド市場アセスメントを依頼する
+2. Python は最新の正規化済みスナップショットを保有銘柄リストとして選ぶ。保有銘柄の変更が明示されていなければ最新Money Forward画面は要求しない
+3. Python は株式・投資信託・年金の銘柄名だけを抽出し、保有額、数量、取得単価、損益、配分を評価入力から除外する
+4. Python は各銘柄または市場参照プロキシの最新日足終値、1日・5日・1か月・3か月リターン、21日・63日高値からの下落率を取得する
+5. 取得失敗、未設定銘柄、プロキシ使用、価格の `as_of` を警告または注記として残す
+6. Python は `on-demand-run` で ChatGPT向け市場・ニュースアセスメント依頼プロンプトを生成する
+7. ChatGPT は企業IR、法定開示、取引所、政府、中央銀行、統計機関等の一次情報と信頼性の高い市場報道をWeb調査する
+8. ChatGPT は値動きの事実、市場報道上の背景、自身の推論を分け、因果関係の確度とシナリオ影響を返す
+9. ユーザが最終判断し、必要な操作を手動で行う
+
+オンデマンド処理は月次レビュー履歴、README、Google Calendar を更新しない。銘柄リストが古くても価格取得は止めず、リストが古い可能性だけを明示する。価格は最新取得可能な日足終値として扱い、リアルタイム気配値とは表現しない。
+
 ---
 
-## Mandatory Codex handoff gate
+## Human approval and task-scope gate
 
-Codex は投資判断者ではない。Money Forwardキャプチャ、ポートフォリオ、NISA、iDeCo、ETF、株式、暗号資産に関するタスクでは、作業開始前に必ず以下を確認すること。
+AIの責務は、Codex / ChatGPTという名称ではなく、ユーザが依頼したタスク種別で決める。
 
-- 今回のタスクは「正規化」「プロンプト作成」「ChatGPT出力の反映」のどれか
-- 投資判断をCodex自身が行うタスクではないか
-- ChatGPTへのハンドオフゲートを省略していないか
-- ユーザがChatGPT出力を貼り付けていないのに、アセット更新まで進めようとしていないか
+### Normalization / preparation
 
-Codex は以下を行ってよい。
+Money Forwardキャプチャの正規化、欠損検出、計算、レビュー材料の生成だけを依頼された場合、AIはその範囲で停止する。正規化タスクから購入・売却・リバランス提案へ暗黙に拡張しない。
 
-- Money ForwardキャプチャやCSV等の入力データを正規化する
-- 資産クラス、口座種別、銘柄名、数量、評価額、損益などを構造化する
-- 入力データの欠損・表記ゆれ・不明点を検出する
-- ChatGPTに渡す投資判断依頼プロンプトを作成する
-- ChatGPTから返ってきた内容を、ユーザが明示的に貼り付けた場合のみ、レポジトリ内のアセットへ反映する
-- ChatGPTから返ってきた coreスポット買い実行スケジュールを、手動発注リマインダーとして Google Calendar イベントにする
-- プロンプト、フォーマット、チェックリスト、正規化スクリプトを改善する
-- 投資判断に必要な材料を整理する
+### Strategy / portfolio review
 
-Codex は以下をしてはいけない。
+ユーザが明示的に戦略検証、ポートフォリオ診断、売買・リバランス案を求めた場合、AIは以下を満たしたうえで提案できる。
 
-- 買い・売り・保有・利確・損切り・積立停止・リバランスなどの投資判断を確定する
-- 「おすすめ」「判断」「結論」「実行すべき」などの形で投資助言を完結する
-- ChatGPTを介さずに投資判断を生成する
-- ChatGPTの出力がない状態で、投資判断をレポジトリアセットへ反映する
-- 正規化結果から自動的に売買方針を導く
-- ユーザが明示していない投資方針を補完して決定する
-- 月次レビューのChatGPTフィードバックループを省略する
+- `strategy/current.yaml` が指す現在戦略を使用する
+- 対象期間のactive planと基準日時点のスナップショットを区別する
+- 税制、市場価格、商品仕様には最新の一次情報、参照日、出典を持たせる
+- 事実、推論、ユーザ確認事項を分離する
+- 比率と閾値を現在保有に合わせて後付け調整しない
 
-Codex は以下の時点で停止し、ユーザにChatGPTへの貼り付けを促すこと。
-
-- Money Forwardキャプチャの正規化が完了したとき
-- ChatGPT向け投資判断依頼プロンプトを作成したとき
-- 投資判断が必要な論点を整理し終えたとき
-
-この時点でCodexが出力してよいのは、正規化済みデータ、不明点・欠損・注意点、ChatGPTに貼り付けるためのプロンプト、ChatGPTに確認してほしい論点、Codex側プロンプトや運用ルール改善の相談事項だけである。
-
-ユーザがChatGPTの出力を明示的に貼り付けた後にのみ、Codex はChatGPTの投資判断をレポジトリの記録フォーマットへ転記し、ChatGPTからの改善提案をAIアセットへ反映し、Codex用プロンプト、正規化ルール、チェックリストを更新し、次回の月次レビュー用プロンプトを改善してよい。ただし、ChatGPTの結論をCodexが独自に上書きしてはいけない。Codex は実装者・整形者・記録者であり、投資判断者ではない。
-
-### Failure example and prevention rule
-
-- 問題: Codex が Money Forwardキャプチャの正規化タスクから勝手に投資判断へ進み、ChatGPTを介さずにアセット更新まで完結した。
-- 原因: Codex の責務境界、禁止事項、ハンドオフ条件、ChatGPTフィードバックゲートが十分に明文化されていなかった、またはCodexがそれを優先制約として扱わなかった。
-- 再発防止: 投資判断を必要とする箇所では、Codex は必ずChatGPT向けプロンプトを作成して停止する。ChatGPT出力がユーザから貼り付けられるまで、判断・反映・最適化を進めない。
+すべてのタスクで、AIによる証券注文、送金、自動発注、未承認の戦略変更、提案の実績化は禁止する。最終的な採否と発注はユーザが行う。
 
 ---
 
@@ -111,6 +103,10 @@ Python が担当すること:
 - coreスポット買い実行スケジュールの Google Calendar イベントドラフト生成
 - 履歴保存
 - Python の候補値と ChatGPT の最終提案の差分保存
+- 最新の保存済みスナップショットから保有銘柄名だけを抽出
+- オンデマンド対象を株式・投資信託・年金へ分類
+- 各保有商品の1日・5日・1か月・3か月の市場参照データ収集と欠損警告
+- ChatGPT向けオンデマンド・アセスメント依頼プロンプト生成
 
 ### Codex は「画像読取」と「YAML 正規化」を担当する
 Codex が担当すること:
@@ -131,6 +127,7 @@ ChatGPT が担当すること:
 - 今月の補強優先順位提案
 - スクリプト改善余地の指摘
 - Codex 向けに使える仕様改善の要約
+- オンデマンド依頼では、一次情報と信頼性の高い市場報道を調査し、保有銘柄の値動きの背景、因果関係の確度、長期シナリオへの影響を評価
 
 ChatGPT が担当しないこと:
 
@@ -186,7 +183,7 @@ ChatGPT に価格計算や比率計算を主担当させない。
 - 生成した Codex 用修正プロンプト
 - coreスポット買い実行スケジュールから生成した Google Calendar イベントドラフト
 - README の最新月セクションに反映した月次サマリー、購入計画、今月の指値買い設定、ポートフォリオサマリー
-- ルート README には月次レビュー履歴を蓄積しない。過去月の月次レビュー原文、構造化レビュー、差分、計算結果は `data/history/` 配下を正とする
+- ルート README には月次レビュー履歴を蓄積しない。新規生成物は `reports/generated/`、2026-07以前の旧生成物は `data/history/` と `prompts/generated/` に凍結する
 
 ### 4. 改善要求は優先度付きで扱う
 ChatGPT が出した改善案はそのまま全部採用しない。  
@@ -232,6 +229,9 @@ monthly-limit-order-review-system/
       reviews/
       diffs/
       codex_patch_requests/
+      on_demand/
+        market_data/
+        prompts/
 
   prompts/
     moneyforward_normalization_prompt.md
@@ -239,9 +239,12 @@ monthly-limit-order-review-system/
       monthly_review_template.md
       codex_patch_template.md
       moneyforward_monthly_session_start_prompt.md
+      on_demand_market_assessment_session_start_prompt.md
+      on_demand_assessment_template.md
     generated/
       monthly_review_prompt_YYYY_MM.md
       codex_patch_prompt_YYYY_MM.md
+      YYYY_MM_DDTHHMMSSZ_on_demand_assessment_prompt.md
 
   src/
     monthly_limit_order_review/
@@ -252,6 +255,7 @@ monthly-limit-order-review-system/
       portfolio.py
       rules.py
       prompt_builder.py
+      on_demand.py
       review_parser.py
       diff_analyzer.py
       codex_patch_builder.py
@@ -631,6 +635,21 @@ yfinance_symbols:
 - python vs chatgpt diff
 - codex patch request
 - core spot buy Google Calendar event drafts
+- timestamped on-demand prompt
+- on-demand held-symbol market data, inventory age, and market-reference collection status
+
+### I. On-demand ChatGPT assessment prompt generation
+
+実装対象:
+
+- 最新の読み取り可能なスナップショットを自動選択し、holdings の銘柄名だけを使う
+- 古いスナップショットでも処理を止めず、保有銘柄リストが古い可能性を表示する
+- holdings を株式・投資信託・年金に分類し、現金・ポイント等は除外する
+- 保有額、数量、取得単価、損益、配分をプロンプトに含めない
+- 取得可能な保有商品ごとに最新日足終値、1日・5日・1か月・3か月リターン、21日・63日高値からのドローダウンを整理する
+- 未設定銘柄、取得失敗、`as_of` の差を警告として残す
+- ChatGPT が一次情報と信頼性の高い市場報道をWeb調査し、価格変動の背景と因果関係の確度を評価するMarkdownプロンプトを生成する
+- 月次用README、月次計算履歴、Google Calendarを更新しない
 
 ---
 
@@ -640,35 +659,44 @@ yfinance_symbols:
 生成ファイル例:
 
 ```text
-prompts/generated/monthly_review_prompt_2026_03.md
+reports/generated/monthly/2026_03/review_request.md
 ```
 
 ### 2. Codex patch prompt
 生成ファイル例:
 
 ```text
-prompts/generated/codex_patch_prompt_2026_03.md
+reports/generated/monthly/2026_03/codex_patch_request.md
 ```
 
 ### 3. Structured computation artifact
 生成ファイル例:
 
 ```text
-data/history/computations/2026_03_computation.yaml
+reports/generated/monthly/2026_03/computation.yaml
 ```
 
 ### 4. Structured diff artifact
 生成ファイル例:
 
 ```text
-data/history/diffs/2026_03_python_vs_chatgpt.yaml
+reports/generated/monthly/2026_03/proposal_diff.yaml
 ```
 
 ### 5. Core spot buy Google Calendar event draft
 生成ファイル例:
 
 ```text
-data/history/calendar_events/2026_03_core_spot_buy_google_calendar_events.yaml
+reports/generated/monthly/2026_03/calendar_events.yaml
+```
+
+### 6. On-demand assessment prompt and held-symbol market data
+
+生成ファイル例:
+
+```text
+reports/generated/on_demand/2026/2026_07_14T083000Z/assessment_request.md
+reports/generated/on_demand/2026/2026_07_14T083000Z/market_data.yaml
 ```
 
 ---
@@ -713,6 +741,27 @@ Python が生成する月次レビュー用プロンプトでは、ChatGPT に�
 - 影響範囲
 - 推奨テスト
 ```
+
+## On-demand ChatGPT output contract
+
+オンデマンド・プロンプトでは、ChatGPT に以下の見出しを必須とする。
+
+```text
+【調査時点と市場概況】
+【銘柄別アセスメント】
+【横断テーマ】
+【要確認・判断保留】
+【参照情報】
+```
+
+- 各銘柄について最新確認価格、1日・5日・1か月・3か月の変化を出す
+- 重要ニュースの発生日、事実、情報源を示す
+- `市場での評価` として、値動きの背景として報道されている要因を示す
+- 因果関係の確度を `高い` / `中程度` / `低い` で示し、理由を書く
+- 長期シナリオへの影響か、一時的センチメントか、判断材料不足かを分ける
+- 値動きの事実、報道された市場解釈、ChatGPTの推論を区別する
+- Web参照日時とURLを記載する
+- 個別材料が確認できない場合は無理に原因を作らない
 
 ---
 
@@ -767,8 +816,7 @@ CodexPatchRequest
 
 ```bash
 python -m monthly_limit_order_review.cli generate-review-prompt \
-  --snapshot data/normalized/snapshot_2026_03.yaml \
-  --output prompts/generated/monthly_review_prompt_2026_03.md
+  --snapshot data/normalized/snapshot_2026_03.yaml
 ```
 
 ### 2. Ingest ChatGPT review
@@ -776,7 +824,7 @@ python -m monthly_limit_order_review.cli generate-review-prompt \
 ```bash
 python -m monthly_limit_order_review.cli ingest-review \
   --snapshot data/normalized/snapshot_2026_03.yaml \
-  --review-text data/history/reviews/chatgpt_review_2026_03.txt
+  --review-text reports/review_inputs/2026_03_chatgpt_review.txt
 ```
 
 ### 3. Generate Codex patch prompt
@@ -784,8 +832,7 @@ python -m monthly_limit_order_review.cli ingest-review \
 ```bash
 python -m monthly_limit_order_review.cli generate-codex-patch \
   --snapshot data/normalized/snapshot_2026_03.yaml \
-  --review-text data/history/reviews/chatgpt_review_2026_03.txt \
-  --output prompts/generated/codex_patch_prompt_2026_03.md
+  --review-text reports/review_inputs/2026_03_chatgpt_review.txt
 ```
 
 ### 4. Optional combined workflow
@@ -802,6 +849,23 @@ python -m monthly_limit_order_review.cli monthly-run \
 - review prompt generation
 
 ただし ChatGPT 呼び出し自体は行わないこと。
+
+### 5. Generate on-demand assessment prompt
+
+```bash
+python -m monthly_limit_order_review.cli on-demand-run \
+  --news-lookback-days 14
+```
+
+`--snapshot` を省略した場合は、`data/normalized/snapshot_*.yaml` のうち `snapshot_date` が最も新しい読み取り可能なファイルを保有銘柄リストとして使う。`--inventory-max-age-days` は古い可能性を表示する閾値であり、価格取得をブロックしない。`--news-lookback-days` はChatGPTに依頼するニュース調査期間とする。
+
+このコマンドは以下だけを行う。
+
+- 銘柄名と市場参照データだけを含む専用アーティファクトの生成
+- オンデマンド・プロンプトの生成
+- `reports/generated/on_demand/` へのタイムスタンプ付き履歴保存
+
+README、月次アーティファクト、Google Calendar は更新しない。
 
 ---
 
@@ -822,6 +886,18 @@ python -m monthly_limit_order_review.cli monthly-run \
 7. ChatGPT に期待する出力形式
 8. 必須のルール改善レビュー
 9. 必須の Codex 向け修正要約
+
+オンデマンド・プロンプトは、少なくとも以下のセクションを持つこと。
+
+1. 依頼時点と、保存済みスナップショットは銘柄名特定だけに使うという説明
+2. 株式・投資信託・年金の対象件数
+3. 株式
+4. 投資信託
+5. 年金
+6. 各銘柄・プロキシの最新価格、1日・5日・1か月・3か月リターン、ドローダウン、`as_of`
+7. 価格取得状況・警告・不確実性
+8. 一次情報と信頼性の高い市場報道を使う調査指示
+9. 因果関係を断定しすぎないための出力形式
 
 ---
 
@@ -928,6 +1004,10 @@ asset_class の候補:
 
 将来の月次レビュー開始時に Codex に貼る日本語テンプレートを保存すること。テンプレートは、Money Forward スクリーンショット添付から始め、Codex が OCR、正規化、検証、ChatGPT 月次レビュー依頼プロンプト生成まで実施する前提を明記する。
 
+### 1-2. `prompts/templates/on_demand_market_assessment_session_start_prompt.md`
+
+オンデマンド依頼時に Codex に貼る日本語テンプレートを保存すること。最新の保存済みスナップショットから保有銘柄名だけを抽出し、保有額・数量・損益・配分を使わず、`on-demand-run` で直近価格変動を取得してChatGPT向けプロンプトを作ることを明記する。月次README、月次履歴、Google Calendarを更新しないことも明記する。
+
 ### 2. Monthly review template
 
 Python がこのテンプレートに埋め込んで `monthly_review_prompt` を作ること。  
@@ -965,6 +1045,10 @@ Python がこのテンプレートに埋め込んで `monthly_review_prompt` を
 ...
 ```
 
+### 2-1. On-demand assessment template
+
+ChatGPT が依頼時点のWeb情報を調査し、保有銘柄の直近価格変動と重要ニュースを突き合わせるテンプレートを保存すること。日足終値をリアルタイム価格と誤認しないこと、一次情報を優先すること、市場解釈には信頼性の高い報道を使うこと、値動きとニュースの因果関係を断定しすぎないこと、出典URLと参照日時を出すことを必須とする。
+
 ### 3. Codex patch template
 
 Python が改善提案を埋め込んで `codex_patch_prompt` を作ること。  
@@ -999,9 +1083,9 @@ Python が改善提案を埋め込んで `codex_patch_prompt` を作ること。
 
 ---
 
-## Additional investor-grade default logic
+## Legacy investor-grade default logic
 
-以下のデフォルト改善を入れてよい。
+以下は初期実装時のデフォルト改善であり、過去計算の再現用に残す。現在の半導体・高ボラティリティ銘柄・留保現金の閾値は `strategy/current.yaml` が参照する戦略版を使用する。
 
 ### A. 半導体エクスポージャ合算
 - `NIKKO_SOX_FUND + SMH` を半導体エクスポージャとして扱う
@@ -1056,6 +1140,12 @@ Python が改善提案を埋め込んで `codex_patch_prompt` を作ること。
 11. ChatGPT レビューから must / should / nice_to_have を抽出できる
 12. Python 候補と ChatGPT 提案の差分が保存される
 13. Codex 用修正プロンプトが必要要素を含む
+14. 最新の読み取り可能なスナップショットを保有銘柄リストとして自動選択できる
+15. holdings を株式・投資信託・年金に分類できる
+16. 現在保有する3資産の市場参照リクエストを作れる
+17. オンデマンド・プロンプトに1日・5日・1か月・3か月リターン、`as_of`、ニュース調査要件、因果関係の確度が含まれる
+18. `on-demand-run` が月次履歴とREADMEを更新せず、専用履歴だけを保存する
+19. オンデマンド・プロンプトに保有額、数量、取得単価、損益、配分が含まれない
 
 ---
 
@@ -1071,6 +1161,7 @@ README には必ず以下を含めること。
 - 生成物一覧
 - 履歴ファイルの説明
 - 差分保存の意味
+- オンデマンド市場・ニュース調査ワークフロー、保有状況診断との分離、月次処理との副作用分離
 - 注意事項
   - 最終判断は人間
   - 発注は人間
@@ -1097,6 +1188,8 @@ Codex は以下を作成すること。
 13. README
 14. サンプル入力ファイル
 15. サンプル出力ファイル
+16. オンデマンド保有銘柄抽出・価格変動取得・プロンプト生成
+17. オンデマンド開始テンプレートと専用履歴保存
 
 ---
 

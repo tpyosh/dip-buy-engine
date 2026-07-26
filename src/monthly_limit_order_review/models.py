@@ -60,6 +60,8 @@ class MarketReference:
     currency: str
     as_of: date
     mean_close_30d: Decimal | None = None
+    prior_close_1d: Decimal | None = None
+    prior_close_5d: Decimal | None = None
     prior_close_21d: Decimal | None = None
     prior_close_63d: Decimal | None = None
 
@@ -115,6 +117,8 @@ class MonthlyComputation:
     semi_exposure_pct: Decimal
     liquidity_jpy: Decimal
     sox_buy_signal: dict
+    strategy_allocations: list[BucketAllocation] = field(default_factory=list)
+    strategy_summary: dict = field(default_factory=dict)
     portfolio_summary: dict = field(default_factory=dict)
     core_buy_materials: dict = field(default_factory=dict)
     exposure_breakdown: dict = field(default_factory=dict)

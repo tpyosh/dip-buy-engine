@@ -1,0 +1,21 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Versioned investment strategy"
+type: object
+required:
+  - schema_version
+  - strategy_id
+  - status
+  - effective_from
+  - scope
+  - allocation
+  - risk_limits
+  - sell_policy
+  - automation
+properties:
+  strategy_id:
+    type: string
+  status:
+    enum: ["active", "superseded"]
+  effective_from:
+    type: string
+    format: date

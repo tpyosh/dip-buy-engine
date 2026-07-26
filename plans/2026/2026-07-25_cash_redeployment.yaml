@@ -1,0 +1,72 @@
+schema_version: 1
+plan_id: "2026-07-25_cash_redeployment"
+status: "approved_pending_execution"
+approved_at: "2026-07-25"
+strategy_ref: "strategy/versions/2026-07-25.yaml"
+
+basis:
+  snapshot_ref: "data/normalized/snapshot_2026_07.yaml"
+  snapshot_date: "2026-06-28"
+  currency: "JPY"
+  total_assets_jpy: 39370393
+  liquidity_jpy: 13620505
+  account_type: "特定口座（源泉徴収あり）"
+  freshness_warning: >
+    金額は2026-06-28時点のスナップショットに基づく。
+    実行前に楽天証券の利用可能現金と未反映取引を確認する。
+
+allocations:
+  hobby_dip_buy_reserve:
+    amount_jpy: 1000000
+    counts_toward_group: "active_hobby"
+    counted_from: "2026-07-25"
+    loss_tolerance: "full_loss_acceptable"
+    leverage_allowed: false
+    borrowing_allowed: false
+    replenish_from_core_allowed: false
+    reauthorization_frequency: "annual"
+  broad_core_lump_sum:
+    planned_amount_jpy: 12620505
+    execution_amount_rule: "max(0, confirmed_available_cash_jpy - 1000000)"
+    target_group: "broad_core"
+    product: "楽天・プラス・オールカントリー株式インデックス・ファンド"
+    product_allocation_pct: 1.00
+    account_type: "特定口座（源泉徴収あり）"
+    execution_method: "lump_sum"
+    requires_pretrade_balance_confirmation: true
+    user_executes_order_manually: true
+
+projection_if_executed_at_basis_amounts:
+  broad_core_before_jpy: 13629542
+  broad_core_after_jpy: 26250047
+  broad_core_after_pct: 0.66674587
+  active_hobby_before_reserve_jpy: 12104152
+  active_hobby_after_reserve_jpy: 13104152
+  active_hobby_after_pct: 0.33284280
+  residual_other_jpy: 16193
+  unreconciled_snapshot_rounding_jpy: 1
+  notes:
+    - "価格変動、税、手数料、未反映取引を無視した基準日時点の配分投影"
+    - "broad coreは65%の補強提案閾値を上回り、active hobbyは35%のリバランス提案閾値を下回る"
+    - "明細合計と総資産の1円差はMoney Forwardの表示丸め差として分離する"
+
+nisa_context:
+  year_2026:
+    growth_investment_quota: "exhausted"
+    accumulation_quota_monthly_jpy: 100000
+    accumulation_observed_through: "2026-07"
+    funding: "credit_card_recurring_from_salary"
+  year_2027:
+    growth_investment_quota_jpy: 2400000
+    salary_surplus_can_fund_full_quota: false
+    expected_funding_order:
+      - "楽天証券の利用可能現金"
+      - "不足時は特定口座のbroad coreを売却し、NISAで同等のbroad coreを買い直す"
+
+execution_gate:
+  requires_user_confirmation: true
+  checks:
+    - "楽天証券の利用可能現金"
+    - "未反映の注文・入出金"
+    - "2026年NISA枠の最新状態"
+    - "商品名と口座区分"

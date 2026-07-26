@@ -27,12 +27,15 @@ def test_market_data_computes_mean_and_recent_high() -> None:
     assert reference.mean_close_30d == Decimal("154.5000")
     assert reference.recent_high_21d == Decimal("169.0000")
     assert reference.recent_high_63d == Decimal("169.0000")
+    assert reference.prior_close_1d == Decimal("168.0000")
+    assert reference.prior_close_5d == Decimal("164.0000")
     assert reference.prior_close_21d == Decimal("148.0000")
     assert reference.prior_close_63d == Decimal("106.0000")
 
 
-def test_market_data_raises_when_history_is_too_short() -> None:
-    history = build_history(30)
+@pytest.mark.parametrize("length", [30, 63])
+def test_market_data_raises_when_history_is_too_short(length: int) -> None:
+    history = build_history(length)
 
     with pytest.raises(MarketDataError):
         fetch_market_references(

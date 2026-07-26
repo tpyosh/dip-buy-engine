@@ -27,6 +27,7 @@ def build_long_term_thesis_targets(
                 "current_value_jpy": holding.market_value_jpy,
                 "portfolio_pct": symbol_weights.get(holding.symbol, Decimal("0")),
                 "thesis_id": thesis.get("thesis_id"),
+                "thesis_status": thesis.get("thesis_status", "legacy_unspecified"),
                 "long_term_thesis_summary": thesis.get("long_term_thesis_summary"),
                 "key_risk_if_thesis_breaks": thesis.get("key_risk_if_thesis_breaks", []),
                 "review_priority": thesis.get("review_priority", "medium"),

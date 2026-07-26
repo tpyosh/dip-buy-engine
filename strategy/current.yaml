@@ -1,0 +1,6 @@
+schema_version: 1
+active_strategy_id: "husband_personal_2026-07-25"
+active_strategy_path: "strategy/versions/2026-07-25.yaml"
+active_plan_paths:
+  - "plans/2026/2026-07-25_cash_redeployment.yaml"
+updated_at: "2026-07-25"

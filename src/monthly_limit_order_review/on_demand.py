@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, date, datetime
+from datetime import UTC, date, datetime, timedelta
 from decimal import Decimal
 from typing import Callable
 from zoneinfo import ZoneInfo
@@ -40,6 +40,47 @@ def assess_snapshot_freshness(
         "timezone": timezone,
         "age_days": age_days,
         "max_age_days": max_age_days,
+    }
+
+
+def build_health_check_window(
+    *,
+    requested_at: datetime,
+    base_lookback_days: int = 14,
+    last_completed_at: datetime | None = None,
+    overlap_days: int = 2,
+    maximum_lookback_days: int = 90,
+) -> dict[str, object]:
+    """Return a gap-tolerant news window that does not assume daily execution."""
+
+    if base_lookback_days < 1 or overlap_days < 0 or maximum_lookback_days < 1:
+        raise ValueError("health-check lookback settings are invalid")
+    requested_utc = requested_at.astimezone(UTC)
+    if last_completed_at is None:
+        required_days = max(base_lookback_days, 30)
+        status = "initial_baseline"
+    else:
+        gap_days = max(0, (requested_utc.date() - last_completed_at.astimezone(UTC).date()).days)
+        required_days = max(base_lookback_days, gap_days + overlap_days)
+        status = "gap_recovery" if required_days > base_lookback_days else "normal"
+    effective_days = min(required_days, maximum_lookback_days)
+    if effective_days < required_days:
+        status = "capped_gap_recovery"
+    return {
+        "status": status,
+        "coverage_start": (requested_utc.date() - timedelta(days=effective_days)).isoformat(),
+        "coverage_end": requested_utc.date().isoformat(),
+        "effective_lookback_days": effective_days,
+        "base_lookback_days": base_lookback_days,
+        "maximum_lookback_days": maximum_lookback_days,
+        "overlap_days": overlap_days,
+        "last_completed_at": (
+            last_completed_at.astimezone(UTC).isoformat(timespec="seconds").replace("+00:00", "Z")
+            if last_completed_at is not None
+            else None
+        ),
+        "continuous_daily_execution_required": False,
+        "monthly_full_review_is_safety_net": True,
     }
 
 
@@ -193,6 +234,8 @@ def build_on_demand_market_data_artifact(computation: MonthlyComputation) -> dic
             "usage": "held_symbol_names_only",
         },
         "news_lookback_days": on_demand_metadata.get("news_lookback_days"),
+        "health_check_window": on_demand_metadata.get("health_check_window", {}),
+        "security_story_targets": list(computation.security_story_targets),
         "instruments": {
             scope: [
                 {
@@ -219,6 +262,7 @@ def render_on_demand_assessment_prompt(
     *,
     inventory_freshness: dict[str, object],
     news_lookback_days: int = 14,
+    health_check_window: dict[str, object] | None = None,
 ) -> str:
     if news_lookback_days < 1:
         raise ValueError("news_lookback_days must be one or greater")
@@ -228,6 +272,14 @@ def render_on_demand_assessment_prompt(
     reference_map = {reference.symbol: reference for reference in computation.market_references}
     collection = computation.metadata.get("on_demand", {}).get("market_reference_collection", {})
     assessment_date = date.fromisoformat(str(inventory_freshness["requested_at_local"])[:10])
+    window = health_check_window or {
+        "status": "explicit",
+        "coverage_start": (assessment_date - timedelta(days=news_lookback_days)).isoformat(),
+        "coverage_end": assessment_date.isoformat(),
+        "effective_lookback_days": news_lookback_days,
+        "continuous_daily_execution_required": False,
+        "monthly_full_review_is_safety_net": True,
+    }
 
     lines = [
         template_text.strip(),
@@ -242,6 +294,7 @@ def render_on_demand_assessment_prompt(
         "- holdings_inventory_usage: 銘柄名の特定だけに使用し、保有額・数量・取得単価・損益・配分は評価しない",
         "- market_price_basis: yfinance latest available daily close; intraday real-time quote is not guaranteed",
         f"- authoritative_news_lookback_days: {news_lookback_days}",
+        f"- health_check_window: {window}",
         f"- computation_generated_at: {computation.generated_at}",
         f"- holdings_inventory_source: {snapshot.source_evidence or {}}",
         "",
@@ -250,7 +303,29 @@ def render_on_demand_assessment_prompt(
         f"- investment_funds_count: {len(groups['investment_funds'])}",
         f"- pension_count: {len(groups['pension'])}",
         f"- ignored_non_investment_symbols: {[holding.symbol for holding in groups['context_only']]}",
+        f"- security_story_target_count: {len(computation.security_story_targets)}",
     ]
+
+    lines.extend(
+        [
+            "",
+            "### 2-1. 個別株・ETFストーリー評価対象",
+            "`machine_id` はCodex向けYAML専用です。ユーザ向け回答では `human_label` のみを使ってください。",
+            "| machine_id (Codex YAML only) | human_label | instrument_type | thesis_recorded | thesis_status | thesis_summary | user_holding_reason | user_disposition | user_sell_condition | invalidation_conditions | required_assessment |",
+            "| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |",
+        ]
+    )
+    for target in computation.security_story_targets:
+        lines.append(
+            f"| {target['symbol']} | {_normalize_cell(target['name'])} | {target['instrument_type']} | "
+            f"{str(target['thesis_recorded']).lower()} | {target['thesis_status']} | "
+            f"{_normalize_cell(target.get('thesis_summary') or '')} | "
+            f"{_normalize_cell(target.get('user_holding_reason') or '')} | "
+            f"{_normalize_cell(target.get('user_disposition') or '')} | "
+            f"{_normalize_cell(target.get('user_sell_condition') or '')} | "
+            f"{_normalize_cell('; '.join(target.get('invalidation_conditions', [])))} | "
+            f"{_normalize_cell(target['required_assessment'])} |"
+        )
 
     section_names = {
         "stocks": "3. 株式",
@@ -285,6 +360,21 @@ def render_on_demand_assessment_prompt(
         lines.append("- なし")
     if snapshot.ocr_notes:
         lines.append("- holdings_inventory_note: 元スナップショットにはOCR注記がありますが、保有銘柄名以外は評価に使わないでください")
+    lines.extend(
+        [
+            "",
+            "## 7. 提出物契約",
+            "- ユーザ向け: 日本語Markdownで、重要な変化、緊急度、判断が必要な事項を簡潔に提示する。正式な商品名・会社名を使い、銘柄コード・ティッカー・内部IDを表示しない。",
+            "- Codex向け: `health_check_response.yaml` を別ファイルで提出する。YAML内にMarkdownや前置きを混ぜない。",
+            "- 機械IDはCodex向けYAMLの `symbol` フィールドにだけ残し、human_summaryなど人間向け文字列へ混ぜない。",
+            "- YAMLでは security_story_targets の全銘柄を一件ずつ記録し、evaluated、story_health、decision、decision_rationale、next_review_triggers、sourcesを必須とする。",
+            "- decisionは add / hold / reduce / exit / no_add_pending_thesis、story_healthは healthy / watch / impaired / broken / insufficient_evidence のいずれかにする。",
+            "- 投資待機資金は維持自体を目的にしない。市場下落時は dip_buy_liquidity_deployment_review.use_option に対象、金額または算式、時期、根拠を持つ使用案を必ず記録する。",
+            "- 最終選択が hold でも使用案の比較は省略せず、reserve_maintenance_is_objective は false とする。",
+            "- 毎日の連続実行は前提にしない。調査期間に空白がある場合は health_check_window 全体を確認する。",
+            "- schema_ref: schemas/health-check-response.schema.yaml",
+        ]
+    )
     return "\n".join(lines).strip() + "\n"
 
 

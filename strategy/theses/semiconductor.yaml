@@ -3,6 +3,9 @@ thesis_id: "semiconductor_structural_growth_2026-07-25"
 status: "active"
 approved_at: "2026-07-25"
 applies_to_exposure_group: "direct_semiconductor"
+covered_symbols:
+  - "SMH"
+instrument_type: "etf"
 strategy_ref: "strategy/versions/2026-07-25.yaml"
 
 role:

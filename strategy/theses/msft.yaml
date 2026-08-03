@@ -4,6 +4,7 @@ status: "inherited_pending_review"
 migrated_at: "2026-07-26"
 source_ref: "config/portfolio_policy.yaml#long_term_thesis.MSFT"
 symbol: "MSFT"
+instrument_type: "individual_stock"
 legacy_summary: >
   クラウド・AI基盤・企業ソフトウェアの複合優位により、
   長期で利益成長が継続するという仮説。

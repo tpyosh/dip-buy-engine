@@ -160,3 +160,78 @@ holdings:
     assert "previous_holding_disappeared" in warning_codes
     assert "asset_class_changed_from_previous_snapshot" in warning_codes
     assert "large_month_over_month_change" in warning_codes
+
+
+def test_same_product_cross_account_rows_are_not_treated_as_redundant(
+    tmp_path: Path,
+) -> None:
+    snapshot_path = tmp_path / "cross-account.yaml"
+    snapshot_path.write_text(
+        """snapshot_date: "2026-07-26"
+currency_base: "JPY"
+total_assets_jpy: 3000000
+holdings:
+  - symbol: "NISSEI_SOX_1"
+    name: "ニッセイSOX指数インデックスファンド"
+    account_type: "NISA成長投資枠"
+    asset_class: "satellite_core"
+    quantity: 100
+    avg_cost: 10000
+    current_price: 20000
+    market_value_jpy: 2000000
+    currency: "JPY"
+  - symbol: "NISSEI_SOX_2"
+    name: "ニッセイSOX指数インデックスファンド"
+    account_type: "特定口座（源泉徴収あり）"
+    asset_class: "satellite_core"
+    quantity: 50
+    avg_cost: 10000
+    current_price: 20000
+    market_value_jpy: 1000000
+    currency: "JPY"
+""",
+        encoding="utf-8",
+    )
+
+    warnings = build_ocr_snapshot_validation_warnings(load_snapshot(snapshot_path))
+    warning_codes = {warning.code for warning in warnings}
+
+    assert "same_product_cross_account_split" in warning_codes
+    assert "account_separation_unverified" not in warning_codes
+    assert "possible_duplicate_holding" not in warning_codes
+
+
+def test_unknown_account_blocks_same_product_consolidation(tmp_path: Path) -> None:
+    snapshot_path = tmp_path / "unknown-account.yaml"
+    snapshot_path.write_text(
+        """snapshot_date: "2026-07-26"
+currency_base: "JPY"
+total_assets_jpy: 3000000
+holdings:
+  - symbol: "SOX_1"
+    name: "SOX Fund"
+    account_type: null
+    asset_class: "satellite_core"
+    quantity: 100
+    avg_cost: 10000
+    current_price: 20000
+    market_value_jpy: 2000000
+    currency: "JPY"
+  - symbol: "SOX_2"
+    name: "SOX Fund"
+    account_type: "特定口座（源泉徴収あり）"
+    asset_class: "satellite_core"
+    quantity: 50
+    avg_cost: 10000
+    current_price: 20000
+    market_value_jpy: 1000000
+    currency: "JPY"
+""",
+        encoding="utf-8",
+    )
+
+    warnings = build_ocr_snapshot_validation_warnings(load_snapshot(snapshot_path))
+    warning_codes = {warning.code for warning in warnings}
+
+    assert "missing_account_type" in warning_codes
+    assert "account_separation_unverified" in warning_codes

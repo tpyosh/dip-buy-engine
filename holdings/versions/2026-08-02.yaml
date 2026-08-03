@@ -1,0 +1,91 @@
+schema_version: 1
+record_type: "holding_metadata"
+record_id: "holding_metadata_2026-08-02"
+effective_from: "2026-07-26"
+confirmed_at: "2026-08-02"
+
+execution_context:
+  scope: "portfolio"
+  unreflected_orders: false
+  planned_withdrawals: false
+  restricted_funds: false
+  confirmed_at: "2026-08-02"
+
+holdings:
+  NISSEI_SOX_1:
+    display_name: "ニッセイSOX指数インデックスファンド（評価額約4,179,530円の明細）"
+    account:
+      account_type: "特定口座（源泉徴収あり）"
+      tax_regime: "taxable_withholding"
+      nisa_regime: null
+      nisa_bucket: null
+      confirmed_by: "user"
+      confirmed_at: "2026-08-02"
+      confirmation_valuation_jpy: 4179530
+    acquisition:
+      method: "staged_purchases"
+      acquisition_years: null
+      status: "unknown"
+
+  NISSEI_SOX_2:
+    display_name: "ニッセイSOX指数インデックスファンド（評価額約2,017,792円の明細）"
+    account:
+      account_type: "NISA（2024年以降・枠区分未確認）"
+      tax_regime: "nisa"
+      nisa_regime: "new_nisa_2024_plus"
+      nisa_bucket: null
+      confirmed_by: "user"
+      confirmed_at: "2026-08-02"
+      confirmation_valuation_jpy: 2017792
+    acquisition:
+      method: "staged_purchases"
+      acquisition_years: null
+      status: "unknown"
+
+  "9444":
+    display_name: "トーシンホールディングス"
+    account:
+      account_type: "特定口座（源泉徴収あり）"
+      tax_regime: "taxable_withholding"
+      confirmed_by: "user"
+      confirmed_at: "2026-08-02"
+    execution_status:
+      sell_order_available: true
+      unreflected_orders: false
+      planned_withdrawals: false
+      restricted_funds: false
+      as_of: "2026-08-02"
+    user_intent:
+      holding_reason: "考慮不要。継続保有理由はない"
+      disposition: "sell_requested"
+      sell_condition: "売却提案を希望"
+      confirmed_at: "2026-08-02"
+
+  "2353":
+    display_name: "日本駐車場開発"
+    account:
+      account_type: "一般口座"
+      tax_regime: "general_taxable"
+      confirmed_by: "user"
+      confirmed_at: "2026-08-02"
+    user_intent:
+      holding_reason: "誤って一般口座で購入し、税務処理の手間を避けたい。少額保有"
+      disposition: "sell_when_at_a_loss_preferred"
+      sell_condition: "含み損の状態での売却を希望"
+      confirmed_at: "2026-08-02"
+
+  "7201":
+    display_name: "日産自動車"
+    user_intent:
+      holding_reason: "趣味で保有していたが、現在は関心を失っている"
+      disposition: "sell_allowed"
+      sell_condition: "売却してよい"
+      confirmed_at: "2026-08-02"
+
+  "7203":
+    display_name: "トヨタ自動車"
+    user_intent:
+      holding_reason: "祖父から相続した株式をそのまま保有。トヨタ株としての積極的な保有理由はない"
+      disposition: "sell_if_rationally_justified"
+      sell_condition: "合理的な理由があれば売却してよい"
+      confirmed_at: "2026-08-02"

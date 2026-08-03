@@ -133,58 +133,27 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert cash_normalization["net_cash_reduction_jpy"] == Decimal("800000")
     assert computation.quarterly_rule_review_outputs["combined_semiconductor_ai_infra_watch_pct"] == Decimal("0.1262")
     assert ura_candidate.avg20_gap_pct == Decimal("-6.00")
-    assert "【要約】" in prompt
-    assert "【今月のcoreスポット買い提案】" in prompt
-    assert "## 5. コア定額買い判定材料" in prompt
-    assert "## 5-1. Coreスポット買い判断材料" in prompt
-    assert "## 7. 半導体エクスポージャ内訳" in prompt
-    assert "## 8. 長期シナリオ点検対象" in prompt
-    assert "## 9. ChatGPTへの長期シナリオレビュー依頼" in prompt
-    assert "【コア定額買い方針レビュー】" in prompt
-    assert "【長期シナリオレビュー】" in prompt
-    assert "【四半期ルール見直し】" in prompt
-    assert "【ルール改善レビュー】" not in prompt
-    assert "必ず単一の ```md コードブロックで出力すること" in prompt
-    assert "ハルシネーション防止" in prompt
-    assert "`must: なし`" in prompt
-    assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
-    assert "monthly_core_budget_tier: rebalance" in prompt
-    assert "recommended_monthly_core_buy_budget_jpy: 700000" in prompt
-    assert "monthly_total_core_deployment_jpy: 1450000" in prompt
-    assert "tradable_core_pct: 16.88%" in prompt
-    assert "effective_core_including_pension_pct: 27.40%" in prompt
-    assert "gross_deployment_months: 7.8" in prompt
-    assert "assumed_monthly_cash_inflow_jpy: 650000" in prompt
-    assert "net_cash_reduction_jpy: 800000" in prompt
-    assert "direct_cap_monitor_pct: 11.83%" in prompt
-    assert "direct_plus_indirect_watch_metric_pct: 12.62%" in prompt
-    assert "承認済みactive planがある場合" in prompt
-    assert "current_monthly_core_auto_invest_amount_jpy: 750000" in prompt
-    assert "annualized_core_auto_invest_amount_jpy: 9000000" in prompt
-    assert "current_cash_jpy:" in prompt
-    assert "bond_like_holdings_present:" in prompt
-    assert "## 11. 生成ロジック上の分離データ" in prompt
-    assert "## 13. 必須の月次・四半期レビュー観点" in prompt
-    assert "review_target_month: 2026_03" in prompt
-    assert "指値設定基準値はスクリプト実行時点から直近20営業日（約1ヶ月）の終値平均" in prompt
-    assert "その指値が直近20営業日終値平均から何%下かを必ず明示すること" in prompt
-    assert "((指値 / 直近20営業日終値平均) - 1) * 100" in prompt
-    assert "指値設定対象月キー: 2026_03" in prompt
-    assert "## 5-2. Core積立設定（毎月固定）" in prompt
-    assert "## 5-3. iDeCo積立設定（毎月固定）" in prompt
-    assert "## 5-4. 暗号資産積立設定（毎週固定）" in prompt
-    assert "total_monthly_jpy: 750000" in prompt
+    assert "【推奨方針】" in prompt
+    assert "【採用した決定規則】" in prompt
+    assert "【具体的な売買・資金移動】" in prompt
+    assert "【実行後配分】" in prompt
+    assert "【実行前確認事項】" in prompt
+    assert "【Codex向け改善フィードバック】" in prompt
+    assert "review_target_month: '2026_03'" in prompt
+    assert "market_references:" in prompt
+    assert "core_monthly_total_jpy: 750000" in prompt
     assert "eMAXIS Slim 米国株式(S&P500)" in prompt
-    assert "楽天・プラス・オールカントリー株式インデックス・ファンド" in prompt
-    assert "| IDECO_ALL_COUNTRY | eMAXIS Slim 全世界株式（オール・カントリー） | 55000 | iDeCo | pension |" in prompt
-    assert "pension_monthly_dca_total_jpy: 55000" in prompt
-    assert "annualized_pension_dca_jpy: 660000" in prompt
-    assert "| BTC | 2000 |" in prompt
-    assert "| ETH | 2000 |" in prompt
-    assert "| XRP | 1000 |" not in prompt
-    assert "annualized_crypto_dca_jpy: 208000" in prompt
-    assert "real_estate_exposure_present: True" in prompt
-    assert "liquidity_comment: residential real estate should not be treated as emergency liquidity" in prompt
+    assert "symbol: IDECO_ALL_COUNTRY" in prompt
+    assert "fund_name: eMAXIS Slim 全世界株式（オール・カントリー）" in prompt
+    assert "pension_monthly_total_jpy: 55000" in prompt
+    assert "symbol: BTC" in prompt
+    assert "symbol: ETH" in prompt
+    assert "symbol: XRP" not in prompt
+    assert "crypto_weekly_total_jpy: 4000" in prompt
+    assert "recommended_monthly_core_buy_budget_jpy" not in prompt
+    assert "monthly_core_budget_tier" not in prompt
+    assert "active_plan" not in prompt
+    assert "publication_date" in prompt
 
 
 def test_taxable_all_country_drawdown_is_not_null_after_reference_mapping(monkeypatch) -> None:
@@ -212,9 +181,9 @@ def test_snapshot_2026_04_is_treated_as_april_limit_order_cycle_without_forced_s
 
     assert computation.metadata["review_target_month"] == "2026_04"
     assert computation.monthly_execution_outputs["review_target_month"] == "2026_04"
-    assert "review_target_month: 2026_04" in prompt
-    assert "指値設定対象月キー: 2026_04" in prompt
-    assert "実行前残高確認後にユーザーが手動で一括発注" in prompt
+    assert "review_target_month: '2026_04'" in prompt
+    assert "response_skeleton:" in prompt
+    assert "order_proposals:" in prompt
     assert "4月1日:" not in prompt
 
 
@@ -254,13 +223,11 @@ def test_snapshot_2026_05_core_references_are_not_missing_without_forced_schedul
     assert spot_materials["fixed_core_auto_invest_amount_jpy"] == 100000
     assert spot_materials["recommended_taxable_core_spot_buy_jpy"] == 1280000
     assert spot_materials["total_monthly_core_deployment_jpy"] == 1380000
-    assert "review_target_month: 2026_05" in prompt
-    assert "fixed_core_auto_invest_amount_jpy: 100000" in prompt
-    assert "recommended_taxable_core_spot_buy_jpy: 1280000" in prompt
-    assert "account_type: 特定口座" in prompt
-    assert "total_monthly_core_deployment_jpy: 1380000" in prompt
-    assert "指値設定対象月キー: 2026_05" in prompt
-    assert "実行前残高確認後にユーザーが手動で一括発注" in prompt
+    assert "review_target_month: '2026_05'" in prompt
+    assert "core_monthly_total_jpy: 100000" in prompt
+    assert "nisa_growth_quota_status: exhausted" in prompt
+    assert "recommended_taxable_core_spot_buy_jpy" not in prompt
+    assert "1280000" not in prompt
     assert "5月1日:" not in prompt
 
 
@@ -307,12 +274,11 @@ def test_snapshot_2026_06_applies_nisa_exhaustion_core_deployment_override(monke
     assert spot_materials["total_monthly_core_deployment_jpy"] == 1380000
     assert spot_materials["baseline_core_spot_buy_jpy"] == 1280000
     assert spot_materials["core_spot_buy_allocation_rule"]["allowed_products_only"] is True
-    assert "fixed_core_auto_invest_amount_jpy: 100000" in prompt
-    assert "recommended_taxable_core_spot_buy_jpy: 1280000" in prompt
-    assert "account_type: 特定口座" in prompt
-    assert "NISAより税効率は落ちる" in prompt
-    assert "total_monthly_core_deployment_jpy: 1380000" in prompt
-    assert "指値設定対象月キー: 2026_06" in prompt
+    assert "core_monthly_total_jpy: 100000" in prompt
+    assert "nisa_growth_quota_status: exhausted" in prompt
+    assert "recommended_taxable_core_spot_buy_jpy" not in prompt
+    assert "NISAより税効率は落ちる" not in prompt
+    assert "1280000" not in prompt
 
 
 def test_snapshot_after_2026_12_requires_explicit_nisa_rule(monkeypatch, tmp_path) -> None:
@@ -332,11 +298,10 @@ def test_snapshot_after_2026_12_requires_explicit_nisa_rule(monkeypatch, tmp_pat
     assert monthly["review_target_month"] == "2027_01"
     assert monthly["nisa_growth_quota_status"] == "requires_explicit_configuration"
     assert monthly["fixed_core_auto_invest_amount_jpy"] == 750000
-    assert monthly["recommended_monthly_core_buy_budget_jpy"] == 13644262
-    assert monthly["recommended_monthly_core_buy_budget_jpy"] != 1280000
-    assert monthly["taxable_core_spot_buy_required"] is True
-    assert monthly["recommended_taxable_core_spot_buy_jpy"] == 13644262
-    assert monthly["core_spot_buy_account_type"] == "特定口座（源泉徴収あり）"
-    assert monthly["monthly_core_budget_tier"] == "approved_lump_sum_plan"
+    assert monthly["recommended_monthly_core_buy_budget_jpy"] is None
+    assert monthly["taxable_core_spot_buy_required"] is False
+    assert monthly["recommended_taxable_core_spot_buy_jpy"] is None
+    assert monthly["core_spot_buy_account_type"] is None
+    assert monthly["monthly_core_budget_tier"] == "aggressive"
     assert recurring["date_based_override_active"] is False
     assert "post_2026_nisa_growth_quota_rule_missing" in warning_codes

@@ -12,10 +12,43 @@ required:
   - sell_policy
   - automation
 properties:
-  strategy_id:
-    type: string
-  status:
-    enum: ["active", "superseded"]
-  effective_from:
-    type: string
-    format: date
+  schema_version: {const: 1}
+  strategy_id: {type: string}
+  status: {enum: [active, superseded]}
+  effective_from: {type: string, format: date}
+  scope:
+    type: object
+    required: [owner, portfolio, allocation_denominator]
+  allocation:
+    type: object
+    required: [target_groups]
+  risk_limits:
+    type: object
+    required: [direct_themes]
+    properties:
+      direct_themes:
+        type: object
+        required: [semiconductor]
+        properties:
+          semiconductor:
+            type: object
+            required:
+              - exposure_group
+              - policy_status
+              - preferred_max_pct
+              - rebalance_proposal_above_pct
+              - denominator
+              - strategic_review_treatment
+              - priority
+              - routine_additions_above_preferred_max
+            properties:
+              exposure_group: {const: direct_semiconductor}
+              policy_status: {enum: [hard_constraint, policy_to_reconsider, explicit_exception]}
+              preferred_max_pct: {type: number, minimum: 0, maximum: 1}
+              rebalance_proposal_above_pct: {type: number, minimum: 0, maximum: 1}
+              denominator: {const: household_total_assets_jpy}
+              strategic_review_treatment: {enum: [hard_constraint, policy_to_reconsider, explicit_exception]}
+              priority: {type: string}
+              routine_additions_above_preferred_max: {type: boolean}
+  sell_policy: {type: object}
+  automation: {type: object}

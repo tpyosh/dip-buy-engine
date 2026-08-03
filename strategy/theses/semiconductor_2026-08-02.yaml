@@ -1,0 +1,43 @@
+schema_version: 1
+thesis_id: "semiconductor_structural_growth_2026-08-02"
+status: "active"
+approved_at: "2026-08-02"
+applies_to_exposure_group: "direct_semiconductor"
+covered_symbols:
+  - "SMH"
+instrument_type: "etf"
+strategy_ref: "strategy/versions/2026-08-02.yaml"
+supersedes_thesis_ref: "strategy/theses/semiconductor.yaml"
+
+role:
+  portfolio_role: "active_hobby_growth_driver"
+
+claims:
+  supported:
+    - "半導体需要と産業の価値プールは長期的に拡大する可能性が高い"
+  not_established_as_fact:
+    - "産業成長が現在価格からの市場超過収益を保証すること"
+
+current_assessment:
+  as_of: "2026-08-02"
+  conclusion: >
+    構造成長仮説の継続可否と、現在の直接半導体集中の縮小は分けて判断する。
+    ユーザは直接半導体エクスポージャーを総資産の12%以下へ縮小する方針を承認した。
+
+invalidation_or_reduction_review:
+  - "AI設備投資縮小時に非AI用途から十分な代替需要が確認できない"
+  - "過剰供給でmargin、free cash flow、ROICがフルサイクルで悪化する"
+  - "指数集中度上昇により産業全体への分散投資ではなくなる"
+
+allocation_rules:
+  preferred_max_pct_of_total_assets: 0.12
+  routine_additions_above_preferred_max: false
+  rebalance_proposal_above_pct_of_total_assets: 0.12
+  reduction_target_approved_by_user: true
+  sale_priority: "proposal_requested_from_independent_review"
+  automatic_sell: false
+  automatic_buy: false
+
+evidence_inheritance:
+  source_ref: "strategy/theses/semiconductor.yaml#evidence"
+  note: "産業仮説の一次情報は前版を継承し、集中目標だけをユーザ回答で更新した"

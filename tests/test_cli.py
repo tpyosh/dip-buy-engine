@@ -62,6 +62,8 @@ def test_generate_review_prompt_writes_only_generated_reports(
     (project_root / "prompts/templates").mkdir(parents=True)
     (project_root / "prompts/generated").mkdir(parents=True)
     (project_root / "plans/recurring/versions").mkdir(parents=True)
+    (project_root / "financial/versions").mkdir(parents=True)
+    (project_root / "holdings/versions").mkdir(parents=True)
     readme_path = project_root / "README.md"
     readme_path.write_text("# Title\n\n## 目的\nbody\n", encoding="utf-8")
 
@@ -78,6 +80,12 @@ def test_generate_review_prompt_writes_only_generated_reports(
     for path in [
         ROOT / "plans/recurring/current.yaml",
         ROOT / "plans/recurring/versions/2026-03-01.yaml",
+            ROOT / "financial/current.yaml",
+            ROOT / "financial/versions/2026-08-02.yaml",
+            ROOT / "financial/versions/2026-08-03.yaml",
+            ROOT / "financial/versions/2026-08-03-v2.yaml",
+            ROOT / "holdings/current.yaml",
+        ROOT / "holdings/versions/2026-08-02.yaml",
     ]:
         destination = project_root / path.relative_to(ROOT)
         destination.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
@@ -115,7 +123,19 @@ def test_generate_review_prompt_writes_only_generated_reports(
     assert result == 0
     assert readme_path.read_text(encoding="utf-8") == "# Title\n\n## 目的\nbody\n"
     assert (project_root / "reports/generated/monthly/2026_04/computation.yaml").exists()
-    assert (project_root / "reports/generated/monthly/2026_04/review_request.md").exists()
+    packet_path = project_root / "reports/generated/monthly/2026_04/review_packet.yaml"
+    prompt_path = project_root / "reports/generated/monthly/2026_04/review_request.md"
+    assert packet_path.exists()
+    assert prompt_path.exists()
+    packet = load_yaml(packet_path)
+    prompt = prompt_path.read_text(encoding="utf-8")
+    assert packet["packet_type"] == "monthly_independent_review"
+    assert packet["review_target_month"] == "2026_04"
+    assert "# ChatGPT向け月次独立レビュー" in prompt
+    assert "## 1. モードと対話フェーズ" in prompt
+    assert "generation_status: ready" in prompt
+    assert "active_strategy" not in prompt
+    assert "candidate_orders" not in prompt
     assert not (project_root / "docs/portfolio_allocation_latest.svg").exists()
 
 

@@ -1,0 +1,65 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "On-demand independent investment decision request"
+type: object
+additionalProperties: false
+required:
+  - schema_version
+  - request_type
+  - decision_id
+  - created_at
+  - decision_question
+  - decision_scope
+  - confirmed_facts
+  - user_constraints
+  - unknown_information
+  - excluded_context
+  - research_requirements
+  - required_outputs
+properties:
+  schema_version:
+    const: 1
+  request_type:
+    const: "on_demand_independent_investment_decision"
+  decision_id:
+    type: string
+  created_at:
+    type: string
+    format: date-time
+  decision_question:
+    type: string
+  decision_scope:
+    type: string
+  confirmed_facts:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [name, value, as_of, source_role]
+      properties:
+        name:
+          type: string
+        value: {}
+        as_of:
+          type: string
+        source_role:
+          type: string
+  user_constraints:
+    type: array
+    items:
+      type: string
+  unknown_information:
+    type: array
+    items:
+      type: string
+  excluded_context:
+    type: array
+    items:
+      type: string
+  research_requirements:
+    type: array
+    items:
+      type: string
+  required_outputs:
+    type: array
+    items:
+      type: string

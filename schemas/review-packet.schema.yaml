@@ -1,0 +1,309 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Closed monthly independent review packet"
+type: object
+additionalProperties: false
+required:
+  - schema_version
+  - packet_type
+  - generation_status
+  - interaction_phase
+  - review_mode
+  - review_target_month
+  - portfolio_snapshot_as_of
+  - market_reference_as_of
+  - packet_generated_at
+  - research_cutoff_at
+  - decision_date
+  - strategic_required_inputs
+  - missing_strategic_inputs
+  - strategic_decision_objective
+  - candidate_methodology
+  - capital_layers
+  - asset_class_definitions
+  - allocation_denominators
+  - market_decline_rule
+  - direct_semiconductor_limit
+  - user_decision_preferences
+  - active_risk_policy
+  - approved_policy
+  - rule_registry
+  - research_contract
+  - validation_contract
+  - selected_sources
+  - preflight_checklist
+  - allowed_quantitative_facts
+  - confirmed_user_conditions
+  - unknown_information
+  - output_contract
+  - excluded_information
+properties:
+  schema_version:
+    const: 2
+  packet_type:
+    const: monthly_independent_review
+  generation_status:
+    enum: [ready, blocked_missing_strategic_inputs]
+  interaction_phase:
+    enum: [objective_confirmation, final_review]
+  review_mode:
+    enum: [monthly_operational_review, strategic_policy_second_opinion]
+  review_target_month:
+    type: string
+    pattern: "^[0-9]{4}_[0-9]{2}$"
+  portfolio_snapshot_as_of:
+    type: string
+    format: date
+  market_reference_as_of:
+    type: string
+  packet_generated_at:
+    type: string
+  research_cutoff_at:
+    type: string
+  decision_date:
+    type: [string, "null"]
+    format: date
+  strategic_required_inputs:
+    $ref: "#/$defs/strategic_required_inputs"
+  missing_strategic_inputs:
+    type: array
+    uniqueItems: true
+    items: {type: string}
+  strategic_decision_objective:
+    $ref: "#/$defs/strategic_decision_objective"
+  candidate_methodology:
+    type: object
+    required:
+      - candidate_range
+      - range_rationale_required
+      - boundary_extension_rule
+      - global_equity_index
+      - bond_index
+      - bond_instrument_type
+      - estimation_period
+      - assumptions_as_of
+      - inflation_assumption_pct
+      - return_basis
+      - tax_cost_treatment
+      - major_drawdown_definition
+      - rebalancing_frequency
+      - required_candidate_fields
+  capital_layers:
+    type: object
+  asset_class_definitions:
+    type: object
+    required: [core, jun_core, satellite_core, satellite, pension, other, liquidity]
+    properties:
+      core: {$ref: "#/$defs/asset_class_definition"}
+      jun_core: {$ref: "#/$defs/asset_class_definition"}
+      satellite_core: {$ref: "#/$defs/asset_class_definition"}
+      satellite: {$ref: "#/$defs/asset_class_definition"}
+      pension: {$ref: "#/$defs/asset_class_definition"}
+      other: {$ref: "#/$defs/asset_class_definition"}
+      liquidity: {$ref: "#/$defs/asset_class_definition"}
+  allocation_denominators:
+    type: object
+    required:
+      - household_total_assets_jpy
+      - long_term_investable_portfolio_jpy
+      - policy_allocation_denominator_jpy
+      - household_reserve_jpy
+      - tactical_liquidity_jpy
+      - excluded_other_assets_jpy
+      - ideco_treatment
+      - crypto_treatment
+      - calculation_status
+  market_decline_rule:
+    type: object
+    required:
+      - status
+      - deployment_target
+      - trigger_index
+      - same_broad_index_required
+      - reference_high_definition
+      - price_basis
+      - lookback_period
+      - fx_treatment
+      - theme_or_sector_decline_is_trigger
+      - unavailable_data_result
+  direct_semiconductor_limit:
+    type: object
+    additionalProperties: false
+    required: [status, limit_pct, denominator, priority, strategic_review_note]
+    properties:
+      status:
+        enum: [hard_constraint, policy_to_reconsider, explicit_exception]
+      limit_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      denominator: {const: household_total_assets_jpy}
+      priority: {type: string}
+      strategic_review_note: {type: string}
+  user_decision_preferences:
+    type: object
+  active_risk_policy:
+    type: object
+  approved_policy:
+    type: [object, "null"]
+  rule_registry:
+    type: array
+    uniqueItems: true
+    items:
+      type: object
+      additionalProperties: false
+      required: [rule_id, applies_to, rule]
+      properties:
+        rule_id: {type: string, pattern: "^R-[A-Z]+-[0-9]{3}$"}
+        applies_to: {type: string}
+        rule: {type: string}
+  research_contract:
+    type: object
+    required: [phase, required_for, preferred_source_types, source_required_fields, portfolio_valuation_rule]
+  validation_contract:
+    type: object
+    required: [quality_check_schema, required_check_ids, phase_rule, static_reference_checks, interaction_phase_at_generation]
+  selected_sources:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [source_id, source_ref, role, as_of]
+      properties:
+        source_id: {type: string}
+        source_ref: {type: string}
+        role: {type: string}
+        as_of: {type: string}
+  preflight_checklist:
+    type: array
+    minItems: 5
+    items: {type: string}
+  allowed_quantitative_facts:
+    type: object
+    additionalProperties: false
+    required:
+      - cash_requirement_inputs
+      - portfolio_totals
+      - category_totals
+      - asset_class_allocations
+      - holdings
+      - security_story_review_targets
+      - thematic_fund_review_targets
+      - same_product_account_groups
+      - market_references
+      - concentration_metrics
+      - recurring_commitments
+      - data_quality_notes
+    properties:
+      cash_requirement_inputs: {type: object}
+      portfolio_totals: {type: object}
+      category_totals: {type: array}
+      asset_class_allocations: {type: array}
+      holdings: {type: array}
+      security_story_review_targets: {type: array}
+      thematic_fund_review_targets: {type: array}
+      same_product_account_groups: {type: array}
+      market_references: {type: array}
+      concentration_metrics: {type: object}
+      recurring_commitments: {type: object}
+      data_quality_notes: {type: object}
+  confirmed_user_conditions:
+    type: array
+    items:
+      type: object
+      required: [condition_id, statement, source, as_of, status]
+      properties:
+        condition_id: {type: string}
+        statement: {type: string}
+        source: {type: string}
+        as_of: {type: string}
+        status: {enum: [confirmed, observed_setting]}
+        upper_bound_pct: {type: number}
+        denominator: {type: string}
+  unknown_information:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [item, reason, source, as_of]
+      properties:
+        item: {type: string}
+        reason: {type: string}
+        source: {type: string}
+        as_of: {type: string}
+  output_contract:
+    type: object
+    required: [interaction_phase, objective_confirmation, final_review, response_identity, canonical_paths, array_schemas, root_fields]
+  excluded_information:
+    type: array
+    items: {type: string}
+$defs:
+  strategic_required_inputs:
+    type: object
+    additionalProperties: false
+    required:
+      - date_of_birth
+      - user_age
+      - user_age_as_of
+      - tax_residency
+      - investment_horizon_years
+      - planning_end_age
+      - expected_withdrawal_start
+      - earliest_possible_asset_use_date
+      - planned_contributions
+      - current_recurring_commitments
+      - expected_future_cash_flows
+      - human_capital_assumptions
+      - liabilities
+      - pension_and_other_future_assets
+    properties:
+      date_of_birth: {type: [string, "null"], format: date}
+      user_age: {type: [integer, "null"], minimum: 0}
+      user_age_as_of: {type: [string, "null"], format: date}
+      tax_residency: {type: [string, "null"]}
+      investment_horizon_years: {type: [number, "null"], minimum: 0}
+      planning_end_age: {type: [integer, "null"], minimum: 0}
+      expected_withdrawal_start: {type: [string, "null"]}
+      earliest_possible_asset_use_date: {type: [string, "null"]}
+      planned_contributions: {type: [array, object, "null"]}
+      current_recurring_commitments: {type: object}
+      expected_future_cash_flows: {type: [array, object, "null"]}
+      human_capital_assumptions: {type: [object, "null"]}
+      liabilities:
+        type: object
+        additionalProperties: false
+        required:
+          - mortgage_outstanding_jpy
+          - user_share_jpy
+          - interest_rate
+          - fixed_or_variable
+          - remaining_term_years
+          - annual_repayment_jpy
+          - balance_as_of
+        properties:
+          mortgage_outstanding_jpy: {type: [number, "null"], minimum: 0}
+          user_share_jpy: {type: [number, "null"], minimum: 0}
+          interest_rate: {type: [number, "null"], minimum: 0}
+          fixed_or_variable: {type: [string, "null"]}
+          remaining_term_years: {type: [number, "null"], minimum: 0}
+          annual_repayment_jpy: {type: [number, "null"], minimum: 0}
+          balance_as_of: {type: [string, "null"]}
+      pension_and_other_future_assets: {type: [array, object, "null"]}
+  strategic_decision_objective:
+    type: object
+    additionalProperties: false
+    required: [primary_objective, objective_question, objective_models, selection_rule, tie_breaker]
+    properties:
+      primary_objective:
+        type: [string, "null"]
+        enum: [maximize_terminal_wealth, minimize_risk_for_required_return, maximize_ex_ante_sharpe_ratio, null]
+      objective_question: {type: string}
+      objective_models: {type: object}
+      selection_rule: {type: string}
+      tie_breaker: {type: string}
+  asset_class_definition:
+    type: object
+    additionalProperties: false
+    required: [core_satellite_group, included_in_long_term_investable_portfolio, tradable, household_allocation_category, cap_treatment]
+    properties:
+      core_satellite_group: {enum: [core, satellite, excluded]}
+      included_in_long_term_investable_portfolio: {type: boolean}
+      tradable: {type: boolean}
+      household_allocation_category: {type: string}
+      cap_treatment: {type: string}

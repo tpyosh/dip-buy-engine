@@ -1,0 +1,272 @@
+schema_version: 1
+record_type: "personal_financial_context"
+record_id: "husband_personal_financial_context_2026-08-03_v2"
+effective_from: "2026-07-26"
+confirmed_at: "2026-08-03"
+currency: "JPY"
+
+scope:
+  owner: "husband"
+  portfolio: "personal_financial_assets"
+  excludes:
+    - "wife_personal_financial_assets"
+  mortgage_risk_scope: "household_pair_loan_with_husband_share"
+
+cash_flow:
+  regular_month:
+    income_after_tax_social_insurance_mortgage_ideco_jpy:
+      value: 374171
+      as_of: "2026-07-25"
+      certainty: "confirmed_user_value"
+      is_expense_value: false
+    nisa_contribution_jpy:
+      value: 100000
+      as_of: "2026-07-25"
+      certainty: "confirmed_user_value"
+      is_expense_value: false
+    disposable_after_nisa_jpy:
+      value: 274171
+      formula: "income_after_tax_social_insurance_mortgage_ideco_jpy - nisa_contribution_jpy"
+      as_of: "2026-07-25"
+      certainty: "machine_calculation_from_confirmed_values"
+      is_expense_value: false
+    essential_expenses_jpy:
+      value: 250000
+      as_of: "2026-08-02"
+      certainty: "confirmed_user_estimate"
+    balance:
+      value: "approximately_zero"
+      as_of: "2026-07-25"
+      certainty: "confirmed_user_description"
+  bonus:
+    take_home_reference_jpy: 2000000
+    amount_qualifier: "approximately_slightly_below_reference"
+    certainty: "rough_user_estimate"
+    annual_frequency: 1
+    payment_months:
+      - 1
+    allocation_policy: "unplanned_discretionary_spending_from_surplus"
+    typical_uses:
+      - "travel"
+      - "discretionary_purchases"
+
+cash_requirements:
+  emergency_fund:
+    target_jpy: 2000000
+    status: "confirmed_user_target"
+    permitted_fallback: "sell_all_country_fund_even_during_market_decline_if_needed"
+  contingency_reserve:
+    enabled: false
+    target_jpy: 0
+    status: "confirmed_not_required"
+  near_term_large_expenses:
+    horizon_years: 3
+    confirmed_items: []
+    unplanned_travel:
+      expected: true
+      committed_amount_jpy: null
+      scheduled_date: null
+      funding_policy: "pay_from_bonus_or_other_realized_surplus"
+      treatment: "not_a_confirmed_large_expense"
+
+dip_buy_liquidity:
+  purpose: "deploy_during_market_declines"
+  reserve_maintenance_is_objective: false
+  amount_basis: "portfolio_snapshot_total_assets_jpy * approved_target_ratio"
+  target_ratio:
+    value: null
+    status: "proposal_requested_from_current_monthly_independent_review"
+  purchase_target:
+    value: null
+    status: "undecided"
+  activation_condition:
+    value: null
+    status: "proposal_requested_from_current_monthly_independent_review"
+  tranche_count:
+    value: null
+    status: "proposal_requested_from_current_monthly_independent_review"
+  tranche_amount_jpy:
+    value: null
+    status: "depends_on_target_ratio_and_tranche_count"
+  minimum_balance_jpy:
+    value: null
+    status: "not_defined"
+  replenishment_method:
+    value: null
+    status: "not_defined"
+  review_rule:
+    declining_market_requires_use_option: true
+    use_option_required_fields:
+      - "target"
+      - "amount_or_formula"
+      - "timing"
+      - "rationale"
+    hold_decision_must_compare_use_option: true
+
+mortgage:
+  evidence:
+    document: "名古屋銀行 ご返済予定表"
+    created_at: "2026-06-29"
+  household_total:
+    original_principal_jpy: 64900000
+    annual_interest_rate: 0.0112
+    fixed_or_variable: "variable"
+    loan_date: "2024-09-27"
+    maturity_date: "2064-09-27"
+    monthly_payment_jpy: 148342
+    annual_payment_jpy: 1780104
+    bonus_payment_jpy: 0
+    scheduled_balance_after_2026_07_27_jpy: 62520685
+  husband_share:
+    allocation_pct: 0.50
+    original_principal_jpy: 32450000
+    monthly_payment_jpy: 74171
+    annual_payment_jpy: 890052
+
+strategic_profile:
+  date_of_birth: "1992-01-07"
+  tax_residency: "Japan"
+  investment_horizon_years: 66
+  planning_end_age: 100
+  expected_withdrawal_start: "2057-01-07"
+  earliest_possible_asset_use_date: "2057-01-07"
+  planned_contributions:
+    status: "reviewer_to_derive"
+    decision_owner: "independent_monthly_reviewer"
+    user_capacity_statement: "余裕はある"
+    observed_commitments_ref: "plans/recurring/current.yaml"
+    decision_scope:
+      - "sustainable_net_contribution_amount"
+      - "continuation_period"
+      - "account_and_asset_allocation"
+      - "continuation_or_change_of_current_nisa_ideco_and_crypto_contributions"
+    constraints:
+      - "distinguish_new_savings_from_temporary_redeployment_of_existing_cash"
+      - "do_not_treat_the_observed_750000_jpy_monthly_setting_as_salary_funded_without_evidence"
+      - "use_confirmed_cash_flow_mortgage_and_emergency_fund_constraints"
+      - "select_one_concrete_base_case_and_do_not_return_the_choice_to_the_user"
+  expected_future_cash_flows:
+    status: "reviewer_to_model_with_uncertainty"
+    decision_owner: "independent_monthly_reviewer"
+    items:
+      employment_income:
+        expected_continuation_years: 30
+        planned_retirement_age: 65
+        certainty: "rough_user_plan_subject_to_future_conditions"
+      bonus:
+        future_amount_jpy: null
+        status: "unknown"
+        modeling_rule: "reviewer_selects_and_documents_base_case_treatment"
+      inheritance:
+        source_owner: "father"
+        source_estimated_total_assets_jpy: 100000000
+        estimate_qualifier: "approximately"
+        reported_beneficiaries:
+          - "user"
+          - "mother"
+          - "younger_sister"
+        user_is_beneficiary: true
+        user_share_jpy: null
+        possible_timing_within_years: 20
+        timing_certainty: "speculative_user_estimate"
+        modeling_rule: "do_not_infer_a_legal_share; choose_a_conservative_base_case_and_show_sensitivity"
+  human_capital_assumptions:
+    education: "graduate_school"
+    employment_status: "full_time_employee"
+    occupation: "automotive_software_engineer"
+    income_stability: "high"
+    income_stability_reason: "user_identified_only_singularity_as_material_risk"
+    expected_salary_continuation_years: 30
+    planned_retirement_age: 65
+    retirement_age_certainty: "rough_user_plan_subject_to_future_conditions"
+    known_long_leave_or_unemployment_risk: "none_identified_by_user"
+  pension_and_other_future_assets:
+    status: "reviewer_to_estimate_with_uncertainty"
+    decision_owner: "independent_monthly_reviewer"
+    items:
+      - type: "japanese_public_employee_pension"
+        employment_assumption: "full_time_employee_from_age_24_through_age_65"
+        expected_benefit_jpy: null
+        benefit_frequency: null
+        status: "amount_unknown"
+        modeling_rule: "use_current_official_Japanese_sources_and_available_user_facts; disclose_data_gaps_and_sensitivity"
+  objective_configuration:
+    user_stated_goal: "死ぬまでお金に不自由しないこと"
+    selection_status: "confirmed"
+    primary_objective: "minimize_risk_for_required_return"
+    objective_models:
+      maximize_terminal_wealth:
+        horizon_years: null
+        planned_contributions: null
+        return_basis: null
+        statistic: null
+        downside_quantile_pct: null
+        leverage_allowed: null
+      minimize_risk_for_required_return:
+        target_return_pct: null
+        target_return_derivation:
+          status: "reviewer_to_derive"
+          decision_owner: "independent_monthly_reviewer"
+          method: "derive the real required return from current investable assets, reviewer-derived sustainable contributions, retirement spending, public pension, planning end age, terminal asset floor, and documented treatment of inheritance"
+          evidence_requirements:
+            - "packet_confirmed_cash_flow_and_asset_values"
+            - "official_pension_and_inflation_sources"
+            - "explicit_formula_and_assumption_date"
+          sensitivity_required: true
+          base_case_required: true
+        return_basis: "real"
+        horizon_years: 66
+        accumulation_horizon_years: 31
+        withdrawal_horizon_years: 35
+        success_probability_pct: null
+        success_probability_derivation:
+          status: "reviewer_to_derive"
+          decision_owner: "independent_monthly_reviewer"
+          method: "select a planning success probability using cited financial-planning or retirement-income evidence and the user's confirmed lifetime sufficiency objective"
+          evidence_requirements:
+            - "verifiable_financial_planning_or_retirement_income_evidence"
+            - "rationale_connected_to_lifetime_sufficiency_objective"
+          sensitivity_required: true
+          base_case_required: true
+        retirement_spending_derivation:
+          status: "reviewer_to_derive"
+          decision_owner: "independent_monthly_reviewer"
+          method: "derive a current-JPY retirement spending base case from confirmed essential expenses, observed discretionary bonus use, inflation assumptions, and the stated goal; do not present it as a user-confirmed preference"
+          evidence_requirements:
+            - "packet_confirmed_current_spending_and_bonus_facts"
+            - "official_or_primary_inflation_and_retirement_spending_evidence"
+          sensitivity_required: true
+          base_case_required: true
+        public_pension_derivation:
+          status: "reviewer_to_derive"
+          decision_owner: "independent_monthly_reviewer"
+          method: "estimate a transparent range and one base case from official Japanese pension information and the confirmed employment period; do not claim Nenkin Net precision"
+          evidence_requirements:
+            - "official_Japanese_pension_sources"
+            - "explicit_limitations_from_missing_wage_history"
+          sensitivity_required: true
+          base_case_required: true
+        terminal_asset_floor_derivation:
+          status: "reviewer_to_derive"
+          decision_owner: "independent_monthly_reviewer"
+          method: "derive a terminal floor that supports longevity and late-life uncertainty without inventing an unconfirmed bequest motive"
+          evidence_requirements:
+            - "planning_end_age_and_lifetime_sufficiency_objective"
+            - "explicit_late_life_uncertainty_rationale"
+          sensitivity_required: true
+          base_case_required: true
+      maximize_ex_ante_sharpe_ratio:
+        risk_free_rate_definition: null
+        return_basis: null
+        horizon_years: null
+
+unknown_information:
+  - "ボーナスの正確な手取り額"
+  - "未計画旅行の金額と時期"
+  - "投資待機資金の目標比率"
+  - "投資待機資金の買付対象"
+  - "投資待機資金の発動条件"
+  - "投資待機資金の投入回数と各回投入額"
+  - "投資待機資金の最低残高と補充方法"
+  - "公的年金の個人別確定見込額"
+  - "相続の本人取り分、実際の時期および税引後額"

@@ -65,5 +65,9 @@ def test_generated_outputs_are_routed_under_reports() -> None:
     )
     assert on_demand["prompt"] == (
         ROOT
-        / "reports/generated/on_demand/2026/2026_07_26T120000Z/assessment_request.md"
+        / "reports/generated/on_demand/2026/2026_07_26T120000Z/health_check_request.md"
+    )
+    assert on_demand["response"] == (
+        ROOT
+        / "reports/generated/on_demand/2026/2026_07_26T120000Z/health_check_response.yaml"
     )

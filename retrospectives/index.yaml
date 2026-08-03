@@ -1,6 +1,6 @@
 schema_version: 1
 record_type: "retrospective_index"
-updated_at: "2026-07-26"
+updated_at: "2026-08-02"
 entries:
   - period: "2026-03"
     classification: "historical_review_not_full_retrospective"
@@ -18,3 +18,7 @@ entries:
     classification: "workflow_retrospective_full"
     original_review_ref: "reports/generated/monthly/2026_08/review_response.md"
     structured_review_ref: "retrospectives/2026-07-26_chatgpt_monthly_review_handoff.yaml"
+  - period: "2026-08"
+    classification: "cash_target_inference_failure_full"
+    original_review_ref: "reports/generated/monthly/2026_08/review_response.md"
+    structured_review_ref: "retrospectives/2026-08-02_cash_target_inference_failure.yaml"

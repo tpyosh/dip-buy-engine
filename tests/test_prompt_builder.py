@@ -1,129 +1,175 @@
 from __future__ import annotations
 
+from copy import deepcopy
+from datetime import date
 from pathlib import Path
 
 import pytest
 
+from monthly_limit_order_review.context_records import load_financial_context
 from monthly_limit_order_review.prompt_builder import build_monthly_review_prompt
+from monthly_limit_order_review.review_packet import build_review_packet
+
+ROOT = Path(__file__).resolve().parents[1]
+TEMPLATE_PATH = ROOT / "prompts/templates/monthly_review_template.md"
 
 
-def test_monthly_review_prompt_contains_required_sections(sample_computation) -> None:
-    template_path = Path(__file__).resolve().parents[1] / "prompts/templates/monthly_review_template.md"
-    prompt = build_monthly_review_prompt(sample_computation, template_path.read_text(encoding="utf-8"))
+def render_prompt(sample_computation) -> str:
+    return build_monthly_review_prompt(
+        sample_computation,
+        TEMPLATE_PATH.read_text(encoding="utf-8"),
+        financial_assumptions_text=(
+            ROOT / "FINANCIAL_ASSUMPTIONS.md"
+        ).read_text(encoding="utf-8"),
+    )
 
-    assert prompt.startswith("対象月: 2026_03\n")
-    assert "Codex が Money Forward スクリーンショットを一次情報として OCR・正規化" in prompt
-    assert "ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しません。" in prompt
-    assert "ChatGPT は Money Forward スクリーンショットの読取や OCR を担当しないこと。" in prompt
-    assert "## 0. 自己完結ハンドオフ" in prompt
-    assert "handoff_mode: self_contained_single_markdown" in prompt
-    assert "external_files_required: false" in prompt
-    assert "normalized_snapshot: embedded_below" in prompt
-    assert "active_strategy: embedded_below" in prompt
-    assert "active_plans: embedded_below" in prompt
-    assert "market_references: embedded_below" in prompt
-    assert "## 0-1. Active plan金額セマンティクス（最優先）" in prompt
-    assert "active_plan_basis_planned_amount_jpy:" in prompt
-    assert "active_plan_current_recalculated_amount_jpy:" in prompt
-    assert "active_plan_amount_difference_expected:" in prompt
-    assert "active_plan_historical_basis_must_not_be_overwritten:" in prompt
-    assert "差だけを理由に不整合や統一対象と判定しない" in prompt
-    assert ".csv" not in prompt.lower()
-    assert "file://" not in prompt.lower()
-    assert "## 1. 前提" in prompt
-    assert "【要約】" in prompt
-    assert "## 5. コア定額買い判定材料" in prompt
-    assert "## 5-1. Coreスポット買い判断材料" in prompt
-    assert "## 5-2. Core積立設定（毎月固定）" in prompt
-    assert "## 5-3. iDeCo積立設定（毎月固定）" in prompt
-    assert "## 5-4. 暗号資産積立設定（毎週固定）" in prompt
-    assert "## 6. SOX 判定材料" in prompt
-    assert "## 7. 半導体エクスポージャ内訳" in prompt
-    assert "## 8. 長期シナリオ点検対象" in prompt
-    assert "## 9. ChatGPTへの長期シナリオレビュー依頼" in prompt
-    assert "## 11. 生成ロジック上の分離データ" in prompt
-    assert "## 13. 必須の月次・四半期レビュー観点" in prompt
-    assert "【Codex向け修正要約】" in prompt
-    assert "【今月のcoreスポット買い提案】" in prompt
-    assert "【コア定額買い方針レビュー】" in prompt
-    assert "【長期シナリオレビュー】" in prompt
-    assert "【四半期ルール見直し】" in prompt
-    assert "【ルール改善レビュー】" not in prompt
-    assert "| ALL_COUNTRY_FUND |" in prompt
-    assert "| MSFT | jun_core |" in prompt
-    assert "suppressed_reason_code" in prompt
-    assert "snapshot_price_source_date" in prompt
-    assert "market_candidate_price_source_date" in prompt
-    assert "eligible deep candidate なし" in prompt
-    assert "0段以上の任意段数" in prompt
-    assert "ルール上の判断" in prompt
-    assert "必ず単一の ```md コードブロックで出力すること" in prompt
-    assert "無理に改善提案を作らない" in prompt
-    assert "`must: なし`" in prompt
-    assert "新規生成物は reports/generated/ に限定" in prompt
-    assert "data/history と prompts/generated は不変履歴" in prompt
-    assert "Webで確認した事実と、そこからの推論を分けて記述してください。" in prompt
-    assert "monthly_core_budget_tier" in prompt
-    assert "recommended_monthly_core_buy_budget_jpy" in prompt
-    assert "monthly_total_core_deployment_jpy" in prompt
-    assert "current_monthly_core_auto_invest_amount_jpy" in prompt
-    assert "annualized_core_auto_invest_amount_jpy" in prompt
-    assert "review_target_month" in prompt
-    assert "直近20営業日（約1ヶ月）の終値平均" in prompt
-    assert "その指値が直近20営業日終値平均から何%下かを必ず明示すること" in prompt
-    assert "((指値 / 直近20営業日終値平均) - 1) * 100" in prompt
-    assert "承認済みactive planがある場合" in prompt
-    assert "確認済み利用可能現金から趣味枠現金1,000,000円を控除" in prompt
-    assert "根拠のない月650,000円の現金流入" in prompt
-    assert "積立しているからスポット買いは不要" in prompt
-    assert "total_monthly_jpy: 750000" in prompt
-    assert "給与収入額と毎月の正確な余剰額は未記録" in prompt
-    assert "通常生活費300,000円/月と本人分住宅ローン74,171円/月" in prompt
-    assert "住宅ローンはペアローンの世帯当初借入額64,900,000円、本人当初借入額32,450,000円、年1.120%" in prompt
-    assert "これらは現在残高ではない" in prompt
-    assert "既存の毎月固定積立（Core積立設定）を前提に評価すること" in prompt
-    assert "| IDECO_ALL_COUNTRY | eMAXIS Slim 全世界株式（オール・カントリー） | 55000 | iDeCo | pension |" in prompt
-    assert "pension_monthly_dca_total_jpy: 55000" in prompt
-    assert "annualized_pension_dca_jpy: 660000" in prompt
-    assert "| BTC | 2000 |" in prompt
-    assert "| ETH | 2000 |" in prompt
-    assert "| XRP | 1000 |" not in prompt
-    assert "crypto_weekly_dca_total_jpy: 4000" in prompt
-    assert "annualized_crypto_dca_jpy: 208000" in prompt
-    assert "暗号資産の週次積立（BTC/ETH）も既に実行される前提で扱い" in prompt
-    assert "iDeCoのオルカン月次積立55,000円はpensionとして既に実行される前提で扱い" in prompt
-    assert "rebalance_mode_active" in prompt
-    assert "tradable_core_pct" in prompt
-    assert "effective_core_including_pension_pct" in prompt
-    assert "cash_normalization_months_estimate" in prompt
-    assert "gross_deployment_months" in prompt
-    assert "assumed_monthly_cash_inflow_jpy" in prompt
-    assert "in_direct" in prompt
-    assert "in_indirect" in prompt
-    assert "avg20_gap_pct" in prompt
-    assert "direct_cap_monitor_pct" in prompt
-    assert "direct_plus_indirect_watch_metric_pct" in prompt
-    assert "priority_lowered_boolean" in prompt
-    assert "suggested_proxy_symbol" in prompt
-    assert "annualized_crypto_dca_jpy" in prompt
-    assert "real_estate_exposure_present" in prompt
-    assert "月次の執行判断と、四半期単位のルール見直し提案は明確に分離してください。" in prompt
-    assert "## 15. 回答前の必須acceptance check" in prompt
-    assert "外部ファイル名、添付状況、取得失敗、再アップロード案内が最終回答にない" in prompt
-    assert "現行source of truthにない新しい方針をmustへ入れたり" in prompt
-    assert "コードブロックを閉じた後に何も追記していない" in prompt
-    assert "指値設定対象月キー" in prompt
+
+def test_monthly_review_prompt_is_a_closed_decision_packet(sample_computation) -> None:
+    prompt = render_prompt(sample_computation)
+
+    assert prompt.startswith("# ChatGPT向け月次独立レビュー\n")
+    assert "- 対象月: 2026_03" in prompt
+    assert "## 実行前チェック（利用者向け）" in prompt
+    assert "ChatGPTの資産運用プロジェクト内では実行しない" in prompt
+    assert "プロジェクト外の新規Temporary Chat" in prompt
+    assert "前月のレビュースレッドを再利用しない" in prompt
+    assert "このレビュー・パケット以外のファイルを添付しない" in prompt
+    assert "カスタム指示を無効化するか" in prompt
+
+    assert "review_mode: monthly_operational_review" in prompt
+    assert "## 1. モードと対話フェーズ" in prompt
+    assert "## 2. 入力データ" in prompt
+    assert "## 3. 正規ルール台帳" in prompt
+    assert "## 4. 外部調査契約" in prompt
+    assert "## 5. 出力スキーマと配送契約" in prompt
+    assert "## 6. 検証契約" in prompt
+    assert "strategic_decision_objective:" in prompt
+    assert "capital_layers:" in prompt
+    assert "prohibited_residual_rule" in prompt
+    assert "user_decision_preferences:" in prompt
+    assert "approved_policy:" in prompt
+    assert "target_groups:" in prompt
+    assert "confirmed_user_conditions:" in prompt
+    assert "allowed_quantitative_facts:" in prompt
+    assert "unknown_information:" in prompt
+    assert "portfolio_snapshot_as_of:" in prompt
+    assert "market_reference_as_of:" in prompt
+    assert "research_cutoff_at:" in prompt
+    assert "decision_date:" in prompt
+    assert "R-CASH-001" in prompt
+    assert "R-DELIVERY-001" in prompt
+    assert "range_rationale_required: true" in prompt
+    assert "GE60_B40" in prompt
+    assert "source_required_fields:" in prompt
+    assert "publication_date" in prompt
+    assert "claim_supported" in prompt
+    assert "【具体的な売買・資金移動】" in prompt
+    assert "review_response.yaml" in prompt
+    assert "prompt_feedback" in prompt
+    assert "strategic_policy_decision:" in prompt
+    assert "updated_inputs:" in prompt
+    assert "decision_axes:" in prompt
+    assert "schema_ref: schemas/monthly-review-response.schema.yaml" in prompt
+    assert "tactical_liquidity_policy_ref" in prompt
+    assert "portfolio_snapshot_as_ofの価格・為替・評価額・比率を更新しない" in prompt
+    assert "decision_quality_checks: []" in prompt
+    assert "status_enum:" in prompt
+    assert "- pass" in prompt
+    assert "- fail" in prompt
+    assert "- not_applicable" in prompt
+
+    assert "active_strategy_id" not in prompt
+    assert "active_plan_id" not in prompt
+    assert "candidate_orders" not in prompt
+    assert "recommended_monthly_core_buy_budget_jpy" not in prompt
+    assert "allowed_user_conditions" not in prompt
+    assert "review_as_of_total_assets_jpy" not in prompt
+    assert "material_trade_assumption_limit_pct" not in prompt
+    assert "総資産の5%" not in prompt
+    assert "dip_buy_liquidity_policy_proposal" not in prompt
+    assert "sox_decision" not in prompt
+
+
+def test_review_packet_excludes_unselected_history_and_recommendations(
+    sample_computation,
+) -> None:
+    computation = deepcopy(sample_computation)
+    computation.metadata["active_strategy_path"] = "old-private-review-do-not-leak.md"
+    computation.metadata["active_plan_paths"] = ["old-approved-plan-do-not-leak.yaml"]
+    computation.strategy_summary["legacy_review_name"] = "stale-chatgpt-review-do-not-leak"
+    computation.core_buy_materials["recommended_monthly_core_buy_budget_jpy"] = 987654321
+
+    prompt = render_prompt(computation)
+
+    assert "old-private-review-do-not-leak" not in prompt
+    assert "old-approved-plan-do-not-leak" not in prompt
+    assert "stale-chatgpt-review-do-not-leak" not in prompt
+    assert "987654321" not in prompt
+
+
+def test_unknown_information_is_separated_without_a_point_estimate(
+    sample_computation,
+) -> None:
+    sample_computation.snapshot.liquidity_target_jpy = None
+    prompt = render_prompt(sample_computation)
+
+    assert "liquidity_target_jpy" in prompt
+    assert "不明値を確認済み事実として推測で埋めず" in prompt
+    assert "reviewer_to_derive" in prompt
+    assert "unknown_information:" in prompt
+
+
+def test_review_packet_selects_financial_facts_without_copying_values_into_template(
+    sample_computation,
+) -> None:
+    computation = deepcopy(sample_computation)
+    computation.snapshot.snapshot_date = date(2026, 7, 26)
+    computation.metadata["review_target_month"] = "2026_08"
+    financial = load_financial_context(ROOT)
+    packet = build_review_packet(
+        computation,
+        financial_context=financial["record"],
+        financial_context_source=financial["source_path"],
+    )
+    template = TEMPLATE_PATH.read_text(encoding="utf-8")
+
+    assert packet.review_mode == "strategic_policy_second_opinion"
+
+    statements = [
+        item["statement"] for item in packet.confirmed_user_conditions
+    ]
+    unknown_reasons = [
+        item["reason"] for item in packet.unknown_information
+    ]
+    assert any("月次収入: 374,171円" in item for item in statements)
+    assert any("通常月の実質可処分収入: 274,171円" in item for item in statements)
+    assert "月間必須支出額: 250,000円" in statements
+    assert "生活防衛資金の目標額: 2,000,000円" in statements
+    assert "生活防衛資金とは別の予備費は確保しない" in statements
+    assert "投資待機資金の目標比率は今回の月次独立レビューから提案を受ける" in statements
+    assert any(
+        "相場下落中でもオール・カントリー型の投資信託を売却"
+        in item
+        for item in statements
+    )
+    assert any("NISA月次積立額: 100,000円" in item for item in statements)
+    assert not any("月額100,000円の具体的な差引先" in item for item in unknown_reasons)
+    assert any("ボーナスの正確な手取り額" in item for item in unknown_reasons)
+    assert any("投資待機資金の目標比率" in item for item in unknown_reasons)
+    assert "account_tax_comparison" in packet.output_contract["array_schemas"]
+    assert "374,171円" not in template
+    assert "274,171円" not in template
+    assert "2026-07-25_cash_redeployment" not in template
+    assert "楽天・プラス・オールカントリー" not in template
+    assert "必要現金" not in template
+    assert "心理的リスク許容度" not in template
 
 
 def test_monthly_review_prompt_rejects_unresolved_local_file_reference(
     sample_computation,
 ) -> None:
-    template_path = (
-        Path(__file__).resolve().parents[1]
-        / "prompts/templates/monthly_review_template.md"
-    )
     template = (
-        template_path.read_text(encoding="utf-8")
+        TEMPLATE_PATH.read_text(encoding="utf-8")
         + "\nローカル参照: stale_reference.csv\n"
     )
 

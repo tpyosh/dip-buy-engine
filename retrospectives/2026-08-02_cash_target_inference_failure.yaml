@@ -1,0 +1,151 @@
+schema_version: 1
+record_type: "workflow_retrospective"
+retrospective_id: "2026-08-02_cash_target_inference_failure"
+period:
+  start: "2026-08-02"
+  end: "2026-08-02"
+prepared_at: "2026-08-02"
+strategy_ref: "strategy/current.yaml"
+plan_refs:
+  - "plans/2026/2026-07-25_cash_redeployment.yaml"
+transaction_refs: []
+information_available_at_decision_time:
+  - "税金、社会保険料、住宅ローン、iDeCo拠出後の月次収入は374,171円"
+  - "上記からNISA積立100,000円を差し引いた実質可処分収入は約274,171円"
+  - "通常月の収支はおおむねプラスマイナスゼロで、ボーナス収入は別にある"
+  - "374,171円、100,000円、274,171円はいずれも月間必須支出ではない"
+  - "生活防衛資金目標はユーザー確認済みの約2,000,000円"
+  - "生活防衛資金を超える現金の用途は相場下落時の買い増し用流動資金に限定するが、目標額と発動計画は未設定"
+assumptions_at_decision_time:
+  - "不明情報があっても一つのベースケースを完成させる要求は、捏造禁止と両立すると想定した"
+  - "現金目標、支出月数、目標株式比率、売買額をすべて要求しても、レビュアーは導出不能を選べると想定した"
+  - "confirmed条件より一般的な資産配分比率を優先しないことは、明示しなくても伝わると想定した"
+decision_process:
+  - "レビュワーは暫定株式比率80%を先に置き、残り20%を現金とした"
+  - "総資産の20%を約8,000,000円と逆算し、確認済み生活防衛資金2,000,000円との差額6,000,000円を投資待機資金と呼んだ"
+  - "274,171円を支出額ではないと明記していたにもかかわらず、支出月数の分母に使用した"
+  - "根拠の弱い一点推定から現金5,650,000円を株式へ移す提案を作った"
+decisions_made:
+  - "現金目標は必要支出等からのみ積み上げ、資産総額・目標株式比率からの逆算を禁止する"
+  - "情報不足時の完成形を、確定判断、条件付き判断、算定不能の分離へ変更する"
+  - "月間必須支出が不明なら支出月数をnullとし、収入を確定値へ代用しない"
+  - "投資待機資金は買付対象、発動条件、各回投入額、投入回数、最低残高、補充方法が揃った場合だけ算定する"
+  - "仮定を含む総資産5%超の売買は実行可能提案として受理しない"
+  - "不足入力とテンプレート改善案をreview_response.yamlのprompt_feedbackへ返す反復改善ループにする"
+observed_outcomes:
+  - "根拠のない現金目標8,000,000円、投資待機資金6,000,000円、現金比率20%が提示された"
+  - "確認済みの生活防衛資金2,000,000円が実質的に上書きされた"
+  - "総資産の約14%に相当する5,650,000円の資金移動が確定的に提案された"
+  - "一時チャットを変えても同じ傾向が再現し、会話履歴ではなくテンプレート構造が主因と判断された"
+process_evaluation_without_outcome_bias:
+  - "捏造禁止という単独指示は妥当だったが、不明でも一点のベースケース、現金目標、支出月数、売買額まで完成させる指示との組み合わせが競合した"
+  - "支出を推論するなら収入と通常月収支が妥当性確認の起点になり得るが、月間必須支出の確定値にはならない。資産総額から支出を推論する経路には合理性がない"
+  - "confirmed条件を下位の仮定から保護する優先順位と受入検証がなかったため、一般的な丸い配分比率がユーザー条件を上書きできた"
+  - "入力不足を回答内で埋める設計で、ChatGPTからCodexへテンプレート不足を返す専用経路がなかった"
+conflicting_instruction_inventory:
+  - instruction: "不明情報を捏造しない"
+    interaction_problem: "一つのベースケースを必ず完成させる要求と競合し、もっともらしい仮定による穴埋めを誘発した"
+  - instruction: "不明情報を理由にレビューを停止しない"
+    interaction_problem: "関連判断だけを算定不能にする選択肢が明示されず、全項目を数値化する圧力になった"
+  - instruction: "現金目標額と支出月数を決める"
+    interaction_problem: "月間必須支出がないのに支出月数を必須としたため、可処分所得が誤って分母へ流用された"
+  - instruction: "目標株式比率を決める"
+    interaction_problem: "現金要件の先行計算順序がなく、株式比率の残余から現金目標を逆算できた"
+  - instruction: "未確定の目標値を暫定提案する"
+    interaction_problem: "confirmedの生活防衛資金より一般的な現金比率が優先され得た"
+  - instruction: "概算でも売買金額を示す"
+    interaction_problem: "仮定の確度と売買規模を結ぶ上限がなく、総資産の約14%の提案へ直結した"
+template_diff_summary:
+  removed:
+    - "不明でも必要な仮定を置いて一つのベースケースを採用する"
+    - "未確定の目標値をレビュアーが暫定提案する"
+    - "正確な実行額が不明でも概算額を必ず示す"
+  added:
+    - "確定判断、条件付き判断、算定不能を分離したものを完成形とする"
+    - "現金目標の入力順序と資産配分からの逆算禁止"
+    - "confirmed、確定事実、機械計算、根拠ある推論、仮定の優先順位"
+    - "各売買の算式、入力値種別、仮定除外時の方向性、confirmed整合性、最大影響額"
+    - "prompt_feedbackによるテンプレート・パケット改善ループ"
+validation_rules:
+  cash_target:
+    formula: "生活防衛資金 + 近い将来の確定支出 + 明示的な予備費 + 設定済み投資待機資金"
+    prohibitions:
+      - "総資産比率または目標株式比率から逆算しない"
+      - "未設定の投資待機資金を生活防衛資金へ上乗せしない"
+  spending_months:
+    formula: "生活防衛資金 / 月間必須支出"
+    unavailable_when: "月間必須支出が不明"
+    prohibited_proxies:
+      - "収入"
+      - "手取り"
+      - "可処分所得"
+      - "積立額"
+      - "通常月の残額"
+      - "資産総額"
+  dip_buy_liquidity:
+    required_inputs:
+      - "買付対象"
+      - "発動条件"
+      - "各回投入額"
+      - "投入回数"
+      - "最低残高"
+      - "補充方法"
+    missing_result: "unconfigured。0円とも任意額とも推定しない"
+  trade_amount:
+    required_audit:
+      - "算式"
+      - "入力値と情報種別"
+      - "仮定を除いても方向性が成立するか"
+      - "confirmed条件との整合性"
+      - "仮定誤り時の最大影響額"
+    materiality_gate: "未確認仮定を含む総資産5%超の売買はconditionalとし、executableを拒否する"
+test_cases:
+  A:
+    inputs:
+      emergency_fund_target_jpy: 2000000
+      monthly_essential_expenses_jpy: null
+      disposable_income_jpy: 274171
+      dip_buy_liquidity_configuration: null
+    expected:
+      emergency_fund_target_jpy: 2000000
+      spending_months: null
+      dip_buy_liquidity_status: "unconfigured"
+      minimum_confirmed_cash_jpy: 2000000
+      total_cash_target_status: "confirmed_minimum_only"
+      total_cash_target_jpy: null
+      executable_large_cash_to_stock_trade: false
+  B:
+    inputs:
+      monthly_essential_expenses_jpy: 300000
+      required_emergency_months: 6
+      near_term_confirmed_expenses_jpy: 1000000
+      dip_buy_liquidity_target_jpy: 2000000
+      dip_buy_tranche_amount_jpy: 500000
+      dip_buy_tranche_count: 4
+      dip_buy_other_required_fields: "configured"
+    expected:
+      emergency_fund_target_jpy: 1800000
+      spending_months: 6
+      minimum_confirmed_cash_jpy: 2800000
+      total_cash_target_status: "fully_calculable"
+      total_cash_target_jpy: 4800000
+      target_stock_ratio_rule: "必要現金4,800,000円を確保した後の結果として算出"
+      trade_formula_required: true
+lessons:
+  - "具体性より数値の導出可能性と入力データの意味を優先する"
+  - "情報不足は回答品質の失敗ではなく、入力契約を改善するための構造化フィードバックとして扱う"
+  - "ヒューリスティック推論は情報種別を明示し、confirmed条件と機械計算を上書きさせない"
+followup_decision_refs:
+  - "FINANCIAL_ASSUMPTIONS.md"
+  - "prompts/templates/monthly_review_template.md"
+  - "prompts/templates/moneyforward_monthly_session_start_prompt.md"
+  - "src/monthly_limit_order_review/review_packet.py"
+  - "src/monthly_limit_order_review/prompt_renderer.py"
+  - "src/monthly_limit_order_review/structured_review.py"
+  - "schemas/review-packet.schema.yaml"
+  - "schemas/monthly-review-response.schema.yaml"
+  - "tests/test_review_packet.py"
+  - "tests/test_structured_review.py"
+unknowns:
+  - "通常支出の内訳のうち、生活防衛資金計算に使う月間必須支出額"
+  - "相場下落時の買い増し用流動資金の具体的な発動・投入・補充ルール"

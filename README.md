@@ -8,7 +8,9 @@ Codex が Money Forward キャプチャを直接読み取り・正規化した�
 
 現在有効な長期方針は [strategy/current.yaml](/Users/tappeiyoshida/projects/stock/strategy/current.yaml) が指す不変の戦略版です。期間限定の承認済み計画は同ファイルの `active_plan_paths` から参照します。
 
-月次CLIはこの戦略と計画を読み込み、旧 `config/portfolio_policy.yaml` のバケット目標値を現在方針として使用しません。旧目標値は過去計算と単体テストの再現用fallbackとしてのみ残しています。生成済みの過去レビューは書き換えません。
+収入、支出、ボーナス、生活防衛資金、ローンなど変わり得る家計値は [financial/current.yaml](/Users/tappeiyoshida/projects/stock/financial/current.yaml)、口座区分、売却可否、保有意図は [holdings/current.yaml](/Users/tappeiyoshida/projects/stock/holdings/current.yaml) が指す版管理YAMLを正とします。これらの値をMarkdown、プロンプト、Pythonコードへ重複して固定しません。
+
+月次CLIはこの戦略と計画をCodex側の計算・履歴整合確認に使い、旧 `config/portfolio_policy.yaml` のバケット目標値を現在方針として使用しません。一方、ChatGPT向け独立レビューでは、現行戦略全体、active plan、Python候補値を `review_packet.yaml` へ入れません。ユーザが明示承認したレビュー制約だけは、その承認記録を出典にallowlistへ加えます。旧目標値は過去計算と単体テストの再現用fallbackとしてのみ残し、生成済みの過去レビューは書き換えません。
 
 ## Human Approval and Task-Scope Gate
 
@@ -276,21 +278,31 @@ coreスポット買いの配分は既存core商品に限定し、基本は eMAXI
 - 2026-07以前の生成履歴は `data/history/` と `prompts/generated/` に凍結し、新規生成物は `reports/generated/` に保存する
 - 月次レビューを待たず、保有銘柄の直近価格変動と信頼性の高いニュースを突き合わせる ChatGPT 向けアセスメント依頼プロンプトを生成する
 
-## オンデマンド・アセスメント
+## オンデマンド・ヘルスチェック
 
-オンデマンド機能の対象は、現在の保有額・数量・取得単価・含み損益・配分ではありません。最新の保存済みスナップショットを保有銘柄リストとしてだけ使い、Python が各銘柄・プロキシの直近価格変動を取得し、ChatGPT が一次情報と信頼性の高い市場報道を調査して、値動きの背景と因果関係の確度を評価します。
+オンデマンド機能は、最新の保存済みスナップショットを保有銘柄リストとして使い、個別株・ETF全件の投資ストーリー、直近価格、一次情報、ニュースを照合します。保有額・数量・取得単価・含み損益・配分は入力せず、月次の配分判断とは分離します。
+
+実行頻度は任意です。余力があれば毎日実行できますが、連続実行を前提にしません。前回の完了済み `health_check_response.yaml` から空白期間がある場合、次回の調査期間を自動的に広げます。初回は30日、通常は最低14日、空白回収は最大90日です。月次レビューも個別株・ETF全件を評価するため、オンデマンド実行を飛ばしても運用全体は停止しません。
 
 オンデマンド作成を始めるときは `prompts/templates/on_demand_market_assessment_session_start_prompt.md` を Codex に渡します。保有銘柄の変更がなければ、Money Forward の最新画面を撮り直す必要はありません。
 
 1. 最新の `data/normalized/snapshot_*.yaml` から株式・投資信託・年金の銘柄名だけを抽出する
-2. `on-demand-run` で各銘柄・プロキシの最新日足終値と1日、5日、1か月、3か月の変化を取得する
+2. `health-check-run` で各銘柄・プロキシの最新日足終値と1日、5日、1か月、3か月の変化を取得する
 3. 取得時点、プロキシ使用、欠損を明示した ChatGPT向けプロンプトを生成する
 4. ChatGPT が企業IR、取引所、政府・中央銀行等の一次情報と信頼性の高い市場報道をWeb調査する
-5. 値動きの事実、市場報道上の背景、推論を分け、因果関係の確度を含むアセスメントを返す
+5. 個別株・ETF全件について、評価実施、ストーリー健全性、保持・買い増し・縮小・売却判断、根拠、次回トリガーを残す
+6. ユーザ向け日本語Markdownと、Codex向け `health_check_response.yaml` を分離して返す
 
 ```bash
-.venv/bin/python -m monthly_limit_order_review.cli on-demand-run \
+.venv/bin/python -m monthly_limit_order_review.cli health-check-run \
   --news-lookback-days 14
+```
+
+ChatGPTから受け取ったCodex向けYAMLは、全銘柄の評価が揃っていることを検証して保存します。検証済みファイルだけが、次回の空白期間計算で「完了済み」として使われます。
+
+```bash
+.venv/bin/python -m monthly_limit_order_review.cli ingest-health-check \
+  --response-yaml /path/to/health_check_response.yaml
 ```
 
 `--snapshot` を省略すると、日付が最も新しい正規化済みスナップショットを銘柄リストとして使います。銘柄リストが古くても価格取得は止めず、その可能性を注記します。`yfinance` の価格は最新取得可能な日足終値であり、リアルタイム気配値ではありません。
@@ -312,23 +324,69 @@ coreスポット買いの配分は既存core商品に限定し、基本は eMAXI
 5. 例として [data/normalized/snapshot_2026_03.yaml](/Users/tappeiyoshida/projects/stock/data/normalized/snapshot_2026_03.yaml) の形式を使う
 6. Codex / CLI が合計、カテゴリ、通貨、分類、前月差分、重複、OCR由来の不確実性を検証する
 7. CLI で市場データ取得、比率計算、ルール計算、警告抽出を実行する
-8. 生成された月次レビュー用プロンプトだけを ChatGPT に貼る。Money Forward のスクリーンショットや OCR 前の貼り付けテキストは ChatGPT に渡さない
-9. ChatGPT が Codex / CLI で検証済みの構造化データを前提に、月次レビューと購入提案を返す
-10. ChatGPT の回答をテキストで保存する
-11. CLI でレビュー取り込み、差分保存、Codex 向け修正プロンプト生成、coreスポット買いのGoogle Calendarイベントドラフト生成を行う
-12. Codex は生成されたイベントドラフトを使い、ChatGPT が決めた coreスポット買い実行スケジュールを手動発注リマインダーとして Google Calendar に作成する
-13. ユーザがChatGPT出力またはCodex向け修正プロンプトを明示的に貼り付けた場合のみ、Codex がREADME の最新月セクションに月次サマリー、購入計画、今月の指値買い設定、ポートフォリオサマリーを反映する
-14. README 更新時は既存の `## Monthly Review: YYYY_MM` を最新月の内容に置換し、過去月の `Monthly Review` セクションをルートREADMEに残さない
+8. CLI がallowlistで `review_packet.yaml` を作り、その同じパケットから `review_request.md` を生成する
+9. 利用者が `review_request.md` 冒頭の実行前チェックを確認し、資産運用Project外の新規Temporary Chat等で、レビュー・パケットだけをChatGPTへ渡す
+10. ChatGPT が数値事実とユーザー条件に加え、個別株・ETF全件を一次情報で調査し、ストーリー健全性と判断痕跡を返す
+11. ChatGPT はユーザ向け日本語MarkdownとCodex向け `review_response.yaml` を分離し、CodexはYAMLだけを機械取り込みする
+12. Codex が回答を履歴、税務・口座制約、実行可能額と照合してから、CLIでレビュー取り込み、差分保存、Codex向け修正プロンプト生成、coreスポット買いのGoogle Calendarイベントドラフト生成を行う
+13. Codex は生成されたイベントドラフトを使い、ChatGPT が決めた coreスポット買い実行スケジュールを手動発注リマインダーとして Google Calendar に作成する
+14. ユーザがChatGPT出力またはCodex向け修正プロンプトを明示的に貼り付けた場合のみ、Codex がREADME の最新月セクションに月次サマリー、購入計画、今月の指値買い設定、ポートフォリオサマリーを反映する
+15. README 更新時は既存の `## Monthly Review: YYYY_MM` を最新月の内容に置換し、過去月の `Monthly Review` セクションをルートREADMEに残さない
 
 将来の月次レビュー開始時は [prompts/templates/moneyforward_monthly_session_start_prompt.md](/Users/tappeiyoshida/projects/stock/prompts/templates/moneyforward_monthly_session_start_prompt.md) を Codex に貼り、スクリーンショット添付から始める。
 
+## 独立レビューのブラインド実行
+
+プロンプト本文だけではChatGPT側の会話履歴やProject参照を消去できません。毎回、`review_request.md` 冒頭のチェックに従って次を実施します。
+
+- ChatGPTの資産運用Project内では実行しない
+- Project外の新規Temporary Chatなど、過去会話を参照しない環境で実行する
+- 前月のレビュースレッドを再利用しない
+- `review_request.md` 以外のファイルを添付しない
+- 独立レビューへ影響するカスタム指示を無効化するか、影響を確認する
+
+`review_packet.yaml` は今回選択した事実の監査用です。ChatGPTへ追加添付するファイルではありません。パケット外情報を使った最新税制・商品仕様・口座制約の確認は、ChatGPT回答をCodexへ戻した後に行います。
+
+## 口座区分と税引後最適化
+
+同一商品が複数明細に分かれていても、連番サフィックスや商品名の一致だけで重複・一本化対象と判定しません。NISA、特定口座、一般口座、iDeCoなどの口座区分は売却判断の必須属性として扱い、正規化時に制度・枠まで可能な限り記録します。
+
+月次レビューでは、経済的エクスポージャーの合算と、売却する口座・取得ロットの選択を分離します。売却・移管・一本化を提案する場合は、口座区分、取得価額、含み損益、概算税額、税引後手取額、NISA非課税保有と枠への影響を比較します。口座区分が不明な場合は、削減すべきエクスポージャーや概算額を示しても、特定ロットの売却・一本化は確定しません。
+
+2026-08-02に確認した国税庁・金融庁の一次情報では、NISAの譲渡益は制度要件を満たす範囲で非課税、NISA内の譲渡損は課税口座との損益通算・繰越控除不可です。2024年以降のNISAは売却商品の簿価分の非課税保有限度額を翌年以降に再利用できます。旧NISAを含む制度区分と取得年は実行前に再確認します。
+
+## 表示名と機械ID
+
+ユーザ向けの日本語Markdownでは、銘柄コード、ティッカー、連番付き内部IDを表示せず、正式な会社名・商品名を使います。同一商品の複数明細は口座区分を付け、口座不明の場合は「商品名（口座区分未確認の2明細）」または評価額などユーザが確認できる属性で区別します。
+
+`9444`、`NISSEI_SOX_1` のような値は、Codex向けYAMLの `symbol` フィールドに限って保持します。Codexは人間向け表示名から機械IDを推測せず、YAMLの対応を使います。
+
 ## 役割分担
 
-- Python: YAMLロード、市場参照取得、配分・集中度計算、警告、候補価格、差分、生成物保存、リポジトリ監査
-- AI: 依頼されたタスク範囲でOCR・正規化・検証・戦略評価・購入案・仮説レビューを行う。正規化だけを依頼された場合は売買提案へ拡張しない
+- Python: YAMLロード、市場参照取得、配分・集中度計算、警告、候補価格、allowlist型レビュー・パケット、差分、生成物保存、リポジトリ監査
+- Codex: 履歴・保有データ・ユーザー条件・過去判断を管理し、判断に必要な事実だけをパケットへ選び、独立ChatGPT向けプロンプトを生成し、回答を税務・口座・実行制約と照合する。新しい投資判断そのものは行わない
+- ChatGPT: 過去助言やCodex結論を知らない独立レビュアーとして、パケットだけから確定判断・条件付き判断・算定不能を分離し、導出可能な具体的実行案と入力契約の改善案を返す
 - ユーザ: 戦略変更、購入・売却・リバランスの採否を決め、証券会社で手動実行する
 
 AIのブランド名を承認境界にせず、`strategy/current.yaml`、active plan、基準日時点のデータ、ユーザが明示したタスク範囲で役割を決めます。
+
+月次レビュー外で新しい資産配分、比率、閾値、銘柄選択、売買判断が必要になった場合、Codexは自分で調査して結論を出しません。確認済み事実、ユーザー制約、不明情報、判断課題だけを `on-demand-decision-prompt` 用パケットへまとめ、資産運用Project外の新規Temporary ChatでChatGPTのセカンドオピニオンを取得するようユーザへ依頼します。Codexの候補値や既存設定はアンカーになるため除外します。
+
+```bash
+.venv/bin/python -m monthly_limit_order_review.cli on-demand-decision-prompt \
+  --request path/to/decision_request.yaml \
+  --output path/to/independent_decision_request.md
+```
+
+ユーザが `independent_decision_response.yaml` と人間向け回答を戻した後にだけ、Codexは契約検証、既存方針との照合、ユーザ承認済み変更の実装を行います。
+
+```bash
+.venv/bin/python -m monthly_limit_order_review.cli validate-independent-decision \
+  --request path/to/decision_request.yaml \
+  --response-yaml path/to/independent_decision_response.yaml
+```
+
+この検証は、対応する `decision_id`、必須項目、判断状態、ユーザ確認ゲートを確認するだけで、回答を自動承認したり売買を実行したりしません。
 
 ## セットアップ
 
@@ -354,7 +412,7 @@ python -m monthly_limit_order_review.cli monthly-run \
   --snapshot data/normalized/snapshot_2026_07.yaml
 ```
 
-3. `reports/generated/monthly/2026_07/review_request.md`をレビューに使い、回答原文を保存します
+3. `reports/generated/monthly/2026_07/review_packet.yaml` のselected_sourcesと対象外情報を確認し、`review_request.md` 冒頭の実行前チェックに従って独立レビューを実行します
 
 - 保存先例: `reports/review_inputs/2026_07_chatgpt_review.txt`
 
@@ -363,16 +421,17 @@ python -m monthly_limit_order_review.cli monthly-run \
 ```bash
 python -m monthly_limit_order_review.cli ingest-review \
   --snapshot data/normalized/snapshot_2026_07.yaml \
-  --review-text reports/review_inputs/2026_07_chatgpt_review.txt
+  --review-yaml reports/review_inputs/review_response.yaml
 
 python -m monthly_limit_order_review.cli generate-codex-patch \
   --snapshot data/normalized/snapshot_2026_07.yaml \
-  --review-text reports/review_inputs/2026_07_chatgpt_review.txt
+  --review-yaml reports/review_inputs/review_response.yaml
 ```
 
 5. `reports/generated/monthly/2026_07/`を確認します
 
 - `computation.yaml`
+- `review_packet.yaml`
 - `review_request.md`
 - `review_response.yaml`
 - `proposal_diff.yaml`
@@ -431,7 +490,11 @@ Money Forward スクリーンショットから読み取れる範囲で以下を
 - NISA / 特定 / 年金 / 現金 / 預金の分類が `asset_class` と矛盾していないか
 - core / satellite / pension / liquidity の扱いが既存ルールと矛盾していないか
 
-検証警告は必ず ChatGPT 月次レビュー依頼プロンプトの警告一覧に含める。警告は常に出力をブロックするものではないが、投資判断に影響する曖昧さはユーザ確認または明示警告の対象にする。
+数値整合、OCR、欠損などのデータ品質警告はレビュー・パケットへ含める。戦略目標、active plan、候補注文、推奨予算に由来する警告は独立レビューを誘導するためパケットへ含めず、Codex側の計算・履歴検証に保持する。警告は常にレビュー全体をブロックするものではない。不明情報がある場合、ChatGPTは確定判断・条件付き判断・算定不能を分離し、根拠のない一点推定をせず、不足入力とテンプレート改善案をCodexへ返す。
+
+現金要件は用途別に分ける。生活防衛資金、近い将来の確定支出、明示的な予備費は必要支出等の入力から積み上げ、総資産比率や目標株式比率から逆算しない。投資待機資金は別構成要素とし、独立ChatGPTが根拠とともに提案しユーザが承認した総資産比率だけを使って、「レビュー基準日の総資産 × 承認比率」で目標額を算定する。比率が未承認なら算定不能とし、Codexや月次レビューで先回りして決めない。収入と通常月収支は通常支出の妥当性確認や条件付き推論には使えるが、月間必須支出や支出月数の確定値には代用せず、資産総額から支出を推定しない。目標額を算定できても、買付対象、発動条件、分割投入、最低残高、補充方法が未設定なら、実際の買付は条件付きとする。
+
+投資待機資金は「確保し続けること」を目的とせず、下落局面で投資に使うための手段とする。月次レビューとオンデマンド・ヘルスチェックは、市場下落時に必ず使用案を比較対象に入れる。使用案には対象、金額または算式、時期、根拠を含め、最終結論が使用見送りでも使用案自体は省略しない。`review_response.yaml` と `health_check_response.yaml` の `dip_buy_liquidity_deployment_review` でこの比較を機械検証する。
 
 ## 主要コマンド
 
@@ -447,7 +510,7 @@ ChatGPT レビュー取り込み:
 ```bash
 python -m monthly_limit_order_review.cli ingest-review \
   --snapshot data/normalized/snapshot_2026_07.yaml \
-  --review-text reports/review_inputs/2026_07_chatgpt_review.txt
+  --review-yaml reports/review_inputs/review_response.yaml
 ```
 
 このコマンドは `reports/generated/monthly/YYYY_MM/calendar_events.yaml` も生成する。`events[].google_calendar_request` は証券会社への自動発注ではなく、手動発注リマインダーのドラフトとして扱う。
@@ -457,7 +520,7 @@ Codex 向け修正プロンプト生成:
 ```bash
 python -m monthly_limit_order_review.cli generate-codex-patch \
   --snapshot data/normalized/snapshot_2026_07.yaml \
-  --review-text reports/review_inputs/2026_07_chatgpt_review.txt
+  --review-yaml reports/review_inputs/review_response.yaml
 ```
 
 月次の計算とプロンプト生成をまとめて実行:
@@ -467,14 +530,14 @@ python -m monthly_limit_order_review.cli monthly-run \
   --snapshot data/normalized/snapshot_2026_07.yaml
 ```
 
-オンデマンド・アセスメント依頼プロンプト生成:
+オンデマンド・ヘルスチェック依頼プロンプト生成:
 
 ```bash
-python -m monthly_limit_order_review.cli on-demand-run \
+python -m monthly_limit_order_review.cli health-check-run \
   --news-lookback-days 14
 ```
 
-このコマンドは月次アーティファクトやREADMEを更新せず、タイムスタンプ付きのプロンプトと計算履歴だけを保存する。
+このコマンドは月次アーティファクトやREADMEを更新せず、タイムスタンプ付きのプロンプトと計算履歴だけを保存する。回答後は `ingest-health-check --response-yaml ...` で全銘柄カバレッジを検証し、同じディレクトリへ `health_check_response.yaml` を保存する。
 
 ## 生成物と旧履歴
 

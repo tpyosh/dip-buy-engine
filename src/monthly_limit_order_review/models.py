@@ -123,9 +123,47 @@ class MonthlyComputation:
     core_buy_materials: dict = field(default_factory=dict)
     exposure_breakdown: dict = field(default_factory=dict)
     long_term_thesis_targets: list[dict] = field(default_factory=list)
+    security_story_targets: list[dict] = field(default_factory=list)
     monthly_execution_outputs: dict = field(default_factory=dict)
     quarterly_rule_review_outputs: dict = field(default_factory=dict)
     metadata: dict = field(default_factory=dict)
+
+
+@dataclass(slots=True)
+class ReviewPacket:
+    schema_version: int
+    packet_type: str
+    generation_status: str
+    interaction_phase: str
+    review_mode: str
+    review_target_month: str
+    portfolio_snapshot_as_of: date
+    market_reference_as_of: str
+    packet_generated_at: str
+    research_cutoff_at: str
+    decision_date: str | None
+    strategic_required_inputs: dict
+    missing_strategic_inputs: list[str]
+    strategic_decision_objective: dict
+    candidate_methodology: dict
+    capital_layers: dict
+    asset_class_definitions: dict
+    allocation_denominators: dict
+    market_decline_rule: dict
+    direct_semiconductor_limit: dict
+    user_decision_preferences: dict
+    active_risk_policy: dict
+    approved_policy: dict | None
+    rule_registry: list[dict]
+    research_contract: dict
+    validation_contract: dict
+    selected_sources: list[dict]
+    preflight_checklist: list[str]
+    allowed_quantitative_facts: dict
+    confirmed_user_conditions: list[dict]
+    unknown_information: list[dict]
+    output_contract: dict
+    excluded_information: list[str]
 
 
 @dataclass(slots=True)

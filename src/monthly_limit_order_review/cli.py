@@ -11,18 +11,30 @@ from pathlib import Path
 from .calendar_events import build_core_spot_buy_calendar_event_drafts, load_core_spot_buy_event_config
 from .candidate_metrics import compute_candidate_metrics
 from .codex_patch_builder import build_codex_patch_prompt, build_codex_patch_request
+from .context_records import (
+    apply_holding_metadata,
+    holding_metadata_by_symbol,
+    load_financial_context,
+    load_holding_metadata_context,
+)
 from .diff_analyzer import build_proposal_diffs
 from .exposure_metrics import build_exposure_breakdown
+from .independent_decision import (
+    load_independent_decision_response,
+    render_independent_decision_prompt,
+)
 from .market_data import fetch_market_references
 from .models import MonthlyComputation, PortfolioSnapshot, PortfolioWarning
 from .on_demand import (
     assess_snapshot_freshness,
+    build_health_check_window,
     build_on_demand_market_data_artifact,
     enrich_on_demand_market_references,
     render_on_demand_assessment_prompt,
 )
 from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics, suggest_core_proxy_symbol
-from .prompt_renderer import render_chatgpt_prompt
+from .prompt_renderer import render_chatgpt_prompt, render_review_generation_blocker
+from .review_packet import build_review_packet
 from .repository_records import (
     audit_repository,
     load_recurring_contribution_context,
@@ -33,7 +45,9 @@ from .review_parser import parse_review_feedback
 from .rules import calculate_sox_buy_signal
 from .snapshot_loader import load_snapshot
 from .storage import default_output_paths, load_yaml, on_demand_output_paths, read_text, write_text, write_yaml
+from .story_health import build_security_story_targets
 from .strategy_policy import load_current_strategy_context
+from .structured_review import load_health_check_response, load_monthly_review_response
 from .thesis_metrics import build_long_term_thesis_targets
 from .utils import infer_target_month_start, month_key, percent, quantize, target_month_key
 from .validation import (
@@ -71,12 +85,16 @@ def build_parser() -> argparse.ArgumentParser:
 
     ingest_parser = subparsers.add_parser("ingest-review", help="Ingest a ChatGPT review text file")
     ingest_parser.add_argument("--snapshot", required=True, help="Path to normalized snapshot YAML")
-    ingest_parser.add_argument("--review-text", required=True, help="Path to saved ChatGPT review text")
+    ingest_source = ingest_parser.add_mutually_exclusive_group(required=True)
+    ingest_source.add_argument("--review-yaml", help="Path to ChatGPT review_response.yaml (preferred)")
+    ingest_source.add_argument("--review-text", help="Path to legacy saved ChatGPT review text")
     ingest_parser.set_defaults(func=handle_ingest_review)
 
     codex_parser = subparsers.add_parser("generate-codex-patch", help="Generate a Codex patch prompt")
     codex_parser.add_argument("--snapshot", required=True, help="Path to normalized snapshot YAML")
-    codex_parser.add_argument("--review-text", required=True, help="Path to saved ChatGPT review text")
+    codex_source = codex_parser.add_mutually_exclusive_group(required=True)
+    codex_source.add_argument("--review-yaml", help="Path to ChatGPT review_response.yaml (preferred)")
+    codex_source.add_argument("--review-text", help="Path to legacy saved ChatGPT review text")
     codex_parser.add_argument("--output", required=False, help="Path to output markdown prompt")
     codex_parser.set_defaults(func=handle_generate_codex_patch)
 
@@ -84,29 +102,90 @@ def build_parser() -> argparse.ArgumentParser:
     monthly_parser.add_argument("--snapshot", required=True, help="Path to normalized snapshot YAML")
     monthly_parser.set_defaults(func=handle_monthly_run)
 
-    on_demand_parser = subparsers.add_parser(
-        "on-demand-run",
-        help="Fetch current prices for held symbols and generate a news-based ChatGPT assessment prompt",
+    decision_parser = subparsers.add_parser(
+        "on-demand-decision-prompt",
+        help="Generate a self-contained independent ChatGPT decision prompt",
     )
-    on_demand_parser.add_argument(
-        "--snapshot",
+    decision_parser.add_argument(
+        "--request",
+        required=True,
+        help="Path to an independent decision request YAML",
+    )
+    decision_parser.add_argument(
+        "--output",
+        required=True,
+        help="Path for the generated Markdown prompt",
+    )
+    decision_parser.set_defaults(func=handle_on_demand_decision_prompt)
+
+    decision_validate_parser = subparsers.add_parser(
+        "validate-independent-decision",
+        help="Validate an independent ChatGPT decision response against its request",
+    )
+    decision_validate_parser.add_argument(
+        "--request",
+        required=True,
+        help="Path to the original independent decision request YAML",
+    )
+    decision_validate_parser.add_argument(
+        "--response-yaml",
+        required=True,
+        help="Path to ChatGPT independent_decision_response.yaml",
+    )
+    decision_validate_parser.set_defaults(func=handle_validate_independent_decision)
+
+    for command, help_text in (
+        (
+            "health-check-run",
+            "Run a gap-tolerant held-security story, market, and news health check",
+        ),
+        (
+            "on-demand-run",
+            "Compatibility alias for health-check-run",
+        ),
+    ):
+        on_demand_parser = subparsers.add_parser(command, help=help_text)
+        on_demand_parser.add_argument(
+            "--snapshot",
+            required=False,
+            help="Path to a snapshot used only as a held-symbol inventory (latest normalized snapshot by default)",
+        )
+        on_demand_parser.add_argument("--output", required=False, help="Path to output markdown prompt")
+        on_demand_parser.add_argument(
+            "--inventory-max-age-days",
+            type=int,
+            default=45,
+            help="Age after which the held-symbol inventory is labeled stale (default: 45; never blocks price fetch)",
+        )
+        on_demand_parser.add_argument(
+            "--news-lookback-days",
+            type=int,
+            default=14,
+            help="Minimum authoritative-news lookback; gaps expand this automatically (default: 14)",
+        )
+        on_demand_parser.add_argument(
+            "--max-news-lookback-days",
+            type=int,
+            default=90,
+            help="Maximum automatic gap-recovery lookback (default: 90)",
+        )
+        on_demand_parser.set_defaults(func=handle_on_demand_run)
+
+    health_ingest_parser = subparsers.add_parser(
+        "ingest-health-check",
+        help="Validate and store a ChatGPT health_check_response.yaml",
+    )
+    health_ingest_parser.add_argument(
+        "--response-yaml",
+        required=True,
+        help="Path to ChatGPT health_check_response.yaml",
+    )
+    health_ingest_parser.add_argument(
+        "--request-dir",
         required=False,
-        help="Path to a snapshot used only as a held-symbol inventory (latest normalized snapshot by default)",
+        help="Generated health-check request directory (latest by default)",
     )
-    on_demand_parser.add_argument("--output", required=False, help="Path to output markdown prompt")
-    on_demand_parser.add_argument(
-        "--inventory-max-age-days",
-        type=int,
-        default=45,
-        help="Age after which the held-symbol inventory is labeled stale (default: 45; never blocks price fetch)",
-    )
-    on_demand_parser.add_argument(
-        "--news-lookback-days",
-        type=int,
-        default=14,
-        help="Authoritative-news lookback requested from ChatGPT (default: 14)",
-    )
-    on_demand_parser.set_defaults(func=handle_on_demand_run)
+    health_ingest_parser.set_defaults(func=handle_ingest_health_check)
 
     audit_parser = subparsers.add_parser(
         "repository-audit",
@@ -143,12 +222,27 @@ def handle_generate_review_prompt(args: argparse.Namespace) -> int:
     paths = default_output_paths(project_root, target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path))
     output_path = Path(args.output) if args.output else paths["review_prompt"]
     template_text = read_text(project_root / "prompts/templates/monthly_review_template.md")
-    prompt = render_chatgpt_prompt(computation, template_text)
-
+    review_packet = build_current_review_packet(computation, project_root)
     write_yaml(paths["computation"], computation)
+    write_yaml(paths["review_packet"], review_packet)
+    if review_packet.generation_status != "ready":
+        blocker = render_review_generation_blocker(review_packet)
+        write_text(output_path, blocker)
+        write_text(paths["review_prompt_history"], blocker)
+        LOGGER.error(
+            "Review prompt generation blocked; missing strategic inputs: %s",
+            ", ".join(review_packet.missing_strategic_inputs),
+        )
+        return 2
+    prompt = render_chatgpt_prompt(
+        computation,
+        template_text,
+        review_packet=review_packet,
+    )
     write_text(output_path, prompt)
     write_text(paths["review_prompt_history"], prompt)
     LOGGER.info("Saved computation to %s", paths["computation"])
+    LOGGER.info("Saved closed review packet to %s", paths["review_packet"])
     LOGGER.info("Saved review prompt to %s", output_path)
     return 0
 
@@ -157,20 +251,23 @@ def handle_ingest_review(args: argparse.Namespace) -> int:
     project_root = get_project_root()
     snapshot_path = Path(args.snapshot)
     computation = compute_monthly(snapshot_path, project_root=project_root)
-    review_text = read_text(args.review_text)
     month = target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path)
-    review_feedback = parse_review_feedback(review_text, review_target_month=month)
+    response_payload, review_feedback, source_review_path = load_review_input(
+        args,
+        computation=computation,
+        review_target_month=month,
+    )
     diffs = build_proposal_diffs(computation.candidate_orders, review_feedback, computation.warnings)
     paths = default_output_paths(project_root, month)
     calendar_event_artifact = build_core_spot_buy_calendar_event_artifact(
         review_feedback=review_feedback,
         review_target_month=month,
-        source_review_path=Path(args.review_text),
+        source_review_path=source_review_path,
         project_root=project_root,
     )
 
     write_yaml(paths["computation"], computation)
-    write_yaml(paths["review_structured"], review_feedback)
+    write_yaml(paths["review_structured"], response_payload or review_feedback)
     write_yaml(paths["diff"], diffs)
     write_yaml(paths["calendar_events"], calendar_event_artifact)
     LOGGER.info("Saved structured review to %s", paths["review_structured"])
@@ -183,9 +280,12 @@ def handle_generate_codex_patch(args: argparse.Namespace) -> int:
     project_root = get_project_root()
     snapshot_path = Path(args.snapshot)
     computation = compute_monthly(snapshot_path, project_root=project_root)
-    review_text = read_text(args.review_text)
     month = target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path)
-    review_feedback = parse_review_feedback(review_text, review_target_month=month)
+    response_payload, review_feedback, source_review_path = load_review_input(
+        args,
+        computation=computation,
+        review_target_month=month,
+    )
     diffs = build_proposal_diffs(computation.candidate_orders, review_feedback, computation.warnings)
     patch_request = build_codex_patch_request(month, review_feedback, diffs)
     paths = default_output_paths(project_root, month)
@@ -195,12 +295,12 @@ def handle_generate_codex_patch(args: argparse.Namespace) -> int:
     calendar_event_artifact = build_core_spot_buy_calendar_event_artifact(
         review_feedback=review_feedback,
         review_target_month=month,
-        source_review_path=Path(args.review_text),
+        source_review_path=source_review_path,
         project_root=project_root,
     )
 
     write_yaml(paths["computation"], computation)
-    write_yaml(paths["review_structured"], review_feedback)
+    write_yaml(paths["review_structured"], response_payload or review_feedback)
     write_yaml(paths["diff"], diffs)
     write_yaml(paths["patch_request"], patch_request)
     write_yaml(paths["calendar_events"], calendar_event_artifact)
@@ -211,25 +311,141 @@ def handle_generate_codex_patch(args: argparse.Namespace) -> int:
     return 0
 
 
+def handle_on_demand_decision_prompt(args: argparse.Namespace) -> int:
+    project_root = get_project_root()
+    request_path = Path(args.request)
+    output_path = Path(args.output)
+    request = load_yaml(request_path)
+    template = read_text(
+        project_root
+        / "prompts/templates/on_demand_independent_decision_template.md"
+    )
+    prompt = render_independent_decision_prompt(request, template)
+    write_text(output_path, prompt)
+    LOGGER.info("Saved on-demand independent decision prompt to %s", output_path)
+    return 0
+
+
+def handle_validate_independent_decision(args: argparse.Namespace) -> int:
+    request = load_yaml(Path(args.request))
+    decision_id = request.get("decision_id")
+    if not decision_id:
+        raise ValueError("Independent decision request is missing decision_id")
+    load_independent_decision_response(
+        args.response_yaml,
+        expected_decision_id=str(decision_id),
+    )
+    LOGGER.info(
+        "Independent decision response passed contract validation for %s",
+        decision_id,
+    )
+    return 0
+
+
+def load_review_input(
+    args: argparse.Namespace,
+    *,
+    computation: MonthlyComputation,
+    review_target_month: str,
+) -> tuple[dict | None, object, Path]:
+    review_yaml = getattr(args, "review_yaml", None)
+    if review_yaml:
+        source_path = Path(review_yaml)
+        project_root = get_project_root()
+        review_packet = build_current_review_packet(computation, project_root)
+        payload, feedback = load_monthly_review_response(
+            source_path,
+            expected_month=review_target_month,
+            expected_security_symbols={
+                target["symbol"] for target in computation.security_story_targets
+            },
+            expected_thematic_member_symbols={
+                symbol
+                for target in review_packet.allowed_quantitative_facts[
+                    "thematic_fund_review_targets"
+                ]
+                for symbol in target.get("member_symbols", [])
+            },
+            expected_cash_context=review_packet.allowed_quantitative_facts[
+                "cash_requirement_inputs"
+            ],
+            expected_date_context={
+                "portfolio_snapshot_as_of": review_packet.portfolio_snapshot_as_of,
+                "market_reference_as_of": review_packet.market_reference_as_of,
+                "packet_generated_at": review_packet.packet_generated_at,
+                "research_cutoff_at": review_packet.research_cutoff_at,
+            },
+            total_assets_jpy=computation.snapshot.total_assets_jpy,
+        )
+        return payload, feedback, source_path
+    review_text_path = getattr(args, "review_text", None)
+    if not review_text_path:
+        raise ValueError("Either --review-yaml or --review-text is required")
+    source_path = Path(review_text_path)
+    return (
+        None,
+        parse_review_feedback(
+            read_text(source_path),
+            review_target_month=review_target_month,
+        ),
+        source_path,
+    )
+
+
 def handle_monthly_run(args: argparse.Namespace) -> int:
     project_root = get_project_root()
     snapshot_path = Path(args.snapshot)
     computation = compute_monthly(snapshot_path, project_root=project_root)
     paths = default_output_paths(project_root, target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path))
     template_text = read_text(project_root / "prompts/templates/monthly_review_template.md")
-    prompt = render_chatgpt_prompt(computation, template_text)
+    review_packet = build_current_review_packet(computation, project_root)
     write_yaml(paths["computation"], computation)
+    write_yaml(paths["review_packet"], review_packet)
+    if review_packet.generation_status != "ready":
+        blocker = render_review_generation_blocker(review_packet)
+        write_text(paths["review_prompt"], blocker)
+        write_text(paths["review_prompt_history"], blocker)
+        LOGGER.error(
+            "Monthly review prompt generation blocked; missing strategic inputs: %s",
+            ", ".join(review_packet.missing_strategic_inputs),
+        )
+        return 2
+    prompt = render_chatgpt_prompt(
+        computation,
+        template_text,
+        review_packet=review_packet,
+    )
     write_text(paths["review_prompt"], prompt)
     write_text(paths["review_prompt_history"], prompt)
     LOGGER.info("Saved computation to %s", paths["computation"])
+    LOGGER.info("Saved closed review packet to %s", paths["review_packet"])
     LOGGER.info("Saved review prompt to %s", paths["review_prompt"])
     return 0
+
+
+def build_current_review_packet(
+    computation: MonthlyComputation,
+    project_root: Path,
+):
+    financial_context = load_financial_context(project_root)
+    return build_review_packet(
+        computation,
+        financial_context=financial_context["record"],
+        financial_context_source=financial_context["source_path"],
+    )
 
 
 def handle_on_demand_run(args: argparse.Namespace) -> int:
     project_root = get_project_root()
     snapshot_path = resolve_on_demand_inventory_path(project_root, args.snapshot)
     requested_at = datetime.now(UTC)
+    last_completed_at = find_latest_completed_health_check(project_root)
+    health_check_window = build_health_check_window(
+        requested_at=requested_at,
+        base_lookback_days=args.news_lookback_days,
+        last_completed_at=last_completed_at,
+        maximum_lookback_days=getattr(args, "max_news_lookback_days", 90),
+    )
     snapshot = load_snapshot(snapshot_path)
     inventory_freshness = assess_snapshot_freshness(
         snapshot.snapshot_date,
@@ -254,7 +470,8 @@ def handle_on_demand_run(args: argparse.Namespace) -> int:
     computation.metadata["on_demand"] = {
         "inventory_freshness": inventory_freshness,
         "market_reference_collection": collection,
-        "news_lookback_days": args.news_lookback_days,
+        "news_lookback_days": health_check_window["effective_lookback_days"],
+        "health_check_window": health_check_window,
         "monthly_side_effects_disabled": True,
     }
 
@@ -265,7 +482,8 @@ def handle_on_demand_run(args: argparse.Namespace) -> int:
         computation,
         template_text,
         inventory_freshness=inventory_freshness,
-        news_lookback_days=args.news_lookback_days,
+        news_lookback_days=int(health_check_window["effective_lookback_days"]),
+        health_check_window=health_check_window,
     )
 
     market_data_artifact = build_on_demand_market_data_artifact(computation)
@@ -276,6 +494,59 @@ def handle_on_demand_run(args: argparse.Namespace) -> int:
     LOGGER.info("Saved on-demand assessment prompt to %s", output_path)
     LOGGER.info("Saved on-demand prompt history to %s", paths["prompt_history"])
     return 0
+
+
+def find_latest_completed_health_check(project_root: Path) -> datetime | None:
+    completed: list[datetime] = []
+    output_root = project_root / "reports/generated/on_demand"
+    for path in output_root.glob("**/health_check_response.yaml"):
+        try:
+            payload = load_yaml(path)
+            raw_value = payload.get("completed_at") or payload.get("generated_at")
+            if raw_value:
+                parsed = datetime.fromisoformat(str(raw_value).replace("Z", "+00:00"))
+                completed.append(parsed if parsed.tzinfo else parsed.replace(tzinfo=UTC))
+        except Exception:  # noqa: BLE001
+            continue
+    return max(completed) if completed else None
+
+
+def handle_ingest_health_check(args: argparse.Namespace) -> int:
+    project_root = get_project_root()
+    request_dir = (
+        Path(args.request_dir)
+        if args.request_dir
+        else resolve_latest_health_check_request_dir(project_root)
+    )
+    market_data_path = request_dir / "market_data.yaml"
+    if not market_data_path.exists():
+        raise ValueError(f"Health-check market_data.yaml is missing: {market_data_path}")
+    market_data = load_yaml(market_data_path)
+    expected_symbols = {
+        str(target["symbol"])
+        for target in market_data.get("security_story_targets", [])
+    }
+    if not expected_symbols:
+        raise ValueError("Health-check request has no security_story_targets")
+    payload = load_health_check_response(
+        args.response_yaml,
+        expected_security_symbols=expected_symbols,
+    )
+    destination = request_dir / "health_check_response.yaml"
+    write_yaml(destination, payload)
+    LOGGER.info("Saved validated health-check response to %s", destination)
+    return 0
+
+
+def resolve_latest_health_check_request_dir(project_root: Path) -> Path:
+    requests = list(
+        (project_root / "reports/generated/on_demand").glob(
+            "**/health_check_request.md"
+        )
+    )
+    if not requests:
+        raise ValueError("No generated health-check request is available")
+    return max(requests, key=lambda path: path.parent.name).parent
 
 
 def resolve_on_demand_inventory_path(project_root: Path, snapshot_arg: str | None) -> Path:
@@ -301,7 +572,11 @@ def compute_on_demand(
     requested_at: datetime,
 ) -> MonthlyComputation:
     snapshot = load_snapshot(snapshot_path)
+    holding_context = load_holding_metadata_context(project_root)
+    apply_holding_metadata(snapshot, holding_context["record"])
+    holding_metadata = holding_metadata_by_symbol(holding_context)
     resolved_buckets = {holding.symbol: holding.asset_class for holding in snapshot.holdings}
+    thesis_policy = load_thesis_monitoring_policy(project_root)
 
     return MonthlyComputation(
         snapshot=snapshot,
@@ -313,8 +588,20 @@ def compute_on_demand(
         semi_exposure_pct=Decimal("0"),
         liquidity_jpy=Decimal("0"),
         sox_buy_signal={},
+        security_story_targets=build_security_story_targets(
+            snapshot,
+            thesis_policy,
+            holding_metadata,
+        ),
         metadata={
             "snapshot_path": str(snapshot_path),
+            "holding_metadata_source": holding_context["source_path"],
+            "holding_metadata_effective_from": holding_context["record"].get(
+                "effective_from"
+            ),
+            "holding_execution_context": holding_context["record"].get(
+                "execution_context", {}
+            ),
             "inventory_only": True,
             "resolved_buckets": resolved_buckets,
         },
@@ -345,6 +632,9 @@ def build_core_spot_buy_calendar_event_artifact(
 
 def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComputation:
     snapshot = load_snapshot(snapshot_path)
+    holding_context = load_holding_metadata_context(project_root)
+    apply_holding_metadata(snapshot, holding_context["record"])
+    holding_metadata = holding_metadata_by_symbol(holding_context)
     review_target_month_start = infer_target_month_start(snapshot.snapshot_date, snapshot_path=snapshot_path)
     review_target_month = month_key(review_target_month_start)
     previous_snapshot, previous_snapshot_warnings = load_previous_snapshot_for_validation(
@@ -472,6 +762,11 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         portfolio_analysis["resolved_buckets"],
         portfolio_analysis["symbol_weights"],
     )
+    security_story_targets = build_security_story_targets(
+        snapshot,
+        merged_policy.get("long_term_thesis", {}),
+        holding_metadata,
+    )
     core_spot_buy_materials = build_core_spot_buy_materials(
         snapshot=snapshot,
         portfolio_analysis=portfolio_analysis,
@@ -596,6 +891,7 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
         core_buy_materials=core_buy_materials,
         exposure_breakdown=exposure_breakdown,
         long_term_thesis_targets=long_term_thesis_targets,
+        security_story_targets=security_story_targets,
         monthly_execution_outputs={
             "review_target_month": review_target_month,
             "nisa_growth_quota_status": recurring_contributions.get("nisa_growth_quota_status"),
@@ -653,6 +949,9 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "review_target_month_start": review_target_month_start.isoformat(),
             "strategy_id": (active_strategy or {}).get("strategy_id"),
             "strategy_effective_from": (active_strategy or {}).get("effective_from"),
+            "approved_review_constraints": build_approved_review_constraints(
+                active_strategy
+            ),
             "active_strategy_path": strategy_context.get("pointer", {}).get(
                 "active_strategy_path"
             ),
@@ -664,10 +963,46 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "classification_audit": portfolio_analysis["classification_audit"],
             "core_recurring_contributions": recurring_contributions,
             "core_recurring_contributions_source": recurring_context["source_path"],
+            "holding_metadata_source": holding_context["source_path"],
+            "holding_metadata_effective_from": holding_context["record"].get(
+                "effective_from"
+            ),
+            "holding_execution_context": holding_context["record"].get(
+                "execution_context", {}
+            ),
             "candidate_policy_status": buy_rules.get("policy_status"),
             "core_spot_buy_materials": core_spot_buy_materials,
         },
     )
+
+
+def build_approved_review_constraints(active_strategy: dict | None) -> list[dict]:
+    if not active_strategy:
+        return []
+    semiconductor = (
+        active_strategy.get("risk_limits", {})
+        .get("direct_themes", {})
+        .get("semiconductor", {})
+    )
+    target_pct = semiconductor.get("rebalance_proposal_above_pct")
+    approval_ref = semiconductor.get("approval_ref")
+    if target_pct is None or not approval_ref:
+        return []
+    return [
+        {
+            "condition_id": "approved_direct_semiconductor_max_pct",
+            "statement": (
+                "直接半導体エクスポージャーを総資産の"
+                f"{Decimal(str(target_pct)) * 100}%以下へ縮小する方針にユーザが同意済み。"
+                "売却対象の優先順位は独立レビューから提案を受ける"
+            ),
+            "source": str(approval_ref),
+            "as_of": str(active_strategy.get("effective_from") or "unknown"),
+            "status": "confirmed",
+            "upper_bound_pct": Decimal(str(target_pct)) * 100,
+            "denominator": "household_total_assets_jpy",
+        }
+    ]
 
 
 def load_previous_snapshot_for_validation(

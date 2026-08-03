@@ -4,6 +4,7 @@ status: "inherited_pending_review"
 migrated_at: "2026-07-26"
 source_ref: "config/portfolio_policy.yaml#long_term_thesis.URA"
 symbol: "URA"
+instrument_type: "etf"
 legacy_summary: >
   脱炭素、電力需要増、エネルギー安全保障を背景に、
   原子力需要が中長期で再評価されるという仮説。

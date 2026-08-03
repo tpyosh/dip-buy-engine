@@ -4,6 +4,7 @@ status: "inherited_pending_review"
 migrated_at: "2026-07-26"
 source_ref: "config/portfolio_policy.yaml#long_term_thesis.PLTR"
 symbol: "PLTR"
+instrument_type: "individual_stock"
 legacy_summary: >
   政府・防衛・大企業向けの高付加価値ソフトウェア需要が継続し、
   AI時代のプラットフォーム企業として拡大するという仮説。

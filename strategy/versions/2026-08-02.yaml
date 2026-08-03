@@ -1,0 +1,128 @@
+schema_version: 1
+strategy_id: "husband_personal_2026-08-02"
+status: "active"
+effective_from: "2026-08-02"
+approved_by: "user"
+
+scope:
+  owner: "husband"
+  portfolio: "personal_financial_assets"
+  excludes:
+    - "wife_personal_financial_assets"
+  financial_context_ref: "financial/current.yaml"
+  holding_metadata_ref: "holdings/current.yaml"
+  allocation_denominator: "snapshot.total_assets_jpy"
+
+purpose:
+  status: "intentionally_mixed_not_fully_defined"
+  statements:
+    - "生活資金と趣味を兼ねる"
+    - "日常生活費は給与で賄い、投資資産の売却を前提にしない"
+
+principles:
+  - id: "theory_based_parameters"
+    rule: >
+      比率と閾値は、個人的事情を制約条件とし、統計・投資理論に基づいて機械的に決める。
+      現在の保有状況に合わせた後付け調整をしない。
+  - id: "human_approval"
+    rule: "エージェントは提案までとし、すべての売買とリバランスはユーザが承認する。"
+  - id: "thesis_before_price"
+    rule: "値下がり幅より下落理由を優先し、価格変動だけで売却しない。"
+  - id: "no_outcome_bias"
+    rule: "過去判断は、当時利用可能だった情報、想定、判断プロセス、実際の結果を分けて評価する。"
+  - id: "dated_evidence"
+    rule: "変化し得る税制、市場価格、商品仕様、統計には基準日と一次情報の出典を持たせる。"
+  - id: "dip_buy_reserve_is_deployment_tool"
+    rule: >
+      投資待機資金は残高維持自体を目的とせず、市場下落時に使うための手段とする。
+      下落局面のレビューでは使用案を必ず比較する。
+
+allocation:
+  target_groups:
+    broad_core:
+      target_pct: 0.70
+      rebalance_proposal_below_pct: 0.65
+      member_buckets:
+        - "core"
+        - "pension"
+      notes:
+        - "pensionのオルカンを経済的なbroad coreに含める"
+        - "取引可能coreとpensionはレポート上で内訳を維持する"
+    active_hobby:
+      target_pct: 0.30
+      rebalance_proposal_above_pct: 0.35
+      member_buckets:
+        - "jun_core"
+        - "satellite_core"
+        - "satellite"
+      reserved_cash_counts_from_approval: true
+      notes:
+        - "趣味としての押し目買い余力を含む"
+        - "損失許容度が高くても、集中リスクは別途管理する"
+        - "投資待機資金の比率は独立レビュー提案とユーザ承認後に確定する"
+
+core_policy:
+  new_purchase_allocation:
+    all_country_pct: 1.00
+    preferred_product: "楽天・プラス・オールカントリー株式インデックス・ファンド"
+  existing_sp500:
+    forced_sale: false
+    new_routine_purchase: false
+  deployment_default: "lump_sum"
+  rationale:
+    - "待機資金の期待機会損失を避ける"
+    - "既存S&P500は税・口座・取引コストを無視して移し替えない"
+
+risk_limits:
+  direct_themes:
+    semiconductor:
+      exposure_group: "direct_semiconductor"
+      policy_status: "hard_constraint"
+      preferred_max_pct: 0.12
+      rebalance_proposal_above_pct: 0.12
+      denominator: "household_total_assets_jpy"
+      strategic_review_treatment: "policy_to_reconsider"
+      priority: "apply the strictest of total satellite, single theme, and direct semiconductor limits after household reserve and legal/account constraints"
+      routine_additions_above_preferred_max: false
+      thesis_ref: "strategy/theses/semiconductor_2026-08-02.yaml"
+      approval_ref: "decisions/2026-08-02_review_questionnaire_answers.md"
+  high_volatility_single_security:
+    preferred_max_pct: 0.05
+    rebalance_proposal_above_pct: 0.08
+    symbols:
+      - "PLTR"
+
+sell_policy:
+  price_decline_alone_is_trigger: false
+  thesis_review_on_material_decline: true
+  sell_proposal_conditions:
+    - "構造成長仮説の破綻"
+    - "価値獲得能力または資本効率の持続的な悪化"
+    - "当初の保有理由を代替する、より妥当な証拠の出現"
+    - "holdings/current.yamlに記録されたユーザの売却意向"
+  core_is_theoretically_sellable: true
+  core_break_examples:
+    - "資本主義または広範な株式価値獲得の構造的崩壊"
+    - "米国を含む世界株式の長期成長前提の重大な破綻"
+
+automation:
+  agent_may:
+    - "collect_and_validate_facts"
+    - "calculate_exposures"
+    - "evaluate_theses"
+    - "propose_rebalance"
+    - "propose_new_securities"
+  agent_must_not:
+    - "place_orders"
+    - "treat_proposals_as_executed"
+    - "change_strategy_without_user_approval"
+  human_approval_required_for_all_trades: true
+
+review_policy:
+  price_move: "review_trigger_only"
+  strategy_review_frequency: "annual"
+  allocation_review_frequency: "monthly"
+  thesis_review_frequency: "quarterly_or_material_event"
+  semiconductor_reduction_target_pct: 0.12
+  semiconductor_sale_priority: "proposal_requested_from_independent_review"
+  dip_buy_reserve_policy_parameters: "proposal_requested_from_current_monthly_independent_review"

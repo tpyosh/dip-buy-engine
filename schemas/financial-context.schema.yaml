@@ -1,0 +1,221 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Versioned personal financial context"
+type: object
+additionalProperties: false
+required:
+  - schema_version
+  - record_type
+  - record_id
+  - effective_from
+  - confirmed_at
+  - currency
+  - scope
+  - cash_flow
+  - cash_requirements
+  - dip_buy_liquidity
+  - mortgage
+  - unknown_information
+properties:
+  schema_version: {const: 1}
+  record_type: {const: personal_financial_context}
+  record_id: {type: string}
+  effective_from: {type: string, format: date}
+  confirmed_at: {type: string, format: date}
+  currency: {const: JPY}
+  scope: {type: object}
+  cash_flow: {type: object}
+  cash_requirements: {type: object}
+  dip_buy_liquidity:
+    type: object
+    required:
+      - purpose
+      - reserve_maintenance_is_objective
+      - amount_basis
+      - target_ratio
+      - purchase_target
+      - activation_condition
+      - tranche_count
+      - tranche_amount_jpy
+      - minimum_balance_jpy
+      - replenishment_method
+      - review_rule
+    properties:
+      purpose: {type: string}
+      reserve_maintenance_is_objective: {const: false}
+      amount_basis:
+        type: string
+        not: {pattern: "review_as_of_total_assets_jpy"}
+      target_ratio: {$ref: "#/$defs/status_value"}
+      purchase_target: {$ref: "#/$defs/status_value"}
+      activation_condition: {$ref: "#/$defs/status_value"}
+      tranche_count: {$ref: "#/$defs/status_value"}
+      tranche_amount_jpy: {$ref: "#/$defs/status_value"}
+      minimum_balance_jpy: {$ref: "#/$defs/status_value"}
+      replenishment_method: {$ref: "#/$defs/status_value"}
+      review_rule: {type: object}
+  mortgage:
+    type: object
+    required: [evidence, household_total, husband_share]
+    properties:
+      evidence: {type: object}
+      household_total:
+        type: object
+        required:
+          - original_principal_jpy
+          - annual_interest_rate
+          - loan_date
+          - maturity_date
+          - monthly_payment_jpy
+          - annual_payment_jpy
+          - bonus_payment_jpy
+        properties:
+          original_principal_jpy: {type: number, minimum: 0}
+          annual_interest_rate: {type: number, minimum: 0}
+          fixed_or_variable:
+            type: [string, "null"]
+            enum: [fixed, variable, mixed, unknown, null]
+          loan_date: {type: string, format: date}
+          maturity_date: {type: string, format: date}
+          monthly_payment_jpy: {type: number, minimum: 0}
+          annual_payment_jpy: {type: number, minimum: 0}
+          bonus_payment_jpy: {type: number, minimum: 0}
+          scheduled_balance_after_2026_07_27_jpy: {type: number, minimum: 0}
+      husband_share:
+        type: object
+        required: [allocation_pct, original_principal_jpy, monthly_payment_jpy, annual_payment_jpy]
+        properties:
+          allocation_pct: {type: number, minimum: 0, maximum: 1}
+          original_principal_jpy: {type: number, minimum: 0}
+          monthly_payment_jpy: {type: number, minimum: 0}
+          annual_payment_jpy: {type: number, minimum: 0}
+  strategic_profile:
+    type: object
+    additionalProperties: false
+    anyOf:
+      - required: [date_of_birth]
+      - required: [user_age]
+    required:
+      - tax_residency
+      - investment_horizon_years
+      - expected_withdrawal_start
+      - earliest_possible_asset_use_date
+      - planned_contributions
+      - expected_future_cash_flows
+      - human_capital_assumptions
+      - pension_and_other_future_assets
+      - objective_configuration
+    properties:
+      date_of_birth: {type: [string, "null"], format: date}
+      user_age: {type: [integer, "null"], minimum: 0}
+      user_age_as_of: {type: [string, "null"], format: date}
+      tax_residency: {type: [string, "null"]}
+      investment_horizon_years: {type: [number, "null"], minimum: 0}
+      planning_end_age: {type: [integer, "null"], minimum: 0}
+      expected_withdrawal_start: {type: [string, "null"]}
+      earliest_possible_asset_use_date: {type: [string, "null"]}
+      planned_contributions: {type: [array, object, "null"]}
+      expected_future_cash_flows: {type: [array, object, "null"]}
+      human_capital_assumptions: {type: [object, "null"]}
+      pension_and_other_future_assets: {type: [array, object, "null"]}
+      objective_configuration:
+        type: object
+        additionalProperties: false
+        required: [primary_objective, objective_models]
+        properties:
+          user_stated_goal: {type: [string, "null"]}
+          selection_status:
+            type: [string, "null"]
+            enum: [confirmed, provisional_user_selection, requires_clarification, null]
+          primary_objective:
+            type: [string, "null"]
+            enum: [maximize_terminal_wealth, minimize_risk_for_required_return, maximize_ex_ante_sharpe_ratio, null]
+          objective_models:
+            type: object
+            properties:
+              maximize_terminal_wealth: {$ref: "#/$defs/terminal_wealth_objective"}
+              minimize_risk_for_required_return: {$ref: "#/$defs/minimum_risk_objective"}
+              maximize_ex_ante_sharpe_ratio: {$ref: "#/$defs/sharpe_objective"}
+  market_decline_rule:
+    type: object
+    additionalProperties: false
+    required:
+      - status
+      - deployment_target
+      - trigger_index
+      - reference_high_definition
+      - price_basis
+      - lookback_period
+      - fx_treatment
+    properties:
+      status: {enum: [configured, not_configured]}
+      deployment_target: {type: [string, "null"]}
+      trigger_index: {type: [string, "null"]}
+      reference_high_definition: {type: [string, "null"]}
+      price_basis: {type: [string, "null"], enum: [close, intraday, null]}
+      lookback_period: {type: [string, "null"]}
+      fx_treatment: {type: [string, "null"]}
+  unknown_information:
+    type: array
+    items: {type: string}
+$defs:
+  status_value:
+    type: object
+    required: [value, status]
+    properties:
+      value: {}
+      status: {type: string}
+  terminal_wealth_objective:
+    type: object
+    additionalProperties: false
+    required: [horizon_years, planned_contributions, return_basis, statistic, downside_quantile_pct, leverage_allowed]
+    properties:
+      horizon_years: {type: [number, "null"], minimum: 0}
+      planned_contributions: {type: [array, object, "null"]}
+      return_basis: {type: [string, "null"], enum: [nominal, real, null]}
+      statistic: {type: [string, "null"], enum: [expected_value, median, downside_quantile, null]}
+      downside_quantile_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      leverage_allowed: {type: [boolean, "null"]}
+  minimum_risk_objective:
+    type: object
+    additionalProperties: false
+    required: [target_return_pct, return_basis, horizon_years, success_probability_pct]
+    properties:
+      target_return_pct: {type: [number, "null"]}
+      target_return_derivation: {$ref: "#/$defs/reviewer_derivation"}
+      return_basis: {type: [string, "null"], enum: [nominal, real, null]}
+      horizon_years: {type: [number, "null"], minimum: 0}
+      accumulation_horizon_years: {type: [number, "null"], minimum: 0}
+      withdrawal_horizon_years: {type: [number, "null"], minimum: 0}
+      success_probability_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      success_probability_derivation: {$ref: "#/$defs/reviewer_derivation"}
+      retirement_spending_derivation: {$ref: "#/$defs/reviewer_derivation"}
+      public_pension_derivation: {$ref: "#/$defs/reviewer_derivation"}
+      terminal_asset_floor_derivation: {$ref: "#/$defs/reviewer_derivation"}
+  sharpe_objective:
+    type: object
+    additionalProperties: false
+    required: [risk_free_rate_definition, return_basis, horizon_years]
+    properties:
+      risk_free_rate_definition: {type: [string, "null"]}
+      return_basis: {type: [string, "null"], enum: [nominal, real, null]}
+      horizon_years: {type: [number, "null"], minimum: 0}
+  reviewer_derivation:
+    type: object
+    additionalProperties: false
+    required:
+      - status
+      - decision_owner
+      - method
+      - evidence_requirements
+      - sensitivity_required
+      - base_case_required
+    properties:
+      status: {const: reviewer_to_derive}
+      decision_owner: {const: independent_monthly_reviewer}
+      method: {type: string}
+      evidence_requirements:
+        type: array
+        minItems: 1
+        items: {type: string}
+      sensitivity_required: {type: boolean}
+      base_case_required: {type: boolean}

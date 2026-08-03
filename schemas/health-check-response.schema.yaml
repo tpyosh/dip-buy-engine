@@ -1,0 +1,242 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Machine-readable on-demand portfolio health-check response"
+type: object
+additionalProperties: false
+required:
+  - schema_version
+  - artifact_type
+  - completed_at
+  - coverage_start
+  - coverage_end
+  - human_summary
+  - dip_buy_liquidity_deployment_review
+  - security_story_reviews
+  - cross_holding_themes
+  - alerts
+  - next_check_triggers
+  - codex_handoff
+properties:
+  schema_version:
+    const: 1
+  artifact_type:
+    const: "portfolio_health_check_response"
+  completed_at:
+    type: string
+    format: date-time
+  coverage_start:
+    type: string
+    format: date
+  coverage_end:
+    type: string
+    format: date
+  human_summary:
+    type: object
+    additionalProperties: false
+    required:
+      - overall_status
+      - urgent_items
+    properties:
+      overall_status:
+        enum:
+          - healthy
+          - watch
+          - action_required
+          - insufficient_evidence
+      urgent_items:
+        type: array
+        items:
+          type: string
+  dip_buy_liquidity_deployment_review:
+    $ref: "#/$defs/dip_buy_liquidity_deployment_review"
+  security_story_reviews:
+    type: array
+    items:
+      $ref: "#/$defs/security_story_review"
+  cross_holding_themes:
+    type: array
+    items:
+      type: string
+  alerts:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required:
+        - severity
+        - symbols
+        - finding
+        - user_action
+      properties:
+        severity:
+          enum:
+            - info
+            - watch
+            - urgent
+        symbols:
+          type: array
+          items:
+            type: string
+        finding:
+          type: string
+        user_action:
+          type: string
+  next_check_triggers:
+    type: array
+    items:
+      type: string
+  codex_handoff:
+    type: object
+    additionalProperties: false
+    required:
+      - thesis_updates_proposed
+      - data_gaps
+    properties:
+      thesis_updates_proposed:
+        type: array
+        items:
+          type: string
+      data_gaps:
+        type: array
+        items:
+          type: string
+$defs:
+  dip_buy_liquidity_deployment_review:
+    type: object
+    additionalProperties: false
+    required:
+      - reserve_status
+      - market_decline_status
+      - market_evidence
+      - use_option
+      - selected_action
+      - selection_rationale
+      - reserve_maintenance_is_objective
+    properties:
+      reserve_status:
+        enum:
+          - available
+          - unavailable
+          - unknown
+      market_decline_status:
+        enum:
+          - declining
+          - not_declining
+          - unclear
+      market_evidence:
+        type: array
+        items:
+          type: string
+      use_option:
+        type: object
+        additionalProperties: false
+        required:
+          - considered
+          - status
+          - target
+          - amount_jpy
+          - formula
+          - timing
+          - rationale
+        properties:
+          considered:
+            type: boolean
+          status:
+            enum:
+              - executable
+              - conditional
+              - not_calculable
+              - not_applicable
+          target:
+            type: [string, "null"]
+          amount_jpy:
+            type: [number, "null"]
+            minimum: 0
+          formula:
+            type: string
+          timing:
+            type: [string, "null"]
+          rationale:
+            type: string
+      selected_action:
+        enum:
+          - use
+          - hold
+          - not_applicable
+          - not_calculable
+      selection_rationale:
+        type: string
+      reserve_maintenance_is_objective:
+        const: false
+  security_story_review:
+    type: object
+    additionalProperties: false
+    required:
+      - symbol
+      - evaluated
+      - thesis_status
+      - provisional_story
+      - material_facts
+      - story_health
+      - invalidation_signals
+      - decision
+      - decision_rationale
+      - next_review_triggers
+      - sources
+    properties:
+      symbol:
+        type: string
+      evaluated:
+        type: boolean
+      thesis_status:
+        enum:
+          - active
+          - inherited_pending_review
+          - missing
+      provisional_story:
+        type: [string, "null"]
+      material_facts:
+        type: array
+        items:
+          type: string
+      story_health:
+        enum:
+          - healthy
+          - watch
+          - impaired
+          - broken
+          - insufficient_evidence
+      invalidation_signals:
+        type: array
+        items:
+          type: string
+      decision:
+        enum:
+          - add
+          - hold
+          - reduce
+          - exit
+          - no_add_pending_thesis
+      decision_rationale:
+        type: string
+      next_review_triggers:
+        type: array
+        items:
+          type: string
+      sources:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required:
+            - title
+            - url
+            - as_of
+          properties:
+            title:
+              type: string
+            url:
+              type: string
+              format: uri
+            as_of:
+              type: string
+              format: date

@@ -1,0 +1,120 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "On-demand independent investment decision response"
+type: object
+additionalProperties: false
+required:
+  - schema_version
+  - artifact_type
+  - decision_id
+  - completed_at
+  - decision_status
+  - recommendation
+  - evidence
+  - alternatives
+  - assumptions
+  - unresolved_information
+  - user_confirmation_required
+  - prompt_feedback
+properties:
+  schema_version:
+    const: 1
+  artifact_type:
+    const: "independent_investment_decision_response"
+  decision_id:
+    type: string
+  completed_at:
+    type: string
+    format: date-time
+  decision_status:
+    enum:
+      - determined
+      - conditional
+      - not_calculable
+  recommendation:
+    type: object
+    additionalProperties: false
+    required:
+      - decision
+      - rationale
+      - parameter_values
+      - formulas
+      - review_triggers
+    properties:
+      decision:
+        type: string
+      rationale:
+        type: string
+      parameter_values:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [name, value, unit]
+          properties:
+            name:
+              type: string
+            value: {}
+            unit:
+              type: string
+      formulas:
+        type: array
+        items:
+          type: string
+      review_triggers:
+        type: array
+        items:
+          type: string
+  evidence:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [title, url, as_of, finding, inference_use]
+      properties:
+        title:
+          type: string
+        url:
+          type: string
+          format: uri
+        as_of:
+          type: string
+        finding:
+          type: string
+        inference_use:
+          type: string
+  alternatives:
+    type: array
+    items:
+      type: object
+      additionalProperties: false
+      required: [description, switch_condition]
+      properties:
+        description:
+          type: string
+        switch_condition:
+          type: string
+  assumptions:
+    type: array
+    items:
+      type: string
+  unresolved_information:
+    type: array
+    items:
+      type: string
+  user_confirmation_required:
+    const: true
+  prompt_feedback:
+    type: object
+    additionalProperties: false
+    required:
+      - input_gaps
+      - template_improvements
+    properties:
+      input_gaps:
+        type: array
+        items:
+          type: string
+      template_improvements:
+        type: array
+        items:
+          type: string

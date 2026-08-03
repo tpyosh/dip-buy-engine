@@ -129,6 +129,8 @@ def build_ocr_snapshot_validation_warnings(
     warnings.extend(validate_category_totals(snapshot))
     warnings.extend(validate_currency_consistency(snapshot))
     warnings.extend(validate_duplicate_holdings(snapshot))
+    warnings.extend(validate_account_type_completeness(snapshot))
+    warnings.extend(validate_same_product_account_separation(snapshot))
     warnings.extend(validate_account_type_classification(snapshot, classification_audit or []))
     warnings.extend(validate_classification_audit(classification_audit or []))
     if previous_snapshot is not None:
@@ -253,6 +255,82 @@ def validate_duplicate_holdings(snapshot: PortfolioSnapshot) -> list[PortfolioWa
                 )
             )
     return dedupe_warnings(warnings)
+
+
+def validate_account_type_completeness(
+    snapshot: PortfolioSnapshot,
+) -> list[PortfolioWarning]:
+    return [
+        PortfolioWarning(
+            code="missing_account_type",
+            severity="warning",
+            message=(
+                f"{holding.symbol}: account_type is unknown. Do not select a sale lot, "
+                "consolidate same-name holdings, or optimize taxes until the account is verified."
+            ),
+            related_symbols=[holding.symbol],
+        )
+        for holding in snapshot.holdings
+        if holding.asset_class not in {"liquidity", "pension", "other"}
+        and holding.account_type is None
+    ]
+
+
+def validate_same_product_account_separation(
+    snapshot: PortfolioSnapshot,
+) -> list[PortfolioWarning]:
+    grouped: dict[str, list] = defaultdict(list)
+    for holding in snapshot.holdings:
+        identity = normalize_identity_text(holding.name)
+        if identity:
+            grouped[identity].append(holding)
+
+    warnings: list[PortfolioWarning] = []
+    for holdings in grouped.values():
+        if len(holdings) < 2:
+            continue
+        symbols = [holding.symbol for holding in holdings]
+        accounts = [holding.account_type for holding in holdings]
+        product_name = holdings[0].name
+        if not all(accounts):
+            warnings.append(
+                PortfolioWarning(
+                    code="account_separation_unverified",
+                    severity="warning",
+                    message=(
+                        f"{product_name}: same product appears in multiple rows but one or more "
+                        "account_type values are unknown. Treat the rows as potentially intentional "
+                        "NISA/taxable separation, not redundant duplication."
+                    ),
+                    related_symbols=symbols,
+                )
+            )
+        elif len(set(accounts)) > 1:
+            warnings.append(
+                PortfolioWarning(
+                    code="same_product_cross_account_split",
+                    severity="info",
+                    message=(
+                        f"{product_name}: same product is held across different account types "
+                        f"({', '.join(str(account) for account in accounts)}). This is an "
+                        "account-level split and must not be labeled redundant duplication."
+                    ),
+                    related_symbols=symbols,
+                )
+            )
+        else:
+            warnings.append(
+                PortfolioWarning(
+                    code="same_product_same_account_multiple_lots",
+                    severity="info",
+                    message=(
+                        f"{product_name}: same product has multiple rows in {accounts[0]}. "
+                        "Verify acquisition lots before considering consolidation."
+                    ),
+                    related_symbols=symbols,
+                )
+            )
+    return warnings
 
 
 def validate_account_type_classification(

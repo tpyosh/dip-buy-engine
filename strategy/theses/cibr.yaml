@@ -4,6 +4,7 @@ status: "inherited_pending_review"
 migrated_at: "2026-07-26"
 source_ref: "config/portfolio_policy.yaml#long_term_thesis.CIBR"
 symbol: "CIBR"
+instrument_type: "etf"
 legacy_summary: "サイバーセキュリティ支出は構造的に維持・拡大するという仮説。"
 legacy_break_conditions:
   - "支出成長の鈍化"

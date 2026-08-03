@@ -3,6 +3,7 @@ from __future__ import annotations
 from copy import deepcopy
 from pathlib import Path
 
+from .context_records import load_financial_context, load_holding_metadata_context
 from .snapshot_loader import load_snapshot
 from .storage import default_output_paths, load_yaml, on_demand_output_paths
 from .strategy_policy import load_current_strategy_context
@@ -76,17 +77,27 @@ def load_thesis_monitoring_policy(project_root: Path) -> dict[str, dict]:
             field="strategy/theses/index.yaml thesis_ref",
         )
         thesis = load_yaml(thesis_path)
-        symbol = thesis.get("symbol")
-        if symbol in (None, ""):
+        symbols = thesis.get("covered_symbols") or [thesis.get("symbol")]
+        symbols = [str(symbol) for symbol in symbols if symbol not in (None, "")]
+        if not symbols:
             continue
-        policy[str(symbol)] = {
-            "enabled": True,
-            "thesis_id": thesis.get("thesis_id"),
-            "thesis_status": entry.get("status") or thesis.get("status"),
-            "long_term_thesis_summary": thesis.get("legacy_summary"),
-            "key_risk_if_thesis_breaks": thesis.get("legacy_break_conditions", []),
-            "review_priority": priorities.get(str(symbol), "medium"),
-        }
+        summary = thesis.get("legacy_summary")
+        if summary is None:
+            summary = " ".join(thesis.get("claims", {}).get("supported", [])) or None
+        break_conditions = thesis.get("legacy_break_conditions")
+        if break_conditions is None:
+            break_conditions = thesis.get("invalidation_or_reduction_review", [])
+        for symbol in symbols:
+            policy[symbol] = {
+                "enabled": True,
+                "thesis_id": thesis.get("thesis_id"),
+                "thesis_status": entry.get("status") or thesis.get("status"),
+                "long_term_thesis_summary": summary,
+                "key_risk_if_thesis_breaks": break_conditions,
+                "review_priority": priorities.get(symbol, "medium"),
+                "instrument_type": thesis.get("instrument_type"),
+                "thesis_source_ref": entry.get("thesis_ref"),
+            }
     return policy
 
 
@@ -105,6 +116,8 @@ def audit_repository(project_root: Path) -> list[dict[str, str]]:
 
     required_paths = [
         "FINANCIAL_ASSUMPTIONS.md",
+        "financial/current.yaml",
+        "holdings/current.yaml",
         "strategy/current.yaml",
         "plans/README.md",
         "plans/recurring/current.yaml",
@@ -117,6 +130,13 @@ def audit_repository(project_root: Path) -> list[dict[str, str]]:
         "schemas/plan.schema.yaml",
         "schemas/transaction.schema.yaml",
         "schemas/retrospective.schema.yaml",
+        "schemas/review-packet.schema.yaml",
+        "schemas/monthly-review-response.schema.yaml",
+        "schemas/health-check-response.schema.yaml",
+        "schemas/financial-context.schema.yaml",
+        "schemas/holding-metadata.schema.yaml",
+        "schemas/independent-decision-request.schema.yaml",
+        "schemas/independent-decision-response.schema.yaml",
     ]
     for relative_path in required_paths:
         if not (root / relative_path).exists():
@@ -182,6 +202,15 @@ def audit_repository(project_root: Path) -> list[dict[str, str]]:
             "recurring_context_legacy_fallback",
             "Recurring contributions still use the legacy config payload.",
         )
+
+    for loader, code in (
+        (load_financial_context, "financial_context_invalid"),
+        (load_holding_metadata_context, "holding_metadata_invalid"),
+    ):
+        try:
+            loader(root)
+        except Exception as exc:  # noqa: BLE001
+            _add_issue(issues, "error", code, str(exc))
 
     _audit_snapshots(root, issues)
     _audit_raw_index(root, issues)

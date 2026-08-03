@@ -7,18 +7,20 @@ from pathlib import Path
 
 from monthly_limit_order_review.cli import (
     build_parser,
+    handle_ingest_health_check,
     handle_on_demand_run,
     resolve_on_demand_inventory_path,
 )
 from monthly_limit_order_review.on_demand import (
     assess_snapshot_freshness,
+    build_health_check_window,
     build_on_demand_reference_requests,
     classify_on_demand_holdings,
     enrich_on_demand_market_references,
     render_on_demand_assessment_prompt,
 )
 from monthly_limit_order_review.snapshot_loader import load_snapshot
-from monthly_limit_order_review.storage import load_yaml
+from monthly_limit_order_review.storage import load_yaml, write_yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -139,6 +141,14 @@ def test_on_demand_prompt_focuses_on_price_moves_and_news_not_portfolio_status(s
     assert "profit_loss_jpy" not in prompt
     assert "avg_cost" not in prompt
     assert "【Codex向け修正要約】" not in prompt
+    assert "health_check_response.yaml" in prompt
+    assert "schemas/health-check-response.schema.yaml" in prompt
+    assert "毎日の連続実行は前提にしない" in prompt
+    assert "【投資待機資金の使用判断】" in prompt
+    assert "dip_buy_liquidity_deployment_review.use_option" in prompt
+    assert "reserve_maintenance_is_objective は false" in prompt
+    assert "正式な商品名・会社名" in prompt
+    assert "machine_id (Codex YAML only)" in prompt
 
 
 def test_on_demand_run_writes_separate_history_without_monthly_side_effects(
@@ -196,7 +206,7 @@ def test_on_demand_run_writes_separate_history_without_monthly_side_effects(
     assert "avg_cost" not in serialized
     assert "quantity" not in serialized
     assert list(
-        (tmp_path / "reports/generated/on_demand").glob("*/**/assessment_request.md")
+        (tmp_path / "reports/generated/on_demand").glob("*/**/health_check_request.md")
     )
     assert not (tmp_path / "data/history/computations").exists()
     assert not (tmp_path / "README.md").exists()
@@ -209,6 +219,100 @@ def test_cli_exposes_on_demand_command() -> None:
     assert args.snapshot is None
     assert args.inventory_max_age_days == 45
     assert args.news_lookback_days == 14
+
+    health_args = build_parser().parse_args(["health-check-run"])
+    assert health_args.func is handle_on_demand_run
+    assert health_args.max_news_lookback_days == 90
+
+    ingest_args = build_parser().parse_args(
+        ["ingest-health-check", "--response-yaml", "response.yaml"]
+    )
+    assert ingest_args.response_yaml == "response.yaml"
+    assert ingest_args.request_dir is None
+
+
+def test_health_check_window_recovers_gap_without_requiring_daily_runs() -> None:
+    window = build_health_check_window(
+        requested_at=datetime(2026, 8, 20, 8, 0, tzinfo=UTC),
+        base_lookback_days=14,
+        last_completed_at=datetime(2026, 7, 25, 8, 0, tzinfo=UTC),
+    )
+
+    assert window["status"] == "gap_recovery"
+    assert window["effective_lookback_days"] == 28
+    assert window["continuous_daily_execution_required"] is False
+    assert window["monthly_full_review_is_safety_net"] is True
+
+
+def test_ingest_health_check_saves_only_validated_complete_response(
+    monkeypatch,
+    tmp_path: Path,
+) -> None:
+    request_dir = tmp_path / "reports/generated/on_demand/2026/2026_08_02T120000Z"
+    write_yaml(
+        request_dir / "market_data.yaml",
+        {"security_story_targets": [{"symbol": "MSFT"}]},
+    )
+    response_path = write_yaml(
+        tmp_path / "incoming.yaml",
+        {
+            "schema_version": 1,
+            "artifact_type": "portfolio_health_check_response",
+            "completed_at": "2026-08-02T12:30:00Z",
+            "coverage_start": "2026-07-03",
+            "coverage_end": "2026-08-02",
+            "human_summary": {"overall_status": "watch", "urgent_items": []},
+            "dip_buy_liquidity_deployment_review": {
+                "reserve_status": "unknown",
+                "market_decline_status": "not_declining",
+                "market_evidence": [],
+                "use_option": {
+                    "considered": False,
+                    "status": "not_applicable",
+                    "target": None,
+                    "amount_jpy": None,
+                    "formula": "",
+                    "timing": None,
+                    "rationale": "下落局面ではない",
+                },
+                "selected_action": "not_applicable",
+                "selection_rationale": "現時点の判定",
+                "reserve_maintenance_is_objective": False,
+            },
+            "security_story_reviews": [
+                {
+                    "symbol": "MSFT",
+                    "evaluated": True,
+                    "thesis_status": "inherited_pending_review",
+                    "provisional_story": None,
+                    "material_facts": [],
+                    "story_health": "watch",
+                    "invalidation_signals": [],
+                    "decision": "hold",
+                    "decision_rationale": "一次情報を確認",
+                    "next_review_triggers": [],
+                    "sources": [],
+                }
+            ],
+            "cross_holding_themes": [],
+            "alerts": [],
+            "next_check_triggers": [],
+            "codex_handoff": {"thesis_updates_proposed": [], "data_gaps": []},
+        },
+    )
+    monkeypatch.setattr("monthly_limit_order_review.cli.get_project_root", lambda: tmp_path)
+
+    result = handle_ingest_health_check(
+        Namespace(
+            response_yaml=str(response_path),
+            request_dir=str(request_dir),
+            verbose=False,
+        )
+    )
+
+    assert result == 0
+    saved = load_yaml(request_dir / "health_check_response.yaml")
+    assert saved["completed_at"] == "2026-08-02T12:30:00Z"
 
 
 def test_on_demand_uses_latest_snapshot_as_symbol_inventory_by_default() -> None:

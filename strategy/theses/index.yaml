@@ -1,10 +1,10 @@
 schema_version: 1
 record_type: "investment_thesis_index"
-updated_at: "2026-07-26"
+updated_at: "2026-08-02"
 entries:
-  - thesis_ref: "strategy/theses/semiconductor.yaml"
+  - thesis_ref: "strategy/theses/semiconductor_2026-08-02.yaml"
     status: "active"
-    approval_ref: "decisions/2026-07-25_strategy_baseline.md"
+    approval_ref: "decisions/2026-08-02_review_questionnaire_answers.md"
   - thesis_ref: "strategy/theses/ura.yaml"
     status: "inherited_pending_review"
   - thesis_ref: "strategy/theses/pltr.yaml"

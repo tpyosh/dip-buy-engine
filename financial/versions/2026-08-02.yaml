@@ -1,0 +1,132 @@
+schema_version: 1
+record_type: "personal_financial_context"
+record_id: "husband_personal_financial_context_2026-08-02"
+effective_from: "2026-07-26"
+confirmed_at: "2026-08-02"
+currency: "JPY"
+
+scope:
+  owner: "husband"
+  portfolio: "personal_financial_assets"
+  excludes:
+    - "wife_personal_financial_assets"
+  mortgage_risk_scope: "household_pair_loan_with_husband_share"
+
+cash_flow:
+  regular_month:
+    income_after_tax_social_insurance_mortgage_ideco_jpy:
+      value: 374171
+      as_of: "2026-07-25"
+      certainty: "confirmed_user_value"
+      is_expense_value: false
+    nisa_contribution_jpy:
+      value: 100000
+      as_of: "2026-07-25"
+      certainty: "confirmed_user_value"
+      is_expense_value: false
+    disposable_after_nisa_jpy:
+      value: 274171
+      formula: "income_after_tax_social_insurance_mortgage_ideco_jpy - nisa_contribution_jpy"
+      as_of: "2026-07-25"
+      certainty: "machine_calculation_from_confirmed_values"
+      is_expense_value: false
+    essential_expenses_jpy:
+      value: 250000
+      as_of: "2026-08-02"
+      certainty: "confirmed_user_estimate"
+    balance:
+      value: "approximately_zero"
+      as_of: "2026-07-25"
+      certainty: "confirmed_user_description"
+  bonus:
+    take_home_reference_jpy: 2000000
+    amount_qualifier: "approximately_slightly_below_reference"
+    certainty: "rough_user_estimate"
+    annual_frequency: 1
+    payment_months:
+      - 1
+    allocation_policy: "unplanned_discretionary_spending_from_surplus"
+    typical_uses:
+      - "travel"
+      - "discretionary_purchases"
+
+cash_requirements:
+  emergency_fund:
+    target_jpy: 2000000
+    status: "confirmed_user_target"
+    permitted_fallback: "sell_all_country_fund_even_during_market_decline_if_needed"
+  contingency_reserve:
+    enabled: false
+    target_jpy: 0
+    status: "confirmed_not_required"
+  near_term_large_expenses:
+    horizon_years: 3
+    confirmed_items: []
+    unplanned_travel:
+      expected: true
+      committed_amount_jpy: null
+      scheduled_date: null
+      funding_policy: "pay_from_bonus_or_other_realized_surplus"
+      treatment: "not_a_confirmed_large_expense"
+
+dip_buy_liquidity:
+  purpose: "deploy_during_market_declines"
+  reserve_maintenance_is_objective: false
+  amount_basis: "portfolio_snapshot_total_assets_jpy * approved_target_ratio"
+  target_ratio:
+    value: null
+    status: "proposal_requested_from_current_monthly_independent_review"
+  purchase_target:
+    value: null
+    status: "undecided"
+  activation_condition:
+    value: null
+    status: "proposal_requested_from_current_monthly_independent_review"
+  tranche_count:
+    value: null
+    status: "proposal_requested_from_current_monthly_independent_review"
+  tranche_amount_jpy:
+    value: null
+    status: "depends_on_target_ratio_and_tranche_count"
+  minimum_balance_jpy:
+    value: null
+    status: "not_defined"
+  replenishment_method:
+    value: null
+    status: "not_defined"
+  review_rule:
+    declining_market_requires_use_option: true
+    use_option_required_fields:
+      - "target"
+      - "amount_or_formula"
+      - "timing"
+      - "rationale"
+    hold_decision_must_compare_use_option: true
+
+mortgage:
+  evidence:
+    document: "名古屋銀行 ご返済予定表"
+    created_at: "2026-06-29"
+  household_total:
+    original_principal_jpy: 64900000
+    annual_interest_rate: 0.0112
+    loan_date: "2024-09-27"
+    maturity_date: "2064-09-27"
+    monthly_payment_jpy: 148342
+    annual_payment_jpy: 1780104
+    bonus_payment_jpy: 0
+    scheduled_balance_after_2026_07_27_jpy: 62520685
+  husband_share:
+    allocation_pct: 0.50
+    original_principal_jpy: 32450000
+    monthly_payment_jpy: 74171
+    annual_payment_jpy: 890052
+
+unknown_information:
+  - "ボーナスの正確な手取り額"
+  - "未計画旅行の金額と時期"
+  - "投資待機資金の目標比率"
+  - "投資待機資金の買付対象"
+  - "投資待機資金の発動条件"
+  - "投資待機資金の投入回数と各回投入額"
+  - "投資待機資金の最低残高と補充方法"

@@ -1,0 +1,50 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Versioned holding metadata"
+type: object
+additionalProperties: false
+required:
+  - schema_version
+  - record_type
+  - record_id
+  - effective_from
+  - confirmed_at
+  - execution_context
+  - holdings
+properties:
+  schema_version:
+    const: 1
+  record_type:
+    const: "holding_metadata"
+  record_id:
+    type: string
+  effective_from:
+    type: string
+    format: date
+  confirmed_at:
+    type: string
+    format: date
+  execution_context:
+    type: object
+    additionalProperties: false
+    required:
+      - scope
+      - unreflected_orders
+      - planned_withdrawals
+      - restricted_funds
+      - confirmed_at
+    properties:
+      scope:
+        const: "portfolio"
+      unreflected_orders:
+        type: boolean
+      planned_withdrawals:
+        type: boolean
+      restricted_funds:
+        type: boolean
+      confirmed_at:
+        type: string
+        format: date
+  holdings:
+    type: object
+    additionalProperties:
+      type: object

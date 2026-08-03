@@ -48,6 +48,7 @@ def default_output_paths(project_root: Path, snapshot_month: str) -> dict[str, P
     return {
         "output_root": output_root,
         "computation": output_root / "computation.yaml",
+        "review_packet": output_root / "review_packet.yaml",
         "review_prompt": output_root / "review_request.md",
         "review_prompt_history": output_root / "review_request.md",
         "review_structured": output_root / "review_response.yaml",
@@ -73,6 +74,7 @@ def on_demand_output_paths(
     return {
         "output_root": output_root,
         "market_data": output_root / "market_data.yaml",
-        "prompt": output_root / "assessment_request.md",
-        "prompt_history": output_root / "assessment_request.md",
+        "prompt": output_root / "health_check_request.md",
+        "prompt_history": output_root / "health_check_request.md",
+        "response": output_root / "health_check_response.yaml",
     }

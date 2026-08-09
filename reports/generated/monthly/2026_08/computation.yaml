@@ -359,7 +359,7 @@ snapshot:
   - 年金は詳細1行が確認でき、取得価額 3,340,695円、現在価値 4,063,372円、評価損益 722,677円、評価損益率 21.63%。
   - 株式（現物）の明細合計とカテゴリ合計の3円差は許容範囲内の表示丸め差として分離した。
   - 前月スナップショットとの差分は保有状態の変化としてのみ記録し、注文、約定、入出金または積立実行を示す取引実績には変換しない。
-generated_at: '2026-08-03T13:34:24Z'
+generated_at: '2026-08-04T13:26:03Z'
 bucket_allocations:
 - bucket: core
   market_value_jpy: 10723146
@@ -413,169 +413,169 @@ bucket_allocations:
 market_references:
 - symbol: CIBR
   yfinance_symbol: CIBR
-  current_price: 92.015
-  mean_close_20d: 89.8808
+  current_price: 93.91
+  mean_close_20d: 89.944
   recent_high_21d: 94.73
   recent_high_63d: 94.73
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 89.8808
+  mean_close_30d: 89.944
   prior_close_1d: 91.83
   prior_close_5d: 89.1
   prior_close_21d: 90.67
   prior_close_63d: 68.76
 - symbol: URA
   yfinance_symbol: URA
-  current_price: 39.05
-  mean_close_20d: 41.5937
+  current_price: 40.81
+  mean_close_20d: 41.6523
   recent_high_21d: 43.88
   recent_high_63d: 58.26
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 41.5937
+  mean_close_30d: 41.6523
   prior_close_1d: 39.07
   prior_close_5d: 40.32
   prior_close_21d: 43.23
   prior_close_63d: 55.84
 - symbol: PLTR
   yfinance_symbol: PLTR
-  current_price: 124.94
-  mean_close_20d: 125.443
+  current_price: 125.65
+  mean_close_20d: 125.4667
   recent_high_21d: 134.85
   recent_high_63d: 160.65
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 125.443
+  mean_close_30d: 125.4667
   prior_close_1d: 123.06
   prior_close_5d: 131.53
   prior_close_21d: 129.3
   prior_close_63d: 144.07
 - symbol: MSFT
   yfinance_symbol: MSFT
-  current_price: 485.194
-  mean_close_20d: 392.3805
-  recent_high_21d: 485.194
-  recent_high_63d: 485.194
+  current_price: 487.65
+  mean_close_20d: 392.4623
+  recent_high_21d: 487.65
+  recent_high_63d: 487.65
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 392.3805
+  mean_close_30d: 392.4623
   prior_close_1d: 464.72
   prior_close_5d: 389.1
   prior_close_21d: 390.49
   prior_close_63d: 414.44
 - symbol: SMH
   yfinance_symbol: SMH
-  current_price: 525.75
-  mean_close_20d: 587.246
+  current_price: 545.46
+  mean_close_20d: 587.903
   recent_high_21d: 611.03
   recent_high_63d: 668.91
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 587.246
+  mean_close_30d: 587.903
   prior_close_1d: 540.53
   prior_close_5d: 548.55
   prior_close_21d: 592.29
   prior_close_63d: 509.82
 - symbol: USDJPY
   yfinance_symbol: USDJPY=X
-  current_price: 156.403
-  mean_close_20d: 162.168
+  current_price: 157.429
+  mean_close_20d: 162.0693
   recent_high_21d: 163.864
   recent_high_63d: 163.864
   currency: JPY
-  as_of: '2026-08-03'
-  mean_close_30d: 162.168
-  prior_close_1d: 160.183
-  prior_close_5d: 163.611
-  prior_close_21d: 161.449
-  prior_close_63d: 157.677
+  as_of: '2026-08-04'
+  mean_close_30d: 162.0693
+  prior_close_1d: 157.582
+  prior_close_5d: 163.771
+  prior_close_21d: 161.452
+  prior_close_63d: 156.508
 - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
   yfinance_symbol: VT
-  current_price: 156.37
-  mean_close_20d: 155.6353
+  current_price: 157.61
+  mean_close_20d: 155.6767
   recent_high_21d: 157.81
   recent_high_63d: 159.35
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 155.6353
+  mean_close_30d: 155.6767
   prior_close_1d: 155.86
   prior_close_5d: 154.45
   prior_close_21d: 156.17
   prior_close_63d: 151.44
 - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
   yfinance_symbol: VT
-  current_price: 156.37
-  mean_close_20d: 155.6353
+  current_price: 157.61
+  mean_close_20d: 155.6767
   recent_high_21d: 157.81
   recent_high_63d: 159.35
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 155.6353
+  mean_close_30d: 155.6767
   prior_close_1d: 155.86
   prior_close_5d: 154.45
   prior_close_21d: 156.17
   prior_close_63d: 151.44
 - symbol: RAKUTEN_PLUS_SP500
   yfinance_symbol: VOO
-  current_price: 690.33
-  mean_close_20d: 684.0323
-  recent_high_21d: 693.86
+  current_price: 696.4
+  mean_close_20d: 684.2347
+  recent_high_21d: 696.4
   recent_high_63d: 698.26
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 684.0323
+  mean_close_30d: 684.2347
   prior_close_1d: 686.65
   prior_close_5d: 679.31
   prior_close_21d: 684.84
   prior_close_63d: 662.52
 - symbol: EMAXIS_SLIM_SP500_1
   yfinance_symbol: VOO
-  current_price: 690.33
-  mean_close_20d: 684.0323
-  recent_high_21d: 693.86
+  current_price: 696.4
+  mean_close_20d: 684.2347
+  recent_high_21d: 696.4
   recent_high_63d: 698.26
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 684.0323
+  mean_close_30d: 684.2347
   prior_close_1d: 686.65
   prior_close_5d: 679.31
   prior_close_21d: 684.84
   prior_close_63d: 662.52
 - symbol: EMAXIS_SLIM_SP500_2
   yfinance_symbol: VOO
-  current_price: 690.33
-  mean_close_20d: 684.0323
-  recent_high_21d: 693.86
+  current_price: 696.4
+  mean_close_20d: 684.2347
+  recent_high_21d: 696.4
   recent_high_63d: 698.26
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 684.0323
+  mean_close_30d: 684.2347
   prior_close_1d: 686.65
   prior_close_5d: 679.31
   prior_close_21d: 684.84
   prior_close_63d: 662.52
 - symbol: EMAXIS_SLIM_SP500_3
   yfinance_symbol: VOO
-  current_price: 690.33
-  mean_close_20d: 684.0323
-  recent_high_21d: 693.86
+  current_price: 696.4
+  mean_close_20d: 684.2347
+  recent_high_21d: 696.4
   recent_high_63d: 698.26
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 684.0323
+  mean_close_30d: 684.2347
   prior_close_1d: 686.65
   prior_close_5d: 679.31
   prior_close_21d: 684.84
   prior_close_63d: 662.52
 - symbol: EMAXIS_SLIM_ALL_COUNTRY
   yfinance_symbol: ACWI
-  current_price: 156.64
-  mean_close_20d: 155.768
+  current_price: 157.94
+  mean_close_20d: 155.8113
   recent_high_21d: 157.97
   recent_high_63d: 159.97
   currency: USD
   as_of: '2026-08-03'
-  mean_close_30d: 155.768
+  mean_close_30d: 155.8113
   prior_close_1d: 156.43
   prior_close_5d: 154.61
   prior_close_21d: 156.15
@@ -583,13 +583,13 @@ market_references:
 candidate_orders:
 - symbol: CIBR
   bucket: satellite_core
-  base_price: 89.8808
-  avg20_base_price: 89.8808
-  current_price: 92.015
-  limit_price: 85.39
+  base_price: 89.944
+  avg20_base_price: 89.944
+  current_price: 93.91
+  limit_price: 85.45
   shares: 1
-  estimated_cost: 85.39
-  estimated_cost_jpy: 13355
+  estimated_cost: 85.45
+  estimated_cost_jpy: 13452
   currency: USD
   drawdown_pct: -5
   drawdown_rule: -5% x 1
@@ -619,13 +619,13 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: CIBR
   bucket: satellite_core
-  base_price: 89.8808
-  avg20_base_price: 89.8808
-  current_price: 92.015
-  limit_price: 82.69
+  base_price: 89.944
+  avg20_base_price: 89.944
+  current_price: 93.91
+  limit_price: 82.75
   shares: 1
-  estimated_cost: 82.69
-  estimated_cost_jpy: 12933
+  estimated_cost: 82.75
+  estimated_cost_jpy: 13027
   currency: USD
   drawdown_pct: -8
   drawdown_rule: -8% x 1
@@ -655,13 +655,13 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: CIBR
   bucket: satellite_core
-  base_price: 89.8808
-  avg20_base_price: 89.8808
-  current_price: 92.015
-  limit_price: 79.1
+  base_price: 89.944
+  avg20_base_price: 89.944
+  current_price: 93.91
+  limit_price: 79.15
   shares: 1
-  estimated_cost: 79.1
-  estimated_cost_jpy: 12371
+  estimated_cost: 79.15
+  estimated_cost_jpy: 12461
   currency: USD
   drawdown_pct: -12
   drawdown_rule: -12% x 1
@@ -670,7 +670,7 @@ candidate_orders:
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,mode_context:normal,mode_priority_weight:0
-  avg20_gap_pct: -11.99
+  avg20_gap_pct: -12
   suppression_reasons: []
   explanation:
     rule_based_reason: []
@@ -691,24 +691,23 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: URA
   bucket: satellite_core
-  base_price: 41.5937
-  avg20_base_price: 41.5937
-  current_price: 39.05
-  limit_price: 39.1
+  base_price: 41.6523
+  avg20_base_price: 41.6523
+  current_price: 40.81
+  limit_price: 39.15
   shares: 2
-  estimated_cost: 78.2
-  estimated_cost_jpy: 12231
+  estimated_cost: 78.3
+  estimated_cost_jpy: 12327
   currency: USD
   drawdown_pct: -6
   drawdown_rule: -6% x 2
   reference_method: mean_close_30d
-  suppressed: true
-  suppressed_reason_code: limit_above_current
-  suppressed_reason_text: Calculated limit price is not below the current price.
-  note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,mode_context:normal,mode_priority_weight:0,limit_above_current
-  avg20_gap_pct: -6
-  suppression_reasons:
-  - Calculated limit price is not below the current price.
+  suppressed: false
+  suppressed_reason_code: null
+  suppressed_reason_text: null
+  note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,mode_context:normal,mode_priority_weight:0
+  avg20_gap_pct: -6.01
+  suppression_reasons: []
   explanation:
     rule_based_reason: []
     discretionary_reason: null
@@ -728,13 +727,13 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: URA
   bucket: satellite_core
-  base_price: 41.5937
-  avg20_base_price: 41.5937
-  current_price: 39.05
-  limit_price: 37.43
+  base_price: 41.6523
+  avg20_base_price: 41.6523
+  current_price: 40.81
+  limit_price: 37.49
   shares: 2
-  estimated_cost: 74.86
-  estimated_cost_jpy: 11708
+  estimated_cost: 74.98
+  estimated_cost_jpy: 11804
   currency: USD
   drawdown_pct: -10
   drawdown_rule: -10% x 2
@@ -743,7 +742,7 @@ candidate_orders:
   suppressed_reason_code: null
   suppressed_reason_text: null
   note_for_chatgpt: drawdown_profile:shallow,shallow_candidate,mode_context:normal,mode_priority_weight:0
-  avg20_gap_pct: -10.01
+  avg20_gap_pct: -9.99
   suppression_reasons: []
   explanation:
     rule_based_reason: []
@@ -764,13 +763,13 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: URA
   bucket: satellite_core
-  base_price: 41.5937
-  avg20_base_price: 41.5937
-  current_price: 39.05
-  limit_price: 35.35
+  base_price: 41.6523
+  avg20_base_price: 41.6523
+  current_price: 40.81
+  limit_price: 35.4
   shares: 2
-  estimated_cost: 70.7
-  estimated_cost_jpy: 11058
+  estimated_cost: 70.8
+  estimated_cost_jpy: 11146
   currency: USD
   drawdown_pct: -15
   drawdown_rule: -15% x 2
@@ -800,13 +799,13 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: PLTR
   bucket: satellite
-  base_price: 125.443
-  avg20_base_price: 125.443
-  current_price: 124.94
-  limit_price: 112.9
+  base_price: 125.4667
+  avg20_base_price: 125.4667
+  current_price: 125.65
+  limit_price: 112.92
   shares: 1
-  estimated_cost: 112.9
-  estimated_cost_jpy: 17658
+  estimated_cost: 112.92
+  estimated_cost_jpy: 17777
   currency: USD
   drawdown_pct: -10
   drawdown_rule: -10% x 1
@@ -840,13 +839,13 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: PLTR
   bucket: satellite
-  base_price: 125.443
-  avg20_base_price: 125.443
-  current_price: 124.94
-  limit_price: 106.63
+  base_price: 125.4667
+  avg20_base_price: 125.4667
+  current_price: 125.65
+  limit_price: 106.65
   shares: 2
-  estimated_cost: 213.26
-  estimated_cost_jpy: 33355
+  estimated_cost: 213.3
+  estimated_cost_jpy: 33580
   currency: USD
   drawdown_pct: -15
   drawdown_rule: -15% x 2
@@ -877,13 +876,13 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: PLTR
   bucket: satellite
-  base_price: 125.443
-  avg20_base_price: 125.443
-  current_price: 124.94
-  limit_price: 97.85
+  base_price: 125.4667
+  avg20_base_price: 125.4667
+  current_price: 125.65
+  limit_price: 97.86
   shares: 2
-  estimated_cost: 195.7
-  estimated_cost_jpy: 30608
+  estimated_cost: 195.72
+  estimated_cost_jpy: 30812
   currency: USD
   drawdown_pct: -22
   drawdown_rule: -22% x 2
@@ -914,13 +913,13 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: MSFT
   bucket: jun_core
-  base_price: 392.3805
-  avg20_base_price: 392.3805
-  current_price: 485.194
-  limit_price: 368.84
+  base_price: 392.4623
+  avg20_base_price: 392.4623
+  current_price: 487.65
+  limit_price: 368.91
   shares: 1
-  estimated_cost: 368.84
-  estimated_cost_jpy: 57688
+  estimated_cost: 368.91
+  estimated_cost_jpy: 58077
   currency: USD
   drawdown_pct: -6
   drawdown_rule: -6% x 1
@@ -950,13 +949,13 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: MSFT
   bucket: jun_core
-  base_price: 392.3805
-  avg20_base_price: 392.3805
-  current_price: 485.194
-  limit_price: 353.14
+  base_price: 392.4623
+  avg20_base_price: 392.4623
+  current_price: 487.65
+  limit_price: 353.22
   shares: 2
-  estimated_cost: 706.28
-  estimated_cost_jpy: 110464
+  estimated_cost: 706.44
+  estimated_cost_jpy: 111214
   currency: USD
   drawdown_pct: -10
   drawdown_rule: -10% x 2
@@ -986,13 +985,13 @@ candidate_orders:
   market_candidate_price_source_date: '2026-08-03'
 - symbol: MSFT
   bucket: jun_core
-  base_price: 392.3805
-  avg20_base_price: 392.3805
-  current_price: 485.194
-  limit_price: 321.75
+  base_price: 392.4623
+  avg20_base_price: 392.4623
+  current_price: 487.65
+  limit_price: 321.82
   shares: 2
-  estimated_cost: 643.5
-  estimated_cost_jpy: 100645
+  estimated_cost: 643.64
+  estimated_cost_jpy: 101328
   currency: USD
   drawdown_pct: -18
   drawdown_rule: -18% x 2
@@ -1032,11 +1031,6 @@ warnings:
   severity: warning
   related_symbols:
   - direct_semiconductor
-- code: limit_above_current
-  message: 'URA: Calculated limit price is not below the current price.'
-  severity: warning
-  related_symbols:
-  - URA
 - code: high_volatility_shallow_suppressed
   message: 'PLTR: High-volatility names default to deeper pullbacks before adding.'
   severity: warning
@@ -1211,12 +1205,12 @@ semi_exposure_pct: 0.1574
 liquidity_jpy: 13622664
 sox_buy_signal:
   proxy_symbol: SMH
-  current_price: 525.75
+  current_price: 545.46
   recent_high_21d: 611.03
   recent_high_63d: 668.91
-  drawdown_pct: -21.4
-  drawdown_pct_from_21d_high: -13.96
-  drawdown_pct_from_63d_high: -21.4
+  drawdown_pct: -18.46
+  drawdown_pct_from_21d_high: -10.73
+  drawdown_pct_from_63d_high: -18.46
   buy_zone: -10% to -5%
   buy_zone_rule_text: drawdown from 63d high between -10% and -5%
   within_buy_zone: false
@@ -1239,7 +1233,7 @@ sox_buy_signal:
     buy_zone_assessment:
       within_buy_zone: false
       near_boundary: false
-      drawdown_pct_from_63d_high: -21.4
+      drawdown_pct_from_63d_high: -18.46
       rule: -10% <= drawdown <= -5%
     bucket_context:
       related_bucket: satellite_core
@@ -1371,10 +1365,10 @@ core_buy_materials:
     current_price: 19705
     suggested_proxy_symbol: ACWI
     reference_symbol: VT
-    reference_current_price: 156.37
+    reference_current_price: 157.61
     recent_high_21d: 157.81
     recent_high_63d: 159.35
-    drawdown_pct_from_recent_high: -1.87
+    drawdown_pct_from_recent_high: -1.09
   - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
     name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
     quantity: 846995
@@ -1382,10 +1376,10 @@ core_buy_materials:
     current_price: 19705
     suggested_proxy_symbol: ACWI
     reference_symbol: VT
-    reference_current_price: 156.37
+    reference_current_price: 157.61
     recent_high_21d: 157.81
     recent_high_63d: 159.35
-    drawdown_pct_from_recent_high: -1.87
+    drawdown_pct_from_recent_high: -1.09
   - symbol: RAKUTEN_PLUS_SP500
     name: 楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)
     quantity: 106530
@@ -1393,10 +1387,10 @@ core_buy_materials:
     current_price: 19875
     suggested_proxy_symbol: VOO
     reference_symbol: VOO
-    reference_current_price: 690.33
-    recent_high_21d: 693.86
+    reference_current_price: 696.4
+    recent_high_21d: 696.4
     recent_high_63d: 698.26
-    drawdown_pct_from_recent_high: -1.14
+    drawdown_pct_from_recent_high: -0.27
   - symbol: EMAXIS_SLIM_SP500_1
     name: eMAXIS Slim 米国株式(S&P500)
     quantity: 337199
@@ -1404,10 +1398,10 @@ core_buy_materials:
     current_price: 44669
     suggested_proxy_symbol: VOO
     reference_symbol: VOO
-    reference_current_price: 690.33
-    recent_high_21d: 693.86
+    reference_current_price: 696.4
+    recent_high_21d: 696.4
     recent_high_63d: 698.26
-    drawdown_pct_from_recent_high: -1.14
+    drawdown_pct_from_recent_high: -0.27
   - symbol: EMAXIS_SLIM_SP500_2
     name: eMAXIS Slim 米国株式(S&P500)
     quantity: 408710
@@ -1415,10 +1409,10 @@ core_buy_materials:
     current_price: 44669
     suggested_proxy_symbol: VOO
     reference_symbol: VOO
-    reference_current_price: 690.33
-    recent_high_21d: 693.86
+    reference_current_price: 696.4
+    recent_high_21d: 696.4
     recent_high_63d: 698.26
-    drawdown_pct_from_recent_high: -1.14
+    drawdown_pct_from_recent_high: -0.27
   - symbol: EMAXIS_SLIM_SP500_3
     name: eMAXIS Slim 米国株式(S&P500)
     quantity: 228995
@@ -1426,10 +1420,10 @@ core_buy_materials:
     current_price: 44669
     suggested_proxy_symbol: VOO
     reference_symbol: VOO
-    reference_current_price: 690.33
-    recent_high_21d: 693.86
+    reference_current_price: 696.4
+    recent_high_21d: 696.4
     recent_high_63d: 698.26
-    drawdown_pct_from_recent_high: -1.14
+    drawdown_pct_from_recent_high: -0.27
   - symbol: EMAXIS_SLIM_ALL_COUNTRY
     name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
     quantity: 614397
@@ -1437,10 +1431,10 @@ core_buy_materials:
     current_price: 38243
     suggested_proxy_symbol: ACWI
     reference_symbol: ACWI
-    reference_current_price: 156.64
+    reference_current_price: 157.94
     recent_high_21d: 157.97
     recent_high_63d: 159.97
-    drawdown_pct_from_recent_high: -2.08
+    drawdown_pct_from_recent_high: -1.27
 exposure_breakdown:
   direct_semiconductor_exposure_pct: 0.1574
   direct_semiconductor_exposure_jpy: 6289272
@@ -2226,20 +2220,20 @@ metadata:
     configuration_warnings: []
     major_core_proxy_stats:
     - reference_symbol: VT
-      one_month_return_pct: 0.13
-      three_month_return_pct: 3.26
-      one_month_drawdown_from_high_pct: -0.91
-      three_month_drawdown_from_high_pct: -1.87
+      one_month_return_pct: 0.92
+      three_month_return_pct: 4.07
+      one_month_drawdown_from_high_pct: -0.13
+      three_month_drawdown_from_high_pct: -1.09
     - reference_symbol: VOO
-      one_month_return_pct: 0.8
-      three_month_return_pct: 4.2
-      one_month_drawdown_from_high_pct: -0.51
-      three_month_drawdown_from_high_pct: -1.14
+      one_month_return_pct: 1.69
+      three_month_return_pct: 5.11
+      one_month_drawdown_from_high_pct: 0
+      three_month_drawdown_from_high_pct: -0.27
     - reference_symbol: ACWI
-      one_month_return_pct: 0.31
-      three_month_return_pct: 3.28
-      one_month_drawdown_from_high_pct: -0.84
-      three_month_drawdown_from_high_pct: -2.08
+      one_month_return_pct: 1.15
+      three_month_return_pct: 4.14
+      one_month_drawdown_from_high_pct: -0.02
+      three_month_drawdown_from_high_pct: -1.27
     portfolio_risk_bucket_summary:
     - bucket: core
       actual_pct: 0.2683

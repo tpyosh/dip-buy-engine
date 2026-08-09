@@ -134,6 +134,7 @@ class ReviewPacket:
     schema_version: int
     packet_type: str
     generation_status: str
+    review_cadence: str
     interaction_phase: str
     review_mode: str
     review_target_month: str

@@ -76,11 +76,11 @@ def main(argv: list[str] | None = None) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Monthly limit-order review CLI")
+    parser = argparse.ArgumentParser(description="On-demand investment review CLI")
     parser.add_argument("--verbose", action="store_true", help="Enable debug logging")
     subparsers = parser.add_subparsers(dest="command", required=True)
 
-    review_parser = subparsers.add_parser("generate-review-prompt", help="Generate monthly ChatGPT review prompt")
+    review_parser = subparsers.add_parser("generate-review-prompt", help="Generate an on-demand ChatGPT comprehensive review prompt")
     review_parser.add_argument("--snapshot", required=True, help="Path to normalized snapshot YAML")
     review_parser.add_argument("--output", required=False, help="Path to output markdown prompt")
     review_parser.set_defaults(func=handle_generate_review_prompt)
@@ -100,7 +100,7 @@ def build_parser() -> argparse.ArgumentParser:
     codex_parser.add_argument("--output", required=False, help="Path to output markdown prompt")
     codex_parser.set_defaults(func=handle_generate_codex_patch)
 
-    monthly_parser = subparsers.add_parser("monthly-run", help="Run monthly computation and prompt generation")
+    monthly_parser = subparsers.add_parser("monthly-run", help="Compatibility command: generate an on-demand comprehensive review from a dated snapshot")
     monthly_parser.add_argument("--snapshot", required=True, help="Path to normalized snapshot YAML")
     monthly_parser.set_defaults(func=handle_monthly_run)
 
@@ -430,7 +430,7 @@ def handle_monthly_run(args: argparse.Namespace) -> int:
         write_text(paths["review_prompt"], blocker)
         write_text(paths["review_prompt_history"], blocker)
         LOGGER.error(
-            "Monthly review prompt generation blocked: %s",
+            "On-demand review prompt generation blocked: %s",
             review_packet.generation_status,
         )
         return 2

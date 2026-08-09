@@ -139,9 +139,10 @@ def test_generate_review_prompt_writes_only_generated_reports(
     assert prompt_path.exists()
     packet = load_yaml(packet_path)
     prompt = prompt_path.read_text(encoding="utf-8")
-    assert packet["packet_type"] == "monthly_independent_review"
+    assert packet["packet_type"] == "on_demand_independent_review"
+    assert packet["review_cadence"] == "on_demand"
     assert packet["review_target_month"] == "2026_04"
-    assert "# ChatGPT向け月次独立レビュー" in prompt
+    assert "# ChatGPT向けオンデマンド包括レビュー" in prompt
     assert "## 1. モードと対話フェーズ" in prompt
     assert "generation_status: ready" in prompt
     assert "active_strategy" not in prompt

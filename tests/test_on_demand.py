@@ -262,7 +262,7 @@ def test_health_check_window_recovers_gap_without_requiring_daily_runs() -> None
     assert window["status"] == "gap_recovery"
     assert window["effective_lookback_days"] == 28
     assert window["continuous_daily_execution_required"] is False
-    assert window["monthly_full_review_is_safety_net"] is True
+    assert window["comprehensive_review_is_decision_authority"] is True
 
 
 def test_ingest_health_check_saves_only_validated_complete_response(

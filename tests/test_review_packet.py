@@ -82,7 +82,9 @@ def test_review_packet_matches_closed_root_schema(sample_computation) -> None:
 
     assert set(payload) == set(schema["required"])
     assert schema["additionalProperties"] is False
-    assert packet.review_mode == "monthly_operational_review"
+    assert packet.packet_type == "on_demand_independent_review"
+    assert packet.review_cadence == "on_demand"
+    assert packet.review_mode == "on_demand_operational_review"
     assert packet.generation_status == "ready"
     assert packet.interaction_phase == "final_review"
     assert packet.approved_policy is not None
@@ -97,7 +99,10 @@ def test_review_packet_matches_closed_root_schema(sample_computation) -> None:
         "does_not_want_generic_theory_without_decision": True,
         "expects_independent_reviewer_to_select_one_base_case": True,
     }
-    assert len(packet.output_contract["final_review"]["required_sections"]) == 6
+    assert len(packet.output_contract["final_review"]["required_sections"]) == 7
+    assert packet.output_contract["final_review"]["required_sections"][-1] == (
+        "【次回レビュー時期】"
+    )
     assert packet.output_contract["final_review"]["delivery"]["preferred"] == (
         "attach_review_response_yaml"
     )
@@ -348,7 +353,7 @@ def test_cash_case_a_preserves_confirmed_minimum_without_inventing_expenses() ->
         "portfolio_snapshot_total_assets_jpy * approved_target_ratio"
     )
     assert cash["dip_buy_liquidity"]["decision_owner"] == (
-        "current_monthly_independent_review_then_user_approval"
+        "current_on_demand_independent_review_then_user_approval"
     )
     assert cash["result"]["minimum_confirmed_cash_jpy"] == 2_000_000
     assert cash["result"]["cash_target_status"] == "confirmed_minimum_only"

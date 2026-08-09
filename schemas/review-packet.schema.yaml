@@ -1,11 +1,12 @@
 $schema: "https://json-schema.org/draft/2020-12/schema"
-title: "Closed monthly independent review packet"
+title: "Closed on-demand independent review packet"
 type: object
 additionalProperties: false
 required:
   - schema_version
   - packet_type
   - generation_status
+  - review_cadence
   - interaction_phase
   - review_mode
   - review_target_month
@@ -43,13 +44,15 @@ properties:
   schema_version:
     const: 2
   packet_type:
-    const: monthly_independent_review
+    const: on_demand_independent_review
   generation_status:
     enum: [ready, blocked_missing_strategic_inputs, blocked_missing_account_types]
+  review_cadence:
+    const: on_demand
   interaction_phase:
     enum: [objective_confirmation, final_review]
   review_mode:
-    enum: [monthly_operational_review, strategic_policy_second_opinion]
+    enum: [on_demand_operational_review, strategic_policy_second_opinion]
   review_target_month:
     type: string
     pattern: "^[0-9]{4}_[0-9]{2}$"

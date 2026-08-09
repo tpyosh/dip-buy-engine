@@ -157,8 +157,9 @@ def response_payload() -> dict:
     policy = tactical_policy()
     return {
         "schema_version": 2,
-        "artifact_type": "monthly_review_response",
-        "review_mode": "monthly_operational_review",
+        "artifact_type": "investment_review_response",
+        "review_cadence": "on_demand",
+        "review_mode": "on_demand_operational_review",
         "interaction_phase": "final_review",
         "review_target_month": "2026_08",
         "portfolio_snapshot_as_of": "2026-07-26",
@@ -166,6 +167,22 @@ def response_payload() -> dict:
         "packet_generated_at": "2026-08-02T12:00:00Z",
         "research_cutoff_at": "2026-08-02T12:00:00Z",
         "decision_date": "2026-08-02",
+        "recommendation_window": {
+            "start_at": "2026-08-02T12:00:00Z",
+            "end_at": "2026-08-30T12:00:00Z",
+            "window_length": 4,
+            "window_unit": "weeks",
+            "selection_rationale": "現在のデータ鮮度と実行可能性から4週間を選択",
+            "confidence_boundary": "重大イベント発生時は早期再レビューする",
+        },
+        "next_review_recommendation": {
+            "review_after_at": "2026-08-30",
+            "interval_value": 4,
+            "interval_unit": "weeks",
+            "rationale": "推奨行動ウィンドウ終了時に再評価する",
+            "early_review_triggers": ["重大な決算または制度変更"],
+            "closing_sentence": "また4週間後（2026-08-30）に最新のスナップショットをもとにレビュー依頼を出してください。",
+        },
         "review_completion_status": "complete",
         "execution_capability_gate": capability_gate(),
         "strategic_policy_decision": {
@@ -623,7 +640,7 @@ def make_strategic(payload: dict) -> dict:
                 "parameter_id": f"P-{index}",
                 "status": "derived",
                 "value": "base case",
-                "decision_owner": "independent_monthly_reviewer",
+                "decision_owner": "independent_on_demand_reviewer",
                 "selection_criteria": "common basis",
                 "source_refs": ["E-FP-001"],
                 "base_case": "selected",
@@ -763,6 +780,34 @@ def test_monthly_yaml_is_machine_readable_codex_input(tmp_path: Path) -> None:
     payload, feedback = load(write_yaml(tmp_path / "review_response.yaml", response_payload()))
     assert payload["schema_version"] == 2
     assert feedback.portfolio_diagnosis == []
+
+
+def test_recommendation_window_must_start_at_request_time(tmp_path: Path) -> None:
+    payload = response_payload()
+    payload["recommendation_window"]["start_at"] = "2026-08-03T12:00:00Z"
+
+    with pytest.raises(
+        ValueError,
+        match="recommendation_window.start_at must equal packet_generated_at",
+    ):
+        load(write_yaml(tmp_path / "review_response.yaml", payload))
+
+
+def test_next_review_cannot_precede_recommendation_window_end(tmp_path: Path) -> None:
+    payload = response_payload()
+    payload["next_review_recommendation"].update(
+        {
+            "review_after_at": "2026-08-23",
+            "interval_value": 3,
+            "closing_sentence": "また3週間後（2026-08-23）に最新のスナップショットをもとにレビュー依頼を出してください。",
+        }
+    )
+
+    with pytest.raises(
+        ValueError,
+        match="next_review_recommendation.review_after_at must not be before",
+    ):
+        load(write_yaml(tmp_path / "review_response.yaml", payload))
 
 
 def test_strategic_mode_requires_one_complete_policy(tmp_path: Path) -> None:

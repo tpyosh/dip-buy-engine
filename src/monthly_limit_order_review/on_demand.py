@@ -81,7 +81,7 @@ def build_health_check_window(
             else None
         ),
         "continuous_daily_execution_required": False,
-        "monthly_full_review_is_safety_net": True,
+        "comprehensive_review_is_decision_authority": True,
     }
 
 
@@ -281,7 +281,7 @@ def render_on_demand_assessment_prompt(
         "coverage_end": assessment_date.isoformat(),
         "effective_lookback_days": news_lookback_days,
         "continuous_daily_execution_required": False,
-        "monthly_full_review_is_safety_net": True,
+        "comprehensive_review_is_decision_authority": True,
     }
 
     lines = [

@@ -24,11 +24,12 @@ def render_prompt(sample_computation) -> str:
     )
 
 
-def test_monthly_review_prompt_is_a_closed_decision_packet(sample_computation) -> None:
+def test_on_demand_review_prompt_is_a_closed_decision_packet(sample_computation) -> None:
     prompt = render_prompt(sample_computation)
 
-    assert prompt.startswith("# ChatGPT向け月次独立レビュー\n")
-    assert "- 対象月: 2026_03" in prompt
+    assert prompt.startswith("# ChatGPT向けオンデマンド包括レビュー\n")
+    assert "- レビュー依頼時点:" in prompt
+    assert "- 計画コンテキスト月: 2026_03" in prompt
     assert "## 実行前チェック（利用者向け）" in prompt
     assert "ChatGPTの資産運用プロジェクト内では実行しない" in prompt
     assert "プロジェクト外の新規Temporary Chat" in prompt
@@ -36,7 +37,14 @@ def test_monthly_review_prompt_is_a_closed_decision_packet(sample_computation) -
     assert "このレビュー・パケット以外のファイルを添付しない" in prompt
     assert "カスタム指示を無効化するか" in prompt
 
-    assert "review_mode: monthly_operational_review" in prompt
+    assert "review_cadence: on_demand" in prompt
+    assert "review_mode: on_demand_operational_review" in prompt
+    assert "independent_monthly_reviewer" not in prompt
+    assert "proposal_requested_from_current_monthly_independent_review" not in prompt
+    assert "recommendation_window" in prompt
+    assert "next_review_recommendation" in prompt
+    assert "【次回レビュー時期】" in prompt
+    assert "最新のスナップショットをもとにレビュー依頼を出してください" in prompt
     assert "## 1. モードと対話フェーズ" in prompt
     assert "## 2. 入力データ" in prompt
     assert "## 3. 正規ルール台帳" in prompt
@@ -158,7 +166,7 @@ def test_review_packet_selects_financial_facts_without_copying_values_into_templ
     assert "月間必須支出額: 250,000円" in statements
     assert "生活防衛資金の目標額: 2,000,000円" in statements
     assert "生活防衛資金とは別の予備費は確保しない" in statements
-    assert "投資待機資金の目標比率は今回の月次独立レビューから提案を受ける" in statements
+    assert "投資待機資金の目標比率は今回のオンデマンド独立レビューから提案を受ける" in statements
     assert any(
         "相場下落中でもオール・カントリー型の投資信託を売却"
         in item

@@ -4,6 +4,7 @@ from datetime import UTC, date, datetime
 from decimal import Decimal
 from functools import lru_cache
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import yaml
 from jsonschema import Draft202012Validator, FormatChecker
@@ -50,6 +51,8 @@ DECISION_QUALITY_CHECKS = {
     "execution_capability_gate_prevents_fabricated_calculations",
     "rounding_residuals_use_explicit_tolerances",
     "mortgage_source_values_are_used_without_generic_revalidation",
+    "recommendation_window_is_reviewer_selected_and_actionable",
+    "next_review_recommendation_matches_the_window",
 }
 STATIC_REFERENCE_CHECKS = {
     "no_undefined_packet_reference",
@@ -79,6 +82,8 @@ SEMANTIC_VALIDATION_CHECKS = {
     "purchase_amounts_reconcile_to_funding_sources",
     "sale_amounts_reconcile_to_sale_details",
     "strategic_policy_precedes_implementation",
+    "recommendation_window_starts_at_request_and_has_positive_duration",
+    "next_review_date_is_not_before_recommendation_window_end",
 }
 REQUIRED_CAPABILITIES = {
     "monthly_cash_flow_calculation",
@@ -244,13 +249,16 @@ def _validate_monthly_review_response(
 ) -> None:
     if payload.get("schema_version") != 2:
         raise ValueError("review_response.yaml schema_version must be 2")
-    if payload.get("artifact_type") != "monthly_review_response":
-        raise ValueError("review_response.yaml artifact_type must be monthly_review_response")
+    if payload.get("artifact_type") != "investment_review_response":
+        raise ValueError("review_response.yaml artifact_type must be investment_review_response")
+    if payload.get("review_cadence") != "on_demand":
+        raise ValueError("review_response.yaml review_cadence must be on_demand")
     if payload.get("review_target_month") != expected_month:
         raise ValueError(
             "review_response.yaml review_target_month does not match the snapshot month"
         )
     required = {
+        "review_cadence",
         "review_mode",
         "interaction_phase",
         "portfolio_snapshot_as_of",
@@ -258,6 +266,8 @@ def _validate_monthly_review_response(
         "packet_generated_at",
         "research_cutoff_at",
         "decision_date",
+        "recommendation_window",
+        "next_review_recommendation",
         "review_completion_status",
         "execution_capability_gate",
         "strategic_policy_decision",
@@ -296,6 +306,12 @@ def _validate_monthly_review_response(
                     f"review_response.yaml {field} conflicts with review packet; "
                     f"expected={expected!r}, actual={payload.get(field)!r}"
                 )
+
+    _validate_review_timing_contract(
+        payload["recommendation_window"],
+        payload["next_review_recommendation"],
+        packet_generated_at=payload["packet_generated_at"],
+    )
 
     _validate_execution_capability_gate(payload["execution_capability_gate"])
     _validate_strategic_policy_decision(
@@ -610,9 +626,80 @@ def _validate_semantic_validation_checks(checks) -> None:
         )
 
 
+def _validate_review_timing_contract(
+    recommendation_window,
+    next_review_recommendation,
+    *,
+    packet_generated_at: str,
+) -> None:
+    _require_mapping_fields(
+        recommendation_window,
+        {
+            "start_at",
+            "end_at",
+            "window_length",
+            "window_unit",
+            "selection_rationale",
+            "confidence_boundary",
+        },
+        name="recommendation_window",
+    )
+    _require_mapping_fields(
+        next_review_recommendation,
+        {
+            "review_after_at",
+            "interval_value",
+            "interval_unit",
+            "rationale",
+            "early_review_triggers",
+            "closing_sentence",
+        },
+        name="next_review_recommendation",
+    )
+    requested_at = _parse_datetime(
+        packet_generated_at,
+        path="packet_generated_at",
+    )
+    start_at = _parse_datetime(
+        recommendation_window["start_at"],
+        path="recommendation_window.start_at",
+    )
+    end_at = _parse_datetime(
+        recommendation_window["end_at"],
+        path="recommendation_window.end_at",
+    )
+    if start_at.astimezone(UTC) != requested_at.astimezone(UTC):
+        raise ValueError(
+            "recommendation_window.start_at must equal packet_generated_at"
+        )
+    if end_at <= start_at:
+        raise ValueError("recommendation_window.end_at must be after start_at")
+
+    review_after_at = date.fromisoformat(
+        str(next_review_recommendation["review_after_at"])
+    )
+    tokyo_end_date = end_at.astimezone(ZoneInfo("Asia/Tokyo")).date()
+    if review_after_at < tokyo_end_date:
+        raise ValueError(
+            "next_review_recommendation.review_after_at must not be before "
+            "recommendation_window.end_at"
+        )
+    japanese_units = {"days": "日", "weeks": "週間", "months": "か月"}
+    expected_closing = (
+        f"また{next_review_recommendation['interval_value']}"
+        f"{japanese_units[next_review_recommendation['interval_unit']]}後"
+        f"（{review_after_at.isoformat()}）に最新のスナップショットをもとに"
+        "レビュー依頼を出してください。"
+    )
+    if next_review_recommendation["closing_sentence"] != expected_closing:
+        raise ValueError(
+            "next_review_recommendation.closing_sentence does not match its interval and date"
+        )
+
+
 def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
     if review_mode not in {
-        "monthly_operational_review",
+        "on_demand_operational_review",
         "strategic_policy_second_opinion",
     }:
         raise ValueError("review_response.yaml review_mode is invalid")
@@ -646,7 +733,7 @@ def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
     status = decision["status"]
     allowed_statuses = (
         {"not_applicable"}
-        if review_mode == "monthly_operational_review"
+        if review_mode == "on_demand_operational_review"
         else {"complete", "blocked"}
     )
     if status not in allowed_statuses:
@@ -666,7 +753,7 @@ def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
         strategic=review_mode == "strategic_policy_second_opinion",
         allow_blocked=status == "blocked",
     )
-    if review_mode == "monthly_operational_review":
+    if review_mode == "on_demand_operational_review":
         if any(
             decision[field]
             for field in (
@@ -677,7 +764,7 @@ def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
             )
         ):
             raise ValueError(
-                "monthly strategic policy candidate comparisons must be empty"
+                "on-demand operational strategic policy candidate comparisons must be empty"
             )
         return
 

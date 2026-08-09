@@ -33,7 +33,7 @@ VALIDATION_WARNING_PREFIXES = (
     "same_product_",
 )
 REVIEW_MODES = {
-    "monthly_operational_review",
+    "on_demand_operational_review",
     "strategic_policy_second_opinion",
 }
 GENERATION_STATUSES = {
@@ -203,7 +203,7 @@ def build_review_packet(
             "as_of": snapshot.snapshot_date.isoformat(),
         },
     ]
-    if review_mode == "monthly_operational_review":
+    if review_mode == "on_demand_operational_review":
         selected_sources.append(
             {
                 "source_id": "approved_operational_policy",
@@ -220,8 +220,9 @@ def build_review_packet(
         )
     return ReviewPacket(
         schema_version=2,
-        packet_type="monthly_independent_review",
+        packet_type="on_demand_independent_review",
         generation_status=generation_status,
+        review_cadence="on_demand",
         interaction_phase=interaction_phase,
         review_mode=review_mode,
         review_target_month=review_target_month,
@@ -230,11 +231,17 @@ def build_review_packet(
         packet_generated_at=computation.generated_at,
         research_cutoff_at=computation.generated_at,
         decision_date=None,
-        strategic_required_inputs=strategic_required_inputs,
+        strategic_required_inputs=normalize_review_cadence_terms(
+            strategic_required_inputs
+        ),
         missing_strategic_inputs=missing_strategic_inputs,
         account_type_gate=account_type_gate,
-        strategic_decision_objective=strategic_decision_objective,
-        candidate_methodology=build_candidate_methodology(),
+        strategic_decision_objective=normalize_review_cadence_terms(
+            strategic_decision_objective
+        ),
+        candidate_methodology=normalize_review_cadence_terms(
+            build_candidate_methodology()
+        ),
         decision_stage_contract=build_decision_stage_contract(),
         execution_capability_contract=build_execution_capability_contract(),
         capital_layers=build_capital_layers(),
@@ -300,7 +307,7 @@ def determine_review_mode(
         == "proposal_requested_from_current_review"
     ):
         return "strategic_policy_second_opinion"
-    return "monthly_operational_review"
+    return "on_demand_operational_review"
 
 
 def build_strategic_required_inputs(
@@ -473,7 +480,7 @@ def build_planning_timeline(
     pension_start_contract = {
         "value": None,
         "status": "reviewer_to_derive",
-        "decision_owner": "independent_monthly_reviewer",
+        "decision_owner": "independent_on_demand_reviewer",
         "selection_criteria": (
             "現行の公的年金制度、確認済み就業期間、退職予定日を使い、"
             "一つのベースケース日付と感応度を選ぶ"
@@ -723,7 +730,7 @@ def build_bonus_information(context: dict) -> dict:
         "future_continuation_model_assumption": {
             "value_jpy": future.get("future_amount_jpy"),
             "status": future.get("status", "unknown"),
-            "decision_owner": "independent_monthly_reviewer",
+            "decision_owner": "independent_on_demand_reviewer",
             "base_case_required": True,
             "rule": (
                 "粗い現在参考額を将来継続額の確認済み事実に変換せず、"
@@ -810,7 +817,8 @@ def _objective_parameter_is_missing(model: dict, field: str) -> bool:
     return not (
         isinstance(derivation, dict)
         and derivation.get("status") == "reviewer_to_derive"
-        and derivation.get("decision_owner") == "independent_monthly_reviewer"
+        and derivation.get("decision_owner")
+        in {"independent_monthly_reviewer", "independent_on_demand_reviewer"}
         and bool(derivation.get("method"))
         and bool(derivation.get("evidence_requirements"))
         and derivation.get("base_case_required") is True
@@ -1200,7 +1208,7 @@ def build_candidate_methodology() -> dict:
         return {
             "value": None,
             "status": "reviewer_to_derive",
-            "decision_owner": "independent_monthly_reviewer",
+            "decision_owner": "independent_on_demand_reviewer",
             "selection_criteria": selection_criteria,
             "allowed_primary_sources": allowed_primary_sources,
             "base_case_required": True,
@@ -1610,7 +1618,7 @@ def build_approved_policy(
     *,
     review_mode: str,
 ) -> dict | None:
-    if review_mode != "monthly_operational_review":
+    if review_mode != "on_demand_operational_review":
         return None
     return {
         "strategy_id": computation.strategy_summary.get("strategy_id"),
@@ -1682,6 +1690,8 @@ def build_decision_quality_checks() -> list[str]:
         "execution_capability_gate_prevents_fabricated_calculations",
         "rounding_residuals_use_explicit_tolerances",
         "mortgage_source_values_are_used_without_generic_revalidation",
+        "recommendation_window_is_reviewer_selected_and_actionable",
+        "next_review_recommendation_matches_the_window",
     ]
 
 
@@ -1717,6 +1727,8 @@ def build_semantic_validation_checks() -> list[str]:
         "purchase_amounts_reconcile_to_funding_sources",
         "sale_amounts_reconcile_to_sale_details",
         "strategic_policy_precedes_implementation",
+        "recommendation_window_starts_at_request_and_has_positive_duration",
+        "next_review_date_is_not_before_recommendation_window_end",
     ]
 
 
@@ -1900,6 +1912,23 @@ def build_rule_registry(review_mode: str) -> list[dict]:
             ),
         },
         {
+            "rule_id": "R-WINDOW-001",
+            "applies_to": "final_review",
+            "rule": (
+                "recommendation_windowはpacket_generated_atを始点とし、データ鮮度、イベント日程、"
+                "予測可能性、実行可能性からreviewerがdays、weeks、monthsの尺度と長さを選ぶ。"
+                "全推奨行動のtimingをその範囲内へ具体化する"
+            ),
+        },
+        {
+            "rule_id": "R-REVIEW-001",
+            "applies_to": "final_review",
+            "rule": (
+                "next_review_recommendationはrecommendation_window終了以前に設定せず、"
+                "早期再レビュー条件と最新スナップショットによる次回依頼文を回答末尾に置く"
+            ),
+        },
+        {
             "rule_id": "R-ID-001",
             "applies_to": "final_review",
             "rule": (
@@ -1944,10 +1973,10 @@ def build_rule_registry(review_mode: str) -> list[dict]:
             ),
         },
     ]
-    if review_mode == "monthly_operational_review":
+    if review_mode == "on_demand_operational_review":
         rules.append(
             {
-                "rule_id": "R-MONTHLY-001",
+                "rule_id": "R-ONDEMAND-001",
                 "applies_to": review_mode,
                 "rule": "未承認の資産配分、比率、閾値、銘柄選択を新たに決定しない",
             }
@@ -2087,7 +2116,7 @@ def build_phase_output_contract(
             "forbidden": [
                 "web_research",
                 "investment_decision",
-                "six_human_sections",
+                "seven_human_sections",
                 "yaml",
                 "trade_proposals",
                 "decision_quality_checks",
@@ -2115,6 +2144,7 @@ def build_phase_output_contract(
                 "【実行後配分】",
                 "【実行前確認事項】",
                 "【Codex向け改善フィードバック】",
+                "【次回レビュー時期】",
             ],
             "updated_inputs_location": "【推奨方針】の冒頭。独立見出しは禁止",
             "human_section_rules": (
@@ -2131,10 +2161,19 @@ def build_phase_output_contract(
             "decision_date_rule": (
                 "ユーザー入力ではなく、final_reviewを生成したAsia/Tokyoの暦日をYYYY-MM-DDで記録する"
             ),
+            "recommendation_window_rule": (
+                "packet_generated_atを始点とし、reviewerが根拠を示してdays、weeks、monthsの"
+                "単位と長さを選ぶ。全推奨行動はend_atまでの具体的な時期へ落とす"
+            ),
+            "next_review_rule": (
+                "次回レビュー日はrecommendation_window.end_at以前にせず、早期再レビュー条件と"
+                "最新スナップショットを求める締めの一文を最終セクションに置く"
+            ),
         },
         "response_identity": {
             "schema_version": 2,
-            "artifact_type": "monthly_review_response",
+            "artifact_type": "investment_review_response",
+            "review_cadence": "on_demand",
             "review_mode": review_mode,
             "interaction_phase": "final_review",
             "review_target_month": review_target_month,
@@ -2167,7 +2206,7 @@ def load_inline_monthly_response_schema() -> dict:
     )
     schema = yaml.safe_load(schema_path.read_text(encoding="utf-8"))
     if not isinstance(schema, dict):
-        raise ValueError("monthly review response schema must be an object")
+        raise ValueError("investment review response schema must be an object")
     return schema
 
 
@@ -2343,16 +2382,16 @@ def extract_structured_financial_review_context(
     add("投資待機資金は市場下落時に使う手段であり、残高維持自体を目的にしない")
     target_ratio = dip.get("target_ratio", {})
     if target_ratio.get("status") == "proposal_requested_from_current_monthly_independent_review":
-        add("投資待機資金の目標比率は今回の月次独立レビューから提案を受ける")
+        add("投資待機資金の目標比率は今回のオンデマンド独立レビューから提案を受ける")
     purchase_target = dip.get("purchase_target", {})
     if purchase_target.get("status") == "undecided":
         add("投資待機資金の買付対象は未定")
     activation = dip.get("activation_condition", {})
     if activation.get("status") == "proposal_requested_from_current_monthly_independent_review":
-        add("投資待機資金の発動条件は今回の月次独立レビューから提案を受ける")
+        add("投資待機資金の発動条件は今回のオンデマンド独立レビューから提案を受ける")
     tranches = dip.get("tranche_count", {})
     if tranches.get("status") == "proposal_requested_from_current_monthly_independent_review":
-        add("投資待機資金の投入回数は今回の月次独立レビューから提案を受ける")
+        add("投資待機資金の投入回数は今回のオンデマンド独立レビューから提案を受ける")
     if dip.get("review_rule", {}).get("declining_market_requires_use_option"):
         add("市場下落時は投資待機資金を使う選択肢を必ず比較する")
 
@@ -2486,7 +2525,7 @@ def build_structured_cash_requirement_inputs(
             "target_jpy": dip_target,
             "target_ratio": ratio_value,
             "amount_calculation_policy": dip.get("amount_basis"),
-            "decision_owner": "current_monthly_independent_review_then_user_approval",
+            "decision_owner": "current_on_demand_independent_review_then_user_approval",
             "purchase_target": _structured_value(dip.get("purchase_target")),
             "activation_condition": _structured_value(dip.get("activation_condition")),
             "tranche_amount_jpy": _structured_value(dip.get("tranche_amount_jpy")),
@@ -2527,6 +2566,32 @@ def build_structured_cash_requirement_inputs(
 def _structured_value(value):
     if isinstance(value, dict) and "value" in value:
         return value.get("value")
+    return value
+
+
+def normalize_review_cadence_terms(value):
+    """Translate legacy reviewer-owner labels before exposing a new review packet."""
+
+    replacements = {
+        "independent_monthly_reviewer": "independent_on_demand_reviewer",
+        "current_monthly_independent_review_then_user_approval": (
+            "current_on_demand_independent_review_then_user_approval"
+        ),
+        "proposal_requested_from_current_monthly_independent_review": (
+            "proposal_requested_from_current_on_demand_independent_review"
+        ),
+    }
+    if isinstance(value, dict):
+        return {
+            key: normalize_review_cadence_terms(item)
+            for key, item in value.items()
+        }
+    if isinstance(value, list):
+        return [normalize_review_cadence_terms(item) for item in value]
+    if isinstance(value, tuple):
+        return tuple(normalize_review_cadence_terms(item) for item in value)
+    if isinstance(value, str):
+        return replacements.get(value, value)
     return value
 
 
@@ -2751,7 +2816,7 @@ def build_cash_requirement_inputs(
             "資産総額から月間支出または月間必須支出を推定しない",
             "生活防衛資金、確定支出、予備費を総資産比率または目標株式比率から逆算しない。投資待機資金だけは独立ChatGPTが提案しユーザが承認した総資産比率から算定する",
             "未設定の投資待機資金を生活防衛資金へ上乗せしない",
-            "オンデマンド独立判断へ委譲中の比率を月次レビューまたはCodexで先回りして決定しない",
+            "オンデマンド包括レビューへ委譲中の比率をCodexで先回りして決定しない",
             "confirmed条件を一般的な資産配分、保守的な印象、丸い比率で上書きしない",
         ],
     }

@@ -67,6 +67,7 @@ def render_chatgpt_prompt(
     preflight = "\n".join(f"- [ ] {item}" for item in packet.preflight_checklist)
     rendered_template = (
         template_text.replace("{{REVIEW_TARGET_MONTH}}", packet.review_target_month)
+        .replace("{{REVIEW_REQUESTED_AT}}", packet.packet_generated_at)
         .replace(
             "{{PORTFOLIO_SNAPSHOT_AS_OF}}",
             packet.portfolio_snapshot_as_of.isoformat(),
@@ -77,6 +78,8 @@ def render_chatgpt_prompt(
     phase_gate = build_phase_gate(packet)
     input_data = {
         "date_context": {
+            "review_cadence": packet.review_cadence,
+            "review_requested_at": packet.packet_generated_at,
             "review_target_month": packet.review_target_month,
             "portfolio_snapshot_as_of": packet.portfolio_snapshot_as_of,
             "market_reference_as_of": packet.market_reference_as_of,
@@ -144,6 +147,7 @@ def render_chatgpt_prompt(
 def build_phase_gate(packet: ReviewPacket) -> dict:
     gate = {
         "generation_status": packet.generation_status,
+        "review_cadence": packet.review_cadence,
         "review_mode": packet.review_mode,
         "interaction_phase": packet.interaction_phase,
     }
@@ -171,7 +175,7 @@ def build_phase_gate(packet: ReviewPacket) -> dict:
                 "forbidden_in_first_response": [
                     "web_research",
                     "investment_decision",
-                    "six_human_sections",
+                    "seven_human_sections",
                     "yaml",
                     "trade_proposals",
                     "decision_quality_checks",
@@ -201,7 +205,7 @@ def render_review_generation_blocker(packet: ReviewPacket) -> str:
         raise ValueError("A ready review packet does not need a generation blocker")
     account_blocked = packet.generation_status == "blocked_missing_account_types"
     lines = [
-        "# 月次独立レビュー生成停止",
+        "# オンデマンド独立レビュー生成停止",
         "",
         (
             "このファイルはChatGPTへ渡すプロンプトではありません。"
@@ -213,6 +217,7 @@ def render_review_generation_blocker(packet: ReviewPacket) -> str:
         ),
         "",
         f"- generation_status: {packet.generation_status}",
+        f"- review_cadence: {packet.review_cadence}",
         f"- review_mode: {packet.review_mode}",
         f"- intended_interaction_phase: {packet.interaction_phase}",
         "",
@@ -246,14 +251,14 @@ def validate_closed_review_prompt(prompt: str) -> None:
     unresolved = re.findall(r"\{\{[A-Z0-9_]+\}\}", prompt)
     if unresolved:
         raise ValueError(
-            "Rendered monthly review prompt contains unresolved placeholders: "
+            "Rendered on-demand review prompt contains unresolved placeholders: "
             + ", ".join(sorted(set(unresolved)))
         )
     if ABSOLUTE_LOCAL_PATH_RE.search(prompt):
-        raise ValueError("Rendered monthly review prompt contains a local absolute path.")
+        raise ValueError("Rendered on-demand review prompt contains a local absolute path.")
     if UNRESOLVED_FILE_REFERENCE_RE.search(prompt):
         raise ValueError(
-            "Rendered monthly review prompt contains unresolved local references."
+            "Rendered on-demand review prompt contains unresolved local references."
         )
     leaked = [field for field in FORBIDDEN_RENDERED_FIELDS if field in prompt]
     if leaked:

@@ -30,6 +30,11 @@ DEPRECATED_OR_UNDEFINED_REFERENCES = (
     "material_trade_assumption_limit_pct",
     "dip_buy_liquidity_policy_proposal",
     "sox_decision",
+    "schemas/monthly-review-response.schema.yaml",
+    "response_skeleton",
+    "array_schemas",
+    "general_explanation_max_pct",
+    "do_not_treat_the_observed_750000_jpy_monthly_setting_as_salary_funded_without_evidence",
 )
 
 
@@ -47,6 +52,14 @@ def render_chatgpt_prompt(
         financial_assumptions_source=financial_assumptions_source,
     )
     if packet.generation_status != "ready":
+        if packet.generation_status == "blocked_missing_account_types":
+            missing = ", ".join(
+                item["symbol"]
+                for item in packet.account_type_gate[
+                    "missing_or_unclassified_holdings"
+                ]
+            )
+            raise ValueError("blocked_missing_account_types: " + missing)
         raise ValueError(
             "blocked_missing_strategic_inputs: "
             + ", ".join(packet.missing_strategic_inputs)
@@ -72,6 +85,7 @@ def render_chatgpt_prompt(
             "decision_date": packet.decision_date,
         },
         "strategic_required_inputs": packet.strategic_required_inputs,
+        "account_type_gate": packet.account_type_gate,
         "strategic_decision_objective": packet.strategic_decision_objective,
         "candidate_methodology": packet.candidate_methodology,
         "capital_layers": packet.capital_layers,
@@ -185,10 +199,18 @@ def yaml_block(value) -> str:
 def render_review_generation_blocker(packet: ReviewPacket) -> str:
     if packet.generation_status == "ready":
         raise ValueError("A ready review packet does not need a generation blocker")
+    account_blocked = packet.generation_status == "blocked_missing_account_types"
     lines = [
         "# 月次独立レビュー生成停止",
         "",
-        "このファイルはChatGPTへ渡すプロンプトではありません。戦略判断に必要な入力が不足しているため、閉じたレビュー・パケットの生成を停止しました。",
+        (
+            "このファイルはChatGPTへ渡すプロンプトではありません。"
+            + (
+                "売買可能な全明細の口座区分が確認できていないため、レビュー依頼とレビュー出力の生成を停止しました。"
+                if account_blocked
+                else "戦略判断に必要な入力が不足しているため、閉じたレビュー・パケットの生成を停止しました。"
+            )
+        ),
         "",
         f"- generation_status: {packet.generation_status}",
         f"- review_mode: {packet.review_mode}",
@@ -196,13 +218,27 @@ def render_review_generation_blocker(packet: ReviewPacket) -> str:
         "",
         "## 不足入力",
     ]
-    lines.extend(f"- `{item}`" for item in packet.missing_strategic_inputs)
-    lines.extend(
-        [
-            "",
-            "未確認値を推測で埋めず、`financial/current.yaml` が指す構造化レコードへ確認済み値を追加してから再生成してください。入力形式は `schemas/financial-context.schema.yaml` を参照してください。",
-        ]
-    )
+    if account_blocked:
+        lines.extend(
+            "- `{}: {}`".format(item["symbol"], item["name"])
+            for item in packet.account_type_gate[
+                "missing_or_unclassified_holdings"
+            ]
+        )
+        lines.extend(
+            [
+                "",
+                "各明細がNISA・特定口座・一般口座のどれかを確認し、`holdings/current.yaml` が指す新版へ記録してから再生成してください。未確認のまま部分レビューを出力してはいけません。",
+            ]
+        )
+    else:
+        lines.extend(f"- `{item}`" for item in packet.missing_strategic_inputs)
+        lines.extend(
+            [
+                "",
+                "未確認値を推測で埋めず、`financial/current.yaml` が指す構造化レコードへ確認済み値を追加してから再生成してください。入力形式は `schemas/financial-context.schema.yaml` を参照してください。",
+            ]
+        )
     return "\n".join(lines).rstrip() + "\n"
 
 

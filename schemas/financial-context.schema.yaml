@@ -167,14 +167,22 @@ $defs:
   terminal_wealth_objective:
     type: object
     additionalProperties: false
-    required: [horizon_years, planned_contributions, return_basis, statistic, downside_quantile_pct, leverage_allowed]
+    required: [target_age, target_date, horizon_years, optimization_target, profit_definition, planned_contributions, return_basis, statistic, downside_quantile_pct, leverage_allowed, lifestyle_constraints]
     properties:
+      target_age: {type: integer, minimum: 0}
+      target_date: {type: string, format: date}
       horizon_years: {type: [number, "null"], minimum: 0}
+      optimization_target: {type: string}
+      profit_definition: {type: string}
       planned_contributions: {type: [array, object, "null"]}
       return_basis: {type: [string, "null"], enum: [nominal, real, null]}
       statistic: {type: [string, "null"], enum: [expected_value, median, downside_quantile, null]}
       downside_quantile_pct: {type: [number, "null"], minimum: 0, maximum: 100}
       leverage_allowed: {type: [boolean, "null"]}
+      lifestyle_constraints:
+        type: array
+        minItems: 1
+        items: {type: string}
   minimum_risk_objective:
     type: object
     additionalProperties: false

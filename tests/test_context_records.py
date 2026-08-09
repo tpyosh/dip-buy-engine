@@ -19,7 +19,7 @@ def test_financial_values_are_loaded_from_versioned_ssot() -> None:
     record = context["record"]
     regular = record["cash_flow"]["regular_month"]
 
-    assert context["source_path"] == "financial/versions/2026-08-03-v2.yaml"
+    assert context["source_path"] == "financial/versions/2026-08-09.yaml"
     assert regular["essential_expenses_jpy"]["value"] == 250_000
     assert regular["income_after_tax_social_insurance_mortgage_ideco_jpy"][
         "is_expense_value"

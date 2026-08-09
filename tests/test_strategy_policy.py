@@ -20,7 +20,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def test_current_strategy_pointer_loads_the_approved_strategy() -> None:
     strategy = load_current_strategy(ROOT)
 
-    assert strategy["strategy_id"] == "husband_personal_2026-08-02"
+    assert strategy["strategy_id"] == "husband_personal_2026-08-09"
     assert strategy["automation"]["human_approval_required_for_all_trades"] is True
 
 

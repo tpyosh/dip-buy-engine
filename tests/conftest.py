@@ -58,6 +58,7 @@ holdings:
 
   - symbol: "ALL_COUNTRY_FUND"
     name: "All Country Mutual Funds"
+    account_type: "NISAつみたて投資枠"
     asset_class: "core"
     quantity: null
     avg_cost: null
@@ -67,6 +68,7 @@ holdings:
 
   - symbol: "MSFT"
     name: "Microsoft"
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "jun_core"
     quantity: 4
     avg_cost: 410
@@ -76,6 +78,7 @@ holdings:
 
   - symbol: "NIKKO_SOX_FUND"
     name: "Nikkei SOX Index Fund"
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "satellite_core"
     quantity: null
     avg_cost: null
@@ -85,6 +88,7 @@ holdings:
 
   - symbol: "SMH"
     name: "VanEck Semiconductor ETF"
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "satellite_core"
     quantity: 1
     avg_cost: 200
@@ -94,6 +98,7 @@ holdings:
 
   - symbol: "PLTR"
     name: "Palantir Technologies"
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "satellite"
     quantity: 10
     avg_cost: 80

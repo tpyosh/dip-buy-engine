@@ -16,8 +16,11 @@ required:
   - decision_date
   - strategic_required_inputs
   - missing_strategic_inputs
+  - account_type_gate
   - strategic_decision_objective
   - candidate_methodology
+  - decision_stage_contract
+  - execution_capability_contract
   - capital_layers
   - asset_class_definitions
   - allocation_denominators
@@ -42,7 +45,7 @@ properties:
   packet_type:
     const: monthly_independent_review
   generation_status:
-    enum: [ready, blocked_missing_strategic_inputs]
+    enum: [ready, blocked_missing_strategic_inputs, blocked_missing_account_types]
   interaction_phase:
     enum: [objective_confirmation, final_review]
   review_mode:
@@ -68,25 +71,90 @@ properties:
     type: array
     uniqueItems: true
     items: {type: string}
+  account_type_gate:
+    type: object
+    additionalProperties: false
+    required:
+      - status
+      - required_account_categories
+      - checked_holding_count
+      - checked_holdings
+      - missing_or_unclassified_holdings
+      - generation_rule
+    properties:
+      status: {enum: [complete, blocked]}
+      required_account_categories: {const: [NISA, 特定口座, 一般口座]}
+      checked_holding_count: {type: integer, minimum: 0}
+      checked_holdings:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [symbol, name, account_type, account_category]
+          properties:
+            symbol: {type: string}
+            name: {type: string}
+            account_type: {type: [string, "null"]}
+            account_category: {enum: [NISA, 特定口座, 一般口座, null]}
+      missing_or_unclassified_holdings:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [symbol, name, observed_account_type]
+          properties:
+            symbol: {type: string}
+            name: {type: string}
+            observed_account_type: {type: [string, "null"]}
+      generation_rule: {type: string}
   strategic_decision_objective:
     $ref: "#/$defs/strategic_decision_objective"
   candidate_methodology:
     type: object
     required:
-      - candidate_range
-      - range_rationale_required
-      - boundary_extension_rule
-      - global_equity_index
-      - bond_index
-      - bond_instrument_type
-      - estimation_period
-      - assumptions_as_of
-      - inflation_assumption_pct
-      - return_basis
-      - tax_cost_treatment
-      - major_drawdown_definition
-      - rebalancing_frequency
+      - staged_selection_sequence
+      - tactical_liquidity_candidates_pct
+      - tactical_liquidity_denominator
+      - tactical_liquidity_is_separate_from_household_reserve
+      - tactical_liquidity_required_comparison_fields
+      - tactical_liquidity_selection_priority
+      - tactical_policy_configuration_after_selection
+      - anti_hindsight_rule
+      - other_pct_candidates
+      - crypto_contribution_options
+      - crypto_current_balance_rule
+      - other_pct_selection_priority
+      - satellite_parameter_contract
+      - candidate_grid
+      - assumption_delegations
+      - common_assumptions_rule
+      - required_return_calculation_contract
+      - success_probability_calculation_contract
+      - primary_objective_fit_definition
       - required_candidate_fields
+  decision_stage_contract:
+    type: object
+    additionalProperties: false
+    required: [required_order, strategic_policy_stage, implementation_stage, status_paths, blocking_isolation_rule]
+    properties:
+      required_order:
+        const: [strategic_policy_stage, implementation_stage]
+      strategic_policy_stage: {type: object}
+      implementation_stage: {type: object}
+      status_paths: {type: array, minItems: 3, maxItems: 3, uniqueItems: true}
+      blocking_isolation_rule: {type: string}
+  execution_capability_contract:
+    type: object
+    additionalProperties: false
+    required: [gate_output_path, required_before_calculation, required_capabilities, capability_status_enum, unavailable_result_contract, partial_completion_rule, fabrication_prohibited]
+    properties:
+      gate_output_path: {const: execution_capability_gate}
+      required_before_calculation: {const: true}
+      required_capabilities: {type: array, minItems: 8, maxItems: 8, uniqueItems: true}
+      capability_status_enum: {const: [available, partial, unavailable]}
+      unavailable_result_contract: {type: object}
+      partial_completion_rule: {type: string}
+      fabrication_prohibited: {const: true}
   capital_layers:
     type: object
   asset_class_definitions:
@@ -128,14 +196,12 @@ properties:
   direct_semiconductor_limit:
     type: object
     additionalProperties: false
-    required: [status, limit_pct, denominator, priority, strategic_review_note]
+    required: [current_approved_constraint, proposed_future_policy, priority, approval_gate]
     properties:
-      status:
-        enum: [hard_constraint, policy_to_reconsider, explicit_exception]
-      limit_pct: {type: [number, "null"], minimum: 0, maximum: 100}
-      denominator: {const: household_total_assets_jpy}
+      current_approved_constraint: {type: object}
+      proposed_future_policy: {type: object}
       priority: {type: string}
-      strategic_review_note: {type: string}
+      approval_gate: {type: array}
   user_decision_preferences:
     type: object
   active_risk_policy:
@@ -155,10 +221,10 @@ properties:
         rule: {type: string}
   research_contract:
     type: object
-    required: [phase, required_for, preferred_source_types, source_required_fields, portfolio_valuation_rule]
+    required: [phase, required_for, preferred_source_types, source_required_fields, cutoff_compliance_rules, portfolio_valuation_rule]
   validation_contract:
     type: object
-    required: [quality_check_schema, required_check_ids, phase_rule, static_reference_checks, interaction_phase_at_generation]
+    required: [quality_check_schema, required_check_ids, phase_rule, static_reference_checks, static_reference_check_rule, standard_json_schema_scope, semantic_validation_check_ids, semantic_validation_rule, numeric_tolerances, rounding_rule, review_completion_status_enum, completion_rule, interaction_phase_at_generation]
   selected_sources:
     type: array
     items:
@@ -229,7 +295,15 @@ properties:
         as_of: {type: string}
   output_contract:
     type: object
-    required: [interaction_phase, objective_confirmation, final_review, response_identity, canonical_paths, array_schemas, root_fields]
+    additionalProperties: false
+    required: [interaction_phase, objective_confirmation, final_review, response_identity, canonical_paths, inline_response_schema]
+    properties:
+      interaction_phase: {enum: [objective_confirmation, final_review]}
+      objective_confirmation: {type: object}
+      final_review: {type: object}
+      response_identity: {type: object}
+      canonical_paths: {type: object}
+      inline_response_schema: {type: object}
   excluded_information:
     type: array
     items: {type: string}
@@ -242,28 +316,35 @@ $defs:
       - user_age
       - user_age_as_of
       - tax_residency
-      - investment_horizon_years
+      - investment_horizon_years_display_only
       - planning_end_age
       - expected_withdrawal_start
       - earliest_possible_asset_use_date
+      - planning_timeline
       - planned_contributions
       - current_recurring_commitments
+      - contribution_reconciliation
       - expected_future_cash_flows
+      - bonus_information
       - human_capital_assumptions
       - liabilities
+      - liability_cash_flows
       - pension_and_other_future_assets
     properties:
       date_of_birth: {type: [string, "null"], format: date}
       user_age: {type: [integer, "null"], minimum: 0}
       user_age_as_of: {type: [string, "null"], format: date}
       tax_residency: {type: [string, "null"]}
-      investment_horizon_years: {type: [number, "null"], minimum: 0}
+      investment_horizon_years_display_only: {type: [number, "null"], minimum: 0}
       planning_end_age: {type: [integer, "null"], minimum: 0}
       expected_withdrawal_start: {type: [string, "null"]}
       earliest_possible_asset_use_date: {type: [string, "null"]}
+      planning_timeline: {type: object}
       planned_contributions: {type: [array, object, "null"]}
       current_recurring_commitments: {type: object}
+      contribution_reconciliation: {type: object}
       expected_future_cash_flows: {type: [array, object, "null"]}
+      bonus_information: {type: object}
       human_capital_assumptions: {type: [object, "null"]}
       liabilities:
         type: object
@@ -284,6 +365,7 @@ $defs:
           remaining_term_years: {type: [number, "null"], minimum: 0}
           annual_repayment_jpy: {type: [number, "null"], minimum: 0}
           balance_as_of: {type: [string, "null"]}
+      liability_cash_flows: {type: array}
       pension_and_other_future_assets: {type: [array, object, "null"]}
   strategic_decision_objective:
     type: object

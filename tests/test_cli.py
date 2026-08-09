@@ -13,7 +13,7 @@ from monthly_limit_order_review.cli import (
 from monthly_limit_order_review.models import BucketAllocation, MarketReference
 from monthly_limit_order_review.portfolio_metrics import compute_portfolio_metrics
 from monthly_limit_order_review.snapshot_loader import load_snapshot
-from monthly_limit_order_review.storage import load_yaml
+from monthly_limit_order_review.storage import load_yaml, write_yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -84,6 +84,7 @@ def test_generate_review_prompt_writes_only_generated_reports(
             ROOT / "financial/versions/2026-08-02.yaml",
             ROOT / "financial/versions/2026-08-03.yaml",
             ROOT / "financial/versions/2026-08-03-v2.yaml",
+            ROOT / "financial/versions/2026-08-09.yaml",
             ROOT / "holdings/current.yaml",
         ROOT / "holdings/versions/2026-08-02.yaml",
     ]:
@@ -94,7 +95,16 @@ def test_generate_review_prompt_writes_only_generated_reports(
         encoding="utf-8",
     )
     snapshot_path = project_root / "snapshot.yaml"
-    snapshot_path.write_text((ROOT / "data/normalized/snapshot_2026_04.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    snapshot_payload = load_yaml(ROOT / "data/normalized/snapshot_2026_04.yaml")
+    for holding in snapshot_payload["holdings"]:
+        if holding.get("asset_class") in {
+            "core",
+            "jun_core",
+            "satellite_core",
+            "satellite",
+        }:
+            holding["account_type"] = "特定口座（源泉徴収あり）"
+    write_yaml(snapshot_path, snapshot_payload)
 
     def fake_references(requests: dict[str, dict[str, str]]) -> list[MarketReference]:
         references: list[MarketReference] = []

@@ -51,6 +51,37 @@ def validate_strategy_policy(strategy: dict) -> None:
     if strategy.get("status") != "active":
         errors.append("strategy status must be active")
 
+    purpose = strategy.get("purpose", {})
+    if purpose.get("status") != "confirmed":
+        errors.append("strategy purpose must be confirmed")
+    if purpose.get("primary_objective") != "maximize_age_65_investment_profit":
+        errors.append("strategy primary objective must maximize age-65 investment profit")
+    if purpose.get("target_age") != 65 or not purpose.get("target_date"):
+        errors.append("strategy purpose must define the age-65 target date")
+
+    satellite_parameters = (
+        strategy.get("review_policy", {}).get("satellite_parameters", {})
+    )
+    if satellite_parameters.get("satellites_allowed") is not True:
+        errors.append("satellite investing must be allowed")
+    if satellite_parameters.get("positive_satellite_allocation_required") is not True:
+        errors.append("satellite allocation must remain a positive reviewer parameter")
+    for field in ("target_pct", "securities"):
+        parameter = satellite_parameters.get(field, {})
+        if parameter.get("status") not in {"reviewer_to_propose", "confirmed"}:
+            errors.append(f"satellite {field} must be a reviewer parameter")
+
+    account_gate_rule = next(
+        (
+            item
+            for item in strategy.get("principles", [])
+            if item.get("id") == "account_type_review_gate"
+        ),
+        None,
+    )
+    if account_gate_rule is None:
+        errors.append("strategy must define the account type review gate")
+
     target_groups = strategy.get("allocation", {}).get("target_groups", {})
     if not target_groups:
         errors.append("allocation.target_groups must not be empty")

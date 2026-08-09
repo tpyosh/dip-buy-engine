@@ -8,6 +8,8 @@ Codex が Money Forward キャプチャを直接読み取り・正規化した�
 
 現在有効な長期方針は [strategy/current.yaml](/Users/tappeiyoshida/projects/stock/strategy/current.yaml) が指す不変の戦略版です。期間限定の承認済み計画は同ファイルの `active_plan_paths` から参照します。
 
+現行の主目的は「今の生活を楽しみつつ無理のない範囲で運用し、65歳時点の投資利益を最大化する」です。持続可能な拠出額を全候補で共通に固定し、資産効率だけを見たオール・カントリー型商品のみの基準案と、趣味として楽しめる正のサテライト配分を比較します。サテライト比率と具体的銘柄は独立ChatGPTがレビューするパラメータで、Codexは先に値を決めません。
+
 収入、支出、ボーナス、生活防衛資金、ローンなど変わり得る家計値は [financial/current.yaml](/Users/tappeiyoshida/projects/stock/financial/current.yaml)、口座区分、売却可否、保有意図は [holdings/current.yaml](/Users/tappeiyoshida/projects/stock/holdings/current.yaml) が指す版管理YAMLを正とします。これらの値をMarkdown、プロンプト、Pythonコードへ重複して固定しません。
 
 月次CLIはこの戦略と計画をCodex側の計算・履歴整合確認に使い、旧 `config/portfolio_policy.yaml` のバケット目標値を現在方針として使用しません。一方、ChatGPT向け独立レビューでは、現行戦略全体、active plan、Python候補値を `review_packet.yaml` へ入れません。ユーザが明示承認したレビュー制約だけは、その承認記録を出典にallowlistへ加えます。旧目標値は過去計算と単体テストの再現用fallbackとしてのみ残し、生成済みの過去レビューは書き換えません。
@@ -325,13 +327,14 @@ ChatGPTから受け取ったCodex向けYAMLは、全銘柄の評価が揃って�
 6. Codex / CLI が合計、カテゴリ、通貨、分類、前月差分、重複、OCR由来の不確実性を検証する
 7. CLI で市場データ取得、比率計算、ルール計算、警告抽出を実行する
 8. CLI がallowlistで `review_packet.yaml` を作り、その同じパケットから `review_request.md` を生成する
-9. 利用者が `review_request.md` 冒頭の実行前チェックを確認し、資産運用Project外の新規Temporary Chat等で、レビュー・パケットだけをChatGPTへ渡す
-10. ChatGPT が数値事実とユーザー条件に加え、個別株・ETF全件を一次情報で調査し、ストーリー健全性と判断痕跡を返す
-11. ChatGPT はユーザ向け日本語MarkdownとCodex向け `review_response.yaml` を分離し、CodexはYAMLだけを機械取り込みする
-12. Codex が回答を履歴、税務・口座制約、実行可能額と照合してから、CLIでレビュー取り込み、差分保存、Codex向け修正プロンプト生成、coreスポット買いのGoogle Calendarイベントドラフト生成を行う
-13. Codex は生成されたイベントドラフトを使い、ChatGPT が決めた coreスポット買い実行スケジュールを手動発注リマインダーとして Google Calendar に作成する
-14. ユーザがChatGPT出力またはCodex向け修正プロンプトを明示的に貼り付けた場合のみ、Codex がREADME の最新月セクションに月次サマリー、購入計画、今月の指値買い設定、ポートフォリオサマリーを反映する
-15. README 更新時は既存の `## Monthly Review: YYYY_MM` を最新月の内容に置換し、過去月の `Monthly Review` セクションをルートREADMEに残さない
+9. 全売買可能明細がNISA・特定口座・一般口座のいずれかに分類済みであることを生成前ゲートで確認する。不足時はレビュー依頼を生成せず、口座確認後に再実行する
+10. 利用者が `review_request.md` 冒頭の実行前チェックを確認し、資産運用Project外の新規Temporary Chat等で、レビュー・パケットだけをChatGPTへ渡す
+11. ChatGPT が数値事実とユーザー条件に加え、個別株・ETF全件を一次情報で調査し、ストーリー健全性と判断痕跡を返す
+12. ChatGPT はユーザ向け日本語MarkdownとCodex向け `review_response.yaml` を分離し、CodexはYAMLだけを機械取り込みする
+13. Codex が回答を履歴、税務・口座制約、実行可能額と照合してから、CLIでレビュー取り込み、差分保存、Codex向け修正プロンプト生成、coreスポット買いのGoogle Calendarイベントドラフト生成を行う
+14. Codex は生成されたイベントドラフトを使い、ChatGPT が決めた coreスポット買い実行スケジュールを手動発注リマインダーとして Google Calendar に作成する
+15. ユーザがChatGPT出力またはCodex向け修正プロンプトを明示的に貼り付けた場合のみ、Codex がREADME の最新月セクションに月次サマリー、購入計画、今月の指値買い設定、ポートフォリオサマリーを反映する
+16. README 更新時は既存の `## Monthly Review: YYYY_MM` を最新月の内容に置換し、過去月の `Monthly Review` セクションをルートREADMEに残さない
 
 将来の月次レビュー開始時は [prompts/templates/moneyforward_monthly_session_start_prompt.md](/Users/tappeiyoshida/projects/stock/prompts/templates/moneyforward_monthly_session_start_prompt.md) を Codex に貼り、スクリーンショット添付から始める。
 
@@ -351,7 +354,9 @@ ChatGPTから受け取ったCodex向けYAMLは、全銘柄の評価が揃って�
 
 同一商品が複数明細に分かれていても、連番サフィックスや商品名の一致だけで重複・一本化対象と判定しません。NISA、特定口座、一般口座、iDeCoなどの口座区分は売却判断の必須属性として扱い、正規化時に制度・枠まで可能な限り記録します。
 
-月次レビューでは、経済的エクスポージャーの合算と、売却する口座・取得ロットの選択を分離します。売却・移管・一本化を提案する場合は、口座区分、取得価額、含み損益、概算税額、税引後手取額、NISA非課税保有と枠への影響を比較します。口座区分が不明な場合は、削減すべきエクスポージャーや概算額を示しても、特定ロットの売却・一本化は確定しません。
+月次レビューでは、経済的エクスポージャーの合算と、売却する口座・取得ロットの選択を分離します。売却・移管・一本化を提案する場合は、口座区分、取得価額、含み損益、概算税額、税引後手取額、NISA非課税保有と枠への影響を比較します。売買可能な全明細の口座区分がNISA・特定口座・一般口座のいずれかに確定するまでは、削減エクスポージャーの部分評価を含めてChatGPT向けレビュー依頼とレビュー結果を一切生成しません。
+
+レビュー結果は、現在保有する全売買可能明細について、何を保有・一部売却・全部売却するか、いつ、どの口座で、どの方法と数量または金額で行うかを一件ずつ示します。現在未保有の資産についても具体的な購入案、または新規購入しない結論と理由を必須とします。
 
 2026-08-02に確認した国税庁・金融庁の一次情報では、NISAの譲渡益は制度要件を満たす範囲で非課税、NISA内の譲渡損は課税口座との損益通算・繰越控除不可です。2024年以降のNISAは売却商品の簿価分の非課税保有限度額を翌年以降に再利用できます。旧NISAを含む制度区分と取得年は実行前に再確認します。
 

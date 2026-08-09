@@ -144,8 +144,11 @@ class ReviewPacket:
     decision_date: str | None
     strategic_required_inputs: dict
     missing_strategic_inputs: list[str]
+    account_type_gate: dict
     strategic_decision_objective: dict
     candidate_methodology: dict
+    decision_stage_contract: dict
+    execution_capability_contract: dict
     capital_layers: dict
     asset_class_definitions: dict
     allocation_denominators: dict

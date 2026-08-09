@@ -5,6 +5,8 @@ from copy import deepcopy
 from datetime import UTC, date, datetime
 from pathlib import Path
 
+import pytest
+
 from monthly_limit_order_review.cli import (
     build_parser,
     handle_ingest_health_check,
@@ -149,6 +151,25 @@ def test_on_demand_prompt_focuses_on_price_moves_and_news_not_portfolio_status(s
     assert "reserve_maintenance_is_objective は false" in prompt
     assert "正式な商品名・会社名" in prompt
     assert "machine_id (Codex YAML only)" in prompt
+    assert "account_type_gate_status: complete" in prompt
+
+
+def test_on_demand_prompt_is_blocked_when_an_account_type_is_missing(
+    sample_computation,
+) -> None:
+    computation = deepcopy(sample_computation)
+    computation.snapshot.holdings[1].account_type = None
+    freshness = assess_snapshot_freshness(
+        computation.snapshot.snapshot_date,
+        requested_at=datetime(2026, 3, 7, 9, 0, tzinfo=UTC),
+    )
+
+    with pytest.raises(ValueError, match="blocked_missing_account_types"):
+        render_on_demand_assessment_prompt(
+            computation,
+            "template",
+            inventory_freshness=freshness,
+        )
 
 
 def test_on_demand_run_writes_separate_history_without_monthly_side_effects(
@@ -251,7 +272,10 @@ def test_ingest_health_check_saves_only_validated_complete_response(
     request_dir = tmp_path / "reports/generated/on_demand/2026/2026_08_02T120000Z"
     write_yaml(
         request_dir / "market_data.yaml",
-        {"security_story_targets": [{"symbol": "MSFT"}]},
+        {
+            "account_type_gate": {"status": "complete"},
+            "security_story_targets": [{"symbol": "MSFT"}],
+        },
     )
     response_path = write_yaml(
         tmp_path / "incoming.yaml",

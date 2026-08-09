@@ -8,6 +8,7 @@ from zoneinfo import ZoneInfo
 from .market_data import MarketDataFetcher
 from .models import Holding, MarketReference, MonthlyComputation, PortfolioSnapshot, PortfolioWarning
 from .portfolio_metrics import suggest_core_proxy_symbol
+from .review_readiness import build_account_type_gate, require_complete_account_type_gate
 from .utils import quantize
 
 ON_DEMAND_SCOPES = ("stocks", "investment_funds", "pension")
@@ -227,6 +228,7 @@ def build_on_demand_market_data_artifact(computation: MonthlyComputation) -> dic
     return {
         "kind": "on_demand_held_symbol_market_data",
         "generated_at": computation.generated_at,
+        "account_type_gate": build_account_type_gate(computation.snapshot),
         "inventory": {
             "source_path": computation.metadata.get("snapshot_path"),
             "snapshot_date": computation.snapshot.snapshot_date,
@@ -267,6 +269,7 @@ def render_on_demand_assessment_prompt(
     if news_lookback_days < 1:
         raise ValueError("news_lookback_days must be one or greater")
     snapshot = computation.snapshot
+    account_type_gate = require_complete_account_type_gate(snapshot)
     resolved_buckets = computation.metadata.get("resolved_buckets", {})
     groups = classify_on_demand_holdings(snapshot, resolved_buckets=resolved_buckets)
     reference_map = {reference.symbol: reference for reference in computation.market_references}
@@ -291,6 +294,8 @@ def render_on_demand_assessment_prompt(
         f"- holdings_inventory_snapshot_date: {inventory_freshness['snapshot_date']}",
         f"- holdings_inventory_age_days: {inventory_freshness['age_days']}",
         f"- holdings_inventory_status: {inventory_freshness['status']}",
+        f"- account_type_gate_status: {account_type_gate['status']}",
+        f"- account_type_gate_checked_holding_count: {account_type_gate['checked_holding_count']}",
         "- holdings_inventory_usage: 銘柄名の特定だけに使用し、保有額・数量・取得単価・損益・配分は評価しない",
         "- market_price_basis: yfinance latest available daily close; intraday real-time quote is not guaranteed",
         f"- authoritative_news_lookback_days: {news_lookback_days}",

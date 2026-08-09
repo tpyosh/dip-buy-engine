@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+from datetime import UTC, date, datetime
 from decimal import Decimal
+from functools import lru_cache
+from pathlib import Path
 
 import yaml
+from jsonschema import Draft202012Validator, FormatChecker
 
 from .models import ReviewFeedback, ReviewOrderProposal
+from .review_readiness import classify_review_account_type
 from .storage import load_yaml
 
 
@@ -28,7 +33,91 @@ DECISION_QUALITY_CHECKS = {
     "prior_recommendations_are_explicitly_superseded_when_changed",
     "delegated_financial_planning_inputs_are_derived_not_reasked",
     "derived_financial_planning_values_have_evidence_and_sensitivity",
+    "date_timeline_is_canonical_and_cash_flows_do_not_overlap",
+    "retirement_mortgage_cash_flows_are_included_without_double_counting",
+    "recurring_contributions_are_reconciled_before_policy_derivation",
+    "capital_market_assumptions_are_complete_and_common_to_all_candidates",
+    "required_return_calculation_is_reproducible",
+    "success_probability_calculation_is_reproducible",
+    "candidate_grid_is_exhaustive_and_not_stopped_at_a_selected_boundary",
+    "equity_bond_other_and_core_satellite_denominators_are_consistent",
+    "approved_and_proposed_semiconductor_limits_are_separated",
+    "strategic_policy_implementation_and_account_lot_statuses_are_separated",
+    "strategic_policy_precedes_implementation",
+    "tactical_liquidity_candidates_follow_finite_grid_and_selection_rule",
+    "other_pct_and_crypto_options_follow_finite_grids_and_selection_rule",
+    "tactical_liquidity_policy_is_locked_before_current_market_evaluation",
+    "execution_capability_gate_prevents_fabricated_calculations",
+    "rounding_residuals_use_explicit_tolerances",
+    "mortgage_source_values_are_used_without_generic_revalidation",
 }
+STATIC_REFERENCE_CHECKS = {
+    "no_undefined_packet_reference",
+    "no_deprecated_date_alias",
+    "no_unapproved_material_trade_threshold",
+    "one_canonical_tactical_liquidity_policy",
+    "allocation_percentages_total_100",
+    "no_machine_ids_in_human_sections",
+    "no_external_response_schema_reference",
+    "selected_recurring_source_is_versioned",
+    "no_inactive_750000_monthly_constraint",
+    "all_root_arrays_have_inline_schema",
+}
+SEMANTIC_VALIDATION_CHECKS = {
+    "candidate_id_values_are_unique",
+    "check_id_values_are_unique",
+    "tactical_liquidity_grid_has_5_required_rows",
+    "other_pct_grid_has_5_required_rows",
+    "crypto_option_grid_has_3_required_rows",
+    "equity_bond_candidate_grid_has_11_required_rows",
+    "allocation_weights_total_100_within_tolerance",
+    "exactly_one_policy_candidate_is_selected",
+    "selected_policy_candidate_is_feasible",
+    "all_review_targets_appear_exactly_once",
+    "holding_values_reconcile_to_total_assets",
+    "before_after_amounts_reconcile",
+    "purchase_amounts_reconcile_to_funding_sources",
+    "sale_amounts_reconcile_to_sale_details",
+    "strategic_policy_precedes_implementation",
+}
+REQUIRED_CAPABILITIES = {
+    "monthly_cash_flow_calculation",
+    "bisection_required_return_calculation",
+    "multivariate_monthly_monte_carlo",
+    "fixed_random_seed",
+    "complete_11_candidate_comparison",
+    "interest_rate_sensitivity_calculation",
+    "candidate_allocation_order_arithmetic_reconciliation",
+    "yaml_or_json_schema_validation",
+}
+ROUNDING_TOLERANCE_JPY = Decimal("10")
+ROUNDING_TOLERANCE_PCT_POINTS = Decimal("0.02")
+
+
+@lru_cache(maxsize=1)
+def _monthly_response_schema_validator() -> Draft202012Validator:
+    schema_path = (
+        Path(__file__).resolve().parents[2]
+        / "schemas/monthly-review-response.schema.yaml"
+    )
+    schema = load_yaml(schema_path)
+    Draft202012Validator.check_schema(schema)
+    return Draft202012Validator(schema, format_checker=FormatChecker())
+
+
+def _validate_against_monthly_response_schema(payload: dict) -> None:
+    errors = sorted(
+        _monthly_response_schema_validator().iter_errors(payload),
+        key=lambda error: tuple(str(item) for item in error.absolute_path),
+    )
+    if not errors:
+        return
+    error = errors[0]
+    location = ".".join(str(item) for item in error.absolute_path) or "<root>"
+    raise ValueError(
+        "review_response.yaml JSON Schema validation failed at "
+        f"{location}: {error.message}"
+    )
 
 
 def load_monthly_review_response(
@@ -40,6 +129,8 @@ def load_monthly_review_response(
     expected_cash_context: dict | None = None,
     expected_date_context: dict | None = None,
     total_assets_jpy: Decimal | int | None = None,
+    expected_current_holding_symbols: set[str] | None = None,
+    expected_current_holding_accounts: dict[str, str] | None = None,
 ) -> tuple[dict, ReviewFeedback]:
     payload = load_yaml(path)
     _validate_monthly_review_response(
@@ -50,6 +141,11 @@ def load_monthly_review_response(
         expected_cash_context=expected_cash_context,
         expected_date_context=expected_date_context,
         total_assets_jpy=total_assets_jpy,
+        expected_current_holding_symbols=(
+            expected_current_holding_symbols
+            or set((expected_current_holding_accounts or {}).keys())
+        ),
+        expected_current_holding_accounts=expected_current_holding_accounts or {},
     )
     decisions = payload["decisions"]
     repository_changes = payload["codex_handoff"]["repository_changes"]
@@ -143,6 +239,8 @@ def _validate_monthly_review_response(
     expected_cash_context: dict | None,
     expected_date_context: dict | None,
     total_assets_jpy: Decimal | int | None,
+    expected_current_holding_symbols: set[str],
+    expected_current_holding_accounts: dict[str, str],
 ) -> None:
     if payload.get("schema_version") != 2:
         raise ValueError("review_response.yaml schema_version must be 2")
@@ -160,7 +258,11 @@ def _validate_monthly_review_response(
         "packet_generated_at",
         "research_cutoff_at",
         "decision_date",
+        "review_completion_status",
+        "execution_capability_gate",
         "strategic_policy_decision",
+        "implementation_decision",
+        "account_lot_execution",
         "decision_axes",
         "empirical_evidence",
         "human_summary",
@@ -173,6 +275,10 @@ def _validate_monthly_review_response(
         "decisions",
         "codex_handoff",
         "decision_quality_checks",
+        "static_reference_checks",
+        "validation_tolerances",
+        "rounding_reconciliation",
+        "semantic_validation_checks",
     }
     missing = sorted(required - set(payload))
     if missing:
@@ -191,9 +297,16 @@ def _validate_monthly_review_response(
                     f"expected={expected!r}, actual={payload.get(field)!r}"
                 )
 
+    _validate_execution_capability_gate(payload["execution_capability_gate"])
     _validate_strategic_policy_decision(
         payload["strategic_policy_decision"],
         review_mode=payload["review_mode"],
+    )
+    _validate_decision_stages(
+        strategic=payload["strategic_policy_decision"],
+        implementation=payload["implementation_decision"],
+        account_lot=payload["account_lot_execution"],
+        review_completion_status=payload["review_completion_status"],
     )
     if payload["interaction_phase"] != "final_review":
         raise ValueError("review_response.yaml interaction_phase must be final_review")
@@ -201,20 +314,41 @@ def _validate_monthly_review_response(
     _validate_decision_axes(payload["decision_axes"])
     if not isinstance(payload["empirical_evidence"], list):
         raise ValueError("empirical_evidence must be a list")
-    _validate_empirical_evidence(payload["empirical_evidence"])
-    _validate_decision_quality_checks(payload["decision_quality_checks"])
+    research_cutoff_at = payload["research_cutoff_at"]
+    _validate_empirical_evidence(
+        payload["empirical_evidence"],
+        research_cutoff_at=research_cutoff_at,
+    )
+    _validate_decision_quality_checks(
+        payload["decision_quality_checks"],
+    )
+    _validate_required_checks(
+        payload["static_reference_checks"],
+        required_ids=STATIC_REFERENCE_CHECKS,
+        name="static_reference_checks",
+    )
+    _validate_tolerances_and_rounding(
+        payload["validation_tolerances"],
+        payload["rounding_reconciliation"],
+    )
+    _validate_semantic_validation_checks(payload["semantic_validation_checks"])
 
     _validate_security_story_coverage(
         payload["security_story_reviews"],
         expected_security_symbols=expected_security_symbols,
         source_name="review_response.yaml",
+        research_cutoff_at=research_cutoff_at,
     )
     _validate_thematic_fund_coverage(
         payload["thematic_fund_reviews"],
         expected_member_symbols=expected_thematic_member_symbols,
+        research_cutoff_at=research_cutoff_at,
     )
     _validate_before_after_allocation(payload["before_after_allocation"])
-    _validate_account_tax_comparisons(payload["account_tax_comparisons"])
+    _validate_account_tax_comparisons(
+        payload["account_tax_comparisons"],
+        research_cutoff_at=research_cutoff_at,
+    )
     _validate_cash_assessment(
         payload["cash_assessment"],
         expected_cash_context=expected_cash_context,
@@ -222,6 +356,7 @@ def _validate_monthly_review_response(
     _validate_dip_buy_liquidity_deployment_review(
         payload["dip_buy_liquidity_deployment_review"],
         source_name="review_response.yaml",
+        research_cutoff_at=research_cutoff_at,
     )
 
     decisions = payload["decisions"]
@@ -231,6 +366,7 @@ def _validate_monthly_review_response(
         "rule_refs",
         "order_proposals",
         "actions",
+        "new_asset_purchase_conclusion",
     }
     unexpected_decision_fields = sorted(set(decisions) - decision_fields)
     if unexpected_decision_fields:
@@ -247,7 +383,13 @@ def _validate_monthly_review_response(
         deployment_review=payload["dip_buy_liquidity_deployment_review"],
         policy_refs=decisions["policy_refs"],
     )
-    _validate_actions(decisions["actions"], total_assets_jpy=total_assets_jpy)
+    _validate_actions(
+        decisions["actions"],
+        total_assets_jpy=total_assets_jpy,
+        expected_current_holding_symbols=expected_current_holding_symbols,
+        expected_current_holding_accounts=expected_current_holding_accounts,
+        new_asset_purchase_conclusion=decisions["new_asset_purchase_conclusion"],
+    )
     _validate_order_proposals(decisions["order_proposals"])
     handoff = payload["codex_handoff"]
     if "repository_changes" not in handoff:
@@ -261,6 +403,211 @@ def _validate_monthly_review_response(
     for priority in ("must", "should", "nice_to_have"):
         if priority not in handoff["repository_changes"]:
             raise ValueError(f"codex_handoff.repository_changes missing {priority}")
+    _validate_against_monthly_response_schema(payload)
+
+
+def _validate_execution_capability_gate(gate) -> None:
+    _require_mapping_fields(
+        gate,
+        {"gate_status", "evaluated_before_calculations", "capabilities"},
+        name="execution_capability_gate",
+    )
+    if gate["evaluated_before_calculations"] is not True:
+        raise ValueError("execution capability gate must run before calculations")
+    capabilities = gate["capabilities"]
+    if not isinstance(capabilities, list):
+        raise ValueError("execution_capability_gate.capabilities must be a list")
+    by_id: dict[str, dict] = {}
+    for index, capability in enumerate(capabilities):
+        _require_mapping_fields(
+            capability,
+            {
+                "capability_id",
+                "status",
+                "evidence",
+                "reason",
+                "missing_capability",
+                "remediation",
+            },
+            name=f"execution_capability_gate.capabilities[{index}]",
+        )
+        capability_id = str(capability["capability_id"])
+        if capability_id in by_id:
+            raise ValueError("execution capability gate contains duplicate capability_id")
+        if capability["status"] not in {"available", "partial", "unavailable"}:
+            raise ValueError("execution capability status is invalid")
+        if capability["status"] == "available":
+            if not str(capability["evidence"]).strip():
+                raise ValueError("available capability requires evidence")
+            if capability["missing_capability"]:
+                raise ValueError("available capability cannot list missing_capability")
+        elif (
+            not str(capability["reason"]).strip()
+            or not capability["missing_capability"]
+            or not str(capability["remediation"]).strip()
+        ):
+            raise ValueError(
+                "partial or unavailable capability requires reason, missing_capability, and remediation"
+            )
+        by_id[capability_id] = capability
+    if set(by_id) != REQUIRED_CAPABILITIES:
+        raise ValueError("execution capability gate must cover all required capabilities exactly once")
+    statuses = {item["status"] for item in capabilities}
+    expected_gate_status = (
+        "all_available"
+        if statuses == {"available"}
+        else "unavailable"
+        if statuses == {"unavailable"}
+        else "partial"
+    )
+    if gate["gate_status"] != expected_gate_status:
+        raise ValueError("execution_capability_gate.gate_status conflicts with capability rows")
+
+
+def _validate_decision_stages(
+    *,
+    strategic: dict,
+    implementation: dict,
+    account_lot: dict,
+    review_completion_status: str,
+) -> None:
+    if strategic.get("stage") != "strategic_policy_stage":
+        raise ValueError("strategic_policy_decision.stage must be strategic_policy_stage")
+    _require_mapping_fields(
+        implementation,
+        {
+            "stage",
+            "status",
+            "reason",
+            "remediation",
+            "strategic_policy_ref",
+            "strategic_policy_status_at_start",
+            "strategy_locked_before_market_evaluation",
+            "product_decision_refs",
+            "tactical_deployment_ref",
+            "before_after_allocation_ref",
+        },
+        name="implementation_decision",
+    )
+    if implementation["stage"] != "implementation_stage":
+        raise ValueError("implementation_decision.stage must be implementation_stage")
+    if implementation["status"] not in {"complete", "partial", "blocked", "not_applicable"}:
+        raise ValueError("implementation_decision.status is invalid")
+    if implementation["status"] in {"complete", "partial"}:
+        if strategic["status"] not in {"complete", "not_applicable"}:
+            raise ValueError("implementation cannot precede an available strategic or approved policy")
+        if implementation["strategic_policy_status_at_start"] != strategic["status"]:
+            raise ValueError("implementation must record the strategic policy status at stage start")
+        if implementation["strategy_locked_before_market_evaluation"] is not True:
+            raise ValueError("implementation must lock strategy before market evaluation")
+    _require_mapping_fields(
+        account_lot,
+        {
+            "status",
+            "reason",
+            "remediation",
+            "implementation_decision_ref",
+            "missing_information",
+            "executable_order_proposal_ids",
+            "blocked_order_proposal_ids",
+        },
+        name="account_lot_execution",
+    )
+    if account_lot["status"] not in {"complete", "blocked", "not_calculable", "not_applicable"}:
+        raise ValueError("account_lot_execution.status is invalid")
+    if account_lot["status"] in {"blocked", "not_calculable"} and (
+        not str(account_lot["reason"]).strip()
+        or not str(account_lot["remediation"]).strip()
+        or not account_lot["missing_information"]
+    ):
+        raise ValueError(
+            "blocked account-lot execution requires reason, remediation, and missing_information"
+        )
+    if review_completion_status == "invalid":
+        raise ValueError("invalid review_completion_status cannot be ingested")
+    if strategic["status"] == "blocked":
+        expected = "blocked"
+    elif implementation["status"] in {"partial", "blocked"} or account_lot["status"] in {
+        "blocked",
+        "not_calculable",
+    }:
+        expected = "complete_with_execution_blocks"
+    else:
+        expected = "complete"
+    if review_completion_status != expected:
+        raise ValueError(
+            "review_completion_status conflicts with strategic, implementation, and account-lot statuses"
+        )
+
+
+def _validate_tolerances_and_rounding(tolerances, rounding) -> None:
+    _require_mapping_fields(
+        tolerances,
+        {
+            "rounding_tolerance_jpy",
+            "rounding_tolerance_pct_points",
+            "monte_carlo_probability_tolerance_pct_points",
+            "return_volatility_tolerance_pct_points",
+        },
+        name="validation_tolerances",
+    )
+    expected = {
+        "rounding_tolerance_jpy": ROUNDING_TOLERANCE_JPY,
+        "rounding_tolerance_pct_points": ROUNDING_TOLERANCE_PCT_POINTS,
+        "monte_carlo_probability_tolerance_pct_points": Decimal("0.01"),
+        "return_volatility_tolerance_pct_points": Decimal("0.01"),
+    }
+    for field, value in expected.items():
+        if Decimal(str(tolerances[field])) != value:
+            raise ValueError(f"validation_tolerances.{field} must equal {value}")
+    _require_mapping_fields(
+        rounding,
+        {
+            "rounding_tolerance_jpy",
+            "rounding_tolerance_pct_points",
+            "rounding_residual_jpy",
+            "rounding_residual_pct_points",
+            "rounding_residual_treatment",
+            "evidence",
+        },
+        name="rounding_reconciliation",
+    )
+    residual_jpy = abs(Decimal(str(rounding["rounding_residual_jpy"])))
+    residual_pct_raw = rounding["rounding_residual_pct_points"]
+    residual_pct = (
+        abs(Decimal(str(residual_pct_raw))) if residual_pct_raw is not None else Decimal("0")
+    )
+    within = (
+        residual_jpy <= ROUNDING_TOLERANCE_JPY
+        and residual_pct <= ROUNDING_TOLERANCE_PCT_POINTS
+    )
+    if within and rounding["rounding_residual_treatment"] != "within_tolerance_recorded":
+        raise ValueError("within-tolerance rounding residual must be recorded, not failed")
+    if not within and rounding["rounding_residual_treatment"] == "within_tolerance_recorded":
+        raise ValueError("rounding residual exceeds the explicit tolerance")
+
+
+def _validate_semantic_validation_checks(checks) -> None:
+    _validate_required_checks(
+        checks,
+        required_ids=SEMANTIC_VALIDATION_CHECKS,
+        name="semantic_validation_checks",
+        additional_required_fields={
+            "observed_value",
+            "expected_value",
+            "difference",
+            "tolerance",
+        },
+    )
+    failed_ids = [
+        str(check["check_id"])
+        for check in checks
+        if check["status"] == "fail"
+    ]
+    if failed_ids:
+        raise ValueError(
+            "semantic validation failed: " + ", ".join(sorted(failed_ids))
+        )
 
 
 def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
@@ -272,7 +619,10 @@ def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
     if not isinstance(decision, dict):
         raise ValueError("strategic_policy_decision must be an object")
     required = {
+        "stage",
         "status",
+        "reason",
+        "remediation",
         "objective",
         "updated_inputs",
         "financial_planning_model",
@@ -282,6 +632,9 @@ def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
         "tactical_liquidity_policy",
         "active_risk_policy",
         "direct_semiconductor_limit",
+        "tactical_liquidity_candidate_comparison",
+        "crypto_contribution_option_comparison",
+        "other_allocation_candidate_comparison",
         "candidate_methodology",
         "candidate_comparison",
     }
@@ -290,20 +643,70 @@ def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
         raise ValueError(
             "strategic_policy_decision missing fields: " + ", ".join(missing)
         )
-    expected_status = (
-        "not_applicable"
+    status = decision["status"]
+    allowed_statuses = (
+        {"not_applicable"}
         if review_mode == "monthly_operational_review"
-        else "proposed"
+        else {"complete", "blocked"}
     )
-    if decision["status"] != expected_status:
+    if status not in allowed_statuses:
         raise ValueError(
             "strategic_policy_decision.status conflicts with review_mode; "
-            f"expected={expected_status}"
+            f"allowed={sorted(allowed_statuses)}"
+        )
+    if status == "blocked" and (
+        not str(decision["reason"]).strip()
+        or not str(decision["remediation"]).strip()
+    ):
+        raise ValueError(
+            "blocked strategic_policy_decision requires reason and remediation"
         )
     _validate_financial_planning_model(
         decision["financial_planning_model"],
         strategic=review_mode == "strategic_policy_second_opinion",
+        allow_blocked=status == "blocked",
     )
+    if review_mode == "monthly_operational_review":
+        if any(
+            decision[field]
+            for field in (
+                "tactical_liquidity_candidate_comparison",
+                "crypto_contribution_option_comparison",
+                "other_allocation_candidate_comparison",
+                "candidate_comparison",
+            )
+        ):
+            raise ValueError(
+                "monthly strategic policy candidate comparisons must be empty"
+            )
+        return
+
+    direct_limit = decision["direct_semiconductor_limit"]
+    _require_mapping_fields(
+        direct_limit,
+        {"current_approved_constraint", "proposed_future_policy", "priority"},
+        name="direct_semiconductor_limit",
+    )
+    current_limit = direct_limit["current_approved_constraint"]
+    proposed_limit = direct_limit["proposed_future_policy"]
+    _require_mapping_fields(
+        current_limit,
+        {"policy_id", "status", "limit_pct", "denominator", "approved", "rationale"},
+        name="direct_semiconductor_limit.current_approved_constraint",
+    )
+    _require_mapping_fields(
+        proposed_limit,
+        {"policy_id", "status", "limit_pct", "denominator", "approved", "rationale"},
+        name="direct_semiconductor_limit.proposed_future_policy",
+    )
+    if current_limit["approved"] is not True or proposed_limit["approved"] is not False:
+        raise ValueError("approved and proposed semiconductor limits must remain separate")
+
+    _validate_policy_precursor_comparisons(decision, allow_unselected=status == "blocked")
+    if status == "blocked":
+        _validate_candidate_comparison(decision, allow_unselected=True)
+        return
+
     policy = decision["recommended_policy"]
     policy_fields = {
         "policy_id",
@@ -321,7 +724,7 @@ def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
             "strategic_policy_decision.recommended_policy missing fields: "
             + ", ".join(missing_policy)
         )
-    if review_mode == "strategic_policy_second_opinion":
+    if status == "complete":
         if not decision["objective"]:
             raise ValueError("strategic policy response requires an objective")
         equity = policy["investable_equity_pct"]
@@ -376,16 +779,22 @@ def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
             {
                 "policy_id",
                 "status",
+                "reason",
+                "remediation",
+                "policy_basis_as_of",
+                "locked_before_market_evaluation",
                 "initial_target_pct_of_total_assets",
                 "target_jpy",
                 "deployment_asset",
                 "trigger_index",
                 "reference_high_definition",
+                "decline_threshold_pct",
                 "price_basis",
                 "lookback_period",
                 "fx_treatment",
                 "tranches",
                 "amount_per_tranche",
+                "minimum_balance_jpy",
                 "refill_rule",
                 "termination_rule",
                 "policy_allocation_treatment",
@@ -396,28 +805,38 @@ def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
             name="tactical_liquidity_policy",
         )
         tactical_required_values = (
+            "policy_basis_as_of",
+            "locked_before_market_evaluation",
             "initial_target_pct_of_total_assets",
             "target_jpy",
             "deployment_asset",
             "trigger_index",
             "reference_high_definition",
+            "decline_threshold_pct",
             "price_basis",
             "lookback_period",
             "fx_treatment",
             "tranches",
             "amount_per_tranche",
+            "minimum_balance_jpy",
             "refill_rule",
             "termination_rule",
             "policy_allocation_treatment",
         )
         if any(tactical[field] is None for field in tactical_required_values):
             raise ValueError("strategic tactical_liquidity_policy must be complete")
+        if tactical["locked_before_market_evaluation"] is not True:
+            raise ValueError("tactical liquidity policy must be locked before market evaluation")
         active_risk = decision["active_risk_policy"]
         _require_mapping_fields(
             active_risk,
             {
                 "policy_id",
                 "satellites_allowed",
+                "satellite_target_pct_of_investable_portfolio",
+                "selected_satellite_securities",
+                "all_country_only_baseline_compared",
+                "selection_rationale",
                 "total_satellite_cap_pct",
                 "single_theme_cap_pct",
                 "single_security_cap_pct",
@@ -431,23 +850,187 @@ def _validate_strategic_policy_decision(decision, *, review_mode: str) -> None:
                 "total_satellite_cap_pct",
                 "single_theme_cap_pct",
                 "single_security_cap_pct",
+                "satellite_target_pct_of_investable_portfolio",
             )
         ):
             raise ValueError("strategic active_risk_policy caps must be complete")
+        if active_risk["satellites_allowed"] is True:
+            if Decimal(
+                str(active_risk["satellite_target_pct_of_investable_portfolio"])
+            ) <= 0:
+                raise ValueError("strategic satellite target must be positive")
+            if not active_risk["selected_satellite_securities"]:
+                raise ValueError("strategic satellite securities must be selected")
+            if active_risk["all_country_only_baseline_compared"] is not True:
+                raise ValueError("strategic satellite policy must compare the all-country-only baseline")
+            selected_satellites = active_risk["selected_satellite_securities"]
+            selected_symbols = [str(item["symbol"]) for item in selected_satellites]
+            if len(selected_symbols) != len(set(selected_symbols)):
+                raise ValueError("strategic satellite securities must be unique")
+            selected_total = sum(
+                (
+                    Decimal(str(item["target_pct_of_investable_portfolio"]))
+                    for item in selected_satellites
+                ),
+                start=Decimal("0"),
+            )
+            satellite_target = Decimal(
+                str(active_risk["satellite_target_pct_of_investable_portfolio"])
+            )
+            if abs(selected_total - satellite_target) > ROUNDING_TOLERANCE_PCT_POINTS:
+                raise ValueError(
+                    "strategic satellite security weights must reconcile to the satellite target"
+                )
+            total_cap = Decimal(str(active_risk["total_satellite_cap_pct"]))
+            single_cap = Decimal(str(active_risk["single_security_cap_pct"]))
+            if satellite_target > total_cap:
+                raise ValueError("strategic satellite target exceeds the total satellite cap")
+            if any(
+                Decimal(str(item["target_pct_of_investable_portfolio"]))
+                > single_cap
+                for item in selected_satellites
+            ):
+                raise ValueError("strategic satellite security exceeds the single-security cap")
         if not isinstance(decision["candidate_methodology"], dict):
             raise ValueError("strategic candidate_methodology must be an object")
-        _validate_candidate_comparison(decision)
-        direct_limit = decision["direct_semiconductor_limit"]
-        _require_mapping_fields(
-            direct_limit,
-            {"policy_id", "status", "limit_pct", "denominator", "priority", "rationale"},
-            name="direct_semiconductor_limit",
-        )
+        _validate_candidate_comparison(decision, allow_unselected=False)
 
 
-def _validate_financial_planning_model(model: dict, *, strategic: bool) -> None:
+def _validate_policy_precursor_comparisons(
+    decision: dict,
+    *,
+    allow_unselected: bool,
+) -> None:
+    configurations = [
+        (
+            "tactical_liquidity_candidate_comparison",
+            "candidate_id",
+            "target_pct_of_household_total_assets",
+            [Decimal("0"), Decimal("2.5"), Decimal("5"), Decimal("7.5"), Decimal("10")],
+            {
+                "denominator",
+                "household_reserve_separate",
+                "long_term_investable_asset_reduction_jpy",
+                "required_real_return_impact_pct_points",
+                "success_probability_impact_pct_points",
+                "deployable_amount_jpy",
+                "expected_return_drag_pct_points",
+                "implementation_complexity",
+                "replenishment_feasibility",
+                "candidate_feasible",
+                "calculation_status",
+                "reason",
+                "missing_capability",
+                "remediation",
+                "selected",
+            },
+        ),
+        (
+            "crypto_contribution_option_comparison",
+            "option_id",
+            "policy",
+            [
+                "stop_new_contributions_and_exclude_unknown_existing_balance",
+                "continue_only_within_realized_surplus_such_as_bonus",
+                "continue_current_contributions_and_disclose_cash_flow_and_success_probability_impact",
+            ],
+            {
+                "current_crypto_balance_jpy",
+                "ordinary_month_cash_flow_impact_jpy",
+                "success_probability_impact_pct_points",
+                "funding_source_treatment",
+                "calculation_status",
+                "reason",
+                "missing_capability",
+                "remediation",
+                "selected",
+            },
+        ),
+        (
+            "other_allocation_candidate_comparison",
+            "candidate_id",
+            "other_pct",
+            [Decimal("0"), Decimal("1"), Decimal("2"), Decimal("3"), Decimal("5")],
+            {
+                "crypto_contribution_option_ref",
+                "current_crypto_balance_jpy",
+                "ordinary_month_cash_flow_consistent",
+                "required_success_probability_maintained",
+                "success_probability_impact_pct_points",
+                "expected_return_impact_pct_points",
+                "diversification_benefit",
+                "incremental_risk",
+                "funding_source_consistency",
+                "candidate_feasible",
+                "calculation_status",
+                "reason",
+                "missing_capability",
+                "remediation",
+                "selected",
+            },
+        ),
+    ]
+    for name, id_field, value_field, expected_values, required_fields in configurations:
+        rows = decision[name]
+        if not isinstance(rows, list) or len(rows) != len(expected_values):
+            raise ValueError(f"{name} must contain the complete finite candidate grid")
+        ids: set[str] = set()
+        actual_values = []
+        selected = []
+        not_calculable_count = 0
+        for index, row in enumerate(rows):
+            _require_mapping_fields(
+                row,
+                required_fields | {id_field, value_field},
+                name=f"{name}[{index}]",
+            )
+            row_id = str(row[id_field])
+            if row_id in ids:
+                raise ValueError(f"{name} contains duplicate {id_field}")
+            ids.add(row_id)
+            value = row[value_field]
+            actual_values.append(
+                Decimal(str(value)) if isinstance(expected_values[0], Decimal) else value
+            )
+            if row["calculation_status"] not in {"calculated", "not_calculable"}:
+                raise ValueError(f"{name}[{index}].calculation_status is invalid")
+            if row["calculation_status"] == "not_calculable":
+                not_calculable_count += 1
+                if (
+                    not str(row["reason"]).strip()
+                    or not row["missing_capability"]
+                    or not str(row["remediation"]).strip()
+                    or row["selected"] is not False
+                ):
+                    raise ValueError(
+                        f"{name}[{index}] not_calculable requires missing capability and cannot be selected"
+                    )
+            elif row["missing_capability"]:
+                raise ValueError(f"{name}[{index}] calculated row cannot list missing_capability")
+            if row["selected"] is True:
+                selected.append(row)
+        if sorted(actual_values) != sorted(expected_values):
+            raise ValueError(f"{name} does not match the required finite grid")
+        if len(selected) > 1:
+            raise ValueError(f"{name} must not select multiple rows")
+        if not allow_unselected and len(selected) != 1:
+            raise ValueError(f"{name} must select exactly one row")
+        if allow_unselected and not selected and not_calculable_count == 0:
+            raise ValueError(f"blocked {name} without selection must identify not_calculable rows")
+        if selected and "candidate_feasible" in selected[0] and selected[0]["candidate_feasible"] is not True:
+            raise ValueError(f"selected row in {name} must be feasible")
+
+
+def _validate_financial_planning_model(
+    model: dict,
+    *,
+    strategic: bool,
+    allow_blocked: bool,
+) -> None:
     required = {
         "status",
+        "reason",
+        "remediation",
         "return_basis",
         "current_age",
         "withdrawal_start_age",
@@ -457,6 +1040,9 @@ def _validate_financial_planning_model(model: dict, *, strategic: bool) -> None:
         "public_pension_annual_current_jpy",
         "public_pension_estimation_method",
         "long_term_contribution_policy",
+        "contribution_reconciliation",
+        "planning_timeline",
+        "liability_cash_flows",
         "inheritance_included_in_base_case",
         "inheritance_base_case_jpy",
         "inheritance_treatment",
@@ -465,6 +1051,8 @@ def _validate_financial_planning_model(model: dict, *, strategic: bool) -> None:
         "success_probability_rationale",
         "target_return_pct",
         "target_return_formula",
+        "required_return_calculation",
+        "success_probability_calculation",
         "sensitivity_cases",
         "source_refs",
     }
@@ -473,6 +1061,7 @@ def _validate_financial_planning_model(model: dict, *, strategic: bool) -> None:
     contribution_fields = {
         "annual_net_contribution_jpy",
         "contribution_end_age",
+        "contribution_end_date",
         "allocation_rule",
         "rationale",
     }
@@ -485,8 +1074,29 @@ def _validate_financial_planning_model(model: dict, *, strategic: bool) -> None:
         if model["status"] != "not_applicable":
             raise ValueError("monthly financial_planning_model must be not_applicable")
         return
-    if model["status"] != "derived":
-        raise ValueError("strategic financial_planning_model must be derived")
+    if allow_blocked and model["status"] in {"blocked", "partial"}:
+        if not str(model["reason"]).strip() or not str(model["remediation"]).strip():
+            raise ValueError(
+                "blocked or partial financial_planning_model requires reason and remediation"
+            )
+        for field in ("required_return_calculation", "success_probability_calculation"):
+            calculation = model[field]
+            _require_mapping_fields(
+                calculation,
+                {"status", "reason", "missing_capability", "remediation"},
+                name=f"financial_planning_model.{field}",
+            )
+            if calculation["status"] == "not_calculable" and (
+                not str(calculation["reason"]).strip()
+                or not calculation["missing_capability"]
+                or not str(calculation["remediation"]).strip()
+            ):
+                raise ValueError(
+                    f"strategic {field} not_calculable requires missing_capability"
+                )
+        return
+    if model["status"] != "complete":
+        raise ValueError("strategic financial_planning_model must be complete")
     required_values = {
         "return_basis",
         "current_age",
@@ -508,17 +1118,75 @@ def _validate_financial_planning_model(model: dict, *, strategic: bool) -> None:
         raise ValueError("strategic financial_planning_model must be complete")
     if any(contribution[field] is None for field in contribution_fields):
         raise ValueError("strategic long_term_contribution_policy must be complete")
+    if not model["contribution_reconciliation"]:
+        raise ValueError("strategic contribution_reconciliation must be complete")
+    _require_mapping_fields(
+        model["planning_timeline"],
+        {
+            "model_start_date",
+            "contribution_end_date",
+            "first_withdrawal_date",
+            "planned_retirement_date",
+            "public_pension_start_date",
+            "mortgage_repayment_end_date",
+            "planning_end_date",
+            "model_period",
+            "overlap_check",
+        },
+        name="financial_planning_model.planning_timeline",
+    )
+    if model["planning_timeline"]["overlap_check"] != "pass":
+        raise ValueError("financial planning timeline overlap check must pass")
+    if not model["liability_cash_flows"]:
+        raise ValueError("strategic liability_cash_flows must include the mortgage")
+    for index, liability in enumerate(model["liability_cash_flows"]):
+        _require_mapping_fields(
+            liability,
+            {
+                "bank_document_values_are_authoritative",
+                "generic_amortization_recalculation_performed",
+                "arithmetic_mismatch_used_for_warning_or_block",
+            },
+            name=f"financial_planning_model.liability_cash_flows[{index}]",
+        )
+        if liability["bank_document_values_are_authoritative"] is not True:
+            raise ValueError("bank-document mortgage values must remain authoritative")
+        if liability["generic_amortization_recalculation_performed"] is not False:
+            raise ValueError("generic mortgage amortization revalidation is prohibited")
+        if liability["arithmetic_mismatch_used_for_warning_or_block"] is not False:
+            raise ValueError("mortgage arithmetic mismatch must not trigger warning or blocking")
+    for field in ("required_return_calculation", "success_probability_calculation"):
+        calculation = model[field]
+        _require_mapping_fields(
+            calculation,
+            {"status", "reason", "missing_capability", "remediation"},
+            name=f"financial_planning_model.{field}",
+        )
+        if calculation["status"] != "calculated":
+            raise ValueError(f"strategic {field} must be calculated")
+        if calculation["missing_capability"]:
+            raise ValueError(f"calculated strategic {field} cannot list missing_capability")
     if not model["sensitivity_cases"] or not model["source_refs"]:
         raise ValueError(
             "strategic financial_planning_model requires sensitivity cases and sources"
         )
 
 
-def _validate_candidate_comparison(decision: dict) -> None:
+def _validate_candidate_comparison(
+    decision: dict,
+    *,
+    allow_unselected: bool,
+) -> None:
     methodology_fields = {
+        "selection_sequence",
+        "tactical_liquidity_candidate_grid",
+        "other_pct_candidate_grid",
+        "crypto_contribution_option_grid",
         "global_equity_index",
         "bond_index",
         "bond_instrument_type",
+        "bond_currency",
+        "bond_fx_hedge_policy",
         "estimation_period",
         "assumptions_as_of",
         "inflation_assumption_pct",
@@ -526,66 +1194,195 @@ def _validate_candidate_comparison(decision: dict) -> None:
         "tax_cost_treatment",
         "major_drawdown_definition",
         "rebalancing_frequency",
+        "candidate_grid",
+        "other_pct_common_base_case",
+        "assumption_derivations",
+        "required_return_method",
+        "success_probability_method",
         "range_rationale",
-        "boundary_extension_applied",
     }
     methodology = decision["candidate_methodology"]
-    missing_methodology = sorted(methodology_fields - set(methodology))
-    if missing_methodology:
-        raise ValueError(
-            "strategic candidate_methodology missing fields: "
-            + ", ".join(missing_methodology)
+    methodology_complete = isinstance(methodology, dict) and not (
+        methodology.get("status") == "blocked"
+    )
+    common_other_pct = None
+    if methodology_complete:
+        missing_methodology = sorted(methodology_fields - set(methodology))
+        if missing_methodology:
+            raise ValueError(
+                "strategic candidate_methodology missing fields: "
+                + ", ".join(missing_methodology)
+            )
+        if any(methodology[field] in (None, "") for field in methodology_fields):
+            raise ValueError("strategic candidate_methodology must be complete")
+        if methodology["candidate_grid"] != list(range(0, 101, 10)):
+            raise ValueError(
+                "candidate methodology must define the exhaustive 0-100 grid"
+            )
+        if methodology["tactical_liquidity_candidate_grid"] != [0, 2.5, 5, 7.5, 10]:
+            raise ValueError("candidate methodology tactical liquidity grid is invalid")
+        if methodology["other_pct_candidate_grid"] != [0, 1, 2, 3, 5]:
+            raise ValueError("candidate methodology other_pct grid is invalid")
+        if methodology["crypto_contribution_option_grid"] != [
+            "stop_new_contributions_and_exclude_unknown_existing_balance",
+            "continue_only_within_realized_surplus_such_as_bonus",
+            "continue_current_contributions_and_disclose_cash_flow_and_success_probability_impact",
+        ]:
+            raise ValueError("candidate methodology crypto option grid is invalid")
+        common_other_pct = Decimal(
+            str(methodology["other_pct_common_base_case"])
         )
-    if any(
-        methodology[field] in (None, "")
-        for field in methodology_fields - {"boundary_extension_applied"}
-    ):
-        raise ValueError("strategic candidate_methodology must be complete")
+    elif not allow_unselected:
+        raise ValueError("completed strategic candidate_methodology must be complete")
+    elif methodology is not None:
+        _require_mapping_fields(
+            methodology,
+            {"status", "reason", "remediation"},
+            name="candidate_methodology",
+        )
+        if methodology["status"] != "blocked" or not str(
+            methodology["reason"]
+        ).strip() or not str(methodology["remediation"]).strip():
+            raise ValueError(
+                "blocked candidate_methodology requires reason and remediation"
+            )
     candidate_fields = {
         "candidate_id",
-        "global_equity_pct",
-        "bonds_pct",
+        "sleeve_equity_pct",
+        "total_equity_pct",
+        "bond_pct",
+        "other_pct",
         "expected_nominal_return_pct",
         "expected_real_return_pct",
         "expected_volatility_pct",
         "equity_bond_correlation",
         "estimated_major_drawdown_pct",
+        "estimated_success_probability_pct",
+        "required_success_probability_pct",
+        "candidate_feasible",
+        "constraint_failures",
         "primary_objective_fit_value",
         "primary_objective_fit_formula",
         "assumptions_ref",
+        "calculation_status",
+        "reason",
+        "missing_capability",
+        "remediation",
         "selected",
     }
     candidates = decision["candidate_comparison"]
+    if not isinstance(candidates, list) or len(candidates) != 11:
+        raise ValueError(
+            "candidate_comparison must contain exactly 11 candidates for the exhaustive 0-100 grid"
+        )
     candidate_ids: set[str] = set()
     selected: list[dict] = []
+    not_calculable_count = 0
     for index, candidate in enumerate(candidates):
         if not isinstance(candidate, dict) or candidate_fields - set(candidate):
             raise ValueError(f"candidate_comparison[{index}] is incomplete")
-        if (
-            Decimal(str(candidate["global_equity_pct"]))
-            + Decimal(str(candidate["bonds_pct"]))
-            != 100
-        ):
-            raise ValueError(f"candidate_comparison[{index}] weights must total 100")
+        calculation_status = candidate["calculation_status"]
+        if calculation_status not in {"calculated", "not_calculable"}:
+            raise ValueError(
+                f"candidate_comparison[{index}].calculation_status is invalid"
+            )
+        if calculation_status == "not_calculable":
+            not_calculable_count += 1
+            if not str(candidate["reason"]).strip() or not str(
+                candidate["remediation"]
+            ).strip() or not candidate["missing_capability"]:
+                raise ValueError(
+                    f"candidate_comparison[{index}] not_calculable requires reason, missing_capability, and remediation"
+                )
+            if candidate["selected"] is not False:
+                raise ValueError(
+                    f"candidate_comparison[{index}] not_calculable cannot be selected"
+                )
+        elif candidate["candidate_feasible"] is None:
+            raise ValueError(f"candidate_comparison[{index}] feasibility is missing")
+        elif candidate["missing_capability"]:
+            raise ValueError(
+                f"candidate_comparison[{index}] calculated row cannot list missing_capability"
+            )
+
+        weights = [
+            candidate[field]
+            for field in ("total_equity_pct", "bond_pct", "other_pct")
+        ]
+        numeric_weights = all(value is not None for value in weights)
+        if any(value is None for value in weights) and numeric_weights is False:
+            if not all(value is None for value in weights):
+                raise ValueError(
+                    f"candidate_comparison[{index}] weights must be all numeric or all null"
+                )
+            if methodology_complete:
+                raise ValueError(
+                    f"candidate_comparison[{index}] weights must use the complete "
+                    "candidate_methodology.other_pct_common_base_case"
+                )
+            if calculation_status == "calculated":
+                raise ValueError(
+                    f"candidate_comparison[{index}] calculated weights cannot be null"
+                )
+        if numeric_weights:
+            total_equity, bonds, other = (Decimal(str(value)) for value in weights)
+            if common_other_pct is None:
+                raise ValueError(
+                    f"candidate_comparison[{index}] cannot use numeric weights when "
+                    "candidate_methodology.other_pct_common_base_case is unavailable"
+                )
+            if abs(total_equity + bonds + other - Decimal("100")) > ROUNDING_TOLERANCE_PCT_POINTS:
+                raise ValueError(
+                    f"candidate_comparison[{index}] weights must total 100 within tolerance"
+                )
+            if common_other_pct is not None and abs(other - common_other_pct) > ROUNDING_TOLERANCE_PCT_POINTS:
+                raise ValueError(
+                    f"candidate_comparison[{index}].other_pct must equal "
+                    "candidate_methodology.other_pct_common_base_case"
+                )
+            sleeve_equity = Decimal(str(candidate["sleeve_equity_pct"]))
+            expected_total_equity = (
+                (Decimal("100") - other) * sleeve_equity / Decimal("100")
+            )
+            expected_bonds = (
+                (Decimal("100") - other)
+                * (Decimal("100") - sleeve_equity)
+                / Decimal("100")
+            )
+            if abs(total_equity - expected_total_equity) > ROUNDING_TOLERANCE_PCT_POINTS:
+                raise ValueError(
+                    f"candidate_comparison[{index}].total_equity_pct violates the canonical formula"
+                )
+            if abs(bonds - expected_bonds) > ROUNDING_TOLERANCE_PCT_POINTS:
+                raise ValueError(
+                    f"candidate_comparison[{index}].bond_pct violates the canonical formula"
+                )
         candidate_id = str(candidate["candidate_id"])
         if candidate_id in candidate_ids:
             raise ValueError("candidate_comparison contains duplicate candidate_id")
         candidate_ids.add(candidate_id)
         if candidate["selected"] is True:
             selected.append(candidate)
-    required_ids = {"GE100_B0", "GE90_B10", "GE80_B20", "GE70_B30"}
-    if not required_ids.issubset(candidate_ids):
-        raise ValueError("candidate_comparison must include the standard 100/0 through 70/30 range")
-    if len(selected) != 1:
+    sleeve_grid = sorted(int(item["sleeve_equity_pct"]) for item in candidates)
+    if sleeve_grid != list(range(0, 101, 10)):
+        raise ValueError("candidate_comparison must include the exhaustive 0-100 grid")
+    if len(selected) > 1:
+        raise ValueError("candidate_comparison must not select multiple candidates")
+    if not allow_unselected and len(selected) != 1:
         raise ValueError("candidate_comparison must select exactly one candidate")
-    if (
-        decision["objective"] == "minimize_risk_for_required_return"
-        and selected[0]["candidate_id"] == "GE70_B30"
-        and "GE60_B40" not in candidate_ids
-    ):
-        raise ValueError(
-            "minimum-risk optimum at the 70/30 boundary requires one 60/40 extension"
-        )
+    if allow_unselected and not selected:
+        if not_calculable_count == 0:
+            raise ValueError(
+                "blocked candidate_comparison without a selection must contain a not_calculable candidate"
+            )
+        if not str(decision["reason"]).strip() or not str(
+            decision["remediation"]
+        ).strip():
+            raise ValueError(
+                "blocked candidate selection requires upper-level reason and remediation"
+            )
+    if selected and selected[0]["candidate_feasible"] is not True:
+        raise ValueError("selected candidate must be feasible")
 
 
 def _require_mapping_fields(value, fields: set[str], *, name: str) -> None:
@@ -626,33 +1423,59 @@ def _validate_updated_inputs(updated) -> None:
 
 
 def _validate_decision_quality_checks(checks) -> None:
+    _validate_required_checks(
+        checks,
+        required_ids=DECISION_QUALITY_CHECKS,
+        name="decision_quality_checks",
+    )
+
+
+def _validate_required_checks(
+    checks,
+    *,
+    required_ids: set[str],
+    name: str,
+    additional_required_fields: set[str] | None = None,
+) -> None:
     if not isinstance(checks, list):
-        raise ValueError("decision_quality_checks must be a list")
-    required_fields = {"check_id", "status", "evidence", "remediation"}
+        raise ValueError(f"{name} must be a list")
+    required_fields = {
+        "check_id",
+        "status",
+        "evidence",
+        "reason",
+        "remediation",
+    } | (additional_required_fields or set())
     by_id: dict[str, dict] = {}
     for index, check in enumerate(checks):
         if not isinstance(check, dict) or required_fields - set(check):
             raise ValueError(
-                f"decision_quality_checks[{index}] must contain check_id, status, evidence, remediation"
+                f"{name}[{index}] is missing required validation fields"
             )
-        if check["status"] not in {"pass", "fail", "not_applicable"}:
-            raise ValueError(f"decision_quality_checks[{index}].status is invalid")
+        if check["status"] not in {
+            "pass",
+            "fail",
+            "not_verifiable",
+            "not_applicable",
+        }:
+            raise ValueError(f"{name}[{index}].status is invalid")
+        if check["status"] == "pass" and not str(check["evidence"]).strip():
+            raise ValueError(f"{name}[{index}] pass requires concrete evidence")
+        if check["status"] in {"fail", "not_verifiable"} and (
+            not str(check["reason"]).strip()
+            or not str(check["remediation"]).strip()
+        ):
+            raise ValueError(
+                f"{name}[{index}] {check['status']} requires reason and remediation"
+            )
+        if check["status"] == "not_applicable" and not str(check["reason"]).strip():
+            raise ValueError(f"{name}[{index}] not_applicable requires reason")
         if check["check_id"] in by_id:
-            raise ValueError("decision_quality_checks contains duplicate check_id")
+            raise ValueError(f"{name} contains duplicate check_id")
         by_id[check["check_id"]] = check
-    missing = sorted(DECISION_QUALITY_CHECKS - set(by_id))
+    missing = sorted(required_ids - set(by_id))
     if missing:
-        raise ValueError("decision_quality_checks missing fields: " + ", ".join(missing))
-    failed = sorted(
-        name
-        for name in DECISION_QUALITY_CHECKS
-        if by_id[name]["status"] != "pass"
-    )
-    if failed:
-        raise ValueError(
-            "decision_quality_checks must all pass in final_review: "
-            + ", ".join(failed)
-        )
+        raise ValueError(f"{name} missing fields: " + ", ".join(missing))
 
 
 def _validate_cash_assessment(
@@ -673,6 +1496,8 @@ def _validate_cash_assessment(
         "maximum_calculable_cash_jpy",
         "total_cash_target_status",
         "total_cash_target_jpy",
+        "calculation_reason",
+        "remediation",
         "derivation_notes",
     }
     if not isinstance(cash, dict):
@@ -762,6 +1587,7 @@ def _validate_dip_buy_liquidity_deployment_review(
     review,
     *,
     source_name: str,
+    research_cutoff_at: str | None = None,
 ) -> None:
     if not isinstance(review, dict):
         raise ValueError(
@@ -780,6 +1606,7 @@ def _validate_dip_buy_liquidity_deployment_review(
         required.update(
             {
                 "policy_ref",
+                "policy_locked_before_market_evaluation",
                 "trigger_index_matches_deployment_target",
                 "theme_or_sector_decline_used_as_trigger",
             }
@@ -803,6 +1630,10 @@ def _validate_dip_buy_liquidity_deployment_review(
             f"{source_name} dip_buy_liquidity_deployment_review.market_decline_status is invalid"
         )
     if source_name == "review_response.yaml":
+        if review["policy_locked_before_market_evaluation"] is not True:
+            raise ValueError(
+                f"{source_name} tactical policy must be locked before market evaluation"
+            )
         if review["theme_or_sector_decline_used_as_trigger"] is not False:
             raise ValueError(
                 f"{source_name} must not use a theme or sector decline as the market trigger"
@@ -818,6 +1649,7 @@ def _validate_dip_buy_liquidity_deployment_review(
             _validate_source(
                 source,
                 path=f"dip_buy_liquidity_deployment_review.market_evidence[{index}]",
+                research_cutoff_at=research_cutoff_at,
             )
     if not isinstance(review["market_evidence"], list):
         raise ValueError(
@@ -847,6 +1679,8 @@ def _validate_dip_buy_liquidity_deployment_review(
         "timing",
         "rationale",
     }
+    if source_name == "review_response.yaml":
+        use_required.update({"reason", "remediation"})
     if not isinstance(use_option, dict):
         raise ValueError(
             f"{source_name} dip_buy_liquidity_deployment_review.use_option must be an object"
@@ -916,16 +1750,22 @@ def _validate_canonical_tactical_liquidity_policy(
     required = {
         "policy_id",
         "status",
+        "reason",
+        "remediation",
+        "policy_basis_as_of",
+        "locked_before_market_evaluation",
         "initial_target_pct_of_total_assets",
         "target_jpy",
         "deployment_asset",
         "trigger_index",
         "reference_high_definition",
+        "decline_threshold_pct",
         "price_basis",
         "lookback_period",
         "fx_treatment",
         "tranches",
         "amount_per_tranche",
+        "minimum_balance_jpy",
         "refill_rule",
         "termination_rule",
         "policy_allocation_treatment",
@@ -957,18 +1797,33 @@ def _validate_actions(
     actions,
     *,
     total_assets_jpy: Decimal | int | None,
+    expected_current_holding_symbols: set[str],
+    expected_current_holding_accounts: dict[str, str],
+    new_asset_purchase_conclusion,
 ) -> None:
     if not isinstance(actions, list):
         raise ValueError("decisions.actions must be a list")
     required = {
         "action_id",
+        "action_scope",
+        "action_level",
+        "symbol",
+        "asset_name",
+        "holding_status",
+        "side",
+        "account_type",
+        "execution_method",
         "status",
+        "reason",
+        "remediation",
         "description",
         "source",
         "destination",
+        "quantity",
         "amount_jpy",
         "formula",
         "inputs",
+        "policy_refs",
         "assumption_independent_direction",
         "confirmed_conditions_consistent",
         "max_impact_if_assumptions_wrong_jpy",
@@ -976,7 +1831,7 @@ def _validate_actions(
         "rationale",
         "requires_user_approval",
     }
-    valid_statuses = {"executable", "conditional", "on_hold"}
+    valid_statuses = {"executable", "conditional", "blocked"}
     valid_source_types = {
         "confirmed_user_condition",
         "observed_packet_fact",
@@ -984,6 +1839,9 @@ def _validate_actions(
         "evidence_based_inference",
         "explicit_assumption",
     }
+    seen_action_ids: set[str] = set()
+    existing_action_symbols: list[str] = []
+    new_asset_action_ids: list[str] = []
     for index, action in enumerate(actions):
         if not isinstance(action, dict):
             raise ValueError(f"decisions.actions[{index}] must be an object")
@@ -994,6 +1852,55 @@ def _validate_actions(
                 + ", ".join(missing)
             )
         status = action["status"]
+        action_id = str(action["action_id"])
+        if action_id in seen_action_ids:
+            raise ValueError(f"decisions.actions[{index}] duplicates action_id {action_id}")
+        seen_action_ids.add(action_id)
+        if not any(
+            category in str(action["account_type"])
+            for category in ("NISA", "特定口座", "一般口座")
+        ):
+            raise ValueError(
+                f"decisions.actions[{index}].account_type must identify NISA, 特定口座, or 一般口座"
+            )
+        if not str(action["timing"]).strip() or not str(
+            action["execution_method"]
+        ).strip():
+            raise ValueError(
+                f"decisions.actions[{index}] must state when and how to act"
+            )
+        if action["action_scope"] == "existing_holding":
+            if action["holding_status"] != "held" or action["side"] not in {
+                "sell",
+                "hold",
+                "transfer",
+            }:
+                raise ValueError(
+                    f"decisions.actions[{index}] has an invalid existing-holding action"
+                )
+            action_symbol = str(action["symbol"])
+            expected_account_type = expected_current_holding_accounts.get(
+                action_symbol
+            )
+            if expected_account_type is not None and classify_review_account_type(
+                action["account_type"]
+            ) != classify_review_account_type(expected_account_type):
+                raise ValueError(
+                    f"decisions.actions[{index}].account_type conflicts with the confirmed holding account"
+                )
+            existing_action_symbols.append(action_symbol)
+        elif action["action_scope"] == "new_asset":
+            if action["holding_status"] != "not_held" or action["side"] != "buy":
+                raise ValueError(
+                    f"decisions.actions[{index}] has an invalid new-asset action"
+                )
+            if str(action["symbol"]) in expected_current_holding_symbols:
+                raise ValueError(
+                    f"decisions.actions[{index}] marks a currently held asset as new"
+                )
+            new_asset_action_ids.append(action_id)
+        else:
+            raise ValueError(f"decisions.actions[{index}] has invalid action_scope")
         if status not in valid_statuses:
             raise ValueError(f"decisions.actions[{index}] has invalid status {status!r}")
         if status == "executable" and not action["confirmed_conditions_consistent"]:
@@ -1039,19 +1946,57 @@ def _validate_actions(
                 f"decisions.actions[{index}] relies on an explicit assumption; mark it conditional"
             )
 
+    if expected_current_holding_symbols:
+        actual = set(existing_action_symbols)
+        if actual != expected_current_holding_symbols or len(existing_action_symbols) != len(
+            actual
+        ):
+            raise ValueError(
+                "decisions.actions existing holding coverage mismatch: "
+                f"expected={sorted(expected_current_holding_symbols)}, actual={sorted(existing_action_symbols)}"
+            )
+
+    if not isinstance(new_asset_purchase_conclusion, dict) or set(
+        new_asset_purchase_conclusion
+    ) != {"status", "rationale", "action_ids"}:
+        raise ValueError("decisions.new_asset_purchase_conclusion is incomplete")
+    conclusion_status = new_asset_purchase_conclusion["status"]
+    conclusion_ids = new_asset_purchase_conclusion["action_ids"]
+    if not isinstance(conclusion_ids, list) or set(conclusion_ids) != set(
+        new_asset_action_ids
+    ):
+        raise ValueError(
+            "decisions.new_asset_purchase_conclusion action_ids do not match new-asset actions"
+        )
+    if conclusion_status == "buy_proposed" and not new_asset_action_ids:
+        raise ValueError("buy_proposed requires at least one new-asset purchase action")
+    if conclusion_status == "no_new_asset_purchase" and new_asset_action_ids:
+        raise ValueError("no_new_asset_purchase cannot reference purchase actions")
+    if conclusion_status not in {"buy_proposed", "no_new_asset_purchase"}:
+        raise ValueError("decisions.new_asset_purchase_conclusion status is invalid")
+    if not str(new_asset_purchase_conclusion["rationale"]).strip():
+        raise ValueError("decisions.new_asset_purchase_conclusion requires rationale")
+
 
 SOURCE_FIELDS = {
     "title",
     "publisher",
     "url",
     "publication_date",
+    "data_as_of",
     "accessed_at",
+    "cutoff_compliance_status",
     "source_type",
     "claim_supported",
 }
 
 
-def _validate_source(source, *, path: str) -> None:
+def _validate_source(
+    source,
+    *,
+    path: str,
+    research_cutoff_at: str | None,
+) -> None:
     if not isinstance(source, dict):
         raise ValueError(f"{path} must be an object")
     missing = sorted(SOURCE_FIELDS - set(source))
@@ -1059,9 +2004,65 @@ def _validate_source(source, *, path: str) -> None:
         raise ValueError(f"{path} missing fields: " + ", ".join(missing))
     if not str(source.get("url") or "").startswith(("https://", "http://")):
         raise ValueError(f"{path}.url must be an absolute web URL")
+    if source["cutoff_compliance_status"] != "compliant":
+        raise ValueError(
+            f"{path} cannot support a decision unless cutoff_compliance_status is compliant"
+        )
+    if source["publication_date"] is None:
+        raise ValueError(
+            f"{path}.publication_date must identify the publication, filing, or release date"
+        )
+    cutoff = _parse_datetime(research_cutoff_at, path="research_cutoff_at")
+    _validate_information_date_not_after_cutoff(
+        source["publication_date"],
+        cutoff=cutoff,
+        path=f"{path}.publication_date",
+    )
+    if source["data_as_of"] is not None:
+        _validate_information_date_not_after_cutoff(
+            source["data_as_of"],
+            cutoff=cutoff,
+            path=f"{path}.data_as_of",
+        )
+    _parse_datetime(source["accessed_at"], path=f"{path}.accessed_at")
 
 
-def _validate_empirical_evidence(items) -> None:
+def _parse_datetime(value, *, path: str) -> datetime:
+    if value is None:
+        raise ValueError(f"{path} must be a timezone-aware date-time")
+    text = str(value)
+    try:
+        parsed = datetime.fromisoformat(text.replace("Z", "+00:00"))
+    except ValueError as exc:
+        raise ValueError(f"{path} must be a valid date-time") from exc
+    if parsed.tzinfo is None:
+        raise ValueError(f"{path} must include a timezone")
+    return parsed.astimezone(UTC)
+
+
+def _validate_information_date_not_after_cutoff(
+    value,
+    *,
+    cutoff: datetime,
+    path: str,
+) -> None:
+    text = str(value)
+    try:
+        if len(text) == 10:
+            information_date = date.fromisoformat(text)
+            if information_date > cutoff.date():
+                raise ValueError(f"{path} is after research_cutoff_at")
+            return
+        information_time = _parse_datetime(text, path=path)
+    except ValueError as exc:
+        if "after research_cutoff_at" in str(exc):
+            raise
+        raise ValueError(f"{path} must be a valid date or date-time") from exc
+    if information_time > cutoff:
+        raise ValueError(f"{path} is after research_cutoff_at")
+
+
+def _validate_empirical_evidence(items, *, research_cutoff_at: str) -> None:
     required = {
         "evidence_id",
         "claim",
@@ -1075,7 +2076,11 @@ def _validate_empirical_evidence(items) -> None:
     for index, item in enumerate(items):
         if not isinstance(item, dict) or required - set(item):
             raise ValueError(f"empirical_evidence[{index}] is incomplete")
-        _validate_source(item["source"], path=f"empirical_evidence[{index}].source")
+        _validate_source(
+            item["source"],
+            path=f"empirical_evidence[{index}].source",
+            research_cutoff_at=research_cutoff_at,
+        )
 
 
 def _validate_before_after_allocation(items) -> None:
@@ -1084,10 +2089,15 @@ def _validate_before_after_allocation(items) -> None:
     required = {
         "view",
         "category",
+        "before_jpy",
+        "after_jpy",
+        "target_jpy",
         "before_pct",
         "after_pct",
         "target_pct",
         "calculation_status",
+        "reason",
+        "remediation",
     }
     grouped: dict[str, list[dict]] = {}
     for index, item in enumerate(items):
@@ -1098,17 +2108,26 @@ def _validate_before_after_allocation(items) -> None:
         calculated = [row for row in rows if row["calculation_status"] == "calculated"]
         if calculated and all(row["after_pct"] is not None for row in calculated):
             total = sum(Decimal(str(row["after_pct"])) for row in calculated)
-            if total != 100:
-                raise ValueError(f"before_after_allocation {view} after_pct must total 100")
+            if abs(total - Decimal("100")) > ROUNDING_TOLERANCE_PCT_POINTS:
+                raise ValueError(
+                    f"before_after_allocation {view} after_pct must total 100 within tolerance"
+                )
 
 
-def _validate_account_tax_comparisons(items) -> None:
+def _validate_account_tax_comparisons(
+    items,
+    *,
+    research_cutoff_at: str,
+) -> None:
     if not isinstance(items, list):
         raise ValueError("account_tax_comparisons must be a list")
     required = {
         "comparison_id",
         "symbol",
         "account_type",
+        "status",
+        "reason",
+        "remediation",
         "cost_basis_jpy",
         "unrealized_gain_loss_jpy",
         "tax_treatment",
@@ -1124,6 +2143,7 @@ def _validate_account_tax_comparisons(items) -> None:
             _validate_source(
                 source,
                 path=f"account_tax_comparisons[{index}].sources[{source_index}]",
+                research_cutoff_at=research_cutoff_at,
             )
 
 
@@ -1132,14 +2152,18 @@ def _validate_order_proposals(items) -> None:
         raise ValueError("decisions.order_proposals must be a list")
     required = {
         "proposal_id",
+        "proposal_level",
         "symbol",
         "account_type",
         "side",
         "status",
+        "reason",
+        "remediation",
         "quantity",
         "amount_jpy",
         "formula",
         "inputs",
+        "policy_refs",
         "tax_and_account_analysis_ref",
         "rationale",
         "requires_user_approval",
@@ -1191,6 +2215,7 @@ def _validate_security_story_coverage(
     *,
     expected_security_symbols: set[str],
     source_name: str,
+    research_cutoff_at: str | None = None,
 ) -> None:
     if not isinstance(reviews, list):
         raise ValueError("security_story_reviews must be a list")
@@ -1229,6 +2254,7 @@ def _validate_security_story_coverage(
                     path=(
                         f"security_story_reviews[{review.get('symbol')}].sources[{index}]"
                     ),
+                    research_cutoff_at=research_cutoff_at,
                 )
 
 
@@ -1236,6 +2262,7 @@ def _validate_thematic_fund_coverage(
     reviews,
     *,
     expected_member_symbols: set[str],
+    research_cutoff_at: str,
 ) -> None:
     if not isinstance(reviews, list):
         raise ValueError("thematic_fund_reviews must be a list")
@@ -1276,6 +2303,7 @@ def _validate_thematic_fund_coverage(
             _validate_source(
                 source,
                 path=f"thematic_fund_reviews[{index}].sources[{source_index}]",
+                research_cutoff_at=research_cutoff_at,
             )
     duplicates = sorted(
         {symbol for symbol in actual_members if actual_members.count(symbol) > 1}

@@ -35,6 +35,14 @@ def request_payload() -> dict:
         "excluded_context": ["Codexの候補比率"],
         "research_requirements": ["一次情報を優先する"],
         "required_outputs": ["推奨比率と算式"],
+        "account_type_gate": {
+            "status": "complete",
+            "checked_holding_count": 1,
+            "required_account_categories": ["NISA", "特定口座", "一般口座"],
+            "confirmed_holdings": [
+                {"symbol": "MSFT", "account_type": "特定口座（源泉徴収あり）"}
+            ],
+        },
     }
 
 
@@ -70,6 +78,15 @@ def test_on_demand_decision_prompt_rejects_codex_recommendation_field() -> None:
         render_independent_decision_prompt(payload, template)
 
 
+def test_on_demand_decision_prompt_rejects_incomplete_account_gate() -> None:
+    template = "{{DECISION_REQUEST_YAML}}"
+    payload = request_payload()
+    payload["account_type_gate"]["status"] = "blocked"
+
+    with pytest.raises(ValueError, match="account_type_gate must be complete"):
+        render_independent_decision_prompt(payload, template)
+
+
 def response_payload() -> dict:
     return {
         "schema_version": 1,
@@ -83,6 +100,12 @@ def response_payload() -> dict:
             "parameter_values": [],
             "formulas": [],
             "review_triggers": [],
+        },
+        "action_plan": {
+            "applicability": "not_applicable",
+            "rationale": "parameter-only test decision",
+            "existing_asset_sales": [],
+            "new_asset_purchases": [],
         },
         "evidence": [],
         "alternatives": [],
@@ -124,4 +147,43 @@ def test_independent_decision_response_rejects_wrong_request_id(
         load_independent_decision_response(
             response_path,
             expected_decision_id="another-request",
+        )
+
+
+def test_independent_decision_sale_must_match_confirmed_account(
+    tmp_path: Path,
+) -> None:
+    payload = response_payload()
+    payload["action_plan"] = {
+        "applicability": "applicable",
+        "rationale": "A sale is proposed.",
+        "existing_asset_sales": [
+            {
+                "symbol": "MSFT",
+                "asset_name": "Microsoft",
+                "account_type": "NISA（成長投資枠）",
+                "timing": "next trading day",
+                "execution_method": "market order after user approval",
+                "quantity": 1,
+                "amount_jpy": None,
+                "formula": "sell 1 share",
+                "rationale": "test",
+                "requires_user_approval": True,
+            }
+        ],
+        "new_asset_purchases": [],
+    }
+    response_path = tmp_path / "independent_decision_response.yaml"
+    response_path.write_text(
+        yaml.safe_dump(payload, allow_unicode=True, sort_keys=False),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(ValueError, match="confirmed holding account"):
+        load_independent_decision_response(
+            response_path,
+            expected_decision_id="test-allocation-parameter",
+            expected_holding_accounts={
+                "MSFT": "特定口座（源泉徴収あり）"
+            },
         )

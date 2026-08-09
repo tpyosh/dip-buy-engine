@@ -9,6 +9,7 @@ required:
   - completed_at
   - decision_status
   - recommendation
+  - action_plan
   - evidence
   - alternatives
   - assumptions
@@ -64,6 +65,19 @@ properties:
         type: array
         items:
           type: string
+  action_plan:
+    type: object
+    additionalProperties: false
+    required: [applicability, rationale, existing_asset_sales, new_asset_purchases]
+    properties:
+      applicability: {enum: [applicable, not_applicable]}
+      rationale: {type: string, minLength: 1}
+      existing_asset_sales:
+        type: array
+        items: {$ref: "#/$defs/concrete_action"}
+      new_asset_purchases:
+        type: array
+        items: {$ref: "#/$defs/concrete_action"}
   evidence:
     type: array
     items:
@@ -118,3 +132,21 @@ properties:
         type: array
         items:
           type: string
+$defs:
+  concrete_action:
+    type: object
+    additionalProperties: false
+    required: [symbol, asset_name, account_type, timing, execution_method, quantity, amount_jpy, formula, rationale, requires_user_approval]
+    properties:
+      symbol: {type: string}
+      asset_name: {type: string, minLength: 1}
+      account_type:
+        type: string
+        pattern: "(NISA|特定口座|一般口座)"
+      timing: {type: string, minLength: 1}
+      execution_method: {type: string, minLength: 1}
+      quantity: {type: [number, "null"], minimum: 0}
+      amount_jpy: {type: [number, "null"], minimum: 0}
+      formula: {type: string, minLength: 1}
+      rationale: {type: string, minLength: 1}
+      requires_user_approval: {const: true}

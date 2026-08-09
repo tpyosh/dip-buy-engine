@@ -22,6 +22,7 @@ from .exposure_metrics import build_exposure_breakdown
 from .independent_decision import (
     load_independent_decision_response,
     render_independent_decision_prompt,
+    validate_independent_decision_request,
 )
 from .market_data import fetch_market_references
 from .models import MonthlyComputation, PortfolioSnapshot, PortfolioWarning
@@ -35,6 +36,7 @@ from .on_demand import (
 from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics, suggest_core_proxy_symbol
 from .prompt_renderer import render_chatgpt_prompt, render_review_generation_blocker
 from .review_packet import build_review_packet
+from .review_readiness import build_account_type_gate, require_complete_account_type_gate
 from .repository_records import (
     audit_repository,
     load_recurring_contribution_context,
@@ -230,8 +232,8 @@ def handle_generate_review_prompt(args: argparse.Namespace) -> int:
         write_text(output_path, blocker)
         write_text(paths["review_prompt_history"], blocker)
         LOGGER.error(
-            "Review prompt generation blocked; missing strategic inputs: %s",
-            ", ".join(review_packet.missing_strategic_inputs),
+            "Review prompt generation blocked: %s",
+            review_packet.generation_status,
         )
         return 2
     prompt = render_chatgpt_prompt(
@@ -328,12 +330,17 @@ def handle_on_demand_decision_prompt(args: argparse.Namespace) -> int:
 
 def handle_validate_independent_decision(args: argparse.Namespace) -> int:
     request = load_yaml(Path(args.request))
+    validate_independent_decision_request(request)
     decision_id = request.get("decision_id")
     if not decision_id:
         raise ValueError("Independent decision request is missing decision_id")
     load_independent_decision_response(
         args.response_yaml,
         expected_decision_id=str(decision_id),
+        expected_holding_accounts={
+            str(item["symbol"]): str(item["account_type"])
+            for item in request["account_type_gate"]["confirmed_holdings"]
+        },
     )
     LOGGER.info(
         "Independent decision response passed contract validation for %s",
@@ -348,11 +355,16 @@ def load_review_input(
     computation: MonthlyComputation,
     review_target_month: str,
 ) -> tuple[dict | None, object, Path]:
+    project_root = get_project_root()
+    review_packet = build_current_review_packet(computation, project_root)
+    if review_packet.generation_status != "ready":
+        raise ValueError(
+            "Review response ingestion blocked because the current request is not review-ready: "
+            + review_packet.generation_status
+        )
     review_yaml = getattr(args, "review_yaml", None)
     if review_yaml:
         source_path = Path(review_yaml)
-        project_root = get_project_root()
-        review_packet = build_current_review_packet(computation, project_root)
         payload, feedback = load_monthly_review_response(
             source_path,
             expected_month=review_target_month,
@@ -376,6 +388,18 @@ def load_review_input(
                 "research_cutoff_at": review_packet.research_cutoff_at,
             },
             total_assets_jpy=computation.snapshot.total_assets_jpy,
+            expected_current_holding_symbols={
+                str(holding["symbol"])
+                for holding in review_packet.allowed_quantitative_facts["holdings"]
+                if holding.get("asset_class")
+                in {"core", "jun_core", "satellite_core", "satellite"}
+            },
+            expected_current_holding_accounts={
+                str(holding["symbol"]): str(holding["account_type"])
+                for holding in review_packet.allowed_quantitative_facts["holdings"]
+                if holding.get("asset_class")
+                in {"core", "jun_core", "satellite_core", "satellite"}
+            },
         )
         return payload, feedback, source_path
     review_text_path = getattr(args, "review_text", None)
@@ -406,8 +430,8 @@ def handle_monthly_run(args: argparse.Namespace) -> int:
         write_text(paths["review_prompt"], blocker)
         write_text(paths["review_prompt_history"], blocker)
         LOGGER.error(
-            "Monthly review prompt generation blocked; missing strategic inputs: %s",
-            ", ".join(review_packet.missing_strategic_inputs),
+            "Monthly review prompt generation blocked: %s",
+            review_packet.generation_status,
         )
         return 2
     prompt = render_chatgpt_prompt(
@@ -460,6 +484,7 @@ def handle_on_demand_run(args: argparse.Namespace) -> int:
         project_root=project_root,
         requested_at=requested_at,
     )
+    require_complete_account_type_gate(computation.snapshot)
     tickers = load_yaml(project_root / "config/tickers.yaml")
     market_reference_path = project_root / "config/market_reference.yaml"
     if market_reference_path.exists():
@@ -522,6 +547,11 @@ def handle_ingest_health_check(args: argparse.Namespace) -> int:
     if not market_data_path.exists():
         raise ValueError(f"Health-check market_data.yaml is missing: {market_data_path}")
     market_data = load_yaml(market_data_path)
+    account_gate = market_data.get("account_type_gate")
+    if not isinstance(account_gate, dict) or account_gate.get("status") != "complete":
+        raise ValueError(
+            "Health-check response ingestion blocked because the request did not pass the account type gate."
+        )
     expected_symbols = {
         str(target["symbol"])
         for target in market_data.get("security_story_targets", [])
@@ -604,6 +634,7 @@ def compute_on_demand(
             ),
             "inventory_only": True,
             "resolved_buckets": resolved_buckets,
+            "account_type_gate": build_account_type_gate(snapshot),
         },
     )
 
@@ -969,6 +1000,16 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             ),
             "holding_execution_context": holding_context["record"].get(
                 "execution_context", {}
+            ),
+            "satellite_review_policy": deepcopy(
+                (active_strategy or {})
+                .get("review_policy", {})
+                .get("satellite_parameters", {})
+            ),
+            "review_output_policy": deepcopy(
+                (active_strategy or {})
+                .get("review_policy", {})
+                .get("output_contract", {})
             ),
             "candidate_policy_status": buy_rules.get("policy_status"),
             "core_spot_buy_materials": core_spot_buy_materials,

@@ -10,7 +10,10 @@ import pytest
 
 from monthly_limit_order_review.context_records import load_financial_context
 from monthly_limit_order_review.models import Holding
-from monthly_limit_order_review.prompt_renderer import render_chatgpt_prompt
+from monthly_limit_order_review.prompt_renderer import (
+    render_chatgpt_prompt,
+    render_review_generation_blocker,
+)
 from monthly_limit_order_review.review_packet import (
     build_cash_requirement_inputs,
     build_structured_cash_requirement_inputs,
@@ -98,8 +101,33 @@ def test_review_packet_matches_closed_root_schema(sample_computation) -> None:
     assert packet.output_contract["final_review"]["delivery"]["preferred"] == (
         "attach_review_response_yaml"
     )
-    assert "thematic_fund_review" in packet.output_contract["array_schemas"]
+    assert "thematic_fund_review" in packet.output_contract["inline_response_schema"]["$defs"]
+    assert "array_schemas" not in packet.output_contract
+    assert "response_skeleton" not in packet.output_contract
     assert any(rule["rule_id"] == "R-ID-001" for rule in packet.rule_registry)
+
+
+def test_missing_account_type_blocks_prompt_and_emits_only_a_blocker(
+    sample_computation,
+) -> None:
+    sample_computation = deepcopy(sample_computation)
+    sample_computation.snapshot.holdings[1].account_type = None
+
+    packet = build_review_packet(sample_computation)
+
+    assert packet.generation_status == "blocked_missing_account_types"
+    assert packet.account_type_gate["status"] == "blocked"
+    with pytest.raises(ValueError, match="blocked_missing_account_types"):
+        render_chatgpt_prompt(
+            sample_computation,
+            (ROOT / "prompts/templates/monthly_review_template.md").read_text(
+                encoding="utf-8"
+            ),
+            review_packet=packet,
+        )
+    blocker = render_review_generation_blocker(packet)
+    assert "ChatGPTへ渡すプロンプトではありません" in blocker
+    assert sample_computation.snapshot.holdings[1].symbol in blocker
 
 
 def test_review_packet_contains_only_observed_or_calculated_current_inputs(
@@ -126,7 +154,7 @@ def test_complete_strategic_inputs_enable_objective_confirmation_phase(
     sample_computation,
 ) -> None:
     sample_computation = deepcopy(sample_computation)
-    sample_computation.snapshot.snapshot_date = date(2026, 8, 2)
+    sample_computation.snapshot.snapshot_date = date(2026, 8, 9)
     financial = complete_strategic_financial_context()
     packet = build_review_packet(
         sample_computation,
@@ -153,7 +181,7 @@ def test_complete_strategic_inputs_enable_objective_confirmation_phase(
 
 def test_birth_date_is_used_to_calculate_age_at_snapshot(sample_computation) -> None:
     sample_computation = deepcopy(sample_computation)
-    sample_computation.snapshot.snapshot_date = date(2026, 8, 2)
+    sample_computation.snapshot.snapshot_date = date(2026, 8, 9)
     financial = complete_strategic_financial_context()
     financial["strategic_profile"]["date_of_birth"] = "1992-01-07"
 
@@ -165,14 +193,14 @@ def test_birth_date_is_used_to_calculate_age_at_snapshot(sample_computation) -> 
 
     assert packet.strategic_required_inputs["date_of_birth"] == "1992-01-07"
     assert packet.strategic_required_inputs["user_age"] == 34
-    assert packet.strategic_required_inputs["user_age_as_of"] == "2026-08-02"
+    assert packet.strategic_required_inputs["user_age_as_of"] == "2026-08-09"
 
 
 def test_undecided_contribution_horizon_blocks_strategic_packet(
     sample_computation,
 ) -> None:
     sample_computation = deepcopy(sample_computation)
-    sample_computation.snapshot.snapshot_date = date(2026, 8, 2)
+    sample_computation.snapshot.snapshot_date = date(2026, 8, 9)
     financial = complete_strategic_financial_context()
     financial["strategic_profile"]["planned_contributions"] = {
         "status": "continuation_horizon_undecided",
@@ -192,7 +220,7 @@ def test_undecided_contribution_horizon_blocks_strategic_packet(
 
 def test_selected_objective_enables_final_review_phase(sample_computation) -> None:
     sample_computation = deepcopy(sample_computation)
-    sample_computation.snapshot.snapshot_date = date(2026, 8, 2)
+    sample_computation.snapshot.snapshot_date = date(2026, 8, 9)
     financial = complete_strategic_financial_context()
     financial["strategic_profile"]["objective_configuration"][
         "primary_objective"
@@ -331,7 +359,17 @@ def test_current_policy_request_switches_packet_to_strategic_mode(
     sample_computation,
 ) -> None:
     sample_computation = deepcopy(sample_computation)
-    sample_computation.snapshot.snapshot_date = date(2026, 8, 2)
+    sample_computation.snapshot.snapshot_date = date(2026, 8, 9)
+    sample_computation.metadata["core_recurring_contributions_source"] = (
+        "plans/recurring/versions/2026-03-01.yaml"
+    )
+    sample_computation.metadata["satellite_review_policy"] = {
+        "satellites_allowed": True,
+        "positive_satellite_allocation_required": True,
+        "all_country_only_baseline_required": True,
+        "target_pct": {"value": None, "status": "reviewer_to_propose"},
+        "securities": {"value": None, "status": "reviewer_to_propose"},
+    }
     financial = load_financial_context(ROOT)
     packet = build_review_packet(
         sample_computation,
@@ -348,10 +386,112 @@ def test_current_policy_request_switches_packet_to_strategic_mode(
         "minimize_risk_for_required_return"
     ]["offered"] is True
     assert packet.approved_policy is None
-    assert packet.candidate_methodology["candidate_range"][0]["global_equity_pct"] == 100
-    assert packet.active_risk_policy["satellites_allowed"] is None
+    assert packet.candidate_methodology["candidate_grid"][
+        "equity_share_of_equity_bond_sleeve_pct"
+    ] == list(range(0, 101, 10))
+    assert packet.active_risk_policy["satellites_allowed"] is True
+    assert packet.active_risk_policy["satellite_target_pct"]["status"] == (
+        "reviewer_to_propose"
+    )
+    assert packet.active_risk_policy["satellite_securities"]["status"] == (
+        "reviewer_to_propose"
+    )
     assert "user_age" not in packet.missing_strategic_inputs
-    assert packet.direct_semiconductor_limit["status"] == "policy_to_reconsider"
+    assert packet.direct_semiconductor_limit["current_approved_constraint"][
+        "limit_pct"
+    ] == 12
+    assert packet.direct_semiconductor_limit["proposed_future_policy"][
+        "status"
+    ] == "reviewer_to_propose"
+    strategic_inputs = packet.strategic_required_inputs
+    assert strategic_inputs["planned_contributions"]["observed_commitments_ref"] == (
+        "plans/recurring/versions/2026-03-01.yaml"
+    )
+    assert not any(
+        "750000" in str(item)
+        for item in strategic_inputs["planned_contributions"]["constraints"]
+    )
+    assert strategic_inputs["planning_timeline"] == {
+        **strategic_inputs["planning_timeline"],
+        "model_start_date": "2026-08-09",
+        "contribution_end_date": "2057-01-06",
+        "first_withdrawal_date": "2057-01-07",
+        "planned_retirement_date": "2057-01-07",
+        "mortgage_repayment_end_date": "2064-09-27",
+        "planning_end_date": "2092-01-07",
+    }
+    liability = strategic_inputs["liability_cash_flows"][0]
+    assert liability["retirement_period"]["ends_on"] == "2064-09-27"
+    assert liability["current_asset_offset_prohibited"] is True
+    contribution_types = {
+        row["contribution_type"]
+        for row in strategic_inputs["contribution_reconciliation"]["rows"]
+    }
+    assert contribution_types == {
+        "nisa_broad_equity_core",
+        "ideco_broad_equity_core",
+        "crypto_btc_eth",
+    }
+    assert packet.market_decline_rule["policy_design_sequence"][-1] == (
+        "then_apply_locked_rule_to_market_data_at_research_cutoff"
+    )
+    assert all(
+        item["status"] == "reviewer_to_derive"
+        for item in packet.candidate_methodology["assumption_delegations"].values()
+    )
+    inline_schema = packet.output_contract["inline_response_schema"]
+    candidate_required = set(inline_schema["$defs"]["candidate"]["required"])
+    assert {
+        "estimated_success_probability_pct",
+        "required_success_probability_pct",
+        "candidate_feasible",
+        "constraint_failures",
+        "calculation_status",
+        "reason",
+        "remediation",
+    }.issubset(candidate_required)
+    assert "static_reference_checks" in inline_schema["required"]
+    assert inline_schema["$defs"]["quality_check"]["properties"]["status"][
+        "enum"
+    ] == ["pass", "fail", "not_verifiable", "not_applicable"]
+    assert packet.candidate_methodology["tactical_liquidity_candidates_pct"] == [
+        0,
+        2.5,
+        5,
+        7.5,
+        10,
+    ]
+    assert packet.candidate_methodology["other_pct_candidates"] == [0, 1, 2, 3, 5]
+    assert packet.decision_stage_contract["required_order"] == [
+        "strategic_policy_stage",
+        "implementation_stage",
+    ]
+    assert packet.execution_capability_contract["fabrication_prohibited"] is True
+    assert packet.validation_contract["numeric_tolerances"] == {
+        "amount_jpy": 10,
+        "percentage_points": 0.02,
+        "monte_carlo_probability_pct_points": 0.01,
+        "return_and_volatility_pct_points": 0.01,
+    }
+    assert {
+        "data_as_of",
+        "cutoff_compliance_status",
+    }.issubset(inline_schema["$defs"]["source"]["required"])
+    assert packet.validation_contract["semantic_validation_check_ids"]
+
+
+def test_unset_satellite_parameters_alone_require_strategic_review(
+    sample_computation,
+) -> None:
+    sample_computation = deepcopy(sample_computation)
+    sample_computation.metadata["satellite_review_policy"] = {
+        "target_pct": {"value": None, "status": "reviewer_to_propose"},
+        "securities": {"value": None, "status": "reviewer_to_propose"},
+    }
+
+    packet = build_review_packet(sample_computation)
+
+    assert packet.review_mode == "strategic_policy_second_opinion"
 
 
 def test_cash_case_b_calculates_target_only_from_complete_inputs() -> None:
@@ -404,7 +544,7 @@ def test_prompt_defines_unknown_as_a_valid_result_and_requests_feedback(
     sample_computation,
 ) -> None:
     computation = deepcopy(sample_computation)
-    computation.snapshot.snapshot_date = date(2026, 8, 2)
+    computation.snapshot.snapshot_date = date(2026, 8, 9)
     financial = load_financial_context(ROOT)
     packet = build_review_packet(
         computation,

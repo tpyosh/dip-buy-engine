@@ -2,6 +2,12 @@ $schema: "https://json-schema.org/draft/2020-12/schema"
 title: "Machine-readable monthly investment review response"
 type: object
 additionalProperties: false
+x-nullability-rules:
+  - "each field's JSON Schema is the sole authority for whether null is allowed; there is no implicit containing-status nullability rule"
+  - "where a field schema explicitly allows null, any narrower status-dependent rule is expressed by that object's if/then schema or by x-additional-validation"
+  - "every blocked or not_calculable object governed by a status condition must include a non-empty reason and remediation"
+  - "reviewer_to_derive inputs must be derived for strategic final_review unless the calculation contract proves them not_calculable"
+  - "account categories must be complete before review generation; only later tax, cost-basis, or lot-detail gaps may block lot execution without blocking the strategic policy decision"
 required:
   - schema_version
   - artifact_type
@@ -13,7 +19,11 @@ required:
   - packet_generated_at
   - research_cutoff_at
   - decision_date
+  - review_completion_status
+  - execution_capability_gate
   - strategic_policy_decision
+  - implementation_decision
+  - account_lot_execution
   - decision_axes
   - empirical_evidence
   - human_summary
@@ -26,6 +36,10 @@ required:
   - decisions
   - codex_handoff
   - decision_quality_checks
+  - static_reference_checks
+  - validation_tolerances
+  - rounding_reconciliation
+  - semantic_validation_checks
 properties:
   schema_version: {const: 2}
   artifact_type: {const: monthly_review_response}
@@ -40,11 +54,17 @@ properties:
   packet_generated_at: {type: string, format: date-time}
   research_cutoff_at: {type: string, format: date-time}
   decision_date: {type: string, format: date}
+  review_completion_status:
+    enum: [complete, complete_with_execution_blocks, blocked, invalid]
+  execution_capability_gate: {$ref: "#/$defs/execution_capability_gate"}
   strategic_policy_decision:
     type: object
     additionalProperties: false
     required:
+      - stage
       - status
+      - reason
+      - remediation
       - objective
       - updated_inputs
       - financial_planning_model
@@ -54,57 +74,106 @@ properties:
       - tactical_liquidity_policy
       - active_risk_policy
       - direct_semiconductor_limit
+      - tactical_liquidity_candidate_comparison
+      - crypto_contribution_option_comparison
+      - other_allocation_candidate_comparison
       - candidate_methodology
       - candidate_comparison
     properties:
-      status: {enum: [proposed, not_applicable, blocked]}
+      stage: {const: strategic_policy_stage}
+      status: {enum: [complete, not_applicable, blocked]}
+      reason: {type: string}
+      remediation: {type: string}
       objective:
         type: [string, "null"]
         enum: [maximize_terminal_wealth, minimize_risk_for_required_return, maximize_ex_ante_sharpe_ratio, null]
       updated_inputs: {$ref: "#/$defs/updated_inputs"}
       financial_planning_model: {$ref: "#/$defs/financial_planning_model"}
       recommended_policy:
-        type: object
-        additionalProperties: false
-        required: [policy_id, investable_equity_pct, investable_bond_pct, investable_other_pct, core_policy, satellite_policy, rebalancing_rule, transition_deadline]
-        properties:
-          policy_id: {type: string}
-          investable_equity_pct: {type: [number, "null"], minimum: 0, maximum: 100}
-          investable_bond_pct: {type: [number, "null"], minimum: 0, maximum: 100}
-          investable_other_pct: {type: [number, "null"], minimum: 0, maximum: 100}
-          core_policy: {type: [string, "null"]}
-          satellite_policy: {type: [string, "null"]}
-          rebalancing_rule: {type: [string, "null"]}
-          transition_deadline: {type: [string, "null"]}
-      policy_allocation_within_investable_portfolio: {$ref: "#/$defs/allocation_view"}
-      household_total_asset_allocation: {$ref: "#/$defs/household_allocation_view"}
+        oneOf:
+          - {$ref: "#/$defs/recommended_policy"}
+          - {$ref: "#/$defs/blocked_component"}
+          - {type: "null"}
+      policy_allocation_within_investable_portfolio:
+        oneOf:
+          - {$ref: "#/$defs/allocation_view"}
+          - {$ref: "#/$defs/blocked_component"}
+          - {type: "null"}
+      household_total_asset_allocation:
+        oneOf:
+          - {$ref: "#/$defs/household_allocation_view"}
+          - {$ref: "#/$defs/blocked_component"}
+          - {type: "null"}
       tactical_liquidity_policy: {$ref: "#/$defs/tactical_liquidity_policy"}
       active_risk_policy:
-        type: object
-        additionalProperties: false
-        required: [policy_id, satellites_allowed, total_satellite_cap_pct, single_theme_cap_pct, single_security_cap_pct, exceptions]
-        properties:
-          policy_id: {type: string}
-          satellites_allowed: {type: [boolean, "null"]}
-          total_satellite_cap_pct: {type: [number, "null"], minimum: 0, maximum: 100}
-          single_theme_cap_pct: {type: [number, "null"], minimum: 0, maximum: 100}
-          single_security_cap_pct: {type: [number, "null"], minimum: 0, maximum: 100}
-          exceptions: {type: array}
-      direct_semiconductor_limit:
-        type: object
-        additionalProperties: false
-        required: [policy_id, status, limit_pct, denominator, priority, rationale]
-        properties:
-          policy_id: {type: string}
-          status: {enum: [hard_constraint, policy_to_reconsider, explicit_exception]}
-          limit_pct: {type: [number, "null"], minimum: 0, maximum: 100}
-          denominator: {const: household_total_assets_jpy}
-          priority: {type: string}
-          rationale: {type: string}
-      candidate_methodology: {$ref: "#/$defs/candidate_methodology"}
+        oneOf:
+          - {$ref: "#/$defs/active_risk_policy"}
+          - {$ref: "#/$defs/blocked_component"}
+          - {type: "null"}
+      direct_semiconductor_limit: {$ref: "#/$defs/direct_semiconductor_limit"}
+      tactical_liquidity_candidate_comparison:
+        type: array
+        items: {$ref: "#/$defs/tactical_liquidity_candidate"}
+      crypto_contribution_option_comparison:
+        type: array
+        items: {$ref: "#/$defs/crypto_contribution_option"}
+      other_allocation_candidate_comparison:
+        type: array
+        items: {$ref: "#/$defs/other_allocation_candidate"}
+      candidate_methodology:
+        oneOf:
+          - {$ref: "#/$defs/candidate_methodology"}
+          - {$ref: "#/$defs/blocked_component"}
+          - {type: "null"}
       candidate_comparison:
         type: array
         items: {$ref: "#/$defs/candidate"}
+        x-additional-validation:
+          - "the 11 sleeve_equity_pct values must be exactly 0, 10, ..., 100 once each and must match candidate_methodology.candidate_grid when methodology is complete"
+          - "candidate_id must be unique"
+          - "all numeric other_pct values must equal candidate_methodology.other_pct_common_base_case"
+          - "total_equity_pct=(100-other_pct)*sleeve_equity_pct/100 and bond_pct=(100-other_pct)*(100-sleeve_equity_pct)/100"
+          - "a completed response selects exactly one feasible candidate; a blocked response may select none only when it gives an upper-level reason and remediation"
+    allOf:
+      - if:
+          properties: {status: {const: complete}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            recommended_policy: {$ref: "#/$defs/recommended_policy"}
+            policy_allocation_within_investable_portfolio: {$ref: "#/$defs/allocation_view"}
+            household_total_asset_allocation: {$ref: "#/$defs/household_allocation_view"}
+            active_risk_policy: {$ref: "#/$defs/active_risk_policy"}
+            tactical_liquidity_candidate_comparison: {type: array, minItems: 5, maxItems: 5}
+            crypto_contribution_option_comparison: {type: array, minItems: 3, maxItems: 3}
+            other_allocation_candidate_comparison: {type: array, minItems: 5, maxItems: 5}
+            candidate_methodology: {$ref: "#/$defs/candidate_methodology"}
+            candidate_comparison: {type: array, minItems: 11, maxItems: 11}
+      - if:
+          properties: {status: {const: blocked}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}
+            tactical_liquidity_candidate_comparison: {type: array, minItems: 5, maxItems: 5}
+            crypto_contribution_option_comparison: {type: array, minItems: 3, maxItems: 3}
+            other_allocation_candidate_comparison: {type: array, minItems: 5, maxItems: 5}
+            candidate_comparison: {type: array, minItems: 11, maxItems: 11}
+      - if:
+          properties: {status: {const: not_applicable}}
+        then:
+          properties:
+            recommended_policy: {type: "null"}
+            policy_allocation_within_investable_portfolio: {type: "null"}
+            household_total_asset_allocation: {type: "null"}
+            active_risk_policy: {type: "null"}
+            tactical_liquidity_candidate_comparison: {type: array, maxItems: 0}
+            crypto_contribution_option_comparison: {type: array, maxItems: 0}
+            other_allocation_candidate_comparison: {type: array, maxItems: 0}
+            candidate_methodology: {type: "null"}
+            candidate_comparison: {type: array, maxItems: 0}
+  implementation_decision: {$ref: "#/$defs/implementation_decision"}
+  account_lot_execution: {$ref: "#/$defs/account_lot_execution"}
   decision_axes:
     type: object
     additionalProperties: false
@@ -143,6 +212,8 @@ properties:
       - maximum_calculable_cash_jpy
       - total_cash_target_status
       - total_cash_target_jpy
+      - calculation_reason
+      - remediation
       - derivation_notes
     properties:
       emergency_fund_target_jpy: {type: [number, "null"], minimum: 0}
@@ -157,6 +228,8 @@ properties:
       maximum_calculable_cash_jpy: {type: [number, "null"], minimum: 0}
       total_cash_target_status: {enum: [fully_calculable, confirmed_minimum_only, not_calculable]}
       total_cash_target_jpy: {type: [number, "null"], minimum: 0}
+      calculation_reason: {type: string}
+      remediation: {type: string}
       derivation_notes:
         type: array
         items: {type: string}
@@ -177,7 +250,7 @@ properties:
   decisions:
     type: object
     additionalProperties: false
-    required: [policy_refs, portfolio_diagnosis, rule_refs, order_proposals, actions]
+    required: [policy_refs, portfolio_diagnosis, rule_refs, order_proposals, actions, new_asset_purchase_conclusion]
     properties:
       policy_refs:
         type: array
@@ -196,6 +269,17 @@ properties:
       actions:
         type: array
         items: {$ref: "#/$defs/action"}
+      new_asset_purchase_conclusion:
+        type: object
+        additionalProperties: false
+        required: [status, rationale, action_ids]
+        properties:
+          status: {enum: [buy_proposed, no_new_asset_purchase]}
+          rationale: {type: string, minLength: 1}
+          action_ids:
+            type: array
+            uniqueItems: true
+            items: {type: string}
   codex_handoff:
     type: object
     additionalProperties: false
@@ -217,21 +301,242 @@ properties:
           nice_to_have: {type: array, items: {type: string}}
   decision_quality_checks:
     type: array
-    minItems: 19
-    items: {$ref: "#/$defs/quality_check"}
+    minItems: 36
+    maxItems: 36
+    uniqueItems: true
+    items: {$ref: "#/$defs/decision_quality_check"}
+  static_reference_checks:
+    type: array
+    minItems: 10
+    maxItems: 10
+    uniqueItems: true
+    items: {$ref: "#/$defs/static_reference_check"}
+  validation_tolerances: {$ref: "#/$defs/validation_tolerances"}
+  rounding_reconciliation: {$ref: "#/$defs/rounding_reconciliation"}
+  semantic_validation_checks:
+    type: array
+    minItems: 15
+    maxItems: 15
+    uniqueItems: true
+    items: {$ref: "#/$defs/semantic_validation_check"}
+x-additional-validation:
+  - "review_completion_status is derived from the three stage statuses and validation results; it is not a self-selected success label"
+  - "complete_with_execution_blocks is allowed when strategic policy is complete but tax, cost-basis, or lot-detail execution is blocked or not_calculable; it cannot bypass the pre-generation account-category gate"
+  - "quality checks are evidence based and are not required to all be pass"
+  - "JSON Schema validation and semantic_validation_checks are separate steps"
 $defs:
+  execution_capability_gate:
+    type: object
+    additionalProperties: false
+    required: [gate_status, evaluated_before_calculations, capabilities]
+    properties:
+      gate_status: {enum: [all_available, partial, unavailable]}
+      evaluated_before_calculations: {const: true}
+      capabilities:
+        type: array
+        minItems: 8
+        maxItems: 8
+        items: {$ref: "#/$defs/capability_result"}
+    x-additional-validation:
+      - "capability_id must be unique and cover all eight required capabilities exactly once"
+      - "gate_status=all_available only when every capability is available"
+      - "unavailable or partial capabilities must not be used to fabricate dependent numbers"
+  capability_result:
+    type: object
+    additionalProperties: false
+    required: [capability_id, status, evidence, reason, missing_capability, remediation]
+    properties:
+      capability_id:
+        enum:
+          - monthly_cash_flow_calculation
+          - bisection_required_return_calculation
+          - multivariate_monthly_monte_carlo
+          - fixed_random_seed
+          - complete_11_candidate_comparison
+          - interest_rate_sensitivity_calculation
+          - candidate_allocation_order_arithmetic_reconciliation
+          - yaml_or_json_schema_validation
+      status: {enum: [available, partial, unavailable]}
+      evidence: {type: string}
+      reason: {type: string}
+      missing_capability: {type: array, items: {type: string}}
+      remediation: {type: string}
+    allOf:
+      - if:
+          properties: {status: {enum: [partial, unavailable]}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            missing_capability: {type: array, minItems: 1}
+            remediation: {type: string, minLength: 1}
+      - if:
+          properties: {status: {const: available}}
+        then:
+          properties:
+            evidence: {type: string, minLength: 1}
+            missing_capability: {type: array, maxItems: 0}
+  implementation_decision:
+    type: object
+    additionalProperties: false
+    required: [stage, status, reason, remediation, strategic_policy_ref, strategic_policy_status_at_start, strategy_locked_before_market_evaluation, product_decision_refs, tactical_deployment_ref, before_after_allocation_ref]
+    properties:
+      stage: {const: implementation_stage}
+      status: {enum: [complete, partial, blocked, not_applicable]}
+      reason: {type: string}
+      remediation: {type: string}
+      strategic_policy_ref: {const: strategic_policy_decision.recommended_policy}
+      strategic_policy_status_at_start: {enum: [complete, not_applicable, blocked]}
+      strategy_locked_before_market_evaluation: {type: [boolean, "null"]}
+      product_decision_refs: {type: array, items: {type: string}}
+      tactical_deployment_ref: {const: dip_buy_liquidity_deployment_review}
+      before_after_allocation_ref: {const: before_after_allocation}
+    allOf:
+      - if:
+          properties: {status: {enum: [complete, partial]}}
+        then:
+          properties:
+            strategic_policy_status_at_start: {enum: [complete, not_applicable]}
+            strategy_locked_before_market_evaluation: {const: true}
+      - if:
+          properties: {status: {enum: [partial, blocked]}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}
+  account_lot_execution:
+    type: object
+    additionalProperties: false
+    required: [status, reason, remediation, implementation_decision_ref, missing_information, executable_order_proposal_ids, blocked_order_proposal_ids]
+    properties:
+      status: {enum: [complete, blocked, not_calculable, not_applicable]}
+      reason: {type: string}
+      remediation: {type: string}
+      implementation_decision_ref: {const: implementation_decision}
+      missing_information: {type: array, items: {type: string}}
+      executable_order_proposal_ids: {type: array, uniqueItems: true, items: {type: string}}
+      blocked_order_proposal_ids: {type: array, uniqueItems: true, items: {type: string}}
+    allOf:
+      - if:
+          properties: {status: {enum: [blocked, not_calculable]}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}
+            missing_information: {type: array, minItems: 1}
+  blocked_component:
+    type: object
+    additionalProperties: false
+    required: [status, reason, remediation]
+    properties:
+      status: {const: blocked}
+      reason: {type: string, minLength: 1}
+      remediation: {type: string, minLength: 1}
+  recommended_policy:
+    type: object
+    additionalProperties: false
+    required: [policy_id, investable_equity_pct, investable_bond_pct, investable_other_pct, core_policy, satellite_policy, rebalancing_rule, transition_deadline]
+    properties:
+      policy_id: {type: string}
+      investable_equity_pct: {type: number, minimum: 0, maximum: 100}
+      investable_bond_pct: {type: number, minimum: 0, maximum: 100}
+      investable_other_pct: {type: number, minimum: 0, maximum: 100}
+      core_policy: {type: string}
+      satellite_policy: {type: string}
+      rebalancing_rule: {type: string}
+      transition_deadline: {type: string}
+  active_risk_policy:
+    type: object
+    additionalProperties: false
+    required: [policy_id, satellites_allowed, satellite_target_pct_of_investable_portfolio, selected_satellite_securities, all_country_only_baseline_compared, selection_rationale, total_satellite_cap_pct, single_theme_cap_pct, single_security_cap_pct, exceptions]
+    properties:
+      policy_id: {type: string}
+      satellites_allowed: {type: [boolean, "null"]}
+      satellite_target_pct_of_investable_portfolio: {type: [number, "null"], minimum: 0, maximum: 100}
+      selected_satellite_securities:
+        type: array
+        items:
+          type: object
+          additionalProperties: false
+          required: [symbol, asset_name, role, target_pct_of_investable_portfolio, rationale]
+          properties:
+            symbol: {type: string}
+            asset_name: {type: string}
+            role: {type: string}
+            target_pct_of_investable_portfolio: {type: number, exclusiveMinimum: 0, maximum: 100}
+            rationale: {type: string}
+      all_country_only_baseline_compared: {type: [boolean, "null"]}
+      selection_rationale: {type: string}
+      total_satellite_cap_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      single_theme_cap_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      single_security_cap_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      exceptions: {type: array}
+    allOf:
+      - if:
+          properties: {satellites_allowed: {const: true}}
+        then:
+          properties:
+            satellite_target_pct_of_investable_portfolio: {type: number, exclusiveMinimum: 0, maximum: 100}
+            selected_satellite_securities: {type: array, minItems: 1}
+            all_country_only_baseline_compared: {const: true}
+            selection_rationale: {type: string, minLength: 1}
+  direct_semiconductor_limit:
+    type: object
+    additionalProperties: false
+    required: [current_approved_constraint, proposed_future_policy, priority]
+    properties:
+      current_approved_constraint:
+        type: object
+        additionalProperties: false
+        required: [policy_id, status, limit_pct, denominator, approved, rationale]
+        properties:
+          policy_id: {type: string}
+          status: {const: hard_constraint}
+          limit_pct: {type: number, minimum: 0, maximum: 100}
+          denominator: {const: household_total_assets_jpy}
+          approved: {const: true}
+          rationale: {type: string}
+      proposed_future_policy:
+        type: object
+        additionalProperties: false
+        required: [policy_id, status, limit_pct, denominator, approved, rationale]
+        properties:
+          policy_id: {type: [string, "null"]}
+          status: {enum: [proposed, not_applicable, blocked]}
+          limit_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+          denominator: {const: household_total_assets_jpy}
+          approved: {const: false}
+          rationale: {type: string}
+      priority: {type: string}
   source:
     type: object
     additionalProperties: false
-    required: [title, publisher, url, publication_date, accessed_at, source_type, claim_supported]
+    required: [title, publisher, url, publication_date, data_as_of, accessed_at, cutoff_compliance_status, source_type, claim_supported]
     properties:
       title: {type: string}
       publisher: {type: string}
       url: {type: string, format: uri}
-      publication_date: {type: [string, "null"]}
+      publication_date:
+        description: "Publication, filing, or release date/time; this is distinct from accessed_at."
+        anyOf:
+          - {type: string, format: date}
+          - {type: string, format: date-time}
+          - {type: "null"}
+      data_as_of:
+        description: "Date/time represented by the data, when applicable; it does not override a later publication date."
+        anyOf:
+          - {type: string, format: date}
+          - {type: string, format: date-time}
+          - {type: "null"}
       accessed_at: {type: string, format: date-time}
+      cutoff_compliance_status: {enum: [compliant, not_verifiable, non_compliant]}
       source_type: {type: string}
       claim_supported: {type: string}
+    x-additional-validation:
+      - "accessed_at may be later than research_cutoff_at and is never used as the cutoff evidence date"
+      - "a source used for a decision must be cutoff_compliance_status=compliant"
+      - "compliant requires a publication_date at or before research_cutoff_at; any supplied data_as_of must also be at or before the cutoff"
+      - "a dynamic page whose publication, filing, or release date cannot be verified is not_verifiable and must not support a decision"
+      - "information published after research_cutoff_at is non_compliant even when data_as_of covers an earlier period"
   updated_inputs:
     type: object
     additionalProperties: false
@@ -246,6 +551,8 @@ $defs:
     additionalProperties: false
     required:
       - status
+      - reason
+      - remediation
       - return_basis
       - current_age
       - withdrawal_start_age
@@ -255,6 +562,9 @@ $defs:
       - public_pension_annual_current_jpy
       - public_pension_estimation_method
       - long_term_contribution_policy
+      - contribution_reconciliation
+      - planning_timeline
+      - liability_cash_flows
       - inheritance_included_in_base_case
       - inheritance_base_case_jpy
       - inheritance_treatment
@@ -263,10 +573,14 @@ $defs:
       - success_probability_rationale
       - target_return_pct
       - target_return_formula
+      - required_return_calculation
+      - success_probability_calculation
       - sensitivity_cases
       - source_refs
     properties:
-      status: {enum: [derived, not_applicable, blocked]}
+      status: {enum: [complete, partial, not_applicable, blocked]}
+      reason: {type: string}
+      remediation: {type: string}
       return_basis: {type: [string, "null"], enum: [real, nominal, null]}
       current_age: {type: [integer, "null"], minimum: 0}
       withdrawal_start_age: {type: [integer, "null"], minimum: 0}
@@ -278,12 +592,23 @@ $defs:
       long_term_contribution_policy:
         type: object
         additionalProperties: false
-        required: [annual_net_contribution_jpy, contribution_end_age, allocation_rule, rationale]
+        required: [annual_net_contribution_jpy, contribution_end_age, contribution_end_date, allocation_rule, rationale]
         properties:
           annual_net_contribution_jpy: {type: [number, "null"], minimum: 0}
           contribution_end_age: {type: [integer, "null"], minimum: 0}
+          contribution_end_date: {type: [string, "null"], format: date}
           allocation_rule: {type: [string, "null"]}
           rationale: {type: [string, "null"]}
+      contribution_reconciliation:
+        type: array
+        items: {$ref: "#/$defs/contribution_reconciliation_row"}
+      planning_timeline:
+        oneOf:
+          - {$ref: "#/$defs/planning_timeline"}
+          - {type: "null"}
+      liability_cash_flows:
+        type: array
+        items: {$ref: "#/$defs/liability_cash_flow"}
       inheritance_included_in_base_case: {type: [boolean, "null"]}
       inheritance_base_case_jpy: {type: [number, "null"], minimum: 0}
       inheritance_treatment: {type: [string, "null"]}
@@ -292,8 +617,185 @@ $defs:
       success_probability_rationale: {type: [string, "null"]}
       target_return_pct: {type: [number, "null"]}
       target_return_formula: {type: [string, "null"]}
+      required_return_calculation: {$ref: "#/$defs/required_return_calculation"}
+      success_probability_calculation: {$ref: "#/$defs/success_probability_calculation"}
       sensitivity_cases: {type: array, items: {type: string}}
       source_refs: {type: array, minItems: 0, uniqueItems: true, items: {type: string}}
+    allOf:
+      - if:
+          properties: {status: {const: complete}}
+        then:
+          properties:
+            return_basis: {enum: [real, nominal]}
+            current_age: {type: integer, minimum: 0}
+            withdrawal_start_age: {type: integer, minimum: 0}
+            planning_end_age: {type: integer, minimum: 0}
+            retirement_spending_current_jpy_per_month: {type: number, minimum: 0}
+            retirement_spending_derivation: {type: string, minLength: 1}
+            public_pension_annual_current_jpy: {type: number, minimum: 0}
+            public_pension_estimation_method: {type: string, minLength: 1}
+            planning_timeline: {$ref: "#/$defs/planning_timeline"}
+            contribution_reconciliation: {type: array, minItems: 1}
+            liability_cash_flows: {type: array, minItems: 1}
+            inheritance_included_in_base_case: {type: boolean}
+            inheritance_treatment: {type: string, minLength: 1}
+            terminal_asset_floor_current_jpy: {type: number, minimum: 0}
+            success_probability_pct: {type: number, minimum: 0, maximum: 100}
+            success_probability_rationale: {type: string, minLength: 1}
+            target_return_pct: {type: number}
+            target_return_formula: {type: string, minLength: 1}
+            required_return_calculation:
+              allOf:
+                - {$ref: "#/$defs/required_return_calculation"}
+                - properties: {status: {const: calculated}}
+            success_probability_calculation:
+              allOf:
+                - {$ref: "#/$defs/success_probability_calculation"}
+                - properties: {status: {const: calculated}}
+            sensitivity_cases: {type: array, minItems: 1}
+            source_refs: {type: array, minItems: 1}
+          required: [return_basis, current_age, withdrawal_start_age, planning_end_age, retirement_spending_current_jpy_per_month, retirement_spending_derivation, public_pension_annual_current_jpy, public_pension_estimation_method, planning_timeline, contribution_reconciliation, liability_cash_flows, inheritance_included_in_base_case, inheritance_treatment, terminal_asset_floor_current_jpy, success_probability_pct, success_probability_rationale, target_return_pct, target_return_formula, required_return_calculation, success_probability_calculation, sensitivity_cases, source_refs]
+      - if:
+          properties: {status: {const: blocked}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}
+  contribution_reconciliation_row:
+    type: object
+    additionalProperties: false
+    required: [contribution_type, periodic_amount_jpy, period, annualized_amount_jpy, funding_source, already_deducted_from_reported_current_income, included_in_model, capital_source_classification, continuation_end_date, uncertainty_status, rationale]
+    properties:
+      contribution_type: {type: string}
+      periodic_amount_jpy: {type: number, minimum: 0}
+      period: {enum: [weekly, monthly, annual, one_time]}
+      annualized_amount_jpy: {type: number, minimum: 0}
+      funding_source: {type: [string, "null"]}
+      already_deducted_from_reported_current_income: {type: boolean}
+      included_in_model: {type: boolean}
+      capital_source_classification: {enum: [new_savings, temporary_cash_redeployment, excluded, conservative_assumption]}
+      continuation_end_date: {type: [string, "null"], format: date}
+      uncertainty_status: {enum: [confirmed, observed_setting, reviewer_assumption]}
+      rationale: {type: string}
+  planning_timeline:
+    type: object
+    additionalProperties: false
+    required: [model_start_date, contribution_end_date, first_withdrawal_date, planned_retirement_date, public_pension_start_date, mortgage_repayment_end_date, planning_end_date, model_period, overlap_check]
+    properties:
+      model_start_date: {type: string, format: date}
+      contribution_end_date: {type: string, format: date}
+      first_withdrawal_date: {type: string, format: date}
+      planned_retirement_date: {type: string, format: date}
+      public_pension_start_date: {type: string, format: date}
+      mortgage_repayment_end_date: {type: string, format: date}
+      planning_end_date: {type: string, format: date}
+      model_period: {const: monthly}
+      overlap_check: {enum: [pass]}
+  liability_cash_flow:
+    type: object
+    additionalProperties: false
+    required: [liability_id, treatment, bank_document_values_are_authoritative, generic_amortization_recalculation_performed, arithmetic_mismatch_used_for_warning_or_block, balance_as_of, outstanding_principal_jpy, first_payment_date, last_payment_date, base_case_monthly_payment_jpy, base_case_annual_interest_rate, active_period_double_count_rule, retirement_period_treatment, rate_sensitivity, source_refs]
+    properties:
+      liability_id: {type: string}
+      treatment: {const: future_repayment_cash_flows}
+      bank_document_values_are_authoritative: {const: true}
+      generic_amortization_recalculation_performed: {const: false}
+      arithmetic_mismatch_used_for_warning_or_block: {const: false}
+      balance_as_of: {type: string, format: date}
+      outstanding_principal_jpy: {type: number, minimum: 0}
+      first_payment_date: {type: string, format: date}
+      last_payment_date: {type: string, format: date}
+      base_case_monthly_payment_jpy: {type: number, minimum: 0}
+      base_case_annual_interest_rate: {type: number, minimum: 0}
+      active_period_double_count_rule: {type: string}
+      retirement_period_treatment: {type: string}
+      rate_sensitivity: {type: array, minItems: 2, items: {type: string}}
+      source_refs: {type: array, minItems: 1, items: {type: string}}
+  required_return_calculation:
+    type: object
+    additionalProperties: false
+    required: [status, reason, missing_capability, remediation]
+    properties:
+      status: {enum: [calculated, not_calculable, not_applicable]}
+      reason: {type: string}
+      missing_capability: {type: array, items: {type: string}}
+      remediation: {type: string}
+      currency_and_price_basis: {const: snapshot_date_current_JPY}
+      tax_cost_basis: {const: product_cost_in_return_personal_tax_in_cash_flows}
+      period: {const: monthly}
+      cash_flow_timing: {type: string}
+      formula: {type: string}
+      root_finding_method: {const: bisection}
+      search_interval_pct: {type: array, minItems: 2, maxItems: 2, items: {type: number}}
+      tolerance_pct_points: {type: number, exclusiveMinimum: 0}
+      required_real_return_pct: {type: [number, "null"]}
+    allOf:
+      - if:
+          properties: {status: {const: calculated}}
+        then:
+          required: [currency_and_price_basis, tax_cost_basis, period, cash_flow_timing, formula, root_finding_method, search_interval_pct, tolerance_pct_points, required_real_return_pct]
+          properties:
+            missing_capability: {type: array, maxItems: 0}
+      - if:
+          properties: {status: {const: not_calculable}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            missing_capability: {type: array, minItems: 1}
+            remediation: {type: string, minLength: 1}
+  success_probability_calculation:
+    type: object
+    additionalProperties: false
+    required: [status, reason, missing_capability, remediation]
+    properties:
+      status: {enum: [calculated, not_calculable, not_applicable]}
+      reason: {type: string}
+      missing_capability: {type: array, items: {type: string}}
+      remediation: {type: string}
+      method: {const: parametric_multivariate_monthly_log_return_monte_carlo}
+      period: {const: monthly}
+      trials: {const: 50000}
+      random_seed: {type: integer, minimum: 19000101, maximum: 99991231}
+      return_distribution: {type: string}
+      expected_returns_pct: {$ref: "#/$defs/three_asset_parameters"}
+      volatilities_pct: {$ref: "#/$defs/three_asset_parameters"}
+      correlation_matrix:
+        type: array
+        minItems: 3
+        maxItems: 3
+        items:
+          type: array
+          minItems: 3
+          maxItems: 3
+          items: {type: number, minimum: -1, maximum: 1}
+      inflation_treatment: {type: string}
+      cash_flow_timing: {type: string}
+      rebalancing: {type: string}
+      terminal_floor_jpy: {type: [number, "null"], minimum: 0}
+      success_definition: {type: string}
+      estimated_probability_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+    allOf:
+      - if:
+          properties: {status: {const: calculated}}
+        then:
+          required: [method, period, trials, random_seed, return_distribution, expected_returns_pct, volatilities_pct, correlation_matrix, inflation_treatment, cash_flow_timing, rebalancing, terminal_floor_jpy, success_definition, estimated_probability_pct]
+          properties:
+            missing_capability: {type: array, maxItems: 0}
+      - if:
+          properties: {status: {const: not_calculable}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            missing_capability: {type: array, minItems: 1}
+            remediation: {type: string, minLength: 1}
+  three_asset_parameters:
+    type: object
+    additionalProperties: false
+    required: [total_equity, bond, other]
+    properties:
+      total_equity: {type: number}
+      bond: {type: number}
+      other: {type: number}
   allocation_view:
     type: object
     additionalProperties: false
@@ -315,34 +817,179 @@ $defs:
   tactical_liquidity_policy:
     type: object
     additionalProperties: false
-    required: [policy_id, status, initial_target_pct_of_total_assets, target_jpy, deployment_asset, trigger_index, reference_high_definition, price_basis, lookback_period, fx_treatment, tranches, amount_per_tranche, refill_rule, termination_rule, policy_allocation_treatment, rationale, source_refs, requires_user_approval]
+    required: [policy_id, status, reason, remediation, policy_basis_as_of, locked_before_market_evaluation, initial_target_pct_of_total_assets, target_jpy, deployment_asset, trigger_index, reference_high_definition, decline_threshold_pct, price_basis, lookback_period, fx_treatment, tranches, amount_per_tranche, minimum_balance_jpy, refill_rule, termination_rule, policy_allocation_treatment, rationale, source_refs, requires_user_approval]
     properties:
       policy_id: {type: string}
       status: {enum: [proposed, approved_unchanged, not_applicable, blocked]}
+      reason: {type: string}
+      remediation: {type: string}
+      policy_basis_as_of: {type: [string, "null"], format: date}
+      locked_before_market_evaluation: {type: [boolean, "null"]}
       initial_target_pct_of_total_assets: {type: [number, "null"], minimum: 0, maximum: 100}
       target_jpy: {type: [number, "null"], minimum: 0}
       deployment_asset: {type: [string, "null"]}
       trigger_index: {type: [string, "null"]}
       reference_high_definition: {type: [string, "null"]}
+      decline_threshold_pct: {type: [number, "null"], minimum: 0, maximum: 100}
       price_basis: {type: [string, "null"], enum: [close, intraday, null]}
       lookback_period: {type: [string, "null"]}
       fx_treatment: {type: [string, "null"]}
       tranches: {type: [integer, "null"], minimum: 1}
       amount_per_tranche: {type: [string, number, "null"]}
+      minimum_balance_jpy: {type: [number, "null"], minimum: 0}
       refill_rule: {type: [string, "null"]}
       termination_rule: {type: [string, "null"]}
       policy_allocation_treatment: {type: [string, "null"]}
       rationale: {type: string}
       source_refs: {type: array, items: {type: string}}
       requires_user_approval: {const: true}
+    allOf:
+      - if:
+          properties: {status: {const: blocked}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}
+  tactical_liquidity_candidate:
+    type: object
+    additionalProperties: false
+    required: [candidate_id, target_pct_of_household_total_assets, denominator, household_reserve_separate, long_term_investable_asset_reduction_jpy, required_real_return_impact_pct_points, success_probability_impact_pct_points, deployable_amount_jpy, expected_return_drag_pct_points, implementation_complexity, replenishment_feasibility, candidate_feasible, calculation_status, reason, missing_capability, remediation, selected]
+    properties:
+      candidate_id: {type: string}
+      target_pct_of_household_total_assets: {enum: [0, 2.5, 5, 7.5, 10]}
+      denominator: {const: household_total_assets_jpy}
+      household_reserve_separate: {const: true}
+      long_term_investable_asset_reduction_jpy: {type: [number, "null"], minimum: 0}
+      required_real_return_impact_pct_points: {type: [number, "null"]}
+      success_probability_impact_pct_points: {type: [number, "null"]}
+      deployable_amount_jpy: {type: [number, "null"], minimum: 0}
+      expected_return_drag_pct_points: {type: [number, "null"]}
+      implementation_complexity: {type: [string, "null"]}
+      replenishment_feasibility: {type: [string, "null"]}
+      candidate_feasible: {type: [boolean, "null"]}
+      calculation_status: {enum: [calculated, not_calculable]}
+      reason: {type: string}
+      missing_capability: {type: array, items: {type: string}}
+      remediation: {type: string}
+      selected: {type: boolean}
+    allOf:
+      - if:
+          properties: {calculation_status: {const: calculated}}
+        then:
+          properties:
+            long_term_investable_asset_reduction_jpy: {type: number, minimum: 0}
+            required_real_return_impact_pct_points: {type: number}
+            success_probability_impact_pct_points: {type: number}
+            deployable_amount_jpy: {type: number, minimum: 0}
+            expected_return_drag_pct_points: {type: number}
+            implementation_complexity: {type: string, minLength: 1}
+            replenishment_feasibility: {type: string, minLength: 1}
+            candidate_feasible: {type: boolean}
+            missing_capability: {type: array, maxItems: 0}
+      - if:
+          properties: {calculation_status: {const: not_calculable}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            missing_capability: {type: array, minItems: 1}
+            remediation: {type: string, minLength: 1}
+            selected: {const: false}
+  crypto_contribution_option:
+    type: object
+    additionalProperties: false
+    required: [option_id, policy, current_crypto_balance_jpy, ordinary_month_cash_flow_impact_jpy, success_probability_impact_pct_points, funding_source_treatment, calculation_status, reason, missing_capability, remediation, selected]
+    properties:
+      option_id: {type: string}
+      policy:
+        enum:
+          - stop_new_contributions_and_exclude_unknown_existing_balance
+          - continue_only_within_realized_surplus_such_as_bonus
+          - continue_current_contributions_and_disclose_cash_flow_and_success_probability_impact
+      current_crypto_balance_jpy: {type: "null"}
+      ordinary_month_cash_flow_impact_jpy: {type: [number, "null"]}
+      success_probability_impact_pct_points: {type: [number, "null"]}
+      funding_source_treatment: {type: string}
+      calculation_status: {enum: [calculated, not_calculable]}
+      reason: {type: string}
+      missing_capability: {type: array, items: {type: string}}
+      remediation: {type: string}
+      selected: {type: boolean}
+    allOf:
+      - if:
+          properties: {calculation_status: {const: not_calculable}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            missing_capability: {type: array, minItems: 1}
+            remediation: {type: string, minLength: 1}
+            selected: {const: false}
+  other_allocation_candidate:
+    type: object
+    additionalProperties: false
+    required: [candidate_id, other_pct, crypto_contribution_option_ref, current_crypto_balance_jpy, ordinary_month_cash_flow_consistent, required_success_probability_maintained, success_probability_impact_pct_points, expected_return_impact_pct_points, diversification_benefit, incremental_risk, funding_source_consistency, candidate_feasible, calculation_status, reason, missing_capability, remediation, selected]
+    properties:
+      candidate_id: {type: string}
+      other_pct: {enum: [0, 1, 2, 3, 5]}
+      crypto_contribution_option_ref: {type: string}
+      current_crypto_balance_jpy: {type: "null"}
+      ordinary_month_cash_flow_consistent: {type: [boolean, "null"]}
+      required_success_probability_maintained: {type: [boolean, "null"]}
+      success_probability_impact_pct_points: {type: [number, "null"]}
+      expected_return_impact_pct_points: {type: [number, "null"]}
+      diversification_benefit: {type: [string, "null"]}
+      incremental_risk: {type: [string, "null"]}
+      funding_source_consistency: {type: [string, "null"]}
+      candidate_feasible: {type: [boolean, "null"]}
+      calculation_status: {enum: [calculated, not_calculable]}
+      reason: {type: string}
+      missing_capability: {type: array, items: {type: string}}
+      remediation: {type: string}
+      selected: {type: boolean}
+    allOf:
+      - if:
+          properties: {calculation_status: {const: calculated}}
+        then:
+          properties:
+            ordinary_month_cash_flow_consistent: {type: boolean}
+            required_success_probability_maintained: {type: boolean}
+            success_probability_impact_pct_points: {type: number}
+            expected_return_impact_pct_points: {type: number}
+            diversification_benefit: {type: string, minLength: 1}
+            incremental_risk: {type: string, minLength: 1}
+            funding_source_consistency: {type: string, minLength: 1}
+            candidate_feasible: {type: boolean}
+            missing_capability: {type: array, maxItems: 0}
+      - if:
+          properties: {calculation_status: {const: not_calculable}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            missing_capability: {type: array, minItems: 1}
+            remediation: {type: string, minLength: 1}
+            selected: {const: false}
   candidate_methodology:
     type: object
     additionalProperties: false
-    required: [global_equity_index, bond_index, bond_instrument_type, estimation_period, assumptions_as_of, inflation_assumption_pct, return_basis, tax_cost_treatment, major_drawdown_definition, rebalancing_frequency, range_rationale, boundary_extension_applied]
+    required: [selection_sequence, tactical_liquidity_candidate_grid, other_pct_candidate_grid, crypto_contribution_option_grid, global_equity_index, bond_index, bond_instrument_type, bond_currency, bond_fx_hedge_policy, estimation_period, assumptions_as_of, inflation_assumption_pct, return_basis, tax_cost_treatment, major_drawdown_definition, rebalancing_frequency, candidate_grid, other_pct_common_base_case, assumption_derivations, required_return_method, success_probability_method, range_rationale]
     properties:
+      selection_sequence:
+        const:
+          - compare_and_select_tactical_liquidity
+          - compare_crypto_contribution_options_and_select_other_pct
+          - compare_all_11_equity_bond_sleeve_candidates
+          - run_sensitivity_around_selected_results
+      tactical_liquidity_candidate_grid: {const: [0, 2.5, 5, 7.5, 10]}
+      other_pct_candidate_grid: {const: [0, 1, 2, 3, 5]}
+      crypto_contribution_option_grid:
+        const:
+          - stop_new_contributions_and_exclude_unknown_existing_balance
+          - continue_only_within_realized_surplus_such_as_bonus
+          - continue_current_contributions_and_disclose_cash_flow_and_success_probability_impact
       global_equity_index: {type: string}
       bond_index: {type: string}
       bond_instrument_type: {type: string}
+      bond_currency: {type: string}
+      bond_fx_hedge_policy: {type: string}
       estimation_period: {type: string}
       assumptions_as_of: {type: string}
       inflation_assumption_pct: {type: number}
@@ -350,25 +997,88 @@ $defs:
       tax_cost_treatment: {type: string}
       major_drawdown_definition: {type: string}
       rebalancing_frequency: {type: string}
+      candidate_grid:
+        type: array
+        minItems: 11
+        maxItems: 11
+        uniqueItems: true
+        items: {type: integer, minimum: 0, maximum: 100, multipleOf: 10}
+      other_pct_common_base_case: {type: number, minimum: 0, maximum: 100}
+      assumption_derivations:
+        type: array
+        minItems: 11
+        items: {$ref: "#/$defs/assumption_derivation"}
+      required_return_method: {type: string}
+      success_probability_method: {type: string}
       range_rationale: {type: string}
-      boundary_extension_applied: {type: boolean}
+  assumption_derivation:
+    type: object
+    additionalProperties: false
+    required: [parameter_id, status, value, decision_owner, selection_criteria, source_refs, base_case, sensitivity]
+    properties:
+      parameter_id: {type: string}
+      status: {const: derived}
+      value: {type: [string, number, boolean]}
+      decision_owner: {const: independent_monthly_reviewer}
+      selection_criteria: {type: string}
+      source_refs: {type: array, minItems: 1, items: {type: string}}
+      base_case: {type: string}
+      sensitivity: {type: string}
   candidate:
     type: object
     additionalProperties: false
-    required: [candidate_id, global_equity_pct, bonds_pct, expected_nominal_return_pct, expected_real_return_pct, expected_volatility_pct, equity_bond_correlation, estimated_major_drawdown_pct, primary_objective_fit_value, primary_objective_fit_formula, assumptions_ref, selected]
+    required: [candidate_id, sleeve_equity_pct, total_equity_pct, bond_pct, other_pct, expected_nominal_return_pct, expected_real_return_pct, expected_volatility_pct, equity_bond_correlation, estimated_major_drawdown_pct, estimated_success_probability_pct, required_success_probability_pct, candidate_feasible, constraint_failures, primary_objective_fit_value, primary_objective_fit_formula, assumptions_ref, calculation_status, reason, missing_capability, remediation, selected]
     properties:
       candidate_id: {type: string}
-      global_equity_pct: {type: number, minimum: 0, maximum: 100}
-      bonds_pct: {type: number, minimum: 0, maximum: 100}
-      expected_nominal_return_pct: {type: number}
-      expected_real_return_pct: {type: number}
-      expected_volatility_pct: {type: number, minimum: 0}
-      equity_bond_correlation: {type: number, minimum: -1, maximum: 1}
-      estimated_major_drawdown_pct: {type: number}
-      primary_objective_fit_value: {type: [number, string]}
-      primary_objective_fit_formula: {type: string}
-      assumptions_ref: {type: string}
+      sleeve_equity_pct: {type: integer, minimum: 0, maximum: 100, multipleOf: 10}
+      total_equity_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      bond_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      other_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      expected_nominal_return_pct: {type: [number, "null"]}
+      expected_real_return_pct: {type: [number, "null"]}
+      expected_volatility_pct: {type: [number, "null"], minimum: 0}
+      equity_bond_correlation: {type: [number, "null"], minimum: -1, maximum: 1}
+      estimated_major_drawdown_pct: {type: [number, "null"]}
+      estimated_success_probability_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      required_success_probability_pct: {type: [number, "null"], minimum: 0, maximum: 100}
+      candidate_feasible: {type: [boolean, "null"]}
+      constraint_failures: {type: array, items: {type: string}}
+      primary_objective_fit_value: {type: [number, string, "null"]}
+      primary_objective_fit_formula: {type: [string, "null"]}
+      assumptions_ref: {type: [string, "null"]}
+      calculation_status: {enum: [calculated, not_calculable]}
+      reason: {type: string}
+      missing_capability: {type: array, items: {type: string}}
+      remediation: {type: string}
       selected: {type: boolean}
+    allOf:
+      - if:
+          properties: {calculation_status: {const: calculated}}
+        then:
+          properties:
+            total_equity_pct: {type: number, minimum: 0, maximum: 100}
+            bond_pct: {type: number, minimum: 0, maximum: 100}
+            other_pct: {type: number, minimum: 0, maximum: 100}
+            expected_nominal_return_pct: {type: number}
+            expected_real_return_pct: {type: number}
+            expected_volatility_pct: {type: number, minimum: 0}
+            equity_bond_correlation: {type: number, minimum: -1, maximum: 1}
+            estimated_major_drawdown_pct: {type: number}
+            estimated_success_probability_pct: {type: number, minimum: 0, maximum: 100}
+            required_success_probability_pct: {type: number, minimum: 0, maximum: 100}
+            candidate_feasible: {type: boolean}
+            primary_objective_fit_value: {type: [number, string]}
+            primary_objective_fit_formula: {type: string, minLength: 1}
+            assumptions_ref: {type: string, minLength: 1}
+            missing_capability: {type: array, maxItems: 0}
+      - if:
+          properties: {calculation_status: {const: not_calculable}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            missing_capability: {type: array, minItems: 1}
+            remediation: {type: string, minLength: 1}
+            selected: {const: false}
   empirical_evidence:
     type: object
     additionalProperties: false
@@ -385,9 +1095,10 @@ $defs:
   dip_buy_liquidity_deployment_review:
     type: object
     additionalProperties: false
-    required: [policy_ref, reserve_status, market_decline_status, trigger_index_matches_deployment_target, theme_or_sector_decline_used_as_trigger, market_evidence, use_option, selected_action, selection_rationale, reserve_maintenance_is_objective]
+    required: [policy_ref, policy_locked_before_market_evaluation, reserve_status, market_decline_status, trigger_index_matches_deployment_target, theme_or_sector_decline_used_as_trigger, market_evidence, use_option, selected_action, selection_rationale, reserve_maintenance_is_objective]
     properties:
       policy_ref: {const: strategic_policy_decision.tactical_liquidity_policy}
+      policy_locked_before_market_evaluation: {type: [boolean, "null"]}
       reserve_status: {enum: [available, unavailable, unknown]}
       market_decline_status: {enum: [declining, not_declining, unclear]}
       trigger_index_matches_deployment_target: {type: [boolean, "null"]}
@@ -398,10 +1109,12 @@ $defs:
       use_option:
         type: object
         additionalProperties: false
-        required: [considered, status, target, amount_jpy, formula, timing, rationale]
+        required: [considered, status, reason, remediation, target, amount_jpy, formula, timing, rationale]
         properties:
           considered: {type: boolean}
           status: {enum: [executable, conditional, not_calculable, not_applicable]}
+          reason: {type: string}
+          remediation: {type: string}
           target: {type: [string, "null"]}
           amount_jpy: {type: [number, "null"], minimum: 0}
           formula: {type: string}
@@ -455,22 +1168,37 @@ $defs:
   before_after_allocation:
     type: object
     additionalProperties: false
-    required: [view, category, before_pct, after_pct, target_pct, calculation_status]
+    required: [view, category, before_jpy, after_jpy, target_jpy, before_pct, after_pct, target_pct, calculation_status, reason, remediation]
     properties:
       view: {enum: [policy_allocation_within_investable_portfolio, household_total_asset_allocation]}
       category: {type: string}
+      before_jpy: {type: [number, "null"]}
+      after_jpy: {type: [number, "null"]}
+      target_jpy: {type: [number, "null"]}
       before_pct: {type: [number, "null"]}
       after_pct: {type: [number, "null"]}
       target_pct: {type: [number, "null"]}
-      calculation_status: {enum: [calculated, not_calculable]}
+      calculation_status: {enum: [calculated, not_calculable, not_applicable]}
+      reason: {type: string}
+      remediation: {type: string}
+    allOf:
+      - if:
+          properties: {calculation_status: {const: not_calculable}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}
   account_tax_comparison:
     type: object
     additionalProperties: false
-    required: [comparison_id, symbol, account_type, cost_basis_jpy, unrealized_gain_loss_jpy, tax_treatment, nisa_impact, estimated_after_tax_proceeds_jpy, decision, sources]
+    required: [comparison_id, symbol, account_type, status, reason, remediation, cost_basis_jpy, unrealized_gain_loss_jpy, tax_treatment, nisa_impact, estimated_after_tax_proceeds_jpy, decision, sources]
     properties:
       comparison_id: {type: string}
       symbol: {type: string}
       account_type: {type: [string, "null"]}
+      status: {enum: [calculated, blocked, not_applicable]}
+      reason: {type: string}
+      remediation: {type: string}
       cost_basis_jpy: {type: [number, "null"]}
       unrealized_gain_loss_jpy: {type: [number, "null"]}
       tax_treatment: {type: string}
@@ -478,6 +1206,13 @@ $defs:
       estimated_after_tax_proceeds_jpy: {type: [number, "null"]}
       decision: {type: string}
       sources: {type: array, items: {$ref: "#/$defs/source"}}
+    allOf:
+      - if:
+          properties: {status: {const: blocked}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}
   typed_input:
     type: object
     additionalProperties: false
@@ -490,39 +1225,80 @@ $defs:
   order_proposal:
     type: object
     additionalProperties: false
-    required: [proposal_id, symbol, account_type, side, status, quantity, amount_jpy, formula, inputs, tax_and_account_analysis_ref, rationale, requires_user_approval]
+    required: [proposal_id, proposal_level, symbol, account_type, side, status, reason, remediation, quantity, amount_jpy, formula, inputs, policy_refs, tax_and_account_analysis_ref, rationale, requires_user_approval]
     properties:
       proposal_id: {type: string}
+      proposal_level: {enum: [strategic_exposure, product_amount, account_lot_order]}
       symbol: {type: string}
       account_type: {type: [string, "null"]}
       side: {enum: [buy, sell, transfer, hold]}
-      status: {enum: [executable, conditional, on_hold]}
+      status: {enum: [executable, conditional, blocked]}
+      reason: {type: string}
+      remediation: {type: string}
       quantity: {type: [number, "null"], minimum: 0}
       amount_jpy: {type: [number, "null"], minimum: 0}
       formula: {type: string}
       inputs: {type: array, items: {$ref: "#/$defs/typed_input"}}
+      policy_refs: {type: array, minItems: 1, items: {type: string}}
       tax_and_account_analysis_ref: {type: [string, "null"]}
       rationale: {type: string}
       requires_user_approval: {const: true}
+    allOf:
+      - if:
+          properties: {status: {enum: [conditional, blocked]}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}
   action:
     type: object
     additionalProperties: false
-    required: [action_id, status, description, source, destination, amount_jpy, formula, inputs, assumption_independent_direction, confirmed_conditions_consistent, max_impact_if_assumptions_wrong_jpy, timing, rationale, requires_user_approval]
+    required: [action_id, action_scope, action_level, symbol, asset_name, holding_status, side, account_type, execution_method, status, reason, remediation, description, source, destination, quantity, amount_jpy, formula, inputs, policy_refs, assumption_independent_direction, confirmed_conditions_consistent, max_impact_if_assumptions_wrong_jpy, timing, rationale, requires_user_approval]
     properties:
       action_id: {type: string}
-      status: {enum: [executable, conditional, on_hold]}
+      action_scope: {enum: [existing_holding, new_asset]}
+      action_level: {enum: [strategic_exposure, product_amount, account_lot_order]}
+      symbol: {type: string}
+      asset_name: {type: string, minLength: 1}
+      holding_status: {enum: [held, not_held]}
+      side: {enum: [buy, sell, hold, transfer]}
+      account_type:
+        type: string
+        minLength: 1
+        pattern: "(NISA|特定口座|一般口座)"
+      execution_method: {type: string, minLength: 1}
+      status: {enum: [executable, conditional, blocked]}
+      reason: {type: string}
+      remediation: {type: string}
       description: {type: string}
       source: {type: [string, "null"]}
       destination: {type: [string, "null"]}
+      quantity: {type: [number, "null"], minimum: 0}
       amount_jpy: {type: [number, "null"], minimum: 0}
       formula: {type: string}
       inputs: {type: array, items: {$ref: "#/$defs/typed_input"}}
+      policy_refs: {type: array, minItems: 1, items: {type: string}}
       assumption_independent_direction: {type: boolean}
       confirmed_conditions_consistent: {type: boolean}
       max_impact_if_assumptions_wrong_jpy: {type: [number, "null"], minimum: 0}
       timing: {type: string}
       rationale: {type: string}
       requires_user_approval: {const: true}
+    allOf:
+      - if:
+          properties: {action_scope: {const: existing_holding}}
+        then:
+          properties: {holding_status: {const: held}, side: {enum: [sell, hold, transfer]}}
+      - if:
+          properties: {action_scope: {const: new_asset}}
+        then:
+          properties: {holding_status: {const: not_held}, side: {const: buy}}
+      - if:
+          properties: {status: {enum: [conditional, blocked]}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}
   execution_check:
     type: object
     additionalProperties: false
@@ -546,9 +1322,153 @@ $defs:
   quality_check:
     type: object
     additionalProperties: false
-    required: [check_id, status, evidence, remediation]
+    required: [check_id, status, evidence, reason, remediation]
     properties:
       check_id: {type: string}
-      status: {enum: [pass, fail, not_applicable]}
+      status: {enum: [pass, fail, not_verifiable, not_applicable]}
       evidence: {type: string}
+      reason: {type: string}
       remediation: {type: string}
+    allOf:
+      - if:
+          properties: {status: {const: pass}}
+        then:
+          properties:
+            evidence: {type: string, minLength: 1}
+      - if:
+          properties: {status: {enum: [fail, not_verifiable]}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}
+      - if:
+          properties: {status: {const: not_applicable}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+  decision_quality_check:
+    allOf:
+      - {$ref: "#/$defs/quality_check"}
+      - type: object
+        properties:
+          check_id:
+            enum:
+              - target_equity_ratio_is_not_cash_residual
+              - strategic_cash_and_tactical_cash_are_separated
+              - one_primary_policy_is_selected
+              - policy_is_derived_from_stated_objective
+              - age_and_horizon_are_considered_when_relevant
+              - age_is_not_replaced_by_an_unexamined_rule_of_thumb
+              - empirical_rules_have_verifiable_support
+              - statistical_average_is_not_presented_as_a_certain_outcome
+              - no_persona_generated_investment_lore
+              - no_numeric_threshold_is_based_only_on_expert_sounding_language
+              - subjective_axes_are_used_only_when_explicitly_authorized
+              - no_unrequested_psychological_or_lifestyle_axes
+              - no_ad_hoc_concentration_limit
+              - no_arbitrary_partial_sale
+              - every_general_statement_supports_a_decision
+              - transition_plan_matches_policy_portfolio
+              - prior_recommendations_are_explicitly_superseded_when_changed
+              - delegated_financial_planning_inputs_are_derived_not_reasked
+              - derived_financial_planning_values_have_evidence_and_sensitivity
+              - date_timeline_is_canonical_and_cash_flows_do_not_overlap
+              - retirement_mortgage_cash_flows_are_included_without_double_counting
+              - recurring_contributions_are_reconciled_before_policy_derivation
+              - capital_market_assumptions_are_complete_and_common_to_all_candidates
+              - required_return_calculation_is_reproducible
+              - success_probability_calculation_is_reproducible
+              - candidate_grid_is_exhaustive_and_not_stopped_at_a_selected_boundary
+              - equity_bond_other_and_core_satellite_denominators_are_consistent
+              - approved_and_proposed_semiconductor_limits_are_separated
+              - strategic_policy_implementation_and_account_lot_statuses_are_separated
+              - strategic_policy_precedes_implementation
+              - tactical_liquidity_candidates_follow_finite_grid_and_selection_rule
+              - other_pct_and_crypto_options_follow_finite_grids_and_selection_rule
+              - tactical_liquidity_policy_is_locked_before_current_market_evaluation
+              - execution_capability_gate_prevents_fabricated_calculations
+              - rounding_residuals_use_explicit_tolerances
+              - mortgage_source_values_are_used_without_generic_revalidation
+  static_reference_check:
+    allOf:
+      - {$ref: "#/$defs/quality_check"}
+      - type: object
+        properties:
+          check_id:
+            enum:
+              - no_undefined_packet_reference
+              - no_deprecated_date_alias
+              - no_unapproved_material_trade_threshold
+              - one_canonical_tactical_liquidity_policy
+              - allocation_percentages_total_100
+              - no_machine_ids_in_human_sections
+              - no_external_response_schema_reference
+              - selected_recurring_source_is_versioned
+              - no_inactive_750000_monthly_constraint
+              - all_root_arrays_have_inline_schema
+  validation_tolerances:
+    type: object
+    additionalProperties: false
+    required: [rounding_tolerance_jpy, rounding_tolerance_pct_points, monte_carlo_probability_tolerance_pct_points, return_volatility_tolerance_pct_points]
+    properties:
+      rounding_tolerance_jpy: {const: 10}
+      rounding_tolerance_pct_points: {const: 0.02}
+      monte_carlo_probability_tolerance_pct_points: {const: 0.01}
+      return_volatility_tolerance_pct_points: {const: 0.01}
+  rounding_reconciliation:
+    type: object
+    additionalProperties: false
+    required: [rounding_tolerance_jpy, rounding_tolerance_pct_points, rounding_residual_jpy, rounding_residual_pct_points, rounding_residual_treatment, evidence]
+    properties:
+      rounding_tolerance_jpy: {const: 10}
+      rounding_tolerance_pct_points: {const: 0.02}
+      rounding_residual_jpy: {type: number}
+      rounding_residual_pct_points: {type: [number, "null"]}
+      rounding_residual_treatment:
+        enum:
+          - within_tolerance_recorded
+          - exceeds_tolerance_fail
+          - exceeds_tolerance_not_verifiable
+      evidence: {type: string, minLength: 1}
+  semantic_validation_check:
+    type: object
+    additionalProperties: false
+    required: [check_id, status, evidence, reason, remediation, observed_value, expected_value, difference, tolerance]
+    properties:
+      check_id:
+        enum:
+          - candidate_id_values_are_unique
+          - check_id_values_are_unique
+          - tactical_liquidity_grid_has_5_required_rows
+          - other_pct_grid_has_5_required_rows
+          - crypto_option_grid_has_3_required_rows
+          - equity_bond_candidate_grid_has_11_required_rows
+          - allocation_weights_total_100_within_tolerance
+          - exactly_one_policy_candidate_is_selected
+          - selected_policy_candidate_is_feasible
+          - all_review_targets_appear_exactly_once
+          - holding_values_reconcile_to_total_assets
+          - before_after_amounts_reconcile
+          - purchase_amounts_reconcile_to_funding_sources
+          - sale_amounts_reconcile_to_sale_details
+          - strategic_policy_precedes_implementation
+      status: {enum: [pass, fail, not_verifiable, not_applicable]}
+      evidence: {type: string}
+      reason: {type: string}
+      remediation: {type: string}
+      observed_value: {type: [string, number, boolean, "null"]}
+      expected_value: {type: [string, number, boolean, "null"]}
+      difference: {type: [number, "null"]}
+      tolerance: {type: [number, "null"], minimum: 0}
+    allOf:
+      - if:
+          properties: {status: {const: pass}}
+        then:
+          properties:
+            evidence: {type: string, minLength: 1}
+      - if:
+          properties: {status: {enum: [fail, not_verifiable]}}
+        then:
+          properties:
+            reason: {type: string, minLength: 1}
+            remediation: {type: string, minLength: 1}

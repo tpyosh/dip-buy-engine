@@ -12,6 +12,15 @@ from monthly_limit_order_review.storage import read_text
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def confirm_test_accounts(computation) -> None:
+    for holding in computation.snapshot.holdings:
+        if (
+            holding.asset_class in {"core", "jun_core", "satellite_core", "satellite"}
+            and holding.account_type is None
+        ):
+            holding.account_type = "特定口座（源泉徴収あり）"
+
+
 def make_reference(
     symbol: str,
     yfinance_symbol: str,
@@ -88,6 +97,7 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
 
     snapshot_path = ROOT / "data/normalized/snapshot_2026_03.yaml"
     computation = compute_monthly(snapshot_path, project_root=ROOT)
+    confirm_test_accounts(computation)
     template_text = read_text(ROOT / "prompts/templates/monthly_review_template.md")
     prompt = build_monthly_review_prompt(computation, template_text)
 
@@ -176,13 +186,15 @@ def test_snapshot_2026_04_is_treated_as_april_limit_order_cycle_without_forced_s
 
     snapshot_path = ROOT / "data/normalized/snapshot_2026_04.yaml"
     computation = compute_monthly(snapshot_path, project_root=ROOT)
+    confirm_test_accounts(computation)
     template_text = read_text(ROOT / "prompts/templates/monthly_review_template.md")
     prompt = build_monthly_review_prompt(computation, template_text)
 
     assert computation.metadata["review_target_month"] == "2026_04"
     assert computation.monthly_execution_outputs["review_target_month"] == "2026_04"
     assert "review_target_month: '2026_04'" in prompt
-    assert "response_skeleton:" in prompt
+    assert "inline_response_schema:" in prompt
+    assert "response_skeleton:" not in prompt
     assert "order_proposals:" in prompt
     assert "4月1日:" not in prompt
 
@@ -194,6 +206,7 @@ def test_snapshot_2026_05_core_references_are_not_missing_without_forced_schedul
 
     snapshot_path = ROOT / "data/normalized/snapshot_2026_05.yaml"
     computation = compute_monthly(snapshot_path, project_root=ROOT)
+    confirm_test_accounts(computation)
     template_text = read_text(ROOT / "prompts/templates/monthly_review_template.md")
     prompt = build_monthly_review_prompt(computation, template_text)
     monthly = computation.monthly_execution_outputs
@@ -240,6 +253,7 @@ def test_snapshot_2026_06_applies_nisa_exhaustion_core_deployment_override(monke
         encoding="utf-8",
     )
     computation = compute_monthly(snapshot_path, project_root=ROOT)
+    confirm_test_accounts(computation)
     template_text = read_text(ROOT / "prompts/templates/monthly_review_template.md")
     prompt = build_monthly_review_prompt(computation, template_text)
     monthly = computation.monthly_execution_outputs

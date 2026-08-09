@@ -4,7 +4,7 @@
 
 ```mermaid
 flowchart LR
-    R["data/raw<br/>外部の未加工証拠"] --> N["data/normalized<br/>時点スナップショット"]
+    RAW["data/raw<br/>外部の未加工証拠"] --> N["data/normalized<br/>時点スナップショット"]
     F["financial/current.yaml<br/>家計の可変値"] --> C
     M["holdings/current.yaml<br/>口座・保有意図"] --> C
     S["strategy/current.yaml<br/>現行長期方針"] --> C["src/<br/>計算・検証"]
@@ -12,10 +12,12 @@ flowchart LR
     N --> C
     T["transactions/<br/>確認済み実績"] --> C
     C --> G["reports/generated<br/>Codex側の全計算"]
-    C --> Q["review_packet.yaml<br/>選択済み事実だけ"]
-    Q --> R["review_request.md<br/>独立レビュー"]
-    R --> U["User向け<br/>日本語Markdown"]
-    R --> Y["review_response.yaml<br/>Codex向け"]
+    C --> A{"全売買可能明細の<br/>口座区分がcomplete?"}
+    A -->|yes| Q["review_packet.yaml<br/>選択済み事実だけ"]
+    A -->|no| B["生成停止<br/>レビュー依頼・回答なし"]
+    Q --> REQ["review_request.md<br/>独立レビュー"]
+    REQ --> U["User向け<br/>日本語Markdown"]
+    REQ --> Y["review_response.yaml<br/>Codex向け"]
     Y --> G
     G --> H["Human approval<br/>採否・手動発注"]
     H --> T
@@ -46,13 +48,15 @@ flowchart LR
 
 ## Independent review boundary
 
+現行の目的関数は、現在の生活の楽しみを維持できる持続可能な拠出を全候補で共通に固定したうえでの、65歳時点の税・費用控除後実質投資利益です。オール・カントリー型商品のみの基準案を必ず比較する一方、趣味として楽しめる正のサテライト配分を制約とし、サテライト比率、具体的銘柄、単一テーマ・単一銘柄上限は独立ChatGPTが提案します。Codexはこれらの値や銘柄を先に決めません。
+
 Codex側の計算は現行戦略、active plan、過去履歴を整合確認に使えるが、ChatGPT向け月次独立レビューへそのまま渡さない。`ReviewPacket` が現在の数値事実、明示済みユーザー条件、確定済み支出・継続設定、不明情報だけをallowlistで選び、現行戦略全体、active plan、過去回答、候補注文、推奨予算を除外する。ユーザが明示承認した集中上限などは、一般戦略値ではなく確認済みユーザ条件として承認記録を出典に渡す。
 
-`review_request.md` は `review_packet.yaml` と同じ構造から生成する。会話履歴やProject参照の分離はプロンプトだけでは保証できないため、資産運用Project外の新規Temporary Chat等、前月スレッド不使用、追加添付なし、カスタム指示確認を実行前チェックで担保する。
+`review_request.md` は `review_packet.yaml` と同じ構造から生成する。ただし、全売買可能明細がNISA・特定口座・一般口座のいずれかに分類できることを `account_type_gate` で先に確認し、一件でも不足すればChatGPT向け依頼、部分レビュー、レビュー回答の取込をすべて停止する。会話履歴やProject参照の分離はプロンプトだけでは保証できないため、資産運用Project外の新規Temporary Chat等、前月スレッド不使用、追加添付なし、カスタム指示確認を実行前チェックで担保する。
 
 個別株・ETFは、投資仮説が登録されている銘柄だけでなく保有一覧から全件を `security_story_review_targets` へ展開する。月次レビューとオンデマンド・ヘルスチェックの双方で、評価実施、ストーリー健全性、保持・買い増し・縮小・売却判断、根拠、次回確認トリガーを記録する。仮説未記録は省略理由にせず、`missing` として暫定ストーリーの再構成対象にする。
 
-人間向け回答とCodex向け入力は分離する。人間向けは日本語Markdown、Codex向けは月次 `review_response.yaml` またはオンデマンド `health_check_response.yaml` とし、CodexはMarkdownから判断値を推測しない。月次YAMLでは、現金要件の導出状態、売買ごとの根拠監査、不足入力とテンプレート改善案を構造化する。入力不足はその場で一点補完せず、ChatGPTからCodexへ `prompt_feedback` として戻し、次回のパケット生成へ反映する。
+人間向け回答とCodex向け入力は分離する。人間向けは日本語Markdown、Codex向けは月次 `review_response.yaml` またはオンデマンド `health_check_response.yaml` とし、CodexはMarkdownから判断値を推測しない。月次YAMLでは、現金要件の導出状態、売買ごとの根拠監査、不足入力とテンプレート改善案を構造化する。現在保有する全売買可能明細には、何を、どの口座で、いつ、どの方法と数量または金額で保有・売却するかを一件ずつ要求する。現在未保有の資産には同じ粒度の購入案、または新規購入なしの結論と理由を要求する。入力不足はその場で一点補完せず、ChatGPTからCodexへ `prompt_feedback` として戻し、次回のパケット生成へ反映する。
 
 月次外で新しい投資判断が必要な場合は、Codexから直接判断へ進まず、`on_demand_independent_investment_decision` パケットを生成する。Codexは事実選択と機械検証だけを行い、結論・候補値・推奨方向を含めない。ユーザがパケットをProject外のTemporary Chatへ渡し、独立ChatGPTのセカンドオピニオンと `independent_decision_response.yaml` をCodexへ戻す。この経路は保有銘柄のニュース確認用 `health_check_response.yaml` とは別であり、比率・閾値・配分・売買方針など汎用的な投資判断に使う。
 
@@ -64,7 +68,7 @@ Codex側の計算は現行戦略、active plan、過去履歴を整合確認に�
 
 オンデマンド・ヘルスチェックは日次実行を必須にしない。前回完了済みYAMLからの空白期間を次回調査窓へ取り込み、月次の全銘柄ストーリー評価を安全網にする。
 
-同一商品が複数明細に分かれる場合、`account_type` を口座ロットの識別に使う。経済的エクスポージャーは商品単位で合算できるが、売却・移管・一本化はNISA・特定口座等を区別し、税引後手取額と非課税保有・枠への影響を比較する。口座区分が不明な明細は、重複解消や特定ロット売却の確定対象にしない。
+同一商品が複数明細に分かれる場合、`account_type` を口座ロットの識別に使う。経済的エクスポージャーは商品単位で合算できるが、売却・移管・一本化はNISA・特定口座・一般口座を区別し、税引後手取額と非課税保有・枠への影響を比較する。口座区分が不明な売買可能明細が一件でもあれば、レビュー自体を生成・取り込みしない。
 
 ## Legacy compatibility
 

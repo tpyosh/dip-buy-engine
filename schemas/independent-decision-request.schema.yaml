@@ -15,6 +15,7 @@ required:
   - excluded_context
   - research_requirements
   - required_outputs
+  - account_type_gate
 properties:
   schema_version:
     const: 1
@@ -63,3 +64,23 @@ properties:
     type: array
     items:
       type: string
+  account_type_gate:
+    type: object
+    additionalProperties: false
+    required: [status, checked_holding_count, required_account_categories, confirmed_holdings]
+    properties:
+      status: {const: complete}
+      checked_holding_count: {type: integer, minimum: 1}
+      required_account_categories: {const: [NISA, 特定口座, 一般口座]}
+      confirmed_holdings:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          additionalProperties: false
+          required: [symbol, account_type]
+          properties:
+            symbol: {type: string}
+            account_type:
+              type: string
+              pattern: "(NISA|特定口座|一般口座)"

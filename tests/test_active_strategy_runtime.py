@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from copy import deepcopy
+from datetime import date
 from decimal import Decimal
 from pathlib import Path
 
@@ -8,7 +9,7 @@ from monthly_limit_order_review.portfolio_metrics import (
     build_core_buy_materials,
     compute_portfolio_metrics,
 )
-from monthly_limit_order_review.cli import compute_monthly
+from monthly_limit_order_review.cli import build_current_review_packet, compute_monthly
 from monthly_limit_order_review.prompt_renderer import render_chatgpt_prompt
 from monthly_limit_order_review.rules import calculate_sox_buy_signal
 from monthly_limit_order_review.snapshot_loader import load_snapshot
@@ -89,7 +90,7 @@ def test_superseded_cash_plan_is_not_loaded_as_an_active_plan() -> None:
     )
 
     assert context["active_plans"] == []
-    assert materials["strategy_id"] == "husband_personal_2026-08-02"
+    assert materials["strategy_id"] == "husband_personal_2026-08-09"
     assert materials["active_plan_id"] is None
     assert materials["monthly_core_budget_tier"] == "standard"
     assert materials["recommended_monthly_core_buy_budget_jpy"] == 100000
@@ -140,7 +141,7 @@ def test_monthly_cli_records_current_strategy_and_user_conditions(
     )
     warning_codes = {warning.code for warning in computation.warnings}
 
-    assert computation.metadata["strategy_id"] == "husband_personal_2026-08-02"
+    assert computation.metadata["strategy_id"] == "husband_personal_2026-08-09"
     assert computation.strategy_summary["active_plan_ids"] == []
     assert computation.core_buy_materials[
         "recommended_monthly_core_buy_budget_jpy"
@@ -198,18 +199,23 @@ def test_monthly_cli_records_current_strategy_and_user_conditions(
         "cash_normalization_months_estimate"
     ] is None
 
+    for holding in computation.snapshot.holdings:
+        if holding.asset_class in {"core", "jun_core", "satellite_core", "satellite"} and holding.account_type is None:
+            holding.account_type = "特定口座（源泉徴収あり）"
+    computation.snapshot.snapshot_date = date(2026, 8, 9)
     prompt = render_chatgpt_prompt(
         computation,
         (ROOT / "prompts/templates/monthly_review_template.md").read_text(
             encoding="utf-8"
         ),
+        review_packet=build_current_review_packet(computation, ROOT),
     )
     assert "## 2. 入力データ" in prompt
     assert "total_assets_jpy: 39969688" in prompt
     assert "active_strategy_id" not in prompt
-    assert "review_mode: monthly_operational_review" in prompt
-    assert "husband_personal_2026-08-02" in prompt
-    assert "この承認済み政策からの乖離点検にだけ使い" in prompt
+    assert "review_mode: strategic_policy_second_opinion" in prompt
+    assert "husband_personal_2026-08-09" not in prompt
+    assert "サテライト比率、具体的な銘柄" in prompt
     assert "2026-07-25_cash_redeployment" not in prompt
     assert "recommended_monthly_core_buy_budget_jpy" not in prompt
     assert "12620505" not in prompt
@@ -244,11 +250,16 @@ def test_current_snapshot_does_not_reactivate_superseded_cash_plan(
     assert materials["active_plan_amount_difference_expected"] is False
     assert materials["active_plan_historical_basis_must_not_be_overwritten"] is False
 
+    for holding in computation.snapshot.holdings:
+        if holding.asset_class in {"core", "jun_core", "satellite_core", "satellite"} and holding.account_type is None:
+            holding.account_type = "特定口座（源泉徴収あり）"
+    computation.snapshot.snapshot_date = date(2026, 8, 9)
     prompt = render_chatgpt_prompt(
         computation,
         (ROOT / "prompts/templates/monthly_review_template.md").read_text(
             encoding="utf-8"
         ),
+        review_packet=build_current_review_packet(computation, ROOT),
     )
     assert "active_plan_basis_planned_amount_jpy" not in prompt
     assert "active_plan_current_recalculated_amount_jpy" not in prompt

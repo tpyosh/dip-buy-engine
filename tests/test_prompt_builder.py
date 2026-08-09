@@ -58,10 +58,14 @@ def test_monthly_review_prompt_is_a_closed_decision_packet(sample_computation) -
     assert "decision_date:" in prompt
     assert "R-CASH-001" in prompt
     assert "R-DELIVERY-001" in prompt
-    assert "range_rationale_required: true" in prompt
-    assert "GE60_B40" in prompt
+    assert "equity_share_of_equity_bond_sleeve_pct:" in prompt
+    assert "- 0" in prompt
+    assert "- 100" in prompt
     assert "source_required_fields:" in prompt
     assert "publication_date" in prompt
+    assert "data_as_of" in prompt
+    assert "cutoff_compliance_status" in prompt
+    assert "accessed_at may be later than research_cutoff_at" in prompt
     assert "claim_supported" in prompt
     assert "【具体的な売買・資金移動】" in prompt
     assert "review_response.yaml" in prompt
@@ -69,14 +73,22 @@ def test_monthly_review_prompt_is_a_closed_decision_packet(sample_computation) -
     assert "strategic_policy_decision:" in prompt
     assert "updated_inputs:" in prompt
     assert "decision_axes:" in prompt
-    assert "schema_ref: schemas/monthly-review-response.schema.yaml" in prompt
+    assert "inline_response_schema:" in prompt
+    assert "external_schema_reference_allowed: false" in prompt
+    assert "schemas/monthly-review-response.schema.yaml" not in prompt
+    assert "<enum>" not in prompt
+    assert "response_skeleton:" not in prompt
+    assert "array_schemas:" not in prompt
     assert "tactical_liquidity_policy_ref" in prompt
     assert "portfolio_snapshot_as_ofの価格・為替・評価額・比率を更新しない" in prompt
-    assert "decision_quality_checks: []" in prompt
+    assert "decision_quality_checks:" in prompt
+    assert "static_reference_checks:" in prompt
     assert "status_enum:" in prompt
     assert "- pass" in prompt
     assert "- fail" in prompt
     assert "- not_applicable" in prompt
+    assert "null is allowed only when the containing object status" not in prompt
+    assert "each field's JSON Schema is the sole authority" in prompt
 
     assert "active_strategy_id" not in prompt
     assert "active_plan_id" not in prompt
@@ -123,7 +135,7 @@ def test_review_packet_selects_financial_facts_without_copying_values_into_templ
     sample_computation,
 ) -> None:
     computation = deepcopy(sample_computation)
-    computation.snapshot.snapshot_date = date(2026, 7, 26)
+    computation.snapshot.snapshot_date = date(2026, 8, 9)
     computation.metadata["review_target_month"] = "2026_08"
     financial = load_financial_context(ROOT)
     packet = build_review_packet(
@@ -156,7 +168,8 @@ def test_review_packet_selects_financial_facts_without_copying_values_into_templ
     assert not any("月額100,000円の具体的な差引先" in item for item in unknown_reasons)
     assert any("ボーナスの正確な手取り額" in item for item in unknown_reasons)
     assert any("投資待機資金の目標比率" in item for item in unknown_reasons)
-    assert "account_tax_comparison" in packet.output_contract["array_schemas"]
+    inline_schema = packet.output_contract["inline_response_schema"]
+    assert "account_tax_comparison" in inline_schema["$defs"]
     assert "374,171円" not in template
     assert "274,171円" not in template
     assert "2026-07-25_cash_redeployment" not in template

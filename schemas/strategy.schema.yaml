@@ -7,10 +7,12 @@ required:
   - status
   - effective_from
   - scope
+  - purpose
   - allocation
   - risk_limits
   - sell_policy
   - automation
+  - review_policy
 properties:
   schema_version: {const: 1}
   strategy_id: {type: string}
@@ -19,6 +21,18 @@ properties:
   scope:
     type: object
     required: [owner, portfolio, allocation_denominator]
+  purpose:
+    type: object
+    additionalProperties: false
+    required: [status, primary_objective, target_age, target_date, statement, lifestyle_constraint, enjoyment_preference]
+    properties:
+      status: {const: confirmed}
+      primary_objective: {const: maximize_age_65_investment_profit}
+      target_age: {const: 65}
+      target_date: {type: string, format: date}
+      statement: {type: string}
+      lifestyle_constraint: {type: string}
+      enjoyment_preference: {type: string}
   allocation:
     type: object
     required: [target_groups]
@@ -52,3 +66,32 @@ properties:
               routine_additions_above_preferred_max: {type: boolean}
   sell_policy: {type: object}
   automation: {type: object}
+  review_policy:
+    type: object
+    required: [satellite_parameters, output_contract]
+    properties:
+      satellite_parameters:
+        type: object
+        additionalProperties: false
+        required: [review_frequency, satellites_allowed, positive_satellite_allocation_required, all_country_only_baseline_required, target_pct, securities, review_dimensions]
+        properties:
+          review_frequency: {type: string}
+          satellites_allowed: {const: true}
+          positive_satellite_allocation_required: {const: true}
+          all_country_only_baseline_required: {const: true}
+          target_pct: {$ref: "#/$defs/reviewer_parameter"}
+          securities: {$ref: "#/$defs/reviewer_parameter"}
+          review_dimensions:
+            type: array
+            minItems: 1
+            items: {type: string}
+      output_contract:
+        type: object
+        required: [existing_holdings, new_assets, required_action_fields]
+$defs:
+  reviewer_parameter:
+    type: object
+    required: [value, status]
+    properties:
+      value: {}
+      status: {enum: [reviewer_to_propose, confirmed]}

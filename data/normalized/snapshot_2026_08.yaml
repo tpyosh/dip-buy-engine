@@ -1,13 +1,14 @@
-snapshot_date: "2026-07-26"
+snapshot_date: "2026-08-09"
 currency_base: "JPY"
-total_assets_jpy: 39969688
+total_assets_jpy: 40051911
 liquidity_target_jpy: null
 category_totals_jpy:
-  預金・現金: 13622664
-  株式（現物）: 5346701
-  投資信託: 16920468
+  預金・現金: 13147713
+  株式（現物）: 5885224
+  投資信託: 16616947
   年金: 4063372
-  ポイント: 16483
+  ポイント: 16233
+  暗号資産: 322422
 source_evidence:
   primary_source: "moneyforward_screenshots_in_user_message"
   auxiliary_source: null

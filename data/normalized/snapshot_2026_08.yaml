@@ -10,28 +10,28 @@ category_totals_jpy:
   ポイント: 16233
   暗号資産: 322422
 source_evidence:
-  primary_source: "moneyforward_screenshots_in_user_message"
-  auxiliary_source: null
-  screenshot_count: 5
-  screenshot_paths:
-    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-4c64e037-9fab-4616-8ad3-f9a4bb926ffe.png"
-    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-e5243e32-614e-4cc0-93c8-f256f18d563e.png"
-    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-4517998a-e496-4af4-afec-ab49bcf791cd.png"
-    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-37cec64c-e518-48cd-9d52-4bc11f24cf80.png"
-    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-78dd116b-0866-451c-82ff-7d073463eb47.png"
+  primary_source: "moneyforward_assets_machine_readable_yaml"
+  auxiliary_source: "crypto_summary_json"
+  attachment_paths:
+    - "/Users/tappeiyoshida/Downloads/moneyforward_assets_machine_readable.yaml"
+    - "/Users/tappeiyoshida/Downloads/crypto_summary_2026-08-09.json"
+  capture_count: 5
+  moneyforward_snapshot_date_present: false
+  crypto_summary_processed_date: "2026-08-09"
+  snapshot_date_basis: "moneyforward_assets_machine_readable.yaml had snapshot_date null; set snapshot_date to 2026-08-09 using crypto_summary_2026-08-09.json processed_date and the request date 2026-08-09."
   raw_evidence_in_repository: false
-  snapshot_date_basis: "No visible date in screenshots; used session current date 2026-07-26."
 ocr_notes:
-  - "スクリーンショット内に取得日が見えないため、セッション日付 2026-07-26 を snapshot_date とした。"
-  - "預金・現金とポイントは明細が画像に含まれないため、カテゴリ合計だけを集約holdingとして記録した。内訳は前月値から補完していない。"
-  - "米国上場銘柄のcurrent_priceは画面表示値を記録し、通貨は銘柄と前月スナップショットの継続性からUSDとした。評価額と評価損益は画面表示どおりJPYで記録した。"
-  - "株式（現物）の明細表示値合計は 5,346,698円で、カテゴリ合計 5,346,701円との差は -3円。Money Forwardの表示丸め差として扱う。"
+  - "moneyforward_assets_machine_readable.yaml は snapshot_date が null のため、crypto_summary_2026-08-09.json の processed_date と依頼日 2026-08-09 を基準に snapshot_date を 2026-08-09 とした。"
+  - "売買可能明細の account_type は添付 YAML では確認できないため snapshot では null を維持し、既知の口座区分は holdings/versions/2026-08-02.yaml の overlay に委ねる。"
+  - "投資信託の symbol は既存参照互換のため NISSEI_SOX_INDEX_1/2 を NISSEI_SOX_1/2、EMAXIS_SLIM_ALL_COUNTRY_FUND を EMAXIS_SLIM_ALL_COUNTRY に正規化した。"
+  - "暗号資産は crypto_summary_2026-08-09.json から個別 holdings を追加した。数量、平均取得単価、現在単価は添付 JSON にないため null のまま保持した。"
+  - "crypto_summary_2026-08-09.json の reward_points 162 は portfolio.current_value に含まれない別指標のため total_assets_jpy へ加算していない。"
 validation_notes:
-  - "カテゴリ合計の合算は総資産 39,969,688円 と一致。"
-  - "投資信託の明細合計はカテゴリ合計 16,920,468円 と一致。"
-  - "年金は詳細1行が確認でき、取得価額 3,340,695円、現在価値 4,063,372円、評価損益 722,677円、評価損益率 21.63%。"
-  - "株式（現物）の明細合計とカテゴリ合計の3円差は許容範囲内の表示丸め差として分離した。"
-  - "前月スナップショットとの差分は保有状態の変化としてのみ記録し、注文、約定、入出金または積立実行を示す取引実績には変換しない。"
+  - "Money Forward のカテゴリ合計 39,729,489円 と crypto_summary の portfolio.current_value 322,422円 の合算は total_assets_jpy 40,051,911円 と一致。"
+  - "株式（現物）の個別評価額合計は 5,885,222円 でカテゴリ合計 5,885,224円 より 2円少ない。添付 YAML の表示値を維持し、差額 2円 は表示丸め差として扱う。"
+  - "holdings の market_value_jpy 合計は 40,051,909円 で total_assets_jpy より 2円少ないが、上記の株式カテゴリ差額と一致する。"
+  - "ポイント集約値 16,233円 は添付 YAML の 3明細内訳（ANA 786円、Tポイント 7円、楽天ポイント 15,440円）と一致。"
+  - "暗号資産 3明細の current_value 合計 322,422円 は crypto_summary_2026-08-09.json の portfolio.current_value と一致。"
 holdings:
   - symbol: "LIQUIDITY"
     name: "預金・現金"
@@ -44,10 +44,10 @@ holdings:
     current_price: null
     unit_price: null
     profit_loss_jpy: null
-    valuation_jpy: 13622664
-    market_value_jpy: 13622664
+    valuation_jpy: 13147713
+    market_value_jpy: 13147713
     currency: "JPY"
-    notes: "明細は今回の画像に含まれていないため、カテゴリ合計のみ記録。前月の口座別内訳は引き継いでいない。"
+    notes: "内訳: PayPay -130,485円; モバイルSuica 1,915円; 三菱UFJ銀行 普通 2,467,987円; 楽天銀行 円預金(普通預金) 8,471,062円; 楽天証券 米ドル 592,677円; 野村証券 MRF 1,744,557円。"
 
   - symbol: "7203"
     name: "トヨタ自動車"
@@ -57,13 +57,13 @@ holdings:
     asset_class: "jun_core"
     quantity: 800
     avg_cost: 532
-    current_price: 2897
+    current_price: 2980
     unit_price: null
-    profit_loss_jpy: 1892000
-    valuation_jpy: 2317600
-    market_value_jpy: 2317600
+    profit_loss_jpy: 1958400
+    valuation_jpy: 2384000
+    market_value_jpy: 2384000
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 444.55%。"
+    notes: "前日比 0円、評価損益率 460.15%。"
 
   - symbol: "9444"
     name: "トーシンホールディングス"
@@ -73,13 +73,13 @@ holdings:
     asset_class: "satellite"
     quantity: 1500
     avg_cost: 628
-    current_price: 233
+    current_price: 315
     unit_price: null
-    profit_loss_jpy: -592500
-    valuation_jpy: 349500
-    market_value_jpy: 349500
+    profit_loss_jpy: -469500
+    valuation_jpy: 472500
+    market_value_jpy: 472500
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 -62.90%。"
+    notes: "前日比 0円、評価損益率 -49.84%。"
 
   - symbol: "2353"
     name: "日本駐車場開発"
@@ -89,13 +89,13 @@ holdings:
     asset_class: "satellite"
     quantity: 100
     avg_cost: 265
-    current_price: 258
+    current_price: 250
     unit_price: null
-    profit_loss_jpy: -700
-    valuation_jpy: 25800
-    market_value_jpy: 25800
+    profit_loss_jpy: -1500
+    valuation_jpy: 25000
+    market_value_jpy: 25000
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 -2.64%。"
+    notes: "前日比 0円、評価損益率 -5.66%。"
 
   - symbol: "7201"
     name: "日産自動車"
@@ -105,13 +105,13 @@ holdings:
     asset_class: "satellite"
     quantity: 100
     avg_cost: 368
-    current_price: 322
+    current_price: 341
     unit_price: null
-    profit_loss_jpy: -4535
-    valuation_jpy: 32220
-    market_value_jpy: 32220
+    profit_loss_jpy: -2675
+    valuation_jpy: 34080
+    market_value_jpy: 34080
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 -12.34%。現在値は整数表示、評価額は画面表示値をそのまま記録。"
+    notes: "前日比 0円、評価損益率 -7.28%。"
 
   - symbol: "SMH"
     name: "ヴァンエック・半導体株ETF"
@@ -121,13 +121,13 @@ holdings:
     asset_class: "satellite_core"
     quantity: 1
     avg_cost: 369.63
-    current_price: 561.19
+    current_price: 582.70
     unit_price: null
-    profit_loss_jpy: 31387
+    profit_loss_jpy: 33622
     valuation_jpy: 91950
     market_value_jpy: 91950
     currency: "USD"
-    notes: "前日比 0円、評価損益率 51.82%。"
+    notes: "前日比 679円、評価損益率 57.64%。"
 
   - symbol: "PLTR"
     name: "パランティア・テクノロジーズ"
@@ -137,13 +137,13 @@ holdings:
     asset_class: "satellite"
     quantity: 11
     avg_cost: 151.22
-    current_price: 122.92
+    current_price: 172.01
     unit_price: null
-    profit_loss_jpy: -51013
-    valuation_jpy: 221544
-    market_value_jpy: 221544
+    profit_loss_jpy: 36081
+    valuation_jpy: 298574
+    market_value_jpy: 298574
     currency: "USD"
-    notes: "前日比 0円、評価損益率 -18.72%。"
+    notes: "前日比 3,207円、評価損益率 13.75%。"
 
   - symbol: "CIBR"
     name: "ファーストトラスト ナスダック サイバーセキュリティ ETF"
@@ -153,13 +153,13 @@ holdings:
     asset_class: "satellite_core"
     quantity: 88
     avg_cost: 76.66
-    current_price: 88.40
+    current_price: 97.85
     unit_price: null
-    profit_loss_jpy: 169319
-    valuation_jpy: 1274621
-    market_value_jpy: 1274621
+    profit_loss_jpy: 294293
+    valuation_jpy: 1358784
+    market_value_jpy: 1358784
     currency: "USD"
-    notes: "前日比 0円、評価損益率 15.32%。"
+    notes: "前日比 7,511円、評価損益率 27.65%。"
 
   - symbol: "MSFT"
     name: "マイクロソフト"
@@ -169,13 +169,13 @@ holdings:
     asset_class: "jun_core"
     quantity: 9
     avg_cost: 398.74
-    current_price: 381.70
+    current_price: 499.99
     unit_price: null
-    profit_loss_jpy: -25123
-    valuation_jpy: 562873
-    market_value_jpy: 562873
+    profit_loss_jpy: 143800
+    valuation_jpy: 710085
+    market_value_jpy: 710085
     currency: "USD"
-    notes: "前日比 0円、評価損益率 -4.27%。"
+    notes: "前日比 2,061円、評価損益率 25.39%。"
 
   - symbol: "URA"
     name: "グローバルX ウラニウム ETF"
@@ -185,13 +185,13 @@ holdings:
     asset_class: "satellite"
     quantity: 72
     avg_cost: 46.10
-    current_price: 39.89
+    current_price: 44.91
     unit_price: null
-    profit_loss_jpy: -73250
-    valuation_jpy: 470590
-    market_value_jpy: 470590
+    profit_loss_jpy: -13510
+    valuation_jpy: 510249
+    market_value_jpy: 510249
     currency: "USD"
-    notes: "前日比 0円、評価損益率 -13.47%。"
+    notes: "前日比 2,484円、評価損益率 -2.58%。config/portfolio_policy.yaml では satellite_core に解決される。"
 
   - symbol: "NISSEI_SOX_1"
     name: "ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>"
@@ -201,13 +201,13 @@ holdings:
     asset_class: "satellite_core"
     quantity: 860960
     avg_cost: 15802
-    current_price: 48545
+    current_price: 45844
     unit_price: null
-    profit_loss_jpy: 2819073
-    valuation_jpy: 4179530
-    market_value_jpy: 4179530
+    profit_loss_jpy: 2586528
+    valuation_jpy: 3946985
+    market_value_jpy: 3946985
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 207.22%。"
+    notes: "前日比 0円、評価損益率 190.12%。"
 
   - symbol: "NISSEI_SOX_2"
     name: "ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>"
@@ -217,13 +217,13 @@ holdings:
     asset_class: "satellite_core"
     quantity: 415654
     avg_cost: 14435
-    current_price: 48545
+    current_price: 45844
     unit_price: null
-    profit_loss_jpy: 1417792
-    valuation_jpy: 2017792
-    market_value_jpy: 2017792
+    profit_loss_jpy: 1305524
+    valuation_jpy: 1905524
+    market_value_jpy: 1905524
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 236.30%。"
+    notes: "前日比 0円、評価損益率 217.59%。"
 
   - symbol: "RAKUTEN_PLUS_ALL_COUNTRY_1"
     name: "楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)"
@@ -233,13 +233,13 @@ holdings:
     asset_class: "core"
     quantity: 1084992
     avg_cost: 14286
-    current_price: 19705
+    current_price: 19738
     unit_price: null
-    profit_loss_jpy: 587977
-    valuation_jpy: 2137977
-    market_value_jpy: 2137977
+    profit_loss_jpy: 591557
+    valuation_jpy: 2141557
+    market_value_jpy: 2141557
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 37.93%。"
+    notes: "前日比 0円、評価損益率 38.16%。"
 
   - symbol: "RAKUTEN_PLUS_ALL_COUNTRY_2"
     name: "楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)"
@@ -249,13 +249,13 @@ holdings:
     asset_class: "core"
     quantity: 846995
     avg_cost: 17710
-    current_price: 19705
+    current_price: 19738
     unit_price: null
-    profit_loss_jpy: 169003
-    valuation_jpy: 1669004
-    market_value_jpy: 1669004
+    profit_loss_jpy: 171799
+    valuation_jpy: 1671799
+    market_value_jpy: 1671799
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 11.27%。"
+    notes: "前日比 0円、評価損益率 11.45%。"
 
   - symbol: "RAKUTEN_PLUS_SP500"
     name: "楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)"
@@ -265,13 +265,13 @@ holdings:
     asset_class: "core"
     quantity: 106530
     avg_cost: 11715
-    current_price: 19875
+    current_price: 20012
     unit_price: null
-    profit_loss_jpy: 86928
-    valuation_jpy: 211728
-    market_value_jpy: 211728
+    profit_loss_jpy: 88388
+    valuation_jpy: 213188
+    market_value_jpy: 213188
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 69.65%。"
+    notes: "前日比 0円、評価損益率 70.82%。"
 
   - symbol: "EMAXIS_SLIM_SP500_1"
     name: "eMAXIS Slim 米国株式(S&P500)"
@@ -281,13 +281,13 @@ holdings:
     asset_class: "core"
     quantity: 337199
     avg_cost: 42349
-    current_price: 44669
+    current_price: 44975
     unit_price: null
-    profit_loss_jpy: 78234
-    valuation_jpy: 1506234
-    market_value_jpy: 1506234
+    profit_loss_jpy: 88553
+    valuation_jpy: 1516553
+    market_value_jpy: 1516553
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 5.48%。"
+    notes: "前日比 0円、評価損益率 6.20%。"
 
   - symbol: "EMAXIS_SLIM_SP500_2"
     name: "eMAXIS Slim 米国株式(S&P500)"
@@ -297,13 +297,13 @@ holdings:
     asset_class: "core"
     quantity: 408710
     avg_cost: 33398
-    current_price: 44669
+    current_price: 44975
     unit_price: null
-    profit_loss_jpy: 460667
-    valuation_jpy: 1825667
-    market_value_jpy: 1825667
+    profit_loss_jpy: 473173
+    valuation_jpy: 1838173
+    market_value_jpy: 1838173
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 33.75%。"
+    notes: "前日比 0円、評価損益率 34.66%。"
 
   - symbol: "EMAXIS_SLIM_SP500_3"
     name: "eMAXIS Slim 米国株式(S&P500)"
@@ -313,13 +313,13 @@ holdings:
     asset_class: "core"
     quantity: 228995
     avg_cost: 39302
-    current_price: 44669
+    current_price: 44975
     unit_price: null
-    profit_loss_jpy: 122898
-    valuation_jpy: 1022898
-    market_value_jpy: 1022898
+    profit_loss_jpy: 129905
+    valuation_jpy: 1029905
+    market_value_jpy: 1029905
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 13.66%。"
+    notes: "前日比 0円、評価損益率 14.43%。"
 
   - symbol: "EMAXIS_SLIM_ALL_COUNTRY"
     name: "eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)"
@@ -329,13 +329,13 @@ holdings:
     asset_class: "core"
     quantity: 614397
     avg_cost: 36491
-    current_price: 38243
+    current_price: 38302
     unit_price: null
-    profit_loss_jpy: 107639
-    valuation_jpy: 2349638
-    market_value_jpy: 2349638
+    profit_loss_jpy: 111264
+    valuation_jpy: 2353263
+    market_value_jpy: 2353263
     currency: "JPY"
-    notes: "前日比 0円、評価損益率 4.80%。"
+    notes: "前日比 0円、評価損益率 4.96%。"
 
   - symbol: "PENSION_EMAXIS_SLIM_ALL_COUNTRY"
     name: "eMAXIS Slim 全世界株式(オール・カントリー)"
@@ -364,7 +364,55 @@ holdings:
     current_price: null
     unit_price: null
     profit_loss_jpy: null
-    valuation_jpy: 16483
-    market_value_jpy: 16483
+    valuation_jpy: 16233
+    market_value_jpy: 16233
     currency: "JPY"
-    notes: "内訳詳細は今回の画像に含まれていないため、カテゴリ合計のみ記録。"
+    notes: "内訳: ANAマイレージ 786円; Tポイント 7円; 楽天ポイント 15,440円。"
+
+  - symbol: "BTC"
+    name: "ビットコイン"
+    source_category: "暗号資産"
+    institution: null
+    account_type: null
+    asset_class: "other"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    unit_price: null
+    profit_loss_jpy: -46181
+    valuation_jpy: 177410
+    market_value_jpy: 177410
+    currency: "JPY"
+    notes: "crypto_summary_2026-08-09.json の current_value/profit_loss を使用。数量・平均取得単価・現在単価は添付 JSON にないため null。"
+
+  - symbol: "ETH"
+    name: "イーサリアム"
+    source_category: "暗号資産"
+    institution: null
+    account_type: null
+    asset_class: "other"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    unit_price: null
+    profit_loss_jpy: -44613
+    valuation_jpy: 137310
+    market_value_jpy: 137310
+    currency: "JPY"
+    notes: "crypto_summary_2026-08-09.json の current_value/profit_loss を使用。数量・平均取得単価・現在単価は添付 JSON にないため null。"
+
+  - symbol: "XRP"
+    name: "エックスアールピー"
+    source_category: "暗号資産"
+    institution: null
+    account_type: null
+    asset_class: "other"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    unit_price: null
+    profit_loss_jpy: -5297
+    valuation_jpy: 7702
+    market_value_jpy: 7702
+    currency: "JPY"
+    notes: "crypto_summary_2026-08-09.json の current_value/profit_loss を使用。数量・平均取得単価・現在単価は添付 JSON にないため null。"

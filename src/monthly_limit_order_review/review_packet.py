@@ -49,6 +49,16 @@ PRIMARY_OBJECTIVES = {
 }
 
 
+def is_crypto_holding(holding) -> bool:
+    source_category = str(getattr(holding, "source_category", "") or "")
+    symbol = str(getattr(holding, "symbol", "") or "").upper()
+    return source_category == "暗号資産" or symbol in {"BTC", "ETH", "XRP"}
+
+
+def snapshot_has_crypto_holdings(snapshot) -> bool:
+    return any(is_crypto_holding(holding) for holding in snapshot.holdings)
+
+
 def build_review_packet(
     computation: MonthlyComputation,
     *,
@@ -240,12 +250,16 @@ def build_review_packet(
             strategic_decision_objective
         ),
         candidate_methodology=normalize_review_cadence_terms(
-            build_candidate_methodology()
+            build_candidate_methodology(
+                has_crypto_holdings=snapshot_has_crypto_holdings(snapshot)
+            )
         ),
         decision_stage_contract=build_decision_stage_contract(),
         execution_capability_contract=build_execution_capability_contract(),
         capital_layers=build_capital_layers(),
-        asset_class_definitions=build_asset_class_definitions(),
+        asset_class_definitions=build_asset_class_definitions(
+            has_crypto_holdings=snapshot_has_crypto_holdings(snapshot)
+        ),
         allocation_denominators=build_allocation_denominators(
             computation,
             cash_requirement_inputs=cash_requirement_inputs,
@@ -993,7 +1007,7 @@ def build_capital_layers() -> dict:
     }
 
 
-def build_asset_class_definitions() -> dict:
+def build_asset_class_definitions(*, has_crypto_holdings: bool = False) -> dict:
     return {
         "core": {
             "core_satellite_group": "core",
@@ -1061,8 +1075,13 @@ def build_asset_class_definitions() -> dict:
                 "household_total_assets_jpy"
             ),
             "crypto_rule": (
-                "継続する暗号資産はother_pctの内数。スナップショットに暗号資産残高の"
-                "独立明細がないため現在残高や現在配分を捏造しない"
+                "継続する暗号資産はother_pctの内数。"
+                + (
+                    "スナップショットに暗号資産残高の独立明細があるため、"
+                    "その current_value_jpy は使用してよいが、数量や取得単価は捏造しない"
+                    if has_crypto_holdings
+                    else "スナップショットに暗号資産残高の独立明細がないため現在残高や現在配分を捏造しない"
+                )
             ),
             "calculation_order": [
                 "exclude_household_reserve",
@@ -1160,6 +1179,15 @@ def build_allocation_denominators(
     cash_requirement_inputs: dict,
 ) -> dict:
     total = computation.snapshot.total_assets_jpy
+    crypto_balance_jpy = sum(
+        (
+            holding.market_value_jpy
+            for holding in computation.snapshot.holdings
+            if is_crypto_holding(holding)
+        ),
+        start=Decimal("0"),
+    )
+    has_crypto_holdings = crypto_balance_jpy > 0
     asset_class_values: dict[str, Decimal] = defaultdict(Decimal)
     for holding in computation.snapshot.holdings:
         asset_class_values[holding.asset_class] += holding.market_value_jpy
@@ -1181,8 +1209,19 @@ def build_allocation_denominators(
             "直接の売買・資金移動対象にはしない"
         ),
         "crypto_treatment": {
-            "current_balance_status": "not_present_in_portfolio_snapshot",
-            "snapshot_scope": "do_not_invent_current_allocation",
+            "current_balance_status": (
+                "present_in_portfolio_snapshot"
+                if has_crypto_holdings
+                else "not_present_in_portfolio_snapshot"
+            ),
+            "current_balance_jpy": (
+                crypto_balance_jpy if has_crypto_holdings else None
+            ),
+            "snapshot_scope": (
+                "use_observed_current_balance_without_inventing_quantity_or_cost_basis"
+                if has_crypto_holdings
+                else "do_not_invent_current_allocation"
+            ),
             "policy_scope": (
                 "if_continued_classify_as_investable_other_within_other_pct"
             ),
@@ -1198,7 +1237,7 @@ def build_allocation_denominators(
     }
 
 
-def build_candidate_methodology() -> dict:
+def build_candidate_methodology(*, has_crypto_holdings: bool = False) -> dict:
     def delegated(
         selection_criteria: str,
         allowed_primary_sources: list[str],
@@ -1267,7 +1306,10 @@ def build_candidate_methodology() -> dict:
             "continue_current_contributions_and_disclose_cash_flow_and_success_probability_impact",
         ],
         "crypto_current_balance_rule": (
-            "スナップショットに暗号資産残高がないため現在残高を推測せず、"
+            "スナップショットに暗号資産残高があるため observed current_value_jpy は使ってよいが、"
+            "数量・取得単価・通貨建て配分は未確認なら捏造しない"
+            if has_crypto_holdings
+            else "スナップショットに暗号資産残高がないため現在残高を推測せず、"
             "未知の既存残高を現在配分へ含めない"
         ),
         "other_pct_selection_priority": [
@@ -1909,6 +1951,18 @@ def build_rule_registry(review_mode: str) -> list[dict]:
                 "戦略目標、商品単位方針、口座・ロット注文を別レイヤーで判定する。"
                 "口座区分は生成前に全件確認し、税額・取得価額・ロット詳細の不足だけを"
                 "該当ロット執行のblocked理由として扱う"
+            ),
+        },
+        {
+            "rule_id": "R-TAX-001",
+            "applies_to": "final_review",
+            "rule": (
+                "保有銘柄の売却を一件でも提案する場合は、日本の最新税制の一次情報に基づき、"
+                "課税口座の含み益ロットと含み損ロットを同一暦年に実現して譲渡益を相殺する"
+                "損益通算（tax-loss harvesting）を必ず比較する。当年の確定損益、利用可能な"
+                "繰越損失、配当等との通算可否、口座区分、NISA内損失は損益通算・繰越控除できない"
+                "点、概算税効果、手数料、再取得までの価格変動リスク、申告実務を確認し、"
+                "税効果だけで投資判断を歪めない。採用しない場合も理由をaccount_tax_comparisonsへ記録する"
             ),
         },
         {

@@ -41,15 +41,15 @@ def test_current_snapshot_uses_strategy_groups_instead_of_legacy_bucket_targets(
         for allocation in analysis["strategy_allocations"]
     }
 
-    assert strategy_allocations["broad_core"].actual_pct == Decimal("0.3699")
+    assert strategy_allocations["broad_core"].actual_pct == Decimal("0.3702")
     assert strategy_allocations["broad_core"].target_pct == Decimal("0.70")
-    assert strategy_allocations["active_hobby"].actual_pct == Decimal("0.2888")
+    assert strategy_allocations["active_hobby"].actual_pct == Decimal("0.2931")
     assert strategy_allocations["active_hobby"].target_pct == Decimal("0.30")
     assert analysis["strategy_metrics"]["recognized_reserved_cash_jpy"] == Decimal(
         "0"
     )
     assert analysis["strategy_metrics"]["unallocated_liquidity_jpy"] == Decimal(
-        "13622664"
+        "13147713"
     )
     assert all(
         allocation.target_pct is None
@@ -211,7 +211,7 @@ def test_monthly_cli_records_current_strategy_and_user_conditions(
         review_packet=build_current_review_packet(computation, ROOT),
     )
     assert "## 2. 入力データ" in prompt
-    assert "total_assets_jpy: 39969688" in prompt
+    assert "total_assets_jpy: 40051911" in prompt
     assert "active_strategy_id" not in prompt
     assert "review_mode: strategic_policy_second_opinion" in prompt
     assert "husband_personal_2026-08-09" not in prompt

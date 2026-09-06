@@ -311,7 +311,7 @@ def test_snapshot_after_2026_12_requires_explicit_nisa_rule(monkeypatch, tmp_pat
     assert computation.metadata["review_target_month"] == "2027_01"
     assert monthly["review_target_month"] == "2027_01"
     assert monthly["nisa_growth_quota_status"] == "requires_explicit_configuration"
-    assert monthly["fixed_core_auto_invest_amount_jpy"] == 750000
+    assert monthly["fixed_core_auto_invest_amount_jpy"] == 100000
     assert monthly["recommended_monthly_core_buy_budget_jpy"] is None
     assert monthly["taxable_core_spot_buy_required"] is False
     assert monthly["recommended_taxable_core_spot_buy_jpy"] is None

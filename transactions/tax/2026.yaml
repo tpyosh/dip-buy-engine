@@ -1,0 +1,135 @@
+schema_version: 1
+record_type: "annual_tax_reconciliation"
+tax_year: 2026
+tax_residency: "Japan"
+updated_at: "2026-08-21"
+status: "collecting"
+transaction_ledger_ref: "transactions/ledger.yaml"
+filing_decision:
+  status: "not_assessed"
+  note: "全売却と年間資料の突合後に判定する。必要に応じて税務署または税理士へ確認する"
+same_year_listed_stock_loss_offset:
+  decision_ref: "decisions/2026-08-12_use_current_year_listed_stock_losses.yaml"
+  latest_update_ref: "decisions/2026-08-12_include_nissan_loss_in_2026_offset.yaml"
+  user_intent: "2026年中に利益確定したい上場株式等の譲渡益との相殺に利用する"
+  status: "provisional_loss_recorded_pending_gain_realization_and_annual_reconciliation"
+  provisional_loss_available_jpy: 485831
+  provisional_realized_gain_loss_jpy: -485831
+  transactions:
+    - "transactions/ledger.yaml#rakuten-1261-7201-sell-fill"
+    - "transactions/ledger.yaml#nomura-79153-9444-sell-fill"
+    - "transactions/ledger.yaml#nomura-79152-2353-sell-fill"
+  cross_account_filing_note: "一般口座または他証券会社の譲渡益と通算する場合は確定申告で集計する"
+  nisa_excluded: true
+  security_selection_authorized: false
+  reported_gain_transactions:
+    - transaction_ref: "transactions/ledger.yaml#rakuten-1262-smh-sell-fill"
+      decision_ref: "decisions/2026-08-13_include_smh_gain_in_2026_offset.yaml"
+      direction: "gain_user_confirmed"
+      realized_gain_loss_jpy: null
+      status: "amount_pending_tax_details_or_annual_statement"
+sales:
+  - transaction_ref: "transactions/ledger.yaml#rakuten-1262-smh-sell-fill"
+    tax_year_assignment_status: "confirmed_japan_trade_date_2026"
+    filing_category: "taxable_withholding"
+    tax_asset_category: "listed_stock"
+    status: "settlement_recorded"
+    realized_gain_loss_direction: "gain_user_confirmed"
+    offset_role: "gain_to_offset_against_2026_listed_stock_losses"
+    missing_fields:
+      - "gross_proceeds_jpy"
+      - "acquisition_cost_jpy"
+      - "fee_jpy"
+      - "tax_jpy"
+      - "net_proceeds_jpy"
+      - "realized_gain_loss_jpy"
+      - "annual_statement_reconciliation"
+    annual_statement_evidence_ref: null
+  - transaction_ref: "transactions/ledger.yaml#rakuten-1266-cibr-sell-fill"
+    tax_year_assignment_status: "confirmed_japan_trade_date_2026"
+    filing_category: "taxable_withholding"
+    tax_asset_category: "listed_stock"
+    status: "settlement_recorded"
+    missing_fields:
+      - "trade_date_local"
+      - "price_usd"
+      - "gross_proceeds_usd"
+      - "gross_proceeds_jpy"
+      - "exchange_rate"
+      - "acquisition_cost_jpy"
+      - "tax_jpy"
+      - "realized_gain_loss_jpy"
+      - "net_proceeds_jpy"
+      - "annual_statement_reconciliation"
+    annual_statement_evidence_ref: null
+  - transaction_ref: "transactions/ledger.yaml#crypto-btc-eth-xrp-full-liquidation-2026-08-12"
+    tax_year_assignment_status: "provisional_pending_trade_date"
+    filing_category: "crypto_misc_income"
+    status: "fill_recorded"
+    missing_fields:
+      - "trade_date"
+      - "settlement_date"
+      - "institution"
+      - "per_asset_quantity"
+      - "per_asset_execution_price"
+      - "per_asset_proceeds"
+      - "gross_proceeds_jpy"
+      - "acquisition_cost_jpy"
+      - "fee_jpy"
+      - "realized_gain_loss_jpy"
+      - "net_proceeds_jpy"
+      - "transaction_history_reconciliation"
+    annual_statement_evidence_ref: null
+  - transaction_ref: "transactions/ledger.yaml#rakuten-1261-7201-sell-fill"
+    tax_year_assignment_status: "confirmed_trade_date_2026"
+    filing_category: "taxable_withholding"
+    tax_asset_category: "listed_stock"
+    status: "settlement_recorded"
+    provisional_realized_gain_loss_jpy: -2355
+    missing_fields:
+      - "tax_jpy"
+      - "annual_statement_reconciliation"
+    annual_statement_evidence_ref: null
+  - transaction_ref: "transactions/ledger.yaml#nomura-79153-9444-sell-fill"
+    tax_year_assignment_status: "confirmed_trade_date_2026"
+    filing_category: "taxable_withholding"
+    tax_asset_category: "listed_stock"
+    status: "settlement_recorded"
+    provisional_realized_gain_loss_jpy: -482024
+    missing_fields:
+      - "fee_jpy"
+      - "tax_jpy"
+      - "annual_statement_reconciliation"
+    annual_statement_evidence_ref: null
+  - transaction_ref: "transactions/ledger.yaml#nomura-79152-2353-sell-fill"
+    tax_year_assignment_status: "confirmed_trade_date_2026"
+    filing_category: "general_taxable"
+    tax_asset_category: "listed_stock"
+    status: "settlement_recorded"
+    provisional_realized_gain_loss_jpy: -1452
+    missing_fields:
+      - "fee_jpy"
+      - "tax_jpy"
+      - "annual_statement_reconciliation"
+    annual_statement_evidence_ref: null
+account_annual_documents:
+  - account_key: "crypto_services"
+    institution: null
+    account_type: "暗号資産取引サービス"
+    status: "transaction_history_not_obtained"
+    evidence_ref: null
+  - account_key: "rakuten_taxable_withholding"
+    institution: "楽天証券"
+    account_type: "特定口座（源泉徴収あり）"
+    status: "not_yet_available"
+    evidence_ref: null
+  - account_key: "nomura_taxable_withholding"
+    institution: "野村證券"
+    account_type: "特定口座（源泉徴収あり）"
+    status: "not_yet_available"
+    evidence_ref: null
+  - account_key: "nomura_general_taxable"
+    institution: "野村證券"
+    account_type: "一般口座"
+    status: "not_yet_available"
+    evidence_ref: null

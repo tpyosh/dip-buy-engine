@@ -1,11 +1,15 @@
-# ChatGPT向け月次独立レビュー
+# ChatGPT向けオンデマンド包括レビュー
 
-- 対象月: 2026_08
-- ポートフォリオ・スナップショット基準日: 2026-07-26
+- レビュー依頼時点: 2026-08-09T10:56:01Z
+- ポートフォリオ・スナップショット基準日: 2026-08-09
+- 計画コンテキスト月: 2026_08
 - 開始フェーズ: final_review
+
+`計画コンテキスト月` は積立・税枠・期間限定条件を選ぶための管理値であり、レビュー頻度を月次に固定するものではありません。この依頼は常にオンデマンドです。
 
 ## 実行前チェック（利用者向け）
 
+- [ ] 全売買可能明細がNISA・特定口座・一般口座のいずれかに分類済みで、account_type_gateがcompleteである
 - [ ] ChatGPTの資産運用プロジェクト内では実行しない
 - [ ] プロジェクト外の新規Temporary Chatなど、過去会話を参照しない環境で実行する
 - [ ] 前月のレビュースレッドを再利用しない
@@ -14,18 +18,30 @@
 
 ## 独立レビュアーへの最優先指示
 
-あなたは、過去の助言やCodexの結論を参照しない独立レビュアーです。後続パケットを今回のユーザー固有情報の全体として扱い、`generation_status`、`review_mode`、`interaction_phase` の順に確認してください。
+あなたは、過去の助言やCodexの結論を参照しない独立レビュアーです。後続パケットを今回のユーザー固有情報の全体として扱い、`generation_status`、`review_cadence`、`review_mode`、`interaction_phase` の順に確認してください。
 
-- `interaction_phase: objective_confirmation` の最初の応答では、パケットが指定する目的確認の一問だけを出してください。各候補の一行定義以外の前置き、Web調査、投資判断、6セクション、YAML、売買案、自己検査結果は禁止です。
+- `review_cadence` は必ず `on_demand` として扱い、月末・月初・毎月などの固定周期を前提にしないでください。
+- `account_type_gate.status` は必ず `complete` でなければなりません。`blocked` のパケットではWeb調査、投資判断、部分レビュー、YAMLを一切出力せず、口座確認後の再生成を求めて終了してください。
+- 主目的は、現在の生活を楽しめる持続可能な拠出を全候補で共通に固定したうえで、65歳時点の税・費用控除後の実質投資利益を最大化することです。拠出額を恣意的に増やすことで目的関数を改善してはいけません。
+- 資産効率だけならオール・カントリー型商品だけになる基準案を必ず比較しつつ、趣味として楽しめる正のサテライト配分を制約として扱ってください。サテライト比率、具体的な銘柄、単一テーマ・単一銘柄上限をレビュー結果のパラメータとして一案に確定してください。
+- `interaction_phase: objective_confirmation` の最初の応答では、パケットが指定する目的確認の一問だけを出してください。各候補の一行定義以外の前置き、Web調査、投資判断、7セクション、YAML、売買案、自己検査結果は禁止です。
 - ユーザーが一度回答したら `final_review` へ移り、回答を `【推奨方針】` 冒頭の `updated_inputs` に反映して、初期入力全体を再評価してください。同じ質問や別の抽象質問を重ねないでください。
-- `interaction_phase: final_review` では、パケットの6セクションと機械可読YAMLを完成させてください。
-- `final_review` は必ず二段階で実行してください。先に `strategic_policy_stage` で長期方針を確定し、その後の `implementation_stage` だけで商品、当月の待機資金投入、口座・ロット注文へ変換してください。現在の市場や保有商品の事情から戦略配分を逆算してはいけません。
+- `interaction_phase: final_review` では、パケットの7セクションと機械可読YAMLを完成させてください。
+- `final_review` は必ず二段階で実行してください。先に `strategic_policy_stage` で長期方針を確定し、その後の `implementation_stage` だけで商品、依頼時点からの行動、待機資金投入、口座・ロット注文へ変換してください。現在の市場や保有商品の事情から戦略配分を逆算してはいけません。
+- 依頼時点を始点とする `recommendation_window` を一つ選んでください。期間の長さと単位は固定せず、利用可能なデータの鮮度、イベント日程、価格・ニュースの予測可能性、売買の実行可能性を根拠に、あなた自身が責任を持って決めてください。
+- `recommendation_window.window_unit` は `days`、`weeks`、`months` から、`window_length` は1以上の整数から選び、`start_at`、`end_at`、`selection_rationale`、`confidence_boundary` を記録してください。単に「次回レビューまで」「当面」「適宜」のような無期限表現は禁止です。
+- すべての推奨行動は `recommendation_window` 内の具体的な時期へ落とし込んでください。ウィンドウを超える長期方針は政策として分離し、この依頼で実行を勧める行動に混ぜないでください。
+- 回答の最後は必ず `【次回レビュー時期】` とし、`next_review_recommendation` と一致する次回依頼日、間隔、根拠、早期再レビュー条件を示してください。最後の一文は「またN日後／N週間後／Nか月後（YYYY-MM-DD）に最新のスナップショットをもとにレビュー依頼を出してください。」の形にし、その後には何も書かないでください。
+- `interaction_phase: final_review` のYAMLでは、`recommendation_window` と `next_review_recommendation` を必ず埋めてください。次回レビュー日は `recommendation_window.end_at` 以前にせず、重大な変化には `early_review_triggers` で対応してください。
 - ユーザー固有の事実はパケット内だけを使い、欠損値を事実として検索・推測で補わないでください。ただし `status: reviewer_to_derive`、`reviewer_to_estimate_with_uncertainty`、`reviewer_to_model_with_uncertainty` は欠損ではなく明示的な判断委譲です。`final_review` 内で根拠、式、限界、感応度を示して一つのベースケースを導出し、同じ値をユーザーへ再質問しないでください。
 - 委譲された長期拠出、退職後支出、公的年金、成功確率、必要収益率、終価下限は、`strategic_policy_decision.financial_planning_model` を唯一の正本として記録してから政策候補を比較してください。推定値をユーザー確認済み事実と表現してはいけません。
 - 出力YAMLは `output_contract.inline_response_schema` だけを正本として検証してください。パケット外のスキーマやファイルは参照しないでください。
-- 先に `execution_capability_gate` を実行し、月次キャッシュフロー、二分法、固定乱数シード付き多変量月次モンテカルロ、全候補比較、金利感応度、算術照合、YAML/JSON Schema検証の可否を個別に記録してください。利用できない能力に依存する数値は捏造せず、`calculation_status: not_calculable`、`reason`、`missing_capability`、`remediation` を記録し、計算可能な項目と定性的判断は続行してください。
+- 先に `execution_capability_gate` を実行し、月次キャッシュフロー、二分法、固定乱数シード付き多変量月次モンテカルロ、全候補比較、金利感応度、算術照合、YAML/JSON Schema検証の可否を個別に記録してください。ここでの「月次」は計算刻みを意味し、レビュー頻度ではありません。利用できない能力に依存する数値は捏造せず、`calculation_status: not_calculable`、`reason`、`missing_capability`、`remediation` を記録し、計算可能な項目と定性的判断は続行してください。
 - 住宅ローンの元本、金利、返済額、返済日、返済終了日と銀行書類由来の入力は正本としてそのまま使ってください。一般的な元利均等返済式との一致を再検証せず、不一致を推測して修正、警告、`blocked` 判定を行ってはいけません。与えられた値を将来キャッシュフローへ二重計上なく使用することだけを検証してください。
-- 戦略方針、商品単位の実装、口座・ロット注文のステータスを別々に判定してください。口座・税情報不足だけを理由に戦略判断全体を `blocked` にせず、未確認の税額やロットを推測しないでください。
+- 口座区分は生成前ゲートで全件確認済みです。未確認の口座区分を仮定したり、口座不足を理由に部分レビューへ縮退したりしてはいけません。取得価額や税額など口座区分以外の実行情報が不足する場合だけ、該当注文を条件付きとして不足項目を明示してください。
+- `decisions.actions` は、現在保有する全売買可能明細について保有・一部売却・全部売却等を一件ずつ網羅し、`what` に相当する銘柄・資産名、口座、`timing`、`execution_method`、数量または金額・算式、根拠を具体化してください。
+- 保有銘柄の売却を一件でも提案する場合は、`R-TAX-001` に従い、日本の税制における損益通算（課税口座の含み益ロットと含み損ロットを同一暦年に実現して譲渡益を相殺する tax-loss harvesting）を必ず比較してください。適用しない場合も、その理由を `account_tax_comparisons` に記録してください。
+- 現在未保有の資産を買う場合は `action_scope: new_asset` の購入行を出し、買わない場合も `new_asset_purchase_conclusion.status: no_new_asset_purchase` と具体的根拠を出してください。曖昧な「検討する」「適宜売買する」で終えてはいけません。
 - 品質チェックは自己申告で `pass` にせず、`pass`、`fail`、`not_verifiable`、`not_applicable` を事実に即して選び、各チェックの `evidence`、`reason`、`remediation` を埋めてください。`pass` には検証した具体的なYAMLパス、式、件数または値を示してください。
 - JSON Schemaで扱う必須フィールド、型、enum、配列構造、null許可、数値範囲と、クロスフィールドの `semantic_validation_checks` を分離してください。丸め差は指定された許容誤差内なら `fail` や `blocked` にせず、`rounding_residual_jpy` と `rounding_residual_treatment` に記録してください。
 - `accessed_at`は調査締切後でも構いません。締切適合は公表・提出・リリース日時と`data_as_of`で判定し、公表日時不明の動的ページや締切後公表情報を判断根拠に使わないでください。
@@ -42,6 +58,7 @@
 ## 1. モードと対話フェーズ
 ```yaml
 generation_status: ready
+review_cadence: on_demand
 review_mode: strategic_policy_second_opinion
 interaction_phase: final_review
 required_first_response: 【推奨方針】から始める
@@ -50,16 +67,18 @@ required_first_response: 【推奨方針】から始める
 ## 2. 入力データ
 ```yaml
 date_context:
+  review_cadence: on_demand
+  review_requested_at: '2026-08-09T10:56:01Z'
   review_target_month: '2026_08'
-  portfolio_snapshot_as_of: '2026-07-26'
-  market_reference_as_of: '2026-08-04'
-  packet_generated_at: '2026-08-04T13:26:03Z'
-  research_cutoff_at: '2026-08-04T13:26:03Z'
+  portfolio_snapshot_as_of: '2026-08-09'
+  market_reference_as_of: '2026-08-07'
+  packet_generated_at: '2026-08-09T10:56:01Z'
+  research_cutoff_at: '2026-08-09T10:56:01Z'
   decision_date: null
 strategic_required_inputs:
   date_of_birth: '1992-01-07'
   user_age: 34
-  user_age_as_of: '2026-07-26'
+  user_age_as_of: '2026-08-09'
   tax_residency: Japan
   investment_horizon_years_display_only: 66
   planning_end_age: 100
@@ -68,14 +87,14 @@ strategic_required_inputs:
   planning_timeline:
     date_source_of_truth_rule: 日付を計算の正本とし、年齢・整数年は表示用に限る。同一キャッシュフローを拠出期と取崩期の両方へ計上しない
     model_period: monthly
-    model_start_date: '2026-07-26'
+    model_start_date: '2026-08-09'
     contribution_end_date: '2057-01-06'
     first_withdrawal_date: '2057-01-07'
     planned_retirement_date: '2057-01-07'
     public_pension_start_date:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: 現行の公的年金制度、確認済み就業期間、退職予定日を使い、一つのベースケース日付と感応度を選ぶ
       allowed_primary_sources:
       - Japan_Pension_Service
@@ -84,14 +103,14 @@ strategic_required_inputs:
       sensitivity_required: true
     mortgage_repayment_end_date: '2064-09-27'
     planning_end_date: '2092-01-07'
-    accumulation_complete_months: 365
+    accumulation_complete_months: 364
     withdrawal_complete_months: 420
-    total_complete_months: 785
+    total_complete_months: 784
     cash_flow_boundary_rule: 拠出はcontribution_end_dateまで、最初の取崩しはfirst_withdrawal_dateから。年金は導出した開始日から、住宅ローンは返済終了日まで別建てで計上する
     annual_model_fallback_rule: 月次モデルを使えない場合だけ、各暦年末にフローを置き、境界年は実在月数で按分し、同じ月を重複させない
   planned_contributions:
     status: reviewer_to_derive
-    decision_owner: independent_monthly_reviewer
+    decision_owner: independent_on_demand_reviewer
     user_capacity_statement: 余裕はある
     observed_commitments_ref: plans/recurring/versions/2026-03-01.yaml
     decision_scope:
@@ -100,6 +119,9 @@ strategic_required_inputs:
     - account_and_asset_allocation
     - continuation_or_change_of_current_nisa_ideco_and_crypto_contributions
     constraints:
+    - preserve_current_lifestyle_enjoyment_and_discretionary_spending
+    - use_one_common_sustainable_contribution_case_for_all_policy_candidates
+    - do_not_improve_the_objective_merely_by_assuming_higher_contributions
     - distinguish_new_savings_from_temporary_redeployment_of_existing_cash
     - use_confirmed_cash_flow_mortgage_and_emergency_fund_constraints
     - select_one_concrete_base_case_and_do_not_return_the_choice_to_the_user
@@ -191,7 +213,7 @@ strategic_required_inputs:
       cash redeploymentはnew savingsへ含めない
   expected_future_cash_flows:
     status: reviewer_to_model_with_uncertainty
-    decision_owner: independent_monthly_reviewer
+    decision_owner: independent_on_demand_reviewer
     items:
       employment_income:
         expected_continuation_years: 30
@@ -225,7 +247,7 @@ strategic_required_inputs:
     future_continuation_model_assumption:
       value_jpy: null
       status: unknown
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       base_case_required: true
       rule: 粗い現在参考額を将来継続額の確認済み事実に変換せず、一つの保守的モデル仮定と感応度を示す
   human_capital_assumptions:
@@ -243,7 +265,7 @@ strategic_required_inputs:
     user_share_jpy: 31260342
     interest_rate: 0.0112
     fixed_or_variable: variable
-    remaining_term_years: 38.17
+    remaining_term_years: 38.14
     annual_repayment_jpy: 890052
     balance_as_of: '2026-07-27'
   liability_cash_flows:
@@ -277,7 +299,7 @@ strategic_required_inputs:
       method: 各shockで残高、残存月数、shock後月利から満期一定の元利均等返済額を再計算し、退職後支払総額と成功確率への影響を示す
   pension_and_other_future_assets:
     status: reviewer_to_estimate_with_uncertainty
-    decision_owner: independent_monthly_reviewer
+    decision_owner: independent_on_demand_reviewer
     items:
     - type: japanese_public_employee_pension
       employment_assumption: full_time_employee_from_age_24_through_age_65
@@ -286,32 +308,131 @@ strategic_required_inputs:
       status: amount_unknown
       modeling_rule: use_current_official_Japanese_sources_and_available_user_facts;
         disclose_data_gaps_and_sensitivity
+account_type_gate:
+  status: complete
+  required_account_categories:
+  - NISA
+  - 特定口座
+  - 一般口座
+  checked_holding_count: 18
+  checked_holdings:
+  - symbol: '7203'
+    name: トヨタ自動車
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: '9444'
+    name: トーシンホールディングス
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: '2353'
+    name: 日本駐車場開発
+    account_type: 一般口座
+    account_category: 一般口座
+  - symbol: '7201'
+    name: 日産自動車
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: SMH
+    name: ヴァンエック・半導体株ETF
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: PLTR
+    name: パランティア・テクノロジーズ
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: CIBR
+    name: ファーストトラスト ナスダック サイバーセキュリティ ETF
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: MSFT
+    name: マイクロソフト
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: URA
+    name: グローバルX ウラニウム ETF
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: NISSEI_SOX_1
+    name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: NISSEI_SOX_2
+    name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
+    account_type: NISA成長投資枠
+    account_category: NISA
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+    account_type: NISAつみたて投資枠
+    account_category: NISA
+  - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
+    name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+    account_type: NISA成長投資枠
+    account_category: NISA
+  - symbol: RAKUTEN_PLUS_SP500
+    name: 楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: EMAXIS_SLIM_SP500_1
+    name: eMAXIS Slim 米国株式(S&P500)
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  - symbol: EMAXIS_SLIM_SP500_2
+    name: eMAXIS Slim 米国株式(S&P500)
+    account_type: NISAつみたて投資枠
+    account_category: NISA
+  - symbol: EMAXIS_SLIM_SP500_3
+    name: eMAXIS Slim 米国株式(S&P500)
+    account_type: NISA成長投資枠
+    account_category: NISA
+  - symbol: EMAXIS_SLIM_ALL_COUNTRY
+    name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    account_type: 特定口座（源泉徴収あり）
+    account_category: 特定口座
+  missing_or_unclassified_holdings: []
+  generation_rule: NISA・特定口座・一般口座のいずれかが全売買可能明細で確認できるまで、ChatGPT向けレビュー依頼とレビュー出力を生成しない
 strategic_decision_objective:
-  primary_objective: minimize_risk_for_required_return
+  primary_objective: maximize_terminal_wealth
   objective_question: 長期政策の主目的を一つ選んでください。選択肢に不足パラメータが示される場合は、同じ回答でその値も指定してください。
   objective_models:
     maximize_terminal_wealth:
-      label: 最終資産額の最大化
-      horizon_years: null
-      planned_contributions: null
-      return_basis: null
-      statistic: null
+      label: 65歳時点の投資利益最大化
+      target_age: 65
+      target_date: '2057-01-07'
+      optimization_target: after_tax_real_investment_profit_jpy_at_target_date
+      profit_definition: after_tax_real_terminal_portfolio_value_jpy - portfolio_snapshot_starting_investable_assets_jpy
+        - cumulative_future_net_contributions_current_jpy
+      lifestyle_constraints:
+      - preserve_current_lifestyle_enjoyment
+      - do_not_fund_investment_by_assuming_cuts_to_uncommitted_travel_or_hobby_spending
+      - respect_confirmed_mortgage_emergency_fund_and_ordinary_month_cash_flow
+      - use_the_same_contribution_schedule_for_every_allocation_candidate
+      horizon_years: 30.4154
+      planned_contributions:
+        status: use_reviewer_derived_common_sustainable_base_case
+        source_ref: strategic_profile.planned_contributions
+      return_basis: real
+      statistic: expected_value
       downside_quantile_pct: null
-      leverage_allowed: null
+      leverage_allowed: false
       required_parameters:
+      - target_age
+      - target_date
+      - optimization_target
+      - profit_definition
+      - lifestyle_constraints
       - horizon_years
       - planned_contributions
       - return_basis
       - statistic
       - leverage_allowed
-      primary_objective_fit_rule: 同一の拠出・期間・名目/実質・レバレッジ条件で、指定された期待値、中央値または下方分位の終価が最大の候補を最良とする
-      offered: false
+      primary_objective_fit_rule: 今の生活を楽しめる持続可能な拠出額を全候補で共通に固定し、指定された利益定義・期間・名目/実質・レバレッジ条件で65歳時点の投資利益が最大の実行可能候補を最良とする
+      offered: true
     minimize_risk_for_required_return:
       label: 必要収益を満たす最小リスク
       target_return_pct: null
       target_return_derivation:
         status: reviewer_to_derive
-        decision_owner: independent_monthly_reviewer
+        decision_owner: independent_on_demand_reviewer
         method: derive the real required return from current investable assets, reviewer-derived
           sustainable contributions, retirement spending, public pension, planning
           end age, terminal asset floor, and documented treatment of inheritance
@@ -328,18 +449,18 @@ strategic_decision_objective:
       success_probability_pct: null
       success_probability_derivation:
         status: reviewer_to_derive
-        decision_owner: independent_monthly_reviewer
+        decision_owner: independent_on_demand_reviewer
         method: select a planning success probability using cited financial-planning
-          or retirement-income evidence and the user's confirmed lifetime sufficiency
-          objective
+          or retirement-income evidence and the user's confirmed lifestyle-preserving
+          age-65-profit objective
         evidence_requirements:
         - verifiable_financial_planning_or_retirement_income_evidence
-        - rationale_connected_to_lifetime_sufficiency_objective
+        - rationale_connected_to_lifestyle_and_age_65_profit_objective
         sensitivity_required: true
         base_case_required: true
       retirement_spending_derivation:
         status: reviewer_to_derive
-        decision_owner: independent_monthly_reviewer
+        decision_owner: independent_on_demand_reviewer
         method: derive a current-JPY retirement spending base case from confirmed
           essential expenses, observed discretionary bonus use, inflation assumptions,
           and the stated goal; do not present it as a user-confirmed preference
@@ -350,7 +471,7 @@ strategic_decision_objective:
         base_case_required: true
       public_pension_derivation:
         status: reviewer_to_derive
-        decision_owner: independent_monthly_reviewer
+        decision_owner: independent_on_demand_reviewer
         method: estimate a transparent range and one base case from official Japanese
           pension information and the confirmed employment period; do not claim Nenkin
           Net precision
@@ -361,11 +482,11 @@ strategic_decision_objective:
         base_case_required: true
       terminal_asset_floor_derivation:
         status: reviewer_to_derive
-        decision_owner: independent_monthly_reviewer
+        decision_owner: independent_on_demand_reviewer
         method: derive a terminal floor that supports longevity and late-life uncertainty
           without inventing an unconfirmed bequest motive
         evidence_requirements:
-        - planning_end_age_and_lifetime_sufficiency_objective
+        - planning_end_age_and_lifestyle_preservation_objective
         - explicit_late_life_uncertainty_rationale
         sensitivity_required: true
         base_case_required: true
@@ -396,6 +517,7 @@ candidate_methodology:
   - compare_and_select_tactical_liquidity
   - compare_crypto_contribution_options_and_select_other_pct
   - compare_all_11_equity_bond_sleeve_candidates
+  - compare_all_country_only_baseline_and_positive_satellite_parameter_candidates
   - run_sensitivity_around_selected_results
   - lock_strategic_policy_before_implementation_stage
   tactical_liquidity_candidates_pct:
@@ -442,13 +564,24 @@ candidate_methodology:
   - stop_new_contributions_and_exclude_unknown_existing_balance
   - continue_only_within_realized_surplus_such_as_bonus
   - continue_current_contributions_and_disclose_cash_flow_and_success_probability_impact
-  crypto_current_balance_rule: スナップショットに暗号資産残高がないため現在残高を推測せず、未知の既存残高を現在配分へ含めない
+  crypto_current_balance_rule: スナップショットに暗号資産残高があるため observed current_value_jpy は使ってよいが、数量・取得単価・通貨建て配分は未確認なら捏造しない
   other_pct_selection_priority:
   - do_not_worsen_confirmed_ordinary_month_cash_flow
   - maintain_required_success_probability
   - require_estimated_diversification_benefit_to_exceed_incremental_risk
   - do_not_treat_unfunded_recurring_crypto_as_confirmed_new_savings
   - if_differences_are_small_select_the_lower_other_pct
+  satellite_parameter_contract:
+    all_country_only_baseline_required: true
+    positive_satellite_allocation_required: true
+    reviewer_must_propose:
+    - satellite_target_pct_of_investable_portfolio
+    - selected_satellite_securities
+    - total_satellite_cap_pct
+    - single_theme_cap_pct
+    - single_security_cap_pct
+    candidate_value_rule: Codexの既存比率や保有銘柄を候補値の根拠にせず、65歳時点の利益、分散、費用、税、売買回転、趣味としての正の配分制約から独立に候補を作る
+    selection_output_path: strategic_policy_decision.active_risk_policy
   candidate_grid:
     equity_share_of_equity_bond_sleeve_pct:
     - 0
@@ -471,7 +604,7 @@ candidate_methodology:
     global_equity_index:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: 日本居住者が低コストで実装できる広範な世界株式の代表性
       allowed_primary_sources:
       - index_provider
@@ -482,7 +615,7 @@ candidate_methodology:
     bond_index:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: 通貨、デュレーション、信用力、実装商品の整合性
       allowed_primary_sources:
       - index_provider
@@ -494,7 +627,7 @@ candidate_methodology:
     bond_instrument_type:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: 流動性、信用リスク、デュレーション、費用、税務
       allowed_primary_sources:
       - fund_manager
@@ -505,7 +638,7 @@ candidate_methodology:
     bond_currency:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: 日本円負債・支出との通貨整合性
       allowed_primary_sources:
       - index_provider
@@ -517,7 +650,7 @@ candidate_methodology:
     bond_fx_hedge_policy:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: JPYベースのボラティリティ、ヘッジコスト、負債通貨との整合性
       allowed_primary_sources:
       - index_provider
@@ -529,7 +662,7 @@ candidate_methodology:
     estimation_period:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: 十分な市場局面を含み、各資産で共通に取得可能な期間
       allowed_primary_sources:
       - index_provider
@@ -540,7 +673,7 @@ candidate_methodology:
     assumptions_as_of:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: research_cutoff_at以前で最も新しい利用可能な前提日
       allowed_primary_sources:
       - government_or_central_bank
@@ -552,7 +685,7 @@ candidate_methodology:
     inflation_assumption_pct:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: 日本の長期物価目標、実績、市場予想を区別したcurrent-JPY基準
       allowed_primary_sources:
       - Bank_of_Japan
@@ -563,7 +696,7 @@ candidate_methodology:
     tax_cost_treatment:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: NISA、iDeCo、課税口座を区別し、手数料控除後の同一基準にそろえる
       allowed_primary_sources:
       - National_Tax_Agency_Japan
@@ -575,7 +708,7 @@ candidate_methodology:
     major_drawdown_definition:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: 全候補に共通のJPY total-return peak-to-trough定義
       allowed_primary_sources:
       - index_provider
@@ -586,7 +719,7 @@ candidate_methodology:
     rebalancing_frequency:
       value: null
       status: reviewer_to_derive
-      decision_owner: independent_monthly_reviewer
+      decision_owner: independent_on_demand_reviewer
       selection_criteria: 費用、税、ドリフト管理を踏まえた一つの共通頻度
       allowed_primary_sources:
       - academic_primary_research
@@ -654,8 +787,9 @@ candidate_methodology:
     minimize_risk_for_required_return: among candidate_feasible=true candidates, minimize
       expected_volatility_pct; tie-break by estimated_major_drawdown_pct closest to
       zero, then lower cost
-    maximize_terminal_wealth: maximize the configured terminal-wealth statistic under
-      the same feasibility constraints
+    maximize_terminal_wealth: maximize configured after-tax real investment profit
+      at age 65 under the same lifestyle-sustainable contribution and feasibility
+      constraints
     maximize_ex_ante_sharpe_ratio: maximize common-basis ex-ante Sharpe ratio under
       the same feasibility constraints
   required_candidate_fields:
@@ -750,7 +884,8 @@ asset_class_definitions:
     equity_internal_split_rule: 総株式比率を決定した後、その内数としてcore_equity_pctとsatellite_equity_pctへ分解する。satelliteは総株式の外数にしない
     active_risk_cap_denominator: long_term_investable_portfolio_jpy
     approved_semiconductor_exception_denominator: household_total_assets_jpy
-    crypto_rule: 継続する暗号資産はother_pctの内数。スナップショットに暗号資産残高の独立明細がないため現在残高や現在配分を捏造しない
+    crypto_rule: 継続する暗号資産はother_pctの内数。スナップショットに暗号資産残高の独立明細があるため、その current_value_jpy
+      は使用してよいが、数量や取得単価は捏造しない
     calculation_order:
     - exclude_household_reserve
     - set_and_exclude_tactical_liquidity_before_candidate_comparison
@@ -760,16 +895,17 @@ asset_class_definitions:
     - apply_active_risk_caps
     - translate_policy_to_products_and_lots
 allocation_denominators:
-  household_total_assets_jpy: 39969688
+  household_total_assets_jpy: 40051911
   long_term_investable_portfolio_jpy: null
   policy_allocation_denominator_jpy: null
   household_reserve_jpy: 2000000
   tactical_liquidity_jpy: null
-  excluded_other_assets_jpy: 16483
+  excluded_other_assets_jpy: 338655
   ideco_treatment: pension asset_classとして長期運用資産と政策配分分母に含めるが、直接の売買・資金移動対象にはしない
   crypto_treatment:
-    current_balance_status: not_present_in_portfolio_snapshot
-    snapshot_scope: do_not_invent_current_allocation
+    current_balance_status: present_in_portfolio_snapshot
+    current_balance_jpy: 322422
+    snapshot_scope: use_observed_current_balance_without_inventing_quantity_or_cost_basis
     policy_scope: if_continued_classify_as_investable_other_within_other_pct
     recurring_contribution_is_not_current_balance: true
   calculation_order_rule: household reserveとtactical liquidityを候補比較前に総資産から除外し、残るlong-term
@@ -819,7 +955,22 @@ user_decision_preferences:
   does_not_want_generic_theory_without_decision: true
   expects_independent_reviewer_to_select_one_base_case: true
 active_risk_policy:
-  satellites_allowed: null
+  satellites_allowed: true
+  satellite_target_pct:
+    value: null
+    status: reviewer_to_propose
+    denominator: long_term_investable_portfolio_jpy
+  satellite_securities:
+    value: null
+    status: reviewer_to_propose
+  review_dimensions:
+  - 65歳時点の税・費用控除後の実質投資利益への寄与
+  - オール・カントリーのみの基準案との差
+  - 総サテライト・単一テーマ・単一銘柄の集中リスク
+  - 商品コスト、税区分、売買回転、実装可能性
+  - 趣味として楽しめる正の配分と資産効率の両立
+  all_country_only_baseline_required: true
+  positive_satellite_allocation_required: true
   total_satellite_cap_pct: null
   single_theme_cap_pct: null
   single_security_cap_pct: null
@@ -830,15 +981,15 @@ selected_sources:
 - source_id: normalized_snapshot
   source_ref: data/normalized/snapshot_2026_08.yaml
   role: observed_current_portfolio
-  as_of: '2026-07-26'
+  as_of: '2026-08-09'
 - source_id: financial_assumptions
-  source_ref: financial/versions/2026-08-03-v2.yaml
+  source_ref: financial/versions/2026-08-09.yaml
   role: explicit_user_conditions_and_confirmed_contracts
-  as_of: '2026-07-26'
+  as_of: '2026-08-09'
 - source_id: holding_metadata
-  source_ref: holdings/versions/2026-08-02.yaml
+  source_ref: holdings/versions/2026-08-09.yaml
   role: confirmed_holding_metadata
-  as_of: '2026-07-26'
+  as_of: '2026-08-09'
 - source_id: current_recurring_settings
   source_ref: plans/recurring/versions/2026-03-01.yaml
   role: observed_recurring_commitments
@@ -846,114 +997,109 @@ selected_sources:
 - source_id: market_reference_collection
   source_ref: embedded_market_reference_collection
   role: calculated_market_reference_facts
-  as_of: '2026-08-04'
+  as_of: '2026-08-07'
 - source_id: investment_thesis_records
   source_ref: strategy/theses/index.yaml
   role: documented_investment_story_context
-  as_of: '2026-07-26'
+  as_of: '2026-08-09'
 confirmed_user_conditions:
 - condition_id: financial_condition_01
   statement: '税金、社会保険料、住宅ローン、iDeCo拠出後の月次収入: 374,171円。この値は支出額ではない'
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_02
   statement: 'NISA月次積立額: 100,000円。この値は支出額ではない'
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_03
   statement: '通常月の実質可処分収入: 274,171円。この値は支出額ではない'
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_04
   statement: '月間必須支出額: 250,000円'
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_05
   statement: 通常月の収支はおおむねプラスマイナスゼロ
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_06
   statement: ボーナスは年1回、支給月は[1]、手取りは2,000,000円をやや下回る程度の粗い見積もり
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_07
   statement: ボーナスの使途は固定せず、旅行や裁量支出を実現した黒字の範囲で行う
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_08
   statement: '生活防衛資金の目標額: 2,000,000円'
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_09
   statement: 緊急時は、相場下落中でもオール・カントリー型の投資信託を売却して資金化することを許容する
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_10
   statement: 生活防衛資金とは別の予備費は確保しない
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_11
   statement: 今後1～3年以内の金額・時期が確定した大型支出はない
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_12
   statement: 旅行は予定するが金額・時期は未確定で、ボーナス等の実現黒字から支出する
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_13
   statement: 投資待機資金は市場下落時に使う手段であり、残高維持自体を目的にしない
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_14
-  statement: 投資待機資金の目標比率は今回の月次独立レビューから提案を受ける
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  statement: 投資待機資金の目標比率は今回のオンデマンド独立レビューから提案を受ける
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_15
   statement: 投資待機資金の買付対象は未定
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_16
-  statement: 投資待機資金の発動条件は今回の月次独立レビューから提案を受ける
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  statement: 投資待機資金の発動条件は今回のオンデマンド独立レビューから提案を受ける
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_17
-  statement: 投資待機資金の投入回数は今回の月次独立レビューから提案を受ける
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  statement: 投資待機資金の投入回数は今回のオンデマンド独立レビューから提案を受ける
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: financial_condition_18
   statement: 市場下落時は投資待機資金を使う選択肢を必ず比較する
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
   status: confirmed
 - condition_id: approved_direct_semiconductor_max_pct
   statement: 直接半導体エクスポージャーを総資産の12.00%以下へ縮小する方針にユーザが同意済み。売却対象の優先順位は独立レビューから提案を受ける
   source: decisions/2026-08-02_review_questionnaire_answers.md
-  as_of: '2026-08-02'
+  as_of: '2026-08-09'
   status: confirmed
   upper_bound_pct: 12
   denominator: household_total_assets_jpy
-- condition_id: confirmed_portfolio_execution_clearance
-  statement: 未反映注文、出金予定、拘束資金はいずれもない
-  source: holdings/versions/2026-08-02.yaml
-  as_of: '2026-08-02'
-  status: confirmed
 - condition_id: observed_core_recurring_settings
   statement: 現在記録されているcore定期積立設定を、実行済み取引ではなく継続中の設定として扱う
   source: plans/recurring/versions/2026-03-01.yaml
@@ -1009,7 +1155,7 @@ allowed_quantitative_facts:
       target_jpy: null
       target_ratio: null
       amount_calculation_policy: portfolio_snapshot_total_assets_jpy * approved_target_ratio
-      decision_owner: current_monthly_independent_review_then_user_approval
+      decision_owner: current_on_demand_independent_review_then_user_approval
       purchase_target: null
       activation_condition: null
       tranche_amount_jpy: null
@@ -1033,54 +1179,57 @@ allowed_quantitative_facts:
     - 市場下落時に投資待機資金を使う選択肢を省略しない
   portfolio_totals:
     currency_base: JPY
-    total_assets_jpy: 39969688
-    liquidity_jpy: 13622664
-    liquidity_pct: 34.08
-    equity_like_jpy: 26330541
-    equity_like_pct: 65.88
-    core_like_jpy: 14786518
-    core_like_pct: 36.99
-    satellite_like_jpy: 11544020
-    satellite_like_pct: 28.88
+    total_assets_jpy: 40051911
+    liquidity_jpy: 13147713
+    liquidity_pct: 32.83
+    equity_like_jpy: 26565543
+    equity_like_pct: 66.33
+    core_like_jpy: 14827810
+    core_like_pct: 37.02
+    satellite_like_jpy: 11737731
+    satellite_like_pct: 29.31
     classification_note: equity_likeはliquidity/other以外、core_likeはcore+pension、satellite_likeはjun_core+satellite_core+satelliteを機械集計
   category_totals:
   - category: ポイント
-    market_value_jpy: 16483
+    market_value_jpy: 16233
     portfolio_pct: 0.04
   - category: 年金
     market_value_jpy: 4063372
-    portfolio_pct: 10.17
+    portfolio_pct: 10.15
   - category: 投資信託
-    market_value_jpy: 16920468
-    portfolio_pct: 42.33
+    market_value_jpy: 16616947
+    portfolio_pct: 41.49
+  - category: 暗号資産
+    market_value_jpy: 322422
+    portfolio_pct: 0.81
   - category: 株式（現物）
-    market_value_jpy: 5346701
-    portfolio_pct: 13.38
+    market_value_jpy: 5885224
+    portfolio_pct: 14.69
   - category: 預金・現金
-    market_value_jpy: 13622664
-    portfolio_pct: 34.08
+    market_value_jpy: 13147713
+    portfolio_pct: 32.83
   asset_class_allocations:
   - asset_class: core
-    market_value_jpy: 10723146
-    portfolio_pct: 26.83
+    market_value_jpy: 10764438
+    portfolio_pct: 26.88
   - asset_class: jun_core
-    market_value_jpy: 2880473
-    portfolio_pct: 7.21
+    market_value_jpy: 3094085
+    portfolio_pct: 7.73
   - asset_class: liquidity
-    market_value_jpy: 13622664
-    portfolio_pct: 34.08
+    market_value_jpy: 13147713
+    portfolio_pct: 32.83
   - asset_class: other
-    market_value_jpy: 16483
-    portfolio_pct: 0.04
+    market_value_jpy: 338655
+    portfolio_pct: 0.85
   - asset_class: pension
     market_value_jpy: 4063372
-    portfolio_pct: 10.17
+    portfolio_pct: 10.15
   - asset_class: satellite
-    market_value_jpy: 1099654
-    portfolio_pct: 2.75
+    market_value_jpy: 1340403
+    portfolio_pct: 3.35
   - asset_class: satellite_core
-    market_value_jpy: 7563893
-    portfolio_pct: 18.92
+    market_value_jpy: 7303243
+    portfolio_pct: 18.23
   holdings:
   - symbol: LIQUIDITY
     name: 預金・現金
@@ -1092,24 +1241,24 @@ allowed_quantitative_facts:
     quantity: null
     avg_cost: null
     current_price: null
-    market_value_jpy: 13622664
+    market_value_jpy: 13147713
     profit_loss_jpy: null
     currency: JPY
-    portfolio_pct: 34.08
+    portfolio_pct: 32.83
   - symbol: '7203'
     name: トヨタ自動車
     human_label: トヨタ自動車
     asset_class: jun_core
     source_category: 株式（現物）
     institution: 野村証券
-    account_type: null
+    account_type: 特定口座（源泉徴収あり）
     quantity: 800
     avg_cost: 532
-    current_price: 2897
-    market_value_jpy: 2317600
-    profit_loss_jpy: 1892000
+    current_price: 2980
+    market_value_jpy: 2384000
+    profit_loss_jpy: 1958400
     currency: JPY
-    portfolio_pct: 5.8
+    portfolio_pct: 5.95
   - symbol: '9444'
     name: トーシンホールディングス
     human_label: トーシンホールディングス
@@ -1119,11 +1268,11 @@ allowed_quantitative_facts:
     account_type: 特定口座（源泉徴収あり）
     quantity: 1500
     avg_cost: 628
-    current_price: 233
-    market_value_jpy: 349500
-    profit_loss_jpy: -592500
+    current_price: 315
+    market_value_jpy: 472500
+    profit_loss_jpy: -469500
     currency: JPY
-    portfolio_pct: 0.87
+    portfolio_pct: 1.18
   - symbol: '2353'
     name: 日本駐車場開発
     human_label: 日本駐車場開発
@@ -1133,9 +1282,9 @@ allowed_quantitative_facts:
     account_type: 一般口座
     quantity: 100
     avg_cost: 265
-    current_price: 258
-    market_value_jpy: 25800
-    profit_loss_jpy: -700
+    current_price: 250
+    market_value_jpy: 25000
+    profit_loss_jpy: -1500
     currency: JPY
     portfolio_pct: 0.06
   - symbol: '7201'
@@ -1144,26 +1293,26 @@ allowed_quantitative_facts:
     asset_class: satellite
     source_category: 株式（現物）
     institution: 楽天証券
-    account_type: null
+    account_type: 特定口座（源泉徴収あり）
     quantity: 100
     avg_cost: 368
-    current_price: 322
-    market_value_jpy: 32220
-    profit_loss_jpy: -4535
+    current_price: 341
+    market_value_jpy: 34080
+    profit_loss_jpy: -2675
     currency: JPY
-    portfolio_pct: 0.08
+    portfolio_pct: 0.09
   - symbol: SMH
     name: ヴァンエック・半導体株ETF
     human_label: ヴァンエック・半導体株ETF
     asset_class: satellite_core
     source_category: 株式（現物）
     institution: 楽天証券
-    account_type: null
+    account_type: 特定口座（源泉徴収あり）
     quantity: 1
     avg_cost: 369.63
-    current_price: 561.19
+    current_price: 582.7
     market_value_jpy: 91950
-    profit_loss_jpy: 31387
+    profit_loss_jpy: 34208
     currency: USD
     portfolio_pct: 0.23
   - symbol: PLTR
@@ -1172,56 +1321,56 @@ allowed_quantitative_facts:
     asset_class: satellite
     source_category: 株式（現物）
     institution: 楽天証券
-    account_type: null
+    account_type: 特定口座（源泉徴収あり）
     quantity: 11
     avg_cost: 151.22
-    current_price: 122.92
-    market_value_jpy: 221544
-    profit_loss_jpy: -51013
+    current_price: 172.01
+    market_value_jpy: 298574
+    profit_loss_jpy: 38892
     currency: USD
-    portfolio_pct: 0.55
+    portfolio_pct: 0.75
   - symbol: CIBR
     name: ファーストトラスト ナスダック サイバーセキュリティ ETF
     human_label: ファーストトラスト ナスダック サイバーセキュリティ ETF
     asset_class: satellite_core
     source_category: 株式（現物）
     institution: 楽天証券
-    account_type: null
+    account_type: 特定口座（源泉徴収あり）
     quantity: 88
     avg_cost: 76.66
-    current_price: 88.4
-    market_value_jpy: 1274621
-    profit_loss_jpy: 169319
+    current_price: 97.85
+    market_value_jpy: 1358784
+    profit_loss_jpy: 326412
     currency: USD
-    portfolio_pct: 3.19
+    portfolio_pct: 3.39
   - symbol: MSFT
     name: マイクロソフト
     human_label: マイクロソフト
     asset_class: jun_core
     source_category: 株式（現物）
     institution: 楽天証券
-    account_type: null
+    account_type: 特定口座（源泉徴収あり）
     quantity: 9
     avg_cost: 398.74
-    current_price: 381.7
-    market_value_jpy: 562873
-    profit_loss_jpy: -25123
+    current_price: 499.99
+    market_value_jpy: 710085
+    profit_loss_jpy: 143785
     currency: USD
-    portfolio_pct: 1.41
+    portfolio_pct: 1.77
   - symbol: URA
     name: グローバルX ウラニウム ETF
     human_label: グローバルX ウラニウム ETF
     asset_class: satellite
     source_category: 株式（現物）
     institution: 楽天証券
-    account_type: null
+    account_type: 特定口座（源泉徴収あり）
     quantity: 72
     avg_cost: 46.1
-    current_price: 39.89
-    market_value_jpy: 470590
-    profit_loss_jpy: -73250
+    current_price: 44.91
+    market_value_jpy: 510249
+    profit_loss_jpy: -3556
     currency: USD
-    portfolio_pct: 1.18
+    portfolio_pct: 1.27
   - symbol: NISSEI_SOX_1
     name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
     human_label: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
@@ -1231,37 +1380,37 @@ allowed_quantitative_facts:
     account_type: 特定口座（源泉徴収あり）
     quantity: 860960
     avg_cost: 15802
-    current_price: 48545
-    market_value_jpy: 4179530
-    profit_loss_jpy: 2819073
+    current_price: 45844
+    market_value_jpy: 3946985
+    profit_loss_jpy: 2586528
     currency: JPY
-    portfolio_pct: 10.46
+    portfolio_pct: 9.85
   - symbol: NISSEI_SOX_2
     name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
     human_label: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
     asset_class: satellite_core
     source_category: 投資信託
     institution: 楽天証券
-    account_type: NISA（2024年以降・枠区分未確認）
+    account_type: NISA成長投資枠
     quantity: 415654
     avg_cost: 14435
-    current_price: 48545
-    market_value_jpy: 2017792
-    profit_loss_jpy: 1417792
+    current_price: 45844
+    market_value_jpy: 1905524
+    profit_loss_jpy: 1305524
     currency: JPY
-    portfolio_pct: 5.05
+    portfolio_pct: 4.76
   - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
     name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
     human_label: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
     asset_class: core
     source_category: 投資信託
     institution: 楽天証券
-    account_type: null
+    account_type: NISAつみたて投資枠
     quantity: 1084992
     avg_cost: 14286
-    current_price: 19705
-    market_value_jpy: 2137977
-    profit_loss_jpy: 587977
+    current_price: 19738
+    market_value_jpy: 2141557
+    profit_loss_jpy: 591557
     currency: JPY
     portfolio_pct: 5.35
   - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
@@ -1270,26 +1419,26 @@ allowed_quantitative_facts:
     asset_class: core
     source_category: 投資信託
     institution: 楽天証券
-    account_type: null
+    account_type: NISA成長投資枠
     quantity: 846995
     avg_cost: 17710
-    current_price: 19705
-    market_value_jpy: 1669004
-    profit_loss_jpy: 169003
+    current_price: 19738
+    market_value_jpy: 1671799
+    profit_loss_jpy: 171799
     currency: JPY
-    portfolio_pct: 4.18
+    portfolio_pct: 4.17
   - symbol: RAKUTEN_PLUS_SP500
     name: 楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)
     human_label: 楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)
     asset_class: core
     source_category: 投資信託
     institution: 楽天証券
-    account_type: null
+    account_type: 特定口座（源泉徴収あり）
     quantity: 106530
     avg_cost: 11715
-    current_price: 19875
-    market_value_jpy: 211728
-    profit_loss_jpy: 86928
+    current_price: 20012
+    market_value_jpy: 213188
+    profit_loss_jpy: 88388
     currency: JPY
     portfolio_pct: 0.53
   - symbol: EMAXIS_SLIM_SP500_1
@@ -1298,54 +1447,54 @@ allowed_quantitative_facts:
     asset_class: core
     source_category: 投資信託
     institution: 楽天証券
-    account_type: null
+    account_type: 特定口座（源泉徴収あり）
     quantity: 337199
     avg_cost: 42349
-    current_price: 44669
-    market_value_jpy: 1506234
-    profit_loss_jpy: 78234
+    current_price: 44975
+    market_value_jpy: 1516553
+    profit_loss_jpy: 88553
     currency: JPY
-    portfolio_pct: 3.77
+    portfolio_pct: 3.79
   - symbol: EMAXIS_SLIM_SP500_2
     name: eMAXIS Slim 米国株式(S&P500)
     human_label: eMAXIS Slim 米国株式(S&P500)
     asset_class: core
     source_category: 投資信託
     institution: 楽天証券
-    account_type: null
+    account_type: NISAつみたて投資枠
     quantity: 408710
     avg_cost: 33398
-    current_price: 44669
-    market_value_jpy: 1825667
-    profit_loss_jpy: 460667
+    current_price: 44975
+    market_value_jpy: 1838173
+    profit_loss_jpy: 473173
     currency: JPY
-    portfolio_pct: 4.57
+    portfolio_pct: 4.59
   - symbol: EMAXIS_SLIM_SP500_3
     name: eMAXIS Slim 米国株式(S&P500)
     human_label: eMAXIS Slim 米国株式(S&P500)
     asset_class: core
     source_category: 投資信託
     institution: 楽天証券
-    account_type: null
+    account_type: NISA成長投資枠
     quantity: 228995
     avg_cost: 39302
-    current_price: 44669
-    market_value_jpy: 1022898
-    profit_loss_jpy: 122898
+    current_price: 44975
+    market_value_jpy: 1029905
+    profit_loss_jpy: 129905
     currency: JPY
-    portfolio_pct: 2.56
+    portfolio_pct: 2.57
   - symbol: EMAXIS_SLIM_ALL_COUNTRY
     name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
     human_label: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
     asset_class: core
     source_category: 投資信託
     institution: 楽天証券
-    account_type: null
+    account_type: 特定口座（源泉徴収あり）
     quantity: 614397
     avg_cost: 36491
-    current_price: 38243
-    market_value_jpy: 2349638
-    profit_loss_jpy: 107639
+    current_price: 38302
+    market_value_jpy: 2353263
+    profit_loss_jpy: 111264
     currency: JPY
     portfolio_pct: 5.88
   - symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
@@ -1361,7 +1510,7 @@ allowed_quantitative_facts:
     market_value_jpy: 4063372
     profit_loss_jpy: 722677
     currency: JPY
-    portfolio_pct: 10.17
+    portfolio_pct: 10.15
   - symbol: POINTS_MILES
     name: ポイント
     human_label: ポイント
@@ -1372,10 +1521,52 @@ allowed_quantitative_facts:
     quantity: null
     avg_cost: null
     current_price: null
-    market_value_jpy: 16483
+    market_value_jpy: 16233
     profit_loss_jpy: null
     currency: JPY
     portfolio_pct: 0.04
+  - symbol: BTC
+    name: ビットコイン
+    human_label: ビットコイン
+    asset_class: other
+    source_category: 暗号資産
+    institution: null
+    account_type: null
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 177410
+    profit_loss_jpy: -46181
+    currency: JPY
+    portfolio_pct: 0.44
+  - symbol: ETH
+    name: イーサリアム
+    human_label: イーサリアム
+    asset_class: other
+    source_category: 暗号資産
+    institution: null
+    account_type: null
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 137310
+    profit_loss_jpy: -44613
+    currency: JPY
+    portfolio_pct: 0.34
+  - symbol: XRP
+    name: エックスアールピー
+    human_label: エックスアールピー
+    asset_class: other
+    source_category: 暗号資産
+    institution: null
+    account_type: null
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 7702
+    profit_loss_jpy: -5297
+    currency: JPY
+    portfolio_pct: 0.02
   security_story_review_targets:
   - symbol: '2353'
     name: 日本駐車場開発
@@ -1391,10 +1582,10 @@ allowed_quantitative_facts:
     user_disposition: sell_when_at_a_loss_preferred
     user_sell_condition: 含み損の状態での売却を希望
     holding_metadata_confirmed_at: '2026-08-02'
-    sell_order_available: null
-    unreflected_orders: null
-    planned_withdrawals: null
-    restricted_funds: null
+    sell_order_available: false
+    unreflected_orders: true
+    planned_withdrawals: false
+    restricted_funds: false
     required_assessment: ユーザの現在の保有意図を制約として、最新の一次情報から暫定ストーリーを再構成し、売買判断を示す
   - symbol: '7201'
     name: 日産自動車
@@ -1448,8 +1639,8 @@ allowed_quantitative_facts:
     user_disposition: sell_requested
     user_sell_condition: 売却提案を希望
     holding_metadata_confirmed_at: '2026-08-02'
-    sell_order_available: true
-    unreflected_orders: false
+    sell_order_available: false
+    unreflected_orders: true
     planned_withdrawals: false
     restricted_funds: false
     required_assessment: ユーザの現在の保有意図を制約として、最新の一次情報から暫定ストーリーを再構成し、売買判断を示す
@@ -1583,44 +1774,44 @@ allowed_quantitative_facts:
     - symbol: NISSEI_SOX_1
       human_label: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>（特定口座（源泉徴収あり））
       account_type: 特定口座（源泉徴収あり）
-      market_value_jpy: 4179530
-      profit_loss_jpy: 2819073
+      market_value_jpy: 3946985
+      profit_loss_jpy: 2586528
     - symbol: NISSEI_SOX_2
-      human_label: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>（NISA（2024年以降・枠区分未確認））
-      account_type: NISA（2024年以降・枠区分未確認）
-      market_value_jpy: 2017792
-      profit_loss_jpy: 1417792
+      human_label: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>（NISA成長投資枠）
+      account_type: NISA成長投資枠
+      market_value_jpy: 1905524
+      profit_loss_jpy: 1305524
     required_assessment: 商品・指数ストーリーを一度評価し、口座・ロットごとの税務・執行判断を分離する
   same_product_account_groups:
   - product_name: eMAXIS Slim 米国株式(S&P500)
-    human_label: eMAXIS Slim 米国株式(S&P500)（口座区分未確認の3明細）
+    human_label: eMAXIS Slim 米国株式(S&P500)
     symbols:
     - EMAXIS_SLIM_SP500_1
     - EMAXIS_SLIM_SP500_2
     - EMAXIS_SLIM_SP500_3
-    account_separation_status: unverified
+    account_separation_status: separate_accounts_confirmed
     members:
     - symbol: EMAXIS_SLIM_SP500_1
-      human_label: eMAXIS Slim 米国株式(S&P500)（評価額1,506,234円の明細・口座区分未確認）
+      human_label: eMAXIS Slim 米国株式(S&P500)（特定口座（源泉徴収あり））
       institution: 楽天証券
-      account_type: null
-      market_value_jpy: 1506234
+      account_type: 特定口座（源泉徴収あり）
+      market_value_jpy: 1516553
       avg_cost: 42349
-      profit_loss_jpy: 78234
+      profit_loss_jpy: 88553
     - symbol: EMAXIS_SLIM_SP500_2
-      human_label: eMAXIS Slim 米国株式(S&P500)（評価額1,825,667円の明細・口座区分未確認）
+      human_label: eMAXIS Slim 米国株式(S&P500)（NISAつみたて投資枠）
       institution: 楽天証券
-      account_type: null
-      market_value_jpy: 1825667
+      account_type: NISAつみたて投資枠
+      market_value_jpy: 1838173
       avg_cost: 33398
-      profit_loss_jpy: 460667
+      profit_loss_jpy: 473173
     - symbol: EMAXIS_SLIM_SP500_3
-      human_label: eMAXIS Slim 米国株式(S&P500)（評価額1,022,898円の明細・口座区分未確認）
+      human_label: eMAXIS Slim 米国株式(S&P500)（NISA成長投資枠）
       institution: 楽天証券
-      account_type: null
-      market_value_jpy: 1022898
+      account_type: NISA成長投資枠
+      market_value_jpy: 1029905
       avg_cost: 39302
-      profit_loss_jpy: 122898
+      profit_loss_jpy: 129905
     decision_note: 経済的エクスポージャーは合算して評価するが、売却・移管・一本化は口座区分と税引後結果を確認してロット単位で判断する
   - product_name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
     human_label: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
@@ -1633,242 +1824,242 @@ allowed_quantitative_facts:
       human_label: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>（特定口座（源泉徴収あり））
       institution: 楽天証券
       account_type: 特定口座（源泉徴収あり）
-      market_value_jpy: 4179530
+      market_value_jpy: 3946985
       avg_cost: 15802
-      profit_loss_jpy: 2819073
+      profit_loss_jpy: 2586528
     - symbol: NISSEI_SOX_2
-      human_label: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>（NISA（2024年以降・枠区分未確認））
+      human_label: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>（NISA成長投資枠）
       institution: 楽天証券
-      account_type: NISA（2024年以降・枠区分未確認）
-      market_value_jpy: 2017792
+      account_type: NISA成長投資枠
+      market_value_jpy: 1905524
       avg_cost: 14435
-      profit_loss_jpy: 1417792
+      profit_loss_jpy: 1305524
     decision_note: 経済的エクスポージャーは合算して評価するが、売却・移管・一本化は口座区分と税引後結果を確認してロット単位で判断する
   - product_name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
-    human_label: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)（口座区分未確認の2明細）
+    human_label: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
     symbols:
     - RAKUTEN_PLUS_ALL_COUNTRY_1
     - RAKUTEN_PLUS_ALL_COUNTRY_2
-    account_separation_status: unverified
+    account_separation_status: separate_accounts_confirmed
     members:
     - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
-      human_label: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)（評価額2,137,977円の明細・口座区分未確認）
+      human_label: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)（NISAつみたて投資枠）
       institution: 楽天証券
-      account_type: null
-      market_value_jpy: 2137977
+      account_type: NISAつみたて投資枠
+      market_value_jpy: 2141557
       avg_cost: 14286
-      profit_loss_jpy: 587977
+      profit_loss_jpy: 591557
     - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
-      human_label: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)（評価額1,669,004円の明細・口座区分未確認）
+      human_label: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)（NISA成長投資枠）
       institution: 楽天証券
-      account_type: null
-      market_value_jpy: 1669004
+      account_type: NISA成長投資枠
+      market_value_jpy: 1671799
       avg_cost: 17710
-      profit_loss_jpy: 169003
+      profit_loss_jpy: 171799
     decision_note: 経済的エクスポージャーは合算して評価するが、売却・移管・一本化は口座区分と税引後結果を確認してロット単位で判断する
   market_references:
   - symbol: CIBR
     reference_symbol: CIBR
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 93.91
-    mean_close_20d: 89.944
-    recent_high_21d: 94.73
-    recent_high_63d: 94.73
-    return_21d_pct: 3.57
-    return_63d_pct: 36.58
-    drawdown_from_21d_high_pct: -0.87
-    drawdown_from_63d_high_pct: -0.87
+    current_price: 97.85
+    mean_close_20d: 91.7607
+    recent_high_21d: 97.94
+    recent_high_63d: 97.94
+    return_21d_pct: 3.81
+    return_63d_pct: 33.78
+    drawdown_from_21d_high_pct: -0.09
+    drawdown_from_63d_high_pct: -0.09
   - symbol: URA
     reference_symbol: URA
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 40.81
-    mean_close_20d: 41.6523
-    recent_high_21d: 43.88
-    recent_high_63d: 58.26
-    return_21d_pct: -5.6
-    return_63d_pct: -26.92
-    drawdown_from_21d_high_pct: -7
-    drawdown_from_63d_high_pct: -29.95
+    current_price: 44.91
+    mean_close_20d: 41.4013
+    recent_high_21d: 44.91
+    recent_high_63d: 57.23
+    return_21d_pct: 6.04
+    return_63d_pct: -20.17
+    drawdown_from_21d_high_pct: 0
+    drawdown_from_63d_high_pct: -21.53
   - symbol: PLTR
     reference_symbol: PLTR
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 125.65
-    mean_close_20d: 125.4667
-    recent_high_21d: 134.85
-    recent_high_63d: 160.65
-    return_21d_pct: -2.82
-    return_63d_pct: -12.79
-    drawdown_from_21d_high_pct: -6.82
-    drawdown_from_63d_high_pct: -21.79
+    current_price: 172.01
+    mean_close_20d: 131.8683
+    recent_high_21d: 172.01
+    recent_high_63d: 172.01
+    return_21d_pct: 33.3
+    return_63d_pct: 25.51
+    drawdown_from_21d_high_pct: 0
+    drawdown_from_63d_high_pct: 0
   - symbol: MSFT
     reference_symbol: MSFT
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 487.65
-    mean_close_20d: 392.4623
-    recent_high_21d: 487.65
-    recent_high_63d: 487.65
-    return_21d_pct: 24.88
-    return_63d_pct: 17.66
+    current_price: 499.99
+    mean_close_20d: 409.814
+    recent_high_21d: 499.99
+    recent_high_63d: 499.99
+    return_21d_pct: 30.08
+    return_63d_pct: 18.83
     drawdown_from_21d_high_pct: 0
     drawdown_from_63d_high_pct: 0
   - symbol: SMH
     reference_symbol: SMH
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 545.46
-    mean_close_20d: 587.903
+    current_price: 582.7
+    mean_close_20d: 579.664
     recent_high_21d: 611.03
     recent_high_63d: 668.91
-    return_21d_pct: -7.91
-    return_63d_pct: 6.99
-    drawdown_from_21d_high_pct: -10.73
-    drawdown_from_63d_high_pct: -18.46
+    return_21d_pct: -4.12
+    return_63d_pct: 7.89
+    drawdown_from_21d_high_pct: -4.64
+    drawdown_from_63d_high_pct: -12.89
   - symbol: USDJPY
     reference_symbol: USDJPY=X
-    as_of: '2026-08-04'
+    as_of: '2026-08-07'
     currency: JPY
-    current_price: 157.429
-    mean_close_20d: 162.0693
+    current_price: 157.745
+    mean_close_20d: 161.6683
     recent_high_21d: 163.864
     recent_high_63d: 163.864
-    return_21d_pct: -2.49
-    return_63d_pct: 0.59
-    drawdown_from_21d_high_pct: -3.93
-    drawdown_from_63d_high_pct: -3.93
+    return_21d_pct: -2.95
+    return_63d_pct: 0.33
+    drawdown_from_21d_high_pct: -3.73
+    drawdown_from_63d_high_pct: -3.73
   - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
     reference_symbol: VT
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 157.61
-    mean_close_20d: 155.6767
-    recent_high_21d: 157.81
-    recent_high_63d: 159.35
-    return_21d_pct: 0.92
-    return_63d_pct: 4.07
-    drawdown_from_21d_high_pct: -0.13
-    drawdown_from_63d_high_pct: -1.09
+    current_price: 161.3
+    mean_close_20d: 156.3713
+    recent_high_21d: 161.3
+    recent_high_63d: 161.3
+    return_21d_pct: 2.74
+    return_63d_pct: 4.93
+    drawdown_from_21d_high_pct: 0
+    drawdown_from_63d_high_pct: 0
   - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
     reference_symbol: VT
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 157.61
-    mean_close_20d: 155.6767
-    recent_high_21d: 157.81
-    recent_high_63d: 159.35
-    return_21d_pct: 0.92
-    return_63d_pct: 4.07
-    drawdown_from_21d_high_pct: -0.13
-    drawdown_from_63d_high_pct: -1.09
+    current_price: 161.3
+    mean_close_20d: 156.3713
+    recent_high_21d: 161.3
+    recent_high_63d: 161.3
+    return_21d_pct: 2.74
+    return_63d_pct: 4.93
+    drawdown_from_21d_high_pct: 0
+    drawdown_from_63d_high_pct: 0
   - symbol: RAKUTEN_PLUS_SP500
     reference_symbol: VOO
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 696.4
-    mean_close_20d: 684.2347
-    recent_high_21d: 696.4
-    recent_high_63d: 698.26
-    return_21d_pct: 1.69
-    return_63d_pct: 5.11
+    current_price: 710.71
+    mean_close_20d: 688.2297
+    recent_high_21d: 710.71
+    recent_high_63d: 710.71
+    return_21d_pct: 2.9
+    return_63d_pct: 5.68
     drawdown_from_21d_high_pct: 0
-    drawdown_from_63d_high_pct: -0.27
+    drawdown_from_63d_high_pct: 0
   - symbol: EMAXIS_SLIM_SP500_1
     reference_symbol: VOO
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 696.4
-    mean_close_20d: 684.2347
-    recent_high_21d: 696.4
-    recent_high_63d: 698.26
-    return_21d_pct: 1.69
-    return_63d_pct: 5.11
+    current_price: 710.71
+    mean_close_20d: 688.2297
+    recent_high_21d: 710.71
+    recent_high_63d: 710.71
+    return_21d_pct: 2.9
+    return_63d_pct: 5.68
     drawdown_from_21d_high_pct: 0
-    drawdown_from_63d_high_pct: -0.27
+    drawdown_from_63d_high_pct: 0
   - symbol: EMAXIS_SLIM_SP500_2
     reference_symbol: VOO
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 696.4
-    mean_close_20d: 684.2347
-    recent_high_21d: 696.4
-    recent_high_63d: 698.26
-    return_21d_pct: 1.69
-    return_63d_pct: 5.11
+    current_price: 710.71
+    mean_close_20d: 688.2297
+    recent_high_21d: 710.71
+    recent_high_63d: 710.71
+    return_21d_pct: 2.9
+    return_63d_pct: 5.68
     drawdown_from_21d_high_pct: 0
-    drawdown_from_63d_high_pct: -0.27
+    drawdown_from_63d_high_pct: 0
   - symbol: EMAXIS_SLIM_SP500_3
     reference_symbol: VOO
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 696.4
-    mean_close_20d: 684.2347
-    recent_high_21d: 696.4
-    recent_high_63d: 698.26
-    return_21d_pct: 1.69
-    return_63d_pct: 5.11
+    current_price: 710.71
+    mean_close_20d: 688.2297
+    recent_high_21d: 710.71
+    recent_high_63d: 710.71
+    return_21d_pct: 2.9
+    return_63d_pct: 5.68
     drawdown_from_21d_high_pct: 0
-    drawdown_from_63d_high_pct: -0.27
+    drawdown_from_63d_high_pct: 0
   - symbol: EMAXIS_SLIM_ALL_COUNTRY
     reference_symbol: ACWI
-    as_of: '2026-08-03'
+    as_of: '2026-08-07'
     currency: USD
-    current_price: 157.94
-    mean_close_20d: 155.8113
-    recent_high_21d: 157.97
-    recent_high_63d: 159.97
-    return_21d_pct: 1.15
-    return_63d_pct: 4.14
-    drawdown_from_21d_high_pct: -0.02
-    drawdown_from_63d_high_pct: -1.27
+    current_price: 161.44
+    mean_close_20d: 156.535
+    recent_high_21d: 161.44
+    recent_high_63d: 161.44
+    return_21d_pct: 2.81
+    return_63d_pct: 4.88
+    drawdown_from_21d_high_pct: 0
+    drawdown_from_63d_high_pct: 0
   concentration_metrics:
     largest_positions:
-    - symbol: NISSEI_SOX_1
-      name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
-      market_value_jpy: 4179530
-      portfolio_pct: 10.46
     - symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
       name: eMAXIS Slim 全世界株式(オール・カントリー)
       market_value_jpy: 4063372
-      portfolio_pct: 10.17
-    - symbol: EMAXIS_SLIM_ALL_COUNTRY
-      name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
-      market_value_jpy: 2349638
-      portfolio_pct: 5.88
+      portfolio_pct: 10.15
+    - symbol: NISSEI_SOX_1
+      name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
+      market_value_jpy: 3946985
+      portfolio_pct: 9.85
     - symbol: '7203'
       name: トヨタ自動車
-      market_value_jpy: 2317600
-      portfolio_pct: 5.8
+      market_value_jpy: 2384000
+      portfolio_pct: 5.95
+    - symbol: EMAXIS_SLIM_ALL_COUNTRY
+      name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+      market_value_jpy: 2353263
+      portfolio_pct: 5.88
     - symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
       name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
-      market_value_jpy: 2137977
+      market_value_jpy: 2141557
       portfolio_pct: 5.35
     - symbol: NISSEI_SOX_2
       name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
-      market_value_jpy: 2017792
-      portfolio_pct: 5.05
+      market_value_jpy: 1905524
+      portfolio_pct: 4.76
     - symbol: EMAXIS_SLIM_SP500_2
       name: eMAXIS Slim 米国株式(S&P500)
-      market_value_jpy: 1825667
-      portfolio_pct: 4.57
+      market_value_jpy: 1838173
+      portfolio_pct: 4.59
     - symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
       name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
-      market_value_jpy: 1669004
-      portfolio_pct: 4.18
+      market_value_jpy: 1671799
+      portfolio_pct: 4.17
     - symbol: EMAXIS_SLIM_SP500_1
       name: eMAXIS Slim 米国株式(S&P500)
-      market_value_jpy: 1506234
-      portfolio_pct: 3.77
+      market_value_jpy: 1516553
+      portfolio_pct: 3.79
     - symbol: CIBR
       name: ファーストトラスト ナスダック サイバーセキュリティ ETF
-      market_value_jpy: 1274621
-      portfolio_pct: 3.19
-    direct_semiconductor_exposure_jpy: 6289272
-    direct_semiconductor_exposure_pct: 15.74
-    indirect_ai_infra_exposure_jpy: 562873
-    indirect_ai_infra_exposure_pct: 1.41
+      market_value_jpy: 1358784
+      portfolio_pct: 3.39
+    direct_semiconductor_exposure_jpy: 5944459
+    direct_semiconductor_exposure_pct: 14.84
+    indirect_ai_infra_exposure_jpy: 710085
+    indirect_ai_infra_exposure_pct: 1.77
     exposure_components:
     - symbol: SMH
       market_value_jpy: 91950
@@ -1876,17 +2067,17 @@ allowed_quantitative_facts:
       included_in_direct_semiconductor_exposure: true
       included_in_indirect_ai_infra_exposure: false
     - symbol: MSFT
-      market_value_jpy: 562873
+      market_value_jpy: 710085
       portfolio_pct: null
       included_in_direct_semiconductor_exposure: false
       included_in_indirect_ai_infra_exposure: true
     - symbol: NISSEI_SOX_1
-      market_value_jpy: 4179530
+      market_value_jpy: 3946985
       portfolio_pct: null
       included_in_direct_semiconductor_exposure: true
       included_in_indirect_ai_infra_exposure: false
     - symbol: NISSEI_SOX_2
-      market_value_jpy: 2017792
+      market_value_jpy: 1905524
       portfolio_pct: null
       included_in_direct_semiconductor_exposure: true
       included_in_indirect_ai_infra_exposure: false
@@ -1924,129 +2115,50 @@ allowed_quantitative_facts:
     as_of: '2026_08'
   data_quality_notes:
     ocr_notes:
-    - スクリーンショット内に取得日が見えないため、セッション日付 2026-07-26 を snapshot_date とした。
-    - 預金・現金とポイントは明細が画像に含まれないため、カテゴリ合計だけを集約holdingとして記録した。内訳は前月値から補完していない。
-    - 米国上場銘柄のcurrent_priceは画面表示値を記録し、通貨は銘柄と前月スナップショットの継続性からUSDとした。評価額と評価損益は画面表示どおりJPYで記録した。
-    - 株式（現物）の明細表示値合計は 5,346,698円で、カテゴリ合計 5,346,701円との差は -3円。Money Forwardの表示丸め差として扱う。
+    - Money Forward画面に基準日の表示がないため、楽天証券CSVのファイル名、crypto_summary_2026-08-09.json の processed_date、依頼日を基準に
+      snapshot_date を 2026-08-09 とした。
+    - 楽天証券・野村証券は各1口座のみのため、Money Forwardの証券明細を別資産として加算せず、カテゴリ合計はMoney Forward、証券内の明細・口座区分は各社CSVを正として突合した。
+    - 投資信託の symbol は既存参照互換のため NISSEI_SOX_INDEX_1/2 を NISSEI_SOX_1/2、EMAXIS_SLIM_ALL_COUNTRY_FUND
+      を EMAXIS_SLIM_ALL_COUNTRY に正規化した。
+    - 暗号資産は crypto_summary_2026-08-09.json から個別 holdings を追加した。数量、平均取得単価、現在単価は添付 JSON
+      にないため null のまま保持した。
+    - crypto_summary_2026-08-09.json の reward_points 162 は portfolio.current_value
+      に含まれない別指標のため total_assets_jpy へ加算していない。
     validation_notes:
-    - カテゴリ合計の合算は総資産 39,969,688円 と一致。
-    - 投資信託の明細合計はカテゴリ合計 16,920,468円 と一致。
-    - 年金は詳細1行が確認でき、取得価額 3,340,695円、現在価値 4,063,372円、評価損益 722,677円、評価損益率 21.63%。
-    - 株式（現物）の明細合計とカテゴリ合計の3円差は許容範囲内の表示丸め差として分離した。
-    - 前月スナップショットとの差分は保有状態の変化としてのみ記録し、注文、約定、入出金または積立実行を示す取引実績には変換しない。
+    - Money Forward のカテゴリ合計 39,729,489円 と crypto_summary の portfolio.current_value
+      322,422円 の合算は total_assets_jpy 40,051,911円 と一致。
+    - 株式（現物）の個別評価額合計は 5,885,222円 でカテゴリ合計 5,885,224円 より 2円少ない。添付 YAML の表示値を維持し、差額 2円
+      は表示丸め差として扱う。
+    - holdings の market_value_jpy 合計は 40,051,909円 で total_assets_jpy より 2円少ないが、上記の株式カテゴリ差額と一致する。
+    - ポイント集約値 16,233円 は添付 YAML の 3明細内訳（ANA 786円、Tポイント 7円、楽天ポイント 15,440円）と一致。
+    - 暗号資産 3明細の current_value 合計 322,422円 は crypto_summary_2026-08-09.json の portfolio.current_value
+      と一致。
+    - 楽天証券CSVの資産合計20,213,348円は、保有商品19,620,671円と外貨預り金592,677円の合計に一致し、Money Forward内の楽天証券分と二重計上していない。
+    - 野村証券CSVのMRF 1,744,557円と株式3明細2,881,500円は、Money Forward内の同一口座明細として扱い、別加算していない。
+    - 野村証券CSVでは9444が1,500株、2353が100株の注文中数量として表示される。売買方向はCSVから判別できないため holdings metadata
+      では unknown_from_csv とした。
     validation_findings:
-    - code: missing_account_type
-      severity: warning
-      message: '7203: account_type is unknown. Do not select a sale lot, consolidate
-        same-name holdings, or optimize taxes until the account is verified.'
-      related_symbols:
-      - '7203'
-    - code: missing_account_type
-      severity: warning
-      message: '7201: account_type is unknown. Do not select a sale lot, consolidate
-        same-name holdings, or optimize taxes until the account is verified.'
-      related_symbols:
-      - '7201'
-    - code: missing_account_type
-      severity: warning
-      message: 'SMH: account_type is unknown. Do not select a sale lot, consolidate
-        same-name holdings, or optimize taxes until the account is verified.'
-      related_symbols:
-      - SMH
-    - code: missing_account_type
-      severity: warning
-      message: 'PLTR: account_type is unknown. Do not select a sale lot, consolidate
-        same-name holdings, or optimize taxes until the account is verified.'
-      related_symbols:
-      - PLTR
-    - code: missing_account_type
-      severity: warning
-      message: 'CIBR: account_type is unknown. Do not select a sale lot, consolidate
-        same-name holdings, or optimize taxes until the account is verified.'
-      related_symbols:
-      - CIBR
-    - code: missing_account_type
-      severity: warning
-      message: 'MSFT: account_type is unknown. Do not select a sale lot, consolidate
-        same-name holdings, or optimize taxes until the account is verified.'
-      related_symbols:
-      - MSFT
-    - code: missing_account_type
-      severity: warning
-      message: 'URA: account_type is unknown. Do not select a sale lot, consolidate
-        same-name holdings, or optimize taxes until the account is verified.'
-      related_symbols:
-      - URA
-    - code: missing_account_type
-      severity: warning
-      message: 'RAKUTEN_PLUS_ALL_COUNTRY_1: account_type is unknown. Do not select
-        a sale lot, consolidate same-name holdings, or optimize taxes until the account
-        is verified.'
-      related_symbols:
-      - RAKUTEN_PLUS_ALL_COUNTRY_1
-    - code: missing_account_type
-      severity: warning
-      message: 'RAKUTEN_PLUS_ALL_COUNTRY_2: account_type is unknown. Do not select
-        a sale lot, consolidate same-name holdings, or optimize taxes until the account
-        is verified.'
-      related_symbols:
-      - RAKUTEN_PLUS_ALL_COUNTRY_2
-    - code: missing_account_type
-      severity: warning
-      message: 'RAKUTEN_PLUS_SP500: account_type is unknown. Do not select a sale
-        lot, consolidate same-name holdings, or optimize taxes until the account is
-        verified.'
-      related_symbols:
-      - RAKUTEN_PLUS_SP500
-    - code: missing_account_type
-      severity: warning
-      message: 'EMAXIS_SLIM_SP500_1: account_type is unknown. Do not select a sale
-        lot, consolidate same-name holdings, or optimize taxes until the account is
-        verified.'
-      related_symbols:
-      - EMAXIS_SLIM_SP500_1
-    - code: missing_account_type
-      severity: warning
-      message: 'EMAXIS_SLIM_SP500_2: account_type is unknown. Do not select a sale
-        lot, consolidate same-name holdings, or optimize taxes until the account is
-        verified.'
-      related_symbols:
-      - EMAXIS_SLIM_SP500_2
-    - code: missing_account_type
-      severity: warning
-      message: 'EMAXIS_SLIM_SP500_3: account_type is unknown. Do not select a sale
-        lot, consolidate same-name holdings, or optimize taxes until the account is
-        verified.'
-      related_symbols:
-      - EMAXIS_SLIM_SP500_3
-    - code: missing_account_type
-      severity: warning
-      message: 'EMAXIS_SLIM_ALL_COUNTRY: account_type is unknown. Do not select a
-        sale lot, consolidate same-name holdings, or optimize taxes until the account
-        is verified.'
-      related_symbols:
-      - EMAXIS_SLIM_ALL_COUNTRY
     - code: same_product_cross_account_split
       severity: info
       message: 'ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>: same product is held across
-        different account types (特定口座（源泉徴収あり）, NISA（2024年以降・枠区分未確認）). This is an account-level
+        different account types (特定口座（源泉徴収あり）, NISA成長投資枠). This is an account-level
         split and must not be labeled redundant duplication.'
       related_symbols:
       - NISSEI_SOX_1
       - NISSEI_SOX_2
-    - code: account_separation_unverified
-      severity: warning
-      message: '楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー): same product appears
-        in multiple rows but one or more account_type values are unknown. Treat the
-        rows as potentially intentional NISA/taxable separation, not redundant duplication.'
+    - code: same_product_cross_account_split
+      severity: info
+      message: '楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー): same product is held
+        across different account types (NISAつみたて投資枠, NISA成長投資枠). This is an account-level
+        split and must not be labeled redundant duplication.'
       related_symbols:
       - RAKUTEN_PLUS_ALL_COUNTRY_1
       - RAKUTEN_PLUS_ALL_COUNTRY_2
-    - code: account_separation_unverified
-      severity: warning
-      message: 'eMAXIS Slim 米国株式(S&P500): same product appears in multiple rows but
-        one or more account_type values are unknown. Treat the rows as potentially
-        intentional NISA/taxable separation, not redundant duplication.'
+    - code: same_product_cross_account_split
+      severity: info
+      message: 'eMAXIS Slim 米国株式(S&P500): same product is held across different account
+        types (特定口座（源泉徴収あり）, NISAつみたて投資枠, NISA成長投資枠). This is an account-level split
+        and must not be labeled redundant duplication.'
       related_symbols:
       - EMAXIS_SLIM_SP500_1
       - EMAXIS_SLIM_SP500_2
@@ -2090,75 +2202,107 @@ allowed_quantitative_facts:
       severity: info
       message: Holding POINTS_MILES is missing current_price; stored as null.
       related_symbols: []
+    - code: missing_quantity
+      severity: info
+      message: Holding BTC is missing quantity; stored as null.
+      related_symbols: []
+    - code: missing_avg_cost
+      severity: info
+      message: Holding BTC is missing avg_cost; stored as null.
+      related_symbols: []
+    - code: missing_current_price
+      severity: info
+      message: Holding BTC is missing current_price; stored as null.
+      related_symbols: []
+    - code: missing_quantity
+      severity: info
+      message: Holding ETH is missing quantity; stored as null.
+      related_symbols: []
+    - code: missing_avg_cost
+      severity: info
+      message: Holding ETH is missing avg_cost; stored as null.
+      related_symbols: []
+    - code: missing_current_price
+      severity: info
+      message: Holding ETH is missing current_price; stored as null.
+      related_symbols: []
+    - code: missing_quantity
+      severity: info
+      message: Holding XRP is missing quantity; stored as null.
+      related_symbols: []
+    - code: missing_avg_cost
+      severity: info
+      message: Holding XRP is missing avg_cost; stored as null.
+      related_symbols: []
+    - code: missing_current_price
+      severity: info
+      message: Holding XRP is missing current_price; stored as null.
+      related_symbols: []
 unknown_information:
 - item: financial_unknown_01
   reason: ボーナスの正確な手取り額
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
 - item: financial_unknown_02
   reason: 未計画旅行の金額と時期
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
 - item: financial_unknown_03
   reason: 投資待機資金の目標比率
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
 - item: financial_unknown_04
   reason: 投資待機資金の買付対象
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
 - item: financial_unknown_05
   reason: 投資待機資金の発動条件
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
 - item: financial_unknown_06
   reason: 投資待機資金の投入回数と各回投入額
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
 - item: financial_unknown_07
   reason: 投資待機資金の最低残高と補充方法
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
 - item: financial_unknown_08
-  reason: 公的年金の個人別確定見込額
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  reason: サテライトの目標比率、対象銘柄、単一テーマ・単一銘柄上限
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
 - item: financial_unknown_09
+  reason: 公的年金の個人別確定見込額
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
+- item: financial_unknown_10
   reason: 相続の本人取り分、実際の時期および税引後額
-  source: financial/versions/2026-08-03-v2.yaml
-  as_of: '2026-07-26'
+  source: financial/versions/2026-08-09.yaml
+  as_of: '2026-08-09'
 - item: liquidity_target_jpy
   reason: 正規化スナップショットに現金目標額が記録されていない
   source: normalized_snapshot
-  as_of: '2026-07-26'
+  as_of: '2026-08-09'
 - item: liquidity_account_breakdown
   reason: 現金は集約値で、口座別の利用可能額がパケットにない
   source: normalized_snapshot
-  as_of: '2026-07-26'
-- item: tradable_holding_account_types
-  reason: '売買可能資産の口座区分が未確認: 7201, 7203, CIBR, EMAXIS_SLIM_ALL_COUNTRY, EMAXIS_SLIM_SP500_1,
-    EMAXIS_SLIM_SP500_2, EMAXIS_SLIM_SP500_3, MSFT, PLTR, RAKUTEN_PLUS_ALL_COUNTRY_1,
-    RAKUTEN_PLUS_ALL_COUNTRY_2, RAKUTEN_PLUS_SP500, SMH, URA。口座区分を確認するまで、売却ロット、一本化、口座間移管を確定しない'
-  source: normalized_snapshot
-  as_of: '2026-07-26'
-- item: same_product_account_separation
-  reason: '同一商品の複数明細について口座区分が未確認: eMAXIS Slim 米国株式(S&P500) (EMAXIS_SLIM_SP500_1, EMAXIS_SLIM_SP500_2,
-    EMAXIS_SLIM_SP500_3); 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー) (RAKUTEN_PLUS_ALL_COUNTRY_1,
-    RAKUTEN_PLUS_ALL_COUNTRY_2)。商品名の一致だけを重複・一本化の根拠にしない'
-  source: normalized_snapshot
-  as_of: '2026-07-26'
+  as_of: '2026-08-09'
 - item: individual_stock_etf_investment_theses
   reason: '投資仮説・棄却条件が正本に未記録の個別株・ETF: 2353, 7201, 7203, 9444。レビュー対象から除外せず、一次情報から暫定ストーリーを再構成し、買い増しはユーザが保有理由を確認するまで確定しない'
   source: strategy/theses/index.yaml
-  as_of: '2026-07-26'
+  as_of: '2026-08-09'
 - item: sale_tax_and_transaction_costs
   reason: 売却税、取得ロット、手数料の確定値はパケットにない
   source: review_packet_boundary
-  as_of: '2026-07-26'
+  as_of: '2026-08-09'
 - item: risk_target_parameters
   reason: 未承認の投資待機資金比率など必要入力がない指標は算定不能として扱う。目標株式比率と目標コア・サテライト比率は、導出可能な現金要件を先に確保した後で評価する。確認済みの集中上限はconfirmed_user_conditionsを優先する
   source: review_scope
-  as_of: '2026-07-26'
+  as_of: '2026-08-09'
+- item: unsettled_orders_and_transfers
+  reason: 未反映注文、入出金、拘束資金はパケットにない
+  source: review_packet_boundary
+  as_of: '2026-08-09'
 excluded_information:
 - 過去の会話、前月以前のレビュー回答、プロジェクト内メモリ
 - 現行戦略の目標比率・閾値（政策配分を現在保有に合わせて後付けしないため）
@@ -2238,7 +2382,17 @@ rule_registry:
   rule: 売買・資金移動は算式、型付き入力、仮定への依存、税・口座、最大影響、実行時期を示し、承認済み根拠のない金額閾値は追加しない
 - rule_id: R-TRADE-002
   applies_to: final_review
-  rule: 戦略目標、商品単位方針、口座・ロット注文を別レイヤーで判定する。口座・税情報不足はロット執行だけをblockedにし、税額や最適ロットを推測しない
+  rule: 戦略目標、商品単位方針、口座・ロット注文を別レイヤーで判定する。口座区分は生成前に全件確認し、税額・取得価額・ロット詳細の不足だけを該当ロット執行のblocked理由として扱う
+- rule_id: R-TAX-001
+  applies_to: final_review
+  rule: 保有銘柄の売却を一件でも提案する場合は、日本の最新税制の一次情報に基づき、課税口座の含み益ロットと含み損ロットを同一暦年に実現して譲渡益を相殺する損益通算（tax-loss
+    harvesting）を必ず比較する。当年の確定損益、利用可能な繰越損失、配当等との通算可否、口座区分、NISA内損失は損益通算・繰越控除できない点、概算税効果、手数料、再取得までの価格変動リスク、申告実務を確認し、税効果だけで投資判断を歪めない。採用しない場合も理由をaccount_tax_comparisonsへ記録する
+- rule_id: R-WINDOW-001
+  applies_to: final_review
+  rule: recommendation_windowはpacket_generated_atを始点とし、データ鮮度、イベント日程、予測可能性、実行可能性からreviewerがdays、weeks、monthsの尺度と長さを選ぶ。全推奨行動のtimingをその範囲内へ具体化する
+- rule_id: R-REVIEW-001
+  applies_to: final_review
+  rule: next_review_recommendationはrecommendation_window終了以前に設定せず、早期再レビュー条件と最新スナップショットによる次回依頼文を回答末尾に置く
 - rule_id: R-ID-001
   applies_to: final_review
   rule: 人間向け回答では正式名称を使い、machine_id・symbol・銘柄コードはCodex向けYAMLの識別子フィールドに限定する
@@ -2308,7 +2462,7 @@ objective_confirmation:
   forbidden:
   - web_research
   - investment_decision
-  - six_human_sections
+  - seven_human_sections
   - yaml
   - trade_proposals
   - decision_quality_checks
@@ -2328,6 +2482,7 @@ final_review:
   - 【実行後配分】
   - 【実行前確認事項】
   - 【Codex向け改善フィードバック】
+  - 【次回レビュー時期】
   updated_inputs_location: 【推奨方針】の冒頭。独立見出しは禁止
   human_section_rules: 一般論は判断根拠に必要な段落だけに限定する。測定不能な割合制限は使わない
   delivery:
@@ -2338,13 +2493,16 @@ final_review:
     yaml_file_transport: コードフェンスなしの純粋なYAMLファイル
     chat_transport: 区切り線後の一つのyamlコードブロック
   decision_date_rule: ユーザー入力ではなく、final_reviewを生成したAsia/Tokyoの暦日をYYYY-MM-DDで記録する
+  recommendation_window_rule: packet_generated_atを始点とし、reviewerが根拠を示してdays、weeks、monthsの単位と長さを選ぶ。全推奨行動はend_atまでの具体的な時期へ落とす
+  next_review_rule: 次回レビュー日はrecommendation_window.end_at以前にせず、早期再レビュー条件と最新スナップショットを求める締めの一文を最終セクションに置く
 response_identity:
   schema_version: 2
-  artifact_type: monthly_review_response
+  artifact_type: investment_review_response
+  review_cadence: on_demand
   review_mode: strategic_policy_second_opinion
   interaction_phase: final_review
   review_target_month: '2026_08'
-  portfolio_snapshot_as_of: '2026-07-26'
+  portfolio_snapshot_as_of: '2026-08-09'
 canonical_paths:
   strategic_policy_stage: strategic_policy_decision
   implementation_stage: implementation_decision
@@ -2355,7 +2513,7 @@ canonical_paths:
   decision_references: decisions.policy_refs
 inline_response_schema:
   $schema: https://json-schema.org/draft/2020-12/schema
-  title: Machine-readable monthly investment review response
+  title: Machine-readable on-demand investment review response
   type: object
   additionalProperties: false
   x-nullability-rules:
@@ -2367,11 +2525,13 @@ inline_response_schema:
     a non-empty reason and remediation
   - reviewer_to_derive inputs must be derived for strategic final_review unless the
     calculation contract proves them not_calculable
-  - missing account or tax facts may block lot execution without blocking the strategic
+  - account categories must be complete before review generation; only later tax,
+    cost-basis, or lot-detail gaps may block lot execution without blocking the strategic
     policy decision
   required:
   - schema_version
   - artifact_type
+  - review_cadence
   - review_mode
   - interaction_phase
   - review_target_month
@@ -2380,6 +2540,8 @@ inline_response_schema:
   - packet_generated_at
   - research_cutoff_at
   - decision_date
+  - recommendation_window
+  - next_review_recommendation
   - review_completion_status
   - execution_capability_gate
   - strategic_policy_decision
@@ -2405,10 +2567,12 @@ inline_response_schema:
     schema_version:
       const: 2
     artifact_type:
-      const: monthly_review_response
+      const: investment_review_response
+    review_cadence:
+      const: on_demand
     review_mode:
       enum:
-      - monthly_operational_review
+      - on_demand_operational_review
       - strategic_policy_second_opinion
     interaction_phase:
       const: final_review
@@ -2429,6 +2593,70 @@ inline_response_schema:
     decision_date:
       type: string
       format: date
+    recommendation_window:
+      type: object
+      additionalProperties: false
+      required:
+      - start_at
+      - end_at
+      - window_length
+      - window_unit
+      - selection_rationale
+      - confidence_boundary
+      properties:
+        start_at:
+          type: string
+          format: date-time
+        end_at:
+          type: string
+          format: date-time
+        window_length:
+          type: integer
+          minimum: 1
+        window_unit:
+          enum:
+          - days
+          - weeks
+          - months
+        selection_rationale:
+          type: string
+          minLength: 1
+        confidence_boundary:
+          type: string
+          minLength: 1
+    next_review_recommendation:
+      type: object
+      additionalProperties: false
+      required:
+      - review_after_at
+      - interval_value
+      - interval_unit
+      - rationale
+      - early_review_triggers
+      - closing_sentence
+      properties:
+        review_after_at:
+          type: string
+          format: date
+        interval_value:
+          type: integer
+          minimum: 1
+        interval_unit:
+          enum:
+          - days
+          - weeks
+          - months
+        rationale:
+          type: string
+          minLength: 1
+        early_review_triggers:
+          type: array
+          items:
+            type: string
+            minLength: 1
+        closing_sentence:
+          type: string
+          pattern: ^また[1-9][0-9]*(日|週間|か月)後（[0-9]{4}-[0-9]{2}-[0-9]{2}）に最新のスナップショットをもとにレビュー依頼を出してください。$
     review_completion_status:
       enum:
       - complete
@@ -2786,6 +3014,7 @@ inline_response_schema:
       - rule_refs
       - order_proposals
       - actions
+      - new_asset_purchase_conclusion
       properties:
         policy_refs:
           type: array
@@ -2810,6 +3039,26 @@ inline_response_schema:
           type: array
           items:
             $ref: '#/$defs/action'
+        new_asset_purchase_conclusion:
+          type: object
+          additionalProperties: false
+          required:
+          - status
+          - rationale
+          - action_ids
+          properties:
+            status:
+              enum:
+              - buy_proposed
+              - no_new_asset_purchase
+            rationale:
+              type: string
+              minLength: 1
+            action_ids:
+              type: array
+              uniqueItems: true
+              items:
+                type: string
     codex_handoff:
       type: object
       additionalProperties: false
@@ -2848,8 +3097,8 @@ inline_response_schema:
                 type: string
     decision_quality_checks:
       type: array
-      minItems: 36
-      maxItems: 36
+      minItems: 38
+      maxItems: 38
       uniqueItems: true
       items:
         $ref: '#/$defs/decision_quality_check'
@@ -2866,8 +3115,8 @@ inline_response_schema:
       $ref: '#/$defs/rounding_reconciliation'
     semantic_validation_checks:
       type: array
-      minItems: 15
-      maxItems: 15
+      minItems: 17
+      maxItems: 17
       uniqueItems: true
       items:
         $ref: '#/$defs/semantic_validation_check'
@@ -2875,9 +3124,16 @@ inline_response_schema:
   - review_completion_status is derived from the three stage statuses and validation
     results; it is not a self-selected success label
   - complete_with_execution_blocks is allowed when strategic policy is complete but
-    account-lot execution is blocked or not_calculable
+    tax, cost-basis, or lot-detail execution is blocked or not_calculable; it cannot
+    bypass the pre-generation account-category gate
   - quality checks are evidence based and are not required to all be pass
   - JSON Schema validation and semantic_validation_checks are separate steps
+  - recommendation_window.start_at must equal packet_generated_at and end_at must
+    be later than start_at
+  - next_review_recommendation.review_after_at must not be before recommendation_window.end_at
+    in Asia/Tokyo
+  - all executable and conditional action timing must be concrete and fall within
+    recommendation_window
   $defs:
     execution_capability_gate:
       type: object
@@ -3160,6 +3416,10 @@ inline_response_schema:
       required:
       - policy_id
       - satellites_allowed
+      - satellite_target_pct_of_investable_portfolio
+      - selected_satellite_securities
+      - all_country_only_baseline_compared
+      - selection_rationale
       - total_satellite_cap_pct
       - single_theme_cap_pct
       - single_security_cap_pct
@@ -3171,6 +3431,42 @@ inline_response_schema:
           type:
           - boolean
           - 'null'
+        satellite_target_pct_of_investable_portfolio:
+          type:
+          - number
+          - 'null'
+          minimum: 0
+          maximum: 100
+        selected_satellite_securities:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+            - symbol
+            - asset_name
+            - role
+            - target_pct_of_investable_portfolio
+            - rationale
+            properties:
+              symbol:
+                type: string
+              asset_name:
+                type: string
+              role:
+                type: string
+              target_pct_of_investable_portfolio:
+                type: number
+                exclusiveMinimum: 0
+                maximum: 100
+              rationale:
+                type: string
+        all_country_only_baseline_compared:
+          type:
+          - boolean
+          - 'null'
+        selection_rationale:
+          type: string
         total_satellite_cap_pct:
           type:
           - number
@@ -3191,6 +3487,25 @@ inline_response_schema:
           maximum: 100
         exceptions:
           type: array
+      allOf:
+      - if:
+          properties:
+            satellites_allowed:
+              const: true
+        then:
+          properties:
+            satellite_target_pct_of_investable_portfolio:
+              type: number
+              exclusiveMinimum: 0
+              maximum: 100
+            selected_satellite_securities:
+              type: array
+              minItems: 1
+            all_country_only_baseline_compared:
+              const: true
+            selection_rationale:
+              type: string
+              minLength: 1
     direct_semiconductor_limit:
       type: object
       additionalProperties: false
@@ -4655,7 +4970,7 @@ inline_response_schema:
           - number
           - boolean
         decision_owner:
-          const: independent_monthly_reviewer
+          const: independent_on_demand_reviewer
         selection_criteria:
           type: string
         source_refs:
@@ -5390,13 +5705,21 @@ inline_response_schema:
       additionalProperties: false
       required:
       - action_id
+      - action_scope
       - action_level
+      - symbol
+      - asset_name
+      - holding_status
+      - side
+      - account_type
+      - execution_method
       - status
       - reason
       - remediation
       - description
       - source
       - destination
+      - quantity
       - amount_jpy
       - formula
       - inputs
@@ -5410,11 +5733,37 @@ inline_response_schema:
       properties:
         action_id:
           type: string
+        action_scope:
+          enum:
+          - existing_holding
+          - new_asset
         action_level:
           enum:
           - strategic_exposure
           - product_amount
           - account_lot_order
+        symbol:
+          type: string
+        asset_name:
+          type: string
+          minLength: 1
+        holding_status:
+          enum:
+          - held
+          - not_held
+        side:
+          enum:
+          - buy
+          - sell
+          - hold
+          - transfer
+        account_type:
+          type: string
+          minLength: 1
+          pattern: (NISA|特定口座|一般口座)
+        execution_method:
+          type: string
+          minLength: 1
         status:
           enum:
           - executable
@@ -5434,6 +5783,11 @@ inline_response_schema:
           type:
           - string
           - 'null'
+        quantity:
+          type:
+          - number
+          - 'null'
+          minimum: 0
         amount_jpy:
           type:
           - number
@@ -5466,6 +5820,29 @@ inline_response_schema:
         requires_user_approval:
           const: true
       allOf:
+      - if:
+          properties:
+            action_scope:
+              const: existing_holding
+        then:
+          properties:
+            holding_status:
+              const: held
+            side:
+              enum:
+              - sell
+              - hold
+              - transfer
+      - if:
+          properties:
+            action_scope:
+              const: new_asset
+        then:
+          properties:
+            holding_status:
+              const: not_held
+            side:
+              const: buy
       - if:
           properties:
             status:
@@ -5633,6 +6010,8 @@ inline_response_schema:
             - execution_capability_gate_prevents_fabricated_calculations
             - rounding_residuals_use_explicit_tolerances
             - mortgage_source_values_are_used_without_generic_revalidation
+            - recommendation_window_is_reviewer_selected_and_actionable
+            - next_review_recommendation_matches_the_window
     static_reference_check:
       allOf:
       - $ref: '#/$defs/quality_check'
@@ -5727,6 +6106,8 @@ inline_response_schema:
           - purchase_amounts_reconcile_to_funding_sources
           - sale_amounts_reconcile_to_sale_details
           - strategic_policy_precedes_implementation
+          - recommendation_window_starts_at_request_and_has_positive_duration
+          - next_review_date_is_not_before_recommendation_window_end
         status:
           enum:
           - pass
@@ -5839,6 +6220,8 @@ required_check_ids:
 - execution_capability_gate_prevents_fabricated_calculations
 - rounding_residuals_use_explicit_tolerances
 - mortgage_source_values_are_used_without_generic_revalidation
+- recommendation_window_is_reviewer_selected_and_actionable
+- next_review_recommendation_matches_the_window
 phase_rule: objective_confirmationではquality checksを出力しない。final_reviewでは各checkを実測結果に従って判定し、自己申告でpassへ揃えない
 static_reference_checks:
 - no_undefined_packet_reference
@@ -5875,6 +6258,8 @@ semantic_validation_check_ids:
 - purchase_amounts_reconcile_to_funding_sources
 - sale_amounts_reconcile_to_sale_details
 - strategic_policy_precedes_implementation
+- recommendation_window_starts_at_request_and_has_positive_duration
+- next_review_date_is_not_before_recommendation_window_end
 semantic_validation_rule: ID一意性、候補集合、選択数、feasibility、クロスフィールド算術、全対象coverage、資金源照合、売却明細照合、二段階順序はJSON
   Schemaだけで検証済みとみなさずsemantic_validation_checksへ具体値と許容差を記録する
 numeric_tolerances:
@@ -5888,7 +6273,7 @@ review_completion_status_enum:
 - complete_with_execution_blocks
 - blocked
 - invalid
-completion_rule: 口座・ロットだけがblockedまたはnot_calculableならcomplete_with_execution_blocksを使用する。戦略判断に不可欠な計算が成立しない場合だけstrategic
+completion_rule: 口座区分は全件確認済みであることを前提とする。税額、取得価額またはロット詳細だけがblockedまたはnot_calculableならcomplete_with_execution_blocksを使用する。戦略判断に不可欠な計算が成立しない場合だけstrategic
   policyをblockedにする
 interaction_phase_at_generation: final_review
 ```

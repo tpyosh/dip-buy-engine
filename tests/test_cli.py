@@ -64,6 +64,7 @@ def test_generate_review_prompt_writes_only_generated_reports(
     (project_root / "plans/recurring/versions").mkdir(parents=True)
     (project_root / "financial/versions").mkdir(parents=True)
     (project_root / "holdings/versions").mkdir(parents=True)
+    (project_root / "transactions").mkdir(parents=True)
     readme_path = project_root / "README.md"
     readme_path.write_text("# Title\n\n## 目的\nbody\n", encoding="utf-8")
 
@@ -80,13 +81,23 @@ def test_generate_review_prompt_writes_only_generated_reports(
     for path in [
         ROOT / "plans/recurring/current.yaml",
         ROOT / "plans/recurring/versions/2026-03-01.yaml",
+        ROOT / "plans/recurring/versions/2026-08-09.yaml",
             ROOT / "financial/current.yaml",
             ROOT / "financial/versions/2026-08-02.yaml",
             ROOT / "financial/versions/2026-08-03.yaml",
             ROOT / "financial/versions/2026-08-03-v2.yaml",
             ROOT / "financial/versions/2026-08-09.yaml",
+            ROOT / "financial/versions/2026-08-09-v2.yaml",
+            ROOT / "financial/versions/2026-08-10-v3.yaml",
+            ROOT / "financial/versions/2026-08-29-v4.yaml",
             ROOT / "holdings/current.yaml",
-        ROOT / "holdings/versions/2026-08-02.yaml",
+            ROOT / "holdings/versions/2026-08-09.yaml",
+            ROOT / "holdings/versions/2026-08-09-v2.yaml",
+            ROOT / "holdings/versions/2026-08-10.yaml",
+                ROOT / "holdings/versions/2026-08-10-v2.yaml",
+                ROOT / "holdings/versions/2026-08-13-v3.yaml",
+                ROOT / "holdings/versions/2026-08-14-v4.yaml",
+                ROOT / "transactions/ledger.yaml",
     ]:
         destination = project_root / path.relative_to(ROOT)
         destination.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")

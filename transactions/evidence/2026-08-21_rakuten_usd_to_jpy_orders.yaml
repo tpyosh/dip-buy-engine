@@ -1,0 +1,47 @@
+schema_version: 1
+record_type: "broker_fx_conversion_evidence_transcription"
+evidence_id: "rakuten_usd_to_jpy_orders_2026-08-21"
+broker: "楽天証券"
+confirmed_at: "2026-08-21"
+confirmed_by: "user_provided_broker_screenshot_and_attribution"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-03589442-3150-4515-8e3d-41128fbc8292.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+orders:
+  order_1275:
+    order_number: "1275"
+    order_placed_at: "2026-08-21T23:19:00+09:00"
+    status: "filled_pending_settlement"
+    source_currency: "USD"
+    destination_currency: "JPY"
+    side: "sell_usd_real_time"
+    source_amount_usd: 1404.00
+    user_attributed_source: "CIBR売却代金"
+    trade_date: "2026-08-24"
+    settlement_date: "2026-08-25"
+    applied_exchange_rate_jpy_per_usd: 158.838
+    calculated_jpy_before_broker_rounding: 223008.552
+    confirmed_settlement_amount_jpy: null
+  order_1276:
+    order_number: "1276"
+    order_placed_at: "2026-08-21T23:21:00+09:00"
+    status: "filled_pending_settlement"
+    source_currency: "USD"
+    destination_currency: "JPY"
+    side: "sell_usd_real_time"
+    source_amount_usd: 582.92
+    user_attributed_source: "SMH売却代金"
+    trade_date: "2026-08-24"
+    settlement_date: "2026-08-25"
+    applied_exchange_rate_jpy_per_usd: 158.859
+    calculated_jpy_before_broker_rounding: 92602.08828
+    confirmed_settlement_amount_jpy: null
+aggregate:
+  source_amount_usd: 1986.92
+  calculated_jpy_before_broker_rounding: 315610.64028
+  confirmed_settlement_amount_jpy: null
+interpretation_limits:
+  - "円受取額は画面に表示されていないため、レート乗算値を確定額にしない"
+  - "2026-08-25の受渡後に実際の円入金額を確認し、オルカン買付額を決める"
+  - "CIBR受渡画面の222,956円と今回の1,404.00 USDは同じ売却に由来するとユーザが説明したため、別々の売却代金として加算しない"

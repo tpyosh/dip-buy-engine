@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import logging
 import sys
 from copy import deepcopy
@@ -17,6 +18,7 @@ from .context_records import (
     load_financial_context,
     load_holding_metadata_context,
 )
+from .current_state import build_current_state_projection
 from .diff_analyzer import build_proposal_diffs
 from .exposure_metrics import build_exposure_breakdown
 from .independent_decision import (
@@ -24,7 +26,7 @@ from .independent_decision import (
     render_independent_decision_prompt,
     validate_independent_decision_request,
 )
-from .market_data import fetch_market_references
+from .market_data import fetch_intraday_quote, fetch_market_references
 from .models import MonthlyComputation, PortfolioSnapshot, PortfolioWarning
 from .on_demand import (
     assess_snapshot_freshness,
@@ -194,6 +196,15 @@ def build_parser() -> argparse.ArgumentParser:
         help="Validate repository sources of truth and cross-file references without writing files",
     )
     audit_parser.set_defaults(func=handle_repository_audit)
+
+    quote_parser = subparsers.add_parser(
+        "intraday-quote",
+        help="Fetch the latest available one-minute close with timestamp and freshness metadata",
+    )
+    quote_parser.add_argument("--symbol", required=True, help="Repository symbol")
+    quote_parser.add_argument("--yfinance-symbol", required=False, help="Provider symbol; defaults to --symbol")
+    quote_parser.add_argument("--currency", default="USD", help="Quote currency (default: USD)")
+    quote_parser.set_defaults(func=handle_intraday_quote)
     return parser
 
 
@@ -217,10 +228,24 @@ def handle_repository_audit(args: argparse.Namespace) -> int:
     return 0
 
 
+def handle_intraday_quote(args: argparse.Namespace) -> int:
+    quote = fetch_intraday_quote(
+        args.symbol,
+        yfinance_symbol=args.yfinance_symbol,
+        currency=args.currency,
+    )
+    print(json.dumps(quote, ensure_ascii=False, indent=2))
+    return 0
+
+
 def handle_generate_review_prompt(args: argparse.Namespace) -> int:
     project_root = get_project_root()
     snapshot_path = Path(args.snapshot)
-    computation = compute_monthly(snapshot_path, project_root=project_root)
+    computation = compute_monthly(
+        snapshot_path,
+        project_root=project_root,
+        project_current_state=True,
+    )
     paths = default_output_paths(project_root, target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path))
     output_path = Path(args.output) if args.output else paths["review_prompt"]
     template_text = read_text(project_root / "prompts/templates/monthly_review_template.md")
@@ -252,7 +277,11 @@ def handle_generate_review_prompt(args: argparse.Namespace) -> int:
 def handle_ingest_review(args: argparse.Namespace) -> int:
     project_root = get_project_root()
     snapshot_path = Path(args.snapshot)
-    computation = compute_monthly(snapshot_path, project_root=project_root)
+    computation = compute_monthly(
+        snapshot_path,
+        project_root=project_root,
+        project_current_state=True,
+    )
     month = target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path)
     response_payload, review_feedback, source_review_path = load_review_input(
         args,
@@ -281,7 +310,11 @@ def handle_ingest_review(args: argparse.Namespace) -> int:
 def handle_generate_codex_patch(args: argparse.Namespace) -> int:
     project_root = get_project_root()
     snapshot_path = Path(args.snapshot)
-    computation = compute_monthly(snapshot_path, project_root=project_root)
+    computation = compute_monthly(
+        snapshot_path,
+        project_root=project_root,
+        project_current_state=True,
+    )
     month = target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path)
     response_payload, review_feedback, source_review_path = load_review_input(
         args,
@@ -419,7 +452,11 @@ def load_review_input(
 def handle_monthly_run(args: argparse.Namespace) -> int:
     project_root = get_project_root()
     snapshot_path = Path(args.snapshot)
-    computation = compute_monthly(snapshot_path, project_root=project_root)
+    computation = compute_monthly(
+        snapshot_path,
+        project_root=project_root,
+        project_current_state=True,
+    )
     paths = default_output_paths(project_root, target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path))
     template_text = read_text(project_root / "prompts/templates/monthly_review_template.md")
     review_packet = build_current_review_packet(computation, project_root)
@@ -604,6 +641,12 @@ def compute_on_demand(
     snapshot = load_snapshot(snapshot_path)
     holding_context = load_holding_metadata_context(project_root)
     apply_holding_metadata(snapshot, holding_context["record"])
+    transaction_ledger = load_yaml(project_root / "transactions/ledger.yaml")
+    snapshot, current_state_projection = build_current_state_projection(
+        snapshot,
+        holding_context["record"],
+        transaction_ledger,
+    )
     holding_metadata = holding_metadata_by_symbol(holding_context)
     resolved_buckets = {holding.symbol: holding.asset_class for holding in snapshot.holdings}
     thesis_policy = load_thesis_monitoring_policy(project_root)
@@ -632,6 +675,7 @@ def compute_on_demand(
             "holding_execution_context": holding_context["record"].get(
                 "execution_context", {}
             ),
+            "current_state_projection": current_state_projection,
             "inventory_only": True,
             "resolved_buckets": resolved_buckets,
             "account_type_gate": build_account_type_gate(snapshot),
@@ -661,10 +705,22 @@ def build_core_spot_buy_calendar_event_artifact(
     }
 
 
-def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComputation:
+def compute_monthly(
+    snapshot_path: Path,
+    *,
+    project_root: Path,
+    project_current_state: bool = False,
+) -> MonthlyComputation:
     snapshot = load_snapshot(snapshot_path)
     holding_context = load_holding_metadata_context(project_root)
     apply_holding_metadata(snapshot, holding_context["record"])
+    current_state_projection = None
+    if project_current_state:
+        snapshot, current_state_projection = build_current_state_projection(
+            snapshot,
+            holding_context["record"],
+            load_yaml(project_root / "transactions/ledger.yaml"),
+        )
     holding_metadata = holding_metadata_by_symbol(holding_context)
     review_target_month_start = infer_target_month_start(snapshot.snapshot_date, snapshot_path=snapshot_path)
     review_target_month = month_key(review_target_month_start)
@@ -1001,10 +1057,16 @@ def compute_monthly(snapshot_path: Path, *, project_root: Path) -> MonthlyComput
             "holding_execution_context": holding_context["record"].get(
                 "execution_context", {}
             ),
+            "current_state_projection": current_state_projection,
             "satellite_review_policy": deepcopy(
                 (active_strategy or {})
                 .get("review_policy", {})
                 .get("satellite_parameters", {})
+            ),
+            "tactical_cash_policy": deepcopy(
+                (active_strategy or {})
+                .get("allocation", {})
+                .get("tactical_cash", {})
             ),
             "review_output_policy": deepcopy(
                 (active_strategy or {})

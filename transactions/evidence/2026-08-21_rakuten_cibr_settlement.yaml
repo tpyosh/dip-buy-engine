@@ -1,0 +1,28 @@
+schema_version: 1
+record_type: "broker_sale_settlement_evidence_transcription"
+evidence_id: "rakuten_cibr_settlement_2026-08-21"
+broker: "楽天証券"
+confirmed_at: "2026-08-21T22:46:00+09:00"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-04c0da80-151a-4bf4-8d6c-3d7cb63c7a82.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+settlement:
+  order_number: "1266"
+  symbol: "CIBR"
+  order_placed_at: "2026-08-12T23:06:00+09:00"
+  order_status: "filled"
+  side: "sell"
+  account_type: "特定口座"
+  settlement_currency: "JPY"
+  order_type: "market"
+  execution_condition: "day"
+  ordered_quantity: 14
+  filled_quantity: 14
+  settlement_amount_jpy: 222956
+  fee_jpy: 1111
+interpretation_limits:
+  - "受渡代金222,956円と手数料1,111円は画面表示値として確定する"
+  - "約定単価、為替レート、売却総額、取得費、源泉徴収税、実現損益は画面にないため推測しない"
+  - "国内約定日2026-08-13と国内受渡日2026-08-17は先行する約定画面で確認済み"

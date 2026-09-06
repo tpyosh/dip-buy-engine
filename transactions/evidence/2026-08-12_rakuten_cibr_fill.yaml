@@ -1,0 +1,37 @@
+schema_version: 1
+record_type: "broker_fill_evidence_transcription"
+evidence_id: "rakuten_cibr_fill_2026-08-12"
+broker: "楽天証券"
+confirmed_at: "2026-08-12"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-814479fa-14be-435a-aa41-2b92726f3554.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+fill:
+  order_number: "1266"
+  order_placed_at: "2026-08-12T23:06:00+09:00"
+  settlement_currency: "JPY"
+  status: "filled"
+  symbol: "CIBR"
+  name: "ファーストトラスト ナスダック サイバーセキュリティETF"
+  market: "米国市場"
+  side: "sell"
+  account_type: "特定口座"
+  order_type: "market"
+  execution_condition: "本日中"
+  extended_hours: false
+  order_method: "通常注文"
+  ordered_quantity: 14
+  filled_quantity: 14
+  unfilled_quantity: 0
+  trade_date_local: null
+  trade_date_japan: "2026-08-13"
+  settlement_date_japan: "2026-08-17"
+  execution_price_usd: null
+  gross_proceeds_usd: null
+  settlement_amount_jpy: null
+interpretation_limits:
+  - "状況は約定、注文数量14株・約定数量14株のため全量約定として扱う"
+  - "約定単価、現地約定日、売却総額、為替、手数料、税、円受取額は表示されていない"
+  - "2026-08-17は国内受渡日であり、受渡金額の確定証拠ではない"

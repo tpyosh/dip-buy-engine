@@ -1,0 +1,31 @@
+schema_version: 1
+record_type: "broker_settlement_evidence_transcription"
+evidence_id: "rakuten_7201_settlement_2026-08-12"
+broker: "楽天証券"
+confirmed_at: "2026-08-12"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-40fc0666-cbc9-4c55-824f-56af401ffc2f.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+settlement:
+  symbol: "7201"
+  name: "日産自動車"
+  market: "東証"
+  account_type: "特定口座"
+  tax_account_display: "源徴あり"
+  side: "sell"
+  trade_date: "2026-08-10"
+  settlement_date: "2026-08-13"
+  quantity: 100
+  execution_price_jpy: 345.0
+  gross_proceeds_jpy: 34500
+  commission_before_tax_jpy: 50
+  commission_tax_jpy: 5
+  total_fee_jpy: 55
+  other_expenses_jpy: 0
+  net_settlement_amount_jpy: 34445
+interpretation_limits:
+  - "画面の税金5円は手数料欄に併記され、34,500円－50円－5円＝受渡金額34,445円と一致するため、手数料に付随する税として記録する"
+  - "譲渡益に対する源泉徴収税額は画面に独立表示されていないため、0円と断定しない"
+  - "取得費と実現損益は画面表示値ではなく、保存済み平均取得単価368円と確認済み受渡金額による暫定計算であり、年間取引報告書との突合が必要"

@@ -1,0 +1,30 @@
+schema_version: 1
+record_type: "user_confirmed_broker_order_report"
+record_status: "superseded_by_later_fill_screen"
+superseded_by: "transactions/evidence/2026-08-21_rakuten_all_country_stage1_fill.yaml#fill"
+evidence_id: "rakuten_all_country_stage1_order_report_2026-08-10"
+task_ref: "plans/2026/2026-08-09_act_s3_execution.yaml#ACT-S3-005"
+stage_id: "ACT-S3-005-STAGE-1"
+confirmed_at: "2026-08-10"
+confirmed_by: "user_message"
+user_report: "ACT-S3-005第1段階を承認、注文完了"
+order:
+  broker: "楽天証券"
+  product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+  side: "buy"
+  account_type: "特定口座"
+  order_method: "投資信託の金額指定買付"
+  ordered_amount_jpy: 5861859
+  point_use: "使わない"
+  distribution_course: "再投資型"
+  order_status: "submitted_pending_fill"
+  order_number: null
+  exact_order_submitted_at: null
+  trade_date: null
+  settlement_date: null
+  allotted_units: null
+  execution_nav_jpy: null
+interpretation_limits:
+  - "ユーザの完了報告は注文送信の完了として扱い、約定完了とは扱わない"
+  - "注文番号、正確な注文時刻、約定日、受渡日、口数、約定基準価額は未確認"
+  - "約定確認後にtransactions/ledger.yamlへ確定買付実績を追加する"

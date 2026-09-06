@@ -1,0 +1,60 @@
+schema_version: 1
+record_type: "broker_investment_fund_fill_evidence_transcription"
+evidence_id: "rakuten_all_country_cash_sweep_fills_2026-08-29"
+broker: "楽天証券"
+confirmed_at: "2026-08-29"
+confirmed_by: "user_provided_broker_screenshot_and_funding_attribution"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-da68f8e3-2aa1-4866-a8b8-39d755a041ac.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+fills:
+  order_1282:
+    order_number: "1282"
+    order_placed_at: "2026-08-26T22:38:00+09:00"
+    order_status: "completed_filled"
+    product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    account_type: "特定口座"
+    distribution_course: "再投資型"
+    ordered_amount_jpy: 376158
+    user_attributed_source: "楽天証券で米ドルとして保有していた余剰現金"
+    trade_date: "2026-08-28"
+    settlement_date: "2026-09-03"
+    allotted_units: 96843
+    execution_nav_jpy_per_10000_units: 38842
+    fee_jpy: 0
+  order_1278:
+    order_number: "1278"
+    order_placed_at: "2026-08-25T07:46:00+09:00"
+    order_status: "completed_filled"
+    product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    account_type: "特定口座"
+    distribution_course: "再投資型"
+    ordered_amount_jpy: 92602
+    user_attributed_source: "SMH売却代金582.92 USDの円転後資金"
+    trade_date: "2026-08-26"
+    settlement_date: "2026-09-01"
+    allotted_units: 23987
+    execution_nav_jpy_per_10000_units: 38605
+    fee_jpy: 0
+  order_1277:
+    order_number: "1277"
+    order_placed_at: "2026-08-24T14:15:00+09:00"
+    order_status: "completed_filled"
+    product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    account_type: "特定口座"
+    distribution_course: "再投資型"
+    ordered_amount_jpy: 222956
+    user_attributed_source: "CIBR売却代金1,404.00 USDの円転後資金"
+    trade_date: "2026-08-25"
+    settlement_date: "2026-08-31"
+    allotted_units: 57955
+    execution_nav_jpy_per_10000_units: 38471
+    fee_jpy: 0
+aggregate:
+  ordered_amount_jpy: 691716
+  allotted_units: 178785
+interpretation_limits:
+  - "3件はすべて約定完了だが、受渡日は2026-08-31、2026-09-01、2026-09-03である"
+  - "376,158円の元となった米ドル額・為替注文・適用レートはこの画面にないため推測しない"
+  - "222,956円と92,602円はユーザの資金源説明によりCIBR・SMH売却代金の付け替えとして記録する"

@@ -1,0 +1,35 @@
+schema_version: 1
+record_type: "broker_settlement_evidence_transcription"
+evidence_id: "rakuten_smh_settlement_2026-08-14"
+broker: "楽天証券"
+confirmed_at: "2026-08-14T13:18:00+09:00"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-731ff460-f105-4bb5-882e-4358f5bc5ae0.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+settlement:
+  order_number: "1262"
+  symbol: "SMH"
+  name: "ヴァンエック・半導体株ETF"
+  side: "sell"
+  account_type: "特定口座"
+  settlement_currency: "USD"
+  order_placed_at: "2026-08-09T22:55:00+09:00"
+  execution_at_displayed: "2026-08-10T22:30:00+09:00"
+  domestic_trade_date: "2026-08-12"
+  domestic_settlement_date: "2026-08-14"
+  ordered_quantity: 1
+  filled_quantity: 1
+  order_price_usd: 583.49
+  execution_price_usd: 585.83
+  gross_proceeds_usd: 585.83
+  fee_usd: 2.91
+  net_settlement_amount_usd: 582.92
+  displayed_exchange_rate_jpy_per_usd: 159.140
+  reconciliation_formula: "585.83 USD - 2.91 USD = 582.92 USD"
+  reconciliation_status: "resolved"
+interpretation_limits:
+  - "583.49 USDは注文時表示価格であり、約定単価ではない"
+  - "159.140円/USDは画面表示為替レートとして保存するが、日本の税務上の譲渡損益計算への適用方法は年間取引報告書と突合する"
+  - "円建て取得費、円建て手数料、源泉徴収税、円建て実現損益はこの画面だけでは確定しない"

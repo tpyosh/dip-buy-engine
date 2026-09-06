@@ -210,7 +210,7 @@ Pythonの全計算結果をそのままChatGPTへ渡してはならない。`Rev
 - 同一商品名や連番サフィックスは重複の証拠ではない
 - NISA、特定口座、一般口座、iDeCoなどの `account_type` を投資可能資産の必須確認属性として扱う
 - 同一商品の複数明細は経済的エクスポージャーを合算する一方、売却・移管・一本化は口座・取得ロット単位で評価する
-- NISAの非課税譲渡益、損失の損益通算不可、非課税保有限度額への影響を含む税引後比較を必須とする
+- NISAの非課税譲渡益、損失の損益通算不可、非課税保有限度額への影響を含む税引後比較を必須とする。保有銘柄の売却を提案する場合は、課税口座の含み益ロットと含み損ロットを同一暦年に実現して譲渡益を相殺する損益通算（tax-loss harvesting）を必ず比較し、採用しない場合も理由を記録する
 - 売買可能な全明細がNISA・特定口座・一般口座のいずれかに分類できるまで、月次・オンデマンドのChatGPT向けレビュー依頼とレビュー出力を生成しない
 - 制度区分、取得年、税率、枠の扱いは、実行前に基準日付きの一次情報で再確認する
 
@@ -655,6 +655,25 @@ yfinance_symbols:
 - 候補価格・候補株数・基準値・現在値を出す
 - 必要なら抑制フラグも出す
 - 独立レビューを誘導しないよう `review_packet.yaml` と `review_request.md` には含めず、ChatGPT回答受領後の差分検証に使う
+
+### D-1. Execution plan contract
+
+- 比率、上限、許容レンジ、中心構成を使うタスクは `allocation_basis` を必須とし、分子、分母、分母定義の正本参照、測定時点、目標値を同じタスクへ記録する
+- 「約3%へ縮小」のように分母を省略した計画、ダッシュボード、提案を禁止する
+- 買付・売却タスクは `order_specification` を必須とし、口座、売買方向、数量または算式、成行・指値等の注文種別、指値ルール、時期、有効期限、部分約定、未約定・失効時の再注文、資金移動先、税確認、ユーザ承認を記録する
+- 注文仕様が未決定の場合もフィールドを省略せず、`status: pending_execution_time_configuration` と `execution_allowed: false` を記録する
+- `status: configured` で注文種別が未決定のタスク、指値なのに価格ルールがないタスク、ユーザ承認を要求しないタスクは監査エラーとする
+- `repository-audit` は `plans/20??/*.yaml` のタスク型計画を検査し、分母または注文仕様の欠落をブロックする
+- 全タスクは `human_actionability` を持ち、actor、next_action、required_inputs、decision_needed、decision_support_owner、unblock_condition、completion_evidenceを記録する
+- `required_inputs` は入力単位の `key`、`availability`、`source_ref`、`value_summary`、`as_of`、`refresh_rule`、`request_from_user_if`、`blocking`、`owner`、`verification_stage`、`trigger_evidence`、`scope` を持つsource-awareな構造とする
+- `availability` は `resolved_from_repository`、`known_event_pending`、`refresh_by_codex`、`verify_at_execution`、`user_input_blocking` のいずれかとし、ユーザへ依頼する前に正本、基準スナップショット、生成済み計算、取引記録を探索する
+- 最新正本後の変更報告、既知イベント、矛盾する証拠がなければ基準状態を下書きへ継続利用し、抽象的な変更可能性だけで銘柄ごとの否定確認を求めない
+- 既存注文・受渡は `known_event_pending`、Codexが更新する市場値は `refresh_by_codex`、通常の数量・重複注文・拘束数量確認は `verify_at_execution`、真に欠ける必須情報だけを `user_input_blocking` とする
+- `verify_at_execution` は下書きをブロックせず、全売買共通の注文入力時プリフライトに置く。ユーザ確認を個別銘柄へ前倒しするには具体的な `trigger_evidence` を必要とする
+- blockedまたは未設定の状態は、停止理由だけでなく解除主体・解除操作・解除条件を同じタスクへ記録する
+- human-readableダッシュボードは各タスク行にnext_actionとunblock_conditionを表示し、現在ブロッカー、Codex更新、真のユーザ必須入力、注文入力時プリフライトを分離して正本YAMLとの同期をテストする
+- 受入時に確認原則を全保有へ一般化し、現在注目している銘柄だけへ根拠のない確認を展開していないことを検査する
+- 受入質問は「その行だけを初めて読んだユーザが、次に誰が何をするかを一意に答えられるか」とする
 
 ### E. Monthly ChatGPT prompt generation
 実装対象:

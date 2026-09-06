@@ -9,6 +9,7 @@ import pytest
 
 from monthly_limit_order_review.cli import (
     build_parser,
+    compute_on_demand,
     handle_ingest_health_check,
     handle_on_demand_run,
     resolve_on_demand_inventory_path,
@@ -347,3 +348,18 @@ def test_on_demand_uses_latest_snapshot_as_symbol_inventory_by_default() -> None
     )
 
     assert path == expected
+
+
+def test_on_demand_inventory_uses_confirmed_current_state_projection() -> None:
+    computation = compute_on_demand(
+        ROOT / "data/normalized/snapshot_2026_08.yaml",
+        project_root=ROOT,
+        requested_at=datetime(2026, 8, 10, 12, 0, tzinfo=UTC),
+    )
+
+    symbols = {holding.symbol for holding in computation.snapshot.holdings}
+    assert not {"7201", "9444", "2353", "SMH", "BTC", "ETH", "XRP"} & symbols
+    assert "POST_SNAPSHOT_SALE_PROCEEDS" in symbols
+    projection = computation.metadata["current_state_projection"]
+    assert projection["historical_snapshot_mutated"] is False
+    assert projection["provisional_sale_proceeds_jpy"] == 921_785

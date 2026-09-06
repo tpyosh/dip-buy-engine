@@ -1,0 +1,1581 @@
+schema_version: 1
+plan_id: "ACT-S3"
+status: "approved_pending_execution"
+approved_at: "2026-08-09"
+last_updated_at: "2026-08-29"
+strategy_ref: "strategy/versions/2026-08-09-v2.yaml"
+decision_ref: "decisions/2026-08-09_act_s3_policy_approval.md"
+execution_contract_decision_ref: "decisions/2026-08-10_evidence_triggered_preflight_contract.md"
+
+basis:
+  snapshot_ref: "data/normalized/snapshot_2026_08.yaml"
+  snapshot_date: "2026-08-09"
+  currency: "JPY"
+  total_assets_jpy: 40051911
+  reference_long_term_investable_assets_jpy: 38035678
+  reference_only: true
+  reference_formula: "40051911 - 2000000 emergency fund - 16233 points"
+  execution_rule: >
+    比率を正本とする。参考円額、参考口数、参考株数では注文せず、各タスクの実行時点で
+    最新価格、長期運用資産額、口座、税、手数料、利用可能残高、未反映注文を確認して再計算する。
+
+input_resolution_contract:
+  repository_first_order:
+    - "basis.snapshot_ref"
+    - "financial/current.yaml"
+    - "holdings/current.yaml"
+    - "strategy/current.yaml"
+    - "この計画内のreference_targets_at_basisとtask実績"
+    - "transactions/"
+  availability_values:
+    resolved_from_repository: "正本に基準値があり、ユーザへの再提出要求は禁止"
+    known_event_pending: "既存注文、受渡、依存タスク等の具体的イベント完了待ち"
+    refresh_by_codex: "最新価格、為替、政策分母等をCodexが必要段階で更新"
+    verify_at_execution: "下書きを止めず、具体的注文を入力する段階で共通確認"
+    user_input_blocking: "正本・接続済み情報源に存在せず、下書きまたは承認に本当に不可欠"
+  stable_state_rule: >
+    最新正本後の取引・移管・注文報告、既知イベント、矛盾する証拠がなければ、保有数量等は
+    下書き計算用に継続しているものとして扱う。論理的な変更可能性だけで否定確認を求めない。
+  user_request_rule: >
+    ユーザ確認は具体的trigger_evidenceがあるknown_event_pending、またはrepository-first探索後も
+    解決できないuser_input_blockingに限定する。verify_at_executionは現在のユーザ宿題にしない。
+  common_order_entry_preflight:
+    blocking_draft: false
+    verification_stage: "order_entry"
+    applies_to: "all_buy_and_sell_tasks"
+    checks:
+      - "現在保有数量または買付可能数量"
+      - "重複する未反映注文"
+      - "拘束数量・拘束資金"
+      - "注文画面で利用可能な注文種別と有効期限"
+    trigger_evidence: "具体的注文案をユーザが承認し、証券会社・取引サービスの注文画面へ入力する"
+
+resume_contract:
+  canonical_task_ids:
+    active:
+      - "ACT-S3-001"
+      - "ACT-S3-002"
+      - "ACT-S3-003"
+      - "ACT-S3-004"
+      - "ACT-S3-005"
+      - "ACT-S3-006"
+      - "ACT-S3-007"
+      - "ACT-S3-008"
+      - "ACT-S3-009"
+      - "ACT-S3-010"
+      - "ACT-S3-011"
+      - "ACT-S3-012"
+      - "ACT-S3-014"
+      - "ACT-S3-015"
+      - "ACT-S3-016"
+    retired:
+      - "ACT-S3-013"
+    rule: "進捗管理にはactiveだけを使用する。retired IDは履歴として保持し、再利用しない"
+  next_session_read_order:
+    - "FINANCIAL_ASSUMPTIONS.md"
+    - "financial/current.yaml"
+    - "holdings/current.yaml"
+    - "strategy/current.yaml"
+    - "plans/2026/2026-08-09_act_s3_execution.yaml"
+    - "data/normalized/snapshot_2026_08.yaml"
+  update_rule: >
+    ユーザの完了、約定、注文確認報告を受けたら、該当taskのstatus、evidence、completed_at、
+    actual_executionを更新する。約定はtransactionsへ別記録し、過去スナップショットを改変しない。
+  external_monitoring:
+    - "ACT-S3-008のSMH注文・約定確認"
+  external_monitoring_is_global_blocker: false
+  scheduling_rule: >
+    タスクIDの番号は識別子であり、全面的な逐次実行順ではない。depends_onが空のタスクと
+    event_drivenタスクは並行可能とし、外部約定待ちの間も他ワークストリームを進める。
+
+confirmed_completed_context:
+  - "BTC・ETHの定期積立停止"
+  - "NISAを全世界株式100,000円/月へ変更"
+  - "iDeCoのeMAXIS Slim 全世界株式55,000円/月の継続確認"
+  - "日産自動車100株を全売却（2026-08-10約定、2026-08-13受渡、平均約定単価345円、受渡金額34,445円、暫定損失2,355円。年間資料突合は未完了）"
+  - "トーシンホールディングス1,500株を全売却（2026-08-10約定、2026-08-13受渡、平均約定単価307円、精算金額459,976円、暫定損失482,024円。手数料・税内訳と年間資料突合は未完了）"
+  - "日本駐車場開発100株を全売却（2026-08-10約定、2026-08-13受渡、平均約定単価252円、精算金額25,048円、暫定損失1,452円。手数料・税内訳と年間資料突合は未完了）"
+  - "BTC・ETH・XRPを全売却し暗号資産残高0円。2026-08-14の銘柄別入金報告はXRP 7,346円、BTC 171,669円、ETH 131,351円、合計310,366円で楽天証券へ入金済み。従来集約報告310,166円との差200円は履歴として保持し、税務損益は未確定"
+  - "CIBR 14株を全量約定・受渡完了（注文番号1266、成行、円貨決済、国内約定日2026-08-13、国内受渡日2026-08-17、受渡代金222,956円、手数料1,111円、残り74株。約定単価・取得費・税・実現損益は未確定）"
+  - "SMH 1株を全量約定・受渡完了（注文番号1262、注文時表示価格583.49 USD、約定単価585.83 USD、手数料2.91 USD、USD受渡代金582.92 USD、表示為替159.140円/USD、国内約定日2026-08-12、国内受渡日2026-08-14、保有0株。円建て税務損益は未確定）"
+  - "CIBR由来1,404.00 USDを注文番号1275、SMH由来582.92 USDを注文番号1276で円転約定。合計1,986.92 USD、約定日2026-08-24、受渡日2026-08-25。適用為替158.838円/USDと158.859円/USD。確定円受取額は受渡後に確認し、オルカンへ投入する"
+  - "野村證券に2026-08-09以前からあった流動現金1,744,557円を楽天証券へ移動（野村2銘柄の売却代金485,024円とは別資金。ACT-S3-005後続段階のコア買付候補）"
+
+execution_gate:
+  requires_user_confirmation: true
+  never_auto_execute: true
+  pretrade_checks:
+    - "最新価格と評価額"
+    - "長期運用資産の実時点分母"
+    - "口座区分"
+    - "利用可能残高と未反映注文"
+    - "取得価額、実現損益、税務上必要な履歴"
+tax_execution_policy_update:
+  decision_ref: "decisions/2026-08-12_use_current_year_listed_stock_losses.yaml"
+  latest_update_ref: "decisions/2026-08-12_include_nissan_loss_in_2026_offset.yaml"
+  reported_gain_update_ref: "decisions/2026-08-13_include_smh_gain_in_2026_offset.yaml"
+  effective_for_tax_year: 2026
+  use_current_year_listed_stock_losses_for_same_year_gain_offset: true
+  provisional_available_loss_jpy: 485831
+  security_selection_or_sale_authorized: false
+  implementation_note: "利益確定対象の選択・売却数量は別の投資判断と注文承認を必要とする。別口座との通算は確定申告で集計する"
+  required_order_fields:
+    - "account_type"
+    - "quantity"
+    - "market_or_limit"
+    - "limit_price_rule_if_applicable"
+    - "order_timing"
+    - "expiration"
+    - "partial_fill_handling"
+    - "unfilled_or_expired_reorder_rule"
+    - "sale_proceeds_destination"
+    - "pretrade_tax_check"
+
+execution_guardrails:
+  first_stage_satellite_buy_freeze:
+    status: "active"
+    applies_to: "第一段階の全サテライト。特にMicrosoft、Palantir、ウラニウムETFを含む"
+    restriction: "ACT-S3-012の第一段階終了判定までは、サテライトの新規買い注文・買い提案を行わない"
+    activation_basis: "2026-08-09承認済みACT-S3第一段階の集中管理方針"
+    release_condition: "ACT-S3-012が完了し、第二段階の判断対象へ移った時点"
+    source_retired_task_id: "ACT-S3-013"
+    task_tracking: false
+    user_todo: false
+
+retired_task_records:
+  - id: "ACT-S3-013"
+    retired_at: "2026-08-13"
+    reason: "独立した成果物を持たない禁止・不作為をタスクとして登録しており、終了条件と完了報告を持てなかったため"
+    migrated_to: "execution_guardrails.first_stage_satellite_buy_freeze"
+    disposition: "not_applicable_not_a_task"
+    id_reuse_allowed: false
+
+reference_targets_at_basis:
+  warning: "すべて2026-08-09基準の参考値。固定注文数量として使用禁止。"
+  core_jpy: 31379434
+  satellite_total_jpy: 6656244
+  direct_semiconductor_jpy: 3042854
+  cybersecurity_jpy: 1141070
+  uranium_jpy: 950892
+  microsoft_jpy: 760714
+  palantir_jpy: 760714
+  semiconductor_transition:
+    nisa_sox_hold_reference_jpy: 1905524
+    taxable_sox_remaining_reference_jpy: 1137330
+    taxable_sox_sale_reference_jpy: 2809655
+    taxable_sox_sale_reference_units: 612900
+  cybersecurity_transition:
+    reference_remaining_shares: 74
+  toyota_first_stage:
+    if_9444_sold_reference_shares_to_sell: 200
+    if_9444_unsold_reference_shares_to_sell: 400
+
+tasks:
+  - id: "ACT-S3-001"
+    status: "completed"
+    completed_at: "2026-08-10"
+    action_kind: "monitor"
+    allocation_effect: "full_exit"
+    workstream: "A_existing_order_monitoring"
+    scheduling: "parallel_now"
+    depends_on: []
+    action: "トーシンホールディングス1,500株の既存成行売却注文を維持し、重複注文を出さず約定確認する"
+    completion_condition: "1,500株すべて売却"
+    known_state: "1,500株全部約定・保有0株"
+    evidence:
+      - "transactions/ledger.yaml#nomura-79153-9444-sell-fill"
+      - "transactions/evidence/2026-08-10_nomura_fills.yaml#fills.9444"
+    actual_execution:
+      order_number: "79153"
+      order_placed_at: "2026-08-08T09:46:00+09:00"
+      trade_date: "2026-08-10"
+      account_type: "特定口座"
+      side: "sell"
+      order_type: "market"
+      filled_quantity: 1500
+      unfilled_quantity: 0
+      average_fill_price_jpy: 307
+      gross_proceeds_jpy: 460500
+      settlement_date: "2026-08-13"
+      fee_jpy: null
+      tax_jpy: null
+      net_proceeds_jpy: 459976
+      acquisition_cost_jpy: 942000
+      provisional_realized_gain_loss_jpy: -482024
+      realized_gain_loss_status: "provisional_pending_annual_document_reconciliation"
+    human_actionability:
+      actor: "codex"
+      next_action: "売却・受渡は完了済み。精算金額459,976円と暫定損失482,024円を記録し、流動現金はACT-S3-014、年間資料との税務突合はACT-S3-016で継続する"
+      required_inputs: []
+      decision_needed: null
+      decision_support_owner: null
+      unblock_condition: "完了済み"
+      completion_evidence: ["1,500株全量の全部約定画面", "2026-08-13受渡・精算金額459,976円の画面", "取引台帳", "保有残高0株の口座メタデータ"]
+  - id: "ACT-S3-002"
+    status: "completed"
+    completed_at: "2026-08-10"
+    action_kind: "monitor"
+    allocation_effect: "full_exit"
+    workstream: "A_existing_order_monitoring"
+    scheduling: "parallel_now"
+    depends_on: []
+    action: "日本駐車場開発100株の既存成行売却注文の状態を確認する"
+    completion_condition: "100株すべて売却"
+    known_state: "100株全部約定・保有0株"
+    evidence:
+      - "transactions/ledger.yaml#nomura-79152-2353-sell-fill"
+      - "transactions/evidence/2026-08-10_nomura_fills.yaml#fills.2353"
+    actual_execution:
+      order_number: "79152"
+      order_placed_at: "2026-08-08T09:44:00+09:00"
+      trade_date: "2026-08-10"
+      account_type: "一般口座"
+      side: "sell"
+      order_type: "market"
+      filled_quantity: 100
+      unfilled_quantity: 0
+      average_fill_price_jpy: 252
+      gross_proceeds_jpy: 25200
+      settlement_date: "2026-08-13"
+      fee_jpy: null
+      tax_jpy: null
+      net_proceeds_jpy: 25048
+      acquisition_cost_jpy: 26500
+      provisional_realized_gain_loss_jpy: -1452
+      realized_gain_loss_status: "provisional_pending_annual_document_reconciliation"
+    human_actionability:
+      actor: "codex"
+      next_action: "売却・受渡は完了済み。精算金額25,048円と暫定損失1,452円を記録し、流動現金はACT-S3-014、年間資料との税務突合はACT-S3-016で継続する"
+      required_inputs: []
+      decision_needed: null
+      decision_support_owner: null
+      unblock_condition: "完了済み"
+      completion_evidence: ["100株全量の全部約定画面", "2026-08-13受渡・精算金額25,048円の画面", "取引台帳", "保有残高0株の口座メタデータ"]
+  - id: "ACT-S3-003"
+    status: "ongoing"
+    action_kind: "calculate"
+    allocation_effect: "ratio_cap"
+    allocation_basis:
+      denominator: "long_term_investable_assets_jpy"
+      denominator_definition_ref: "strategy/versions/2026-08-09-v2.yaml#scope.allocation_denominator_definition"
+      measurement_time: "latest_snapshot_or_execution_time"
+      targets:
+        - numerator: "total_satellite_market_value_jpy"
+          relation: "maximum"
+          value: 0.20
+    workstream: "G_satellite_cap_verification"
+    scheduling: "event_driven_after_satellite_sales"
+    depends_on: []
+    action: "先行売却の実績を反映し、全サテライト時価評価額が実行時点の長期運用資産額の20%以下になったことを確認する"
+    completion_condition: "最新実績によるサテライト比率が20%以下"
+    human_actionability:
+      actor: "codex"
+      next_action: "先行するサテライト売却の約定・受渡実績が更新されるたびに、Codexが最新評価額と政策分母でサテライト比率を再計算する"
+      required_inputs: []
+      decision_needed: null
+      decision_support_owner: null
+      unblock_condition: "計算に必要な先行売却実績と最新評価額・政策分母が揃う"
+      completion_evidence: ["測定時点を付した全サテライト評価表", "全サテライト時価評価額÷長期運用資産額が20%以下の計算結果"]
+  - id: "ACT-S3-004"
+    status: "completed"
+    action_kind: "calculate"
+    allocation_effect: "cash_amount"
+    workstream: "B_available_cash_to_core"
+    scheduling: "parallel_now"
+    depends_on: []
+    action: "生活防衛資金2,000,000円を除く利用可能現金を確認する"
+    completion_condition: "投資可能現金額が確定"
+    reference_draft:
+      as_of: "2026-08-09"
+      total_cash_and_deposits_jpy: 13147713
+      proposed_emergency_fund_account: "三菱UFJ銀行 普通預金"
+      proposed_emergency_fund_jpy: 2000000
+      proposed_mufg_excess_above_emergency_fund_jpy: 467987
+      reference_investable_cash_before_execution_adjustments_jpy: 11147713
+      formula: "13,147,713円 - 生活防衛資金2,000,000円 = 11,147,713円"
+      executable: false
+      execution_adjustments: ["現在残高", "未約定注文の拘束資金", "未受渡・未反映資金", "直近の確定支払額"]
+    actual_result:
+      approved_at: "2026-08-10"
+      approval_ref: "decisions/2026-08-10_act_s3_004_emergency_fund_location_approval.md"
+      emergency_fund_account: "三菱UFJ銀行 普通預金"
+      emergency_fund_jpy: 2000000
+      basis_investable_cash_jpy: 11147713
+      basis_as_of: "2026-08-09"
+      execution_amount_status: "reference_ceiling_not_an_order_amount"
+      execution_refresh_rule: "ACT-S3-005の各注文入力時に、当該資金源の実買付可能額、拘束資金、未反映入出金、直近確定支払を反映する"
+    post_completion_adjustment:
+      effective_at: "2026-08-29"
+      decision_ref: "decisions/2026-08-29_mufg_large_purchase_reserve.yaml"
+      near_term_large_purchase_reserve_account: "三菱UFJ銀行 普通預金"
+      near_term_large_purchase_reserve_jpy: 467987
+      treatment: "生活防衛資金2,000,000円とは別の投資対象外資金としてACT-S3-005から除外"
+      original_reference_investable_cash_ceiling_jpy: 11147713
+      adjusted_reference_investable_cash_ceiling_jpy: 10679726
+      formula: "11,147,713円 - 大型購入用467,987円 = 10,679,726円"
+    execution_note: >
+      楽天証券の日産と野村證券2件の売却代金受渡待ちと並行して確認する。未約定注文の拘束資金、未受渡代金、
+      生活防衛資金2,000,000円を除き、現時点ですでに利用可能な現金だけをACT-S3-005の対象にする。
+    human_actionability:
+      actor: "codex"
+      next_action: "完了済み。2026-08-10時点の当初上限11,147,713円は履歴として維持する。2026-08-29に三菱UFJ銀行の467,987円を大型購入用の投資対象外資金へ変更したため、ACT-S3-005では調整後参考上限10,679,726円を使う"
+      required_inputs:
+        - key: "liquidity_basis"
+          label: "基準スナップショットの現金・預金内訳"
+          availability: "resolved_from_repository"
+          source_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=LIQUIDITY]"
+          value_summary: "2026-08-09時点13,147,713円。口座内訳はnotesに記録済み"
+          as_of: "2026-08-09"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "基準スナップショットに現金・預金内訳が存在"
+          scope: "portfolio"
+        - key: "order_entry_cash_preflight"
+          label: "注文入力時の現在残高、拘束資金、未反映入出金、直近確定支払"
+          availability: "verify_at_execution"
+          source_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=LIQUIDITY]"
+          value_summary: "基準残高は確認済み。基準日後の差分は未確認"
+          as_of: "2026-08-09"
+          refresh_rule: "ACT-S3-005の買付額を確定する直前に差分だけ更新"
+          request_from_user_if: null
+          blocking: false
+          owner: "user_and_external_broker"
+          verification_stage: "order_entry"
+          trigger_evidence: "ACT-S3-005の具体的買付注文を入力する段階"
+          scope: "portfolio"
+        - key: "emergency_fund_location_proposal"
+          label: "生活防衛資金2,000,000円を確保する口座の下書き"
+          availability: "resolved_from_repository"
+          source_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=LIQUIDITY]"
+          value_summary: "三菱UFJ銀行普通預金2,467,987円のうち2,000,000円を生活防衛資金として残す案"
+          as_of: "2026-08-09"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "approval"
+          trigger_evidence: "三菱UFJ銀行普通預金だけで生活防衛資金2,000,000円を確保できる"
+          scope: "portfolio"
+      decision_needed: null
+      decision_support_owner: null
+      unblock_condition: "completed"
+      completion_evidence: ["2026-08-10のユーザ明示承認", "三菱UFJ銀行普通預金の生活防衛資金2,000,000円", "2026-08-09基準の投資可能現金上限11,147,713円"]
+  - id: "ACT-S3-005"
+    status: "in_progress"
+    action_kind: "buy"
+    allocation_effect: "cash_amount"
+    workstream: "B_available_cash_to_core"
+    scheduling: "prepare_in_parallel_execute_each_available_cash_batch_after_act004"
+    action: "ACT-S3-004の投資可能現金を全世界株式コアへ投入する"
+    completion_condition: "不要な戦術現金を残さない"
+    depends_on: ["ACT-S3-004"]
+    reference_draft:
+      account_institution: "楽天証券"
+      account_type: "特定口座（源泉徴収あり）"
+      product_symbol: "EMAXIS_SLIM_ALL_COUNTRY"
+      product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+      product_basis_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=EMAXIS_SLIM_ALL_COUNTRY]"
+      purchase_method: "投資信託の金額指定買付"
+      amount_rule: "ACT-S3-004確定額から注文入力時の拘束資金・未反映資金・確定支払を控除した利用可能額"
+      nisa_growth_quota_status: "exhausted"
+      nisa_status_ref: "plans/recurring/versions/2026-08-09.yaml#core_recurring_contributions.nisa_growth_quota_status"
+      executable: false
+      pending: ["その他後続資金の買付可能額反映と未投入残額の再計算"]
+    staged_execution_design:
+      purpose: "全資金の移動・受渡完了を待たず、生活防衛資金を侵食しない利用可能現金からコアへ投入する"
+      tactical_market_timing: false
+      execution_design_approval_status: "approved_by_user_direction_to_deploy_available_cash_without_waiting_for_all_sources"
+      stage_trigger: "各資金が楽天証券で買付可能になったこと"
+      aggregate_reference_ceiling_jpy: 11147713
+      aggregate_reference_ceiling_ref: "ACT-S3-004.reference_draft.reference_investable_cash_before_execution_adjustments_jpy"
+      current_adjustment:
+        effective_at: "2026-08-29"
+        decision_ref: "decisions/2026-08-29_mufg_large_purchase_reserve.yaml"
+        excluded_near_term_large_purchase_reserve_jpy: 467987
+        adjusted_aggregate_reference_ceiling_jpy: 10679726
+        committed_core_purchases_jpy: 8184782
+        adjusted_reference_ceiling_remaining_jpy: 2494944
+        formula: "10,679,726円 - 5,861,859円 - 1,946,765円 - 376,158円 = 2,494,944円"
+      stages:
+        - source_bucket: "楽天銀行の円預金"
+          reference_balance_jpy: 8471062
+          reference_action: "ACT-S3-004承認後、楽天証券で実際に買付可能な金額を確認し、その範囲の金額指定買付案を最初に承認対象とする"
+          wait_for_other_sources: false
+        - source_bucket: "三菱UFJの生活防衛資金超過分と野村證券MRF"
+          reference_components_jpy:
+            mufg_above_emergency_fund: 467987
+            nomura_mrf: 1744557
+          reference_subtotal_jpy: 2212544
+          reference_action: "移動可能になった資金ごとに楽天証券の買付可能額へ反映後、同じコア商品を金額指定買付する"
+          wait_for_other_sources: false
+          execution_state:
+            nomura_mrf_transfer_status: "completed_to_rakuten_securities"
+            nomura_mrf_transferred_jpy: 1744557
+            transfer_date: "2026-08-13"
+            rakuten_credit_status: "credited_and_investable"
+            observed_rakuten_buying_power_jpy: 1946765
+            transaction_ref: "transactions/ledger.yaml#nomura-existing-cash-1744557-transfer-to-rakuten-2026-08-13"
+            mufg_above_emergency_fund_transfer_status: "excluded_from_investment_for_near_term_large_purchase"
+            mufg_excluded_amount_jpy: 467987
+            mufg_exclusion_decision_ref: "decisions/2026-08-29_mufg_large_purchase_reserve.yaml"
+        - source_bucket: "楽天証券米ドルと少額決済残高の最終整理"
+          reference_components_jpy:
+            rakuten_securities_usd_value: 592677
+            paypay_balance: -130485
+            mobile_suica_balance: 1915
+          reference_net_jpy: 464107
+          reference_action: "為替・換金・決済残高の実利用可能額を確認し、ACT-S3-005の最終残高調整としてコアへ投入する"
+          wait_for_other_sources: false
+      reconciliation_formula: "8,471,062 + 2,212,544 + 464,107 = 11,147,713円"
+      amount_rule_per_stage: "min(当該資金源から楽天証券で実際に買付可能な金額, ACT-S3-004の未投入確定額)。負数、未受渡、拘束資金、直近確定支払は除外"
+      completion_rule: "各段階の実績を合算し、ACT-S3-004確定額との差額を再確認して不要な戦術現金が残っていないことを確認する"
+    current_stage_proposal:
+      stage_id: "ACT-S3-005-STAGE-1"
+      status: "completed_filled"
+      observed_at: "2026-08-10T14:23:00+09:00"
+      evidence_ref: "transactions/evidence/2026-08-10_rakuten_all_country_purchase_screen.yaml"
+      current_buying_power_jpy: 5861859
+      aggregate_reference_ceiling_before_stage_jpy: 11147713
+      proposed_purchase_amount_jpy: 5861859
+      aggregate_reference_ceiling_remaining_after_stage_jpy: 5285854
+      calculation: "min(楽天証券の現在買付可能額5,861,859円, ACT-S3-004未投入上限11,147,713円) = 5,861,859円"
+      future_transfer_treatment: "近日中に他口座から増える買付可能額は待たず、反映後にACT-S3-005の別段階として未投入上限内で注文票を作る"
+      order_ticket:
+        broker: "楽天証券"
+        product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+        account_type: "特定口座"
+        order_method: "投資信託の金額指定買付"
+        amount_jpy: 5861859
+        point_use: "使わない"
+        distribution_course: "再投資型"
+        nisa_growth_quota_used_jpy: 0
+        prospectus_action: "交付目論見書を確認し、同意チェックを入れる"
+        confirmation_screen: "省略せず、商品・口座・金額・ポイント不使用・再投資型・注文受付日を確認してから発注する"
+      approval:
+        approved_at: "2026-08-10"
+        approved_by: "user"
+        approval_evidence_ref: "transactions/evidence/2026-08-10_rakuten_all_country_stage1_order_report.yaml"
+      actual_order:
+        reported_at: "2026-08-21"
+        status: "completed_filled"
+        ordered_amount_jpy: 5861859
+        order_number: "1263"
+        exact_order_submitted_at: "2026-08-10T14:33:00+09:00"
+        trade_date: "2026-08-12"
+        settlement_date: "2026-08-18"
+        allotted_units: 1515633
+        execution_nav_jpy_per_10000_units: 38676
+        fee_jpy: 0
+        settlement_amount_jpy: 5861859
+        transaction_ref: "transactions/ledger.yaml#rakuten-all-country-5861859-buy-fill-2026-08-12"
+        evidence_ref: "transactions/evidence/2026-08-21_rakuten_all_country_stage1_fill.yaml#fill"
+      committed_amount_jpy: 5861859
+      uncommitted_reference_ceiling_jpy: 5285854
+      execution_allowed: false
+      user_approval_status: "approved"
+    ready_followup_stage_proposals:
+      - stage_id: "ACT-S3-005-STAGE-2A"
+        status: "completed_filled"
+        prepared_at: "2026-08-13"
+        source_bucket: "野村證券既存流動現金の入金後に確認した楽天証券買付可能額"
+        source_transaction_ref: "transactions/ledger.yaml#nomura-existing-cash-1744557-transfer-to-rakuten-2026-08-13"
+        transferred_amount_jpy: 1744557
+        observed_rakuten_buying_power_jpy: 1946765
+        buying_power_observed_at: "2026-08-13"
+        buying_power_excess_over_confirmed_transfer_jpy: 202208
+        excess_component_source: null
+        stage_1_committed_amount_jpy: 5861859
+        aggregate_reference_ceiling_before_stage_jpy: 5285854
+        proposed_purchase_amount_jpy: 1946765
+        aggregate_reference_ceiling_remaining_after_stage_jpy: 3339089
+        calculation: "min(楽天証券の現在買付可能額1,946,765円, ACT-S3-004未投入上限5,285,854円) = 1,946,765円"
+        order_ticket:
+          broker: "楽天証券"
+          product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+          account_type: "特定口座"
+          order_method: "投資信託の金額指定買付"
+          amount_jpy: 1946765
+          point_use: "使わない"
+          distribution_course: "再投資型"
+          nisa_growth_quota_used_jpy: 0
+          prospectus_action: "交付目論見書を確認し、同意チェックを入れる"
+          confirmation_screen: "省略せず、商品・口座・金額・ポイント不使用・再投資型・注文受付日を確認してから発注する"
+        execution_preflight: "注文入力時に楽天証券の買付可能額が1,946,765円以上であることを確認する。減少している場合だけ実買付可能額へ注文額を下げて再承認する"
+        approval:
+          approved_at: "2026-08-13"
+          approved_by: "user_execution_report"
+          approval_evidence_ref: "transactions/evidence/2026-08-13_rakuten_all_country_stage2a_order.yaml"
+        actual_order:
+          status: "completed_filled"
+          order_number: "1268"
+          order_placed_at: "2026-08-13T09:05:00+09:00"
+          ordered_amount_jpy: 1946765
+          trade_date: "2026-08-14"
+          settlement_date: "2026-08-20"
+          fee_jpy: 0
+          point_use_jpy: 0
+          allotted_units: 498928
+          execution_nav_jpy_per_10000_units: 39019
+          settlement_amount_jpy: 1946765
+          execution_confirmed_at: "2026-08-21"
+          transaction_ref: "transactions/ledger.yaml#rakuten-all-country-1946765-buy-fill-2026-08-14"
+          evidence_ref: "transactions/evidence/2026-08-21_rakuten_all_country_fills.yaml#fills.order_1268"
+        committed_amount_jpy: 1946765
+        execution_allowed: false
+        user_approval_status: "approved"
+      - stage_id: "ACT-S3-005-STAGE-2B"
+        status: "completed_filled_pending_settlement"
+        prepared_at: "2026-08-26"
+        source_bucket: "楽天証券で米ドルとして保有していた余剰現金の円転後資金"
+        actual_purchase_amount_jpy: 376158
+        stage_1_and_2a_committed_amount_jpy: 7808624
+        aggregate_reference_ceiling_before_stage_jpy: 3339089
+        aggregate_reference_ceiling_remaining_after_stage_jpy: 2962931
+        calculation: "11,147,713円 - 5,861,859円 - 1,946,765円 - 376,158円 = 2,962,931円"
+        actual_order:
+          status: "completed_filled_pending_settlement"
+          order_number: "1282"
+          order_placed_at: "2026-08-26T22:38:00+09:00"
+          ordered_amount_jpy: 376158
+          trade_date: "2026-08-28"
+          settlement_date: "2026-09-03"
+          fee_jpy: 0
+          allotted_units: 96843
+          execution_nav_jpy_per_10000_units: 38842
+          transaction_ref: "transactions/ledger.yaml#rakuten-all-country-376158-buy-fill-2026-08-28"
+          evidence_ref: "transactions/evidence/2026-08-29_rakuten_all_country_cash_sweep_fills.yaml#fills.order_1282"
+        committed_amount_jpy: 376158
+        execution_allowed: false
+        user_approval_status: "approved_and_executed"
+    order_specification:
+      status: "stage_1_stage_2a_stage_2b_completed_followup_cash_pending"
+      execution_allowed: false
+      account_type: "楽天証券・特定口座"
+      side: "buy"
+      quantity_rule: "第1段階は5,861,859円。後続段階は楽天証券の実買付可能額とACT-S3-004未投入残額の小さい方を金額指定する"
+      order_type: "investment_fund_amount_order"
+      limit_price_rule: null
+      timing: "ACT-S3-004承認後、各資金源が楽天証券で買付可能になった都度。全資金源の準備完了や相場条件を待たない"
+      expiration: "第1段階は確認画面で注文受付日・約定日・取消可否を確認する。基準価額を指定する注文ではない"
+      partial_fill_handling: "投資信託の金額指定注文として受理額・約定額を記録し、未投入差額は次段階へ繰り越す。重複注文を出さない"
+      unfilled_or_expired_reorder_rule: "注文不成立・取消・受理額差異があればACT-S3-004未投入残額と買付可能額を再計算し、ユーザ再承認。自動再注文しない"
+      proceeds_destination: "全世界株式コア"
+      pretrade_tax_check: "特定口座を選択し、NISA成長投資枠買付可能額0円を確認済み。ポイント70円は政策分母外のため使用しない"
+      user_approval_required: true
+      user_approval_status: "approved"
+    human_actionability:
+      actor: "codex_and_user"
+      next_action: "第1段階5,861,859円、第2A段階1,946,765円、楽天証券余剰米ドル由来376,158円は約定済み。三菱UFJ銀行の467,987円は大型購入用として投入対象外。Codexは調整後の未投入参考上限2,494,944円について、その他の後続資金が買付可能になったイベントごとに実額を再計算する"
+      required_inputs:
+        - key: "investable_cash_result"
+          label: "ACT-S3-004で確定する投資可能現金額"
+          availability: "resolved_from_repository"
+          source_ref: "plans/2026/2026-08-09_act_s3_execution.yaml#tasks[ACT-S3-004]"
+          value_summary: "2026-08-10承認時の基準上限11,147,713円から、2026-08-29承認の大型購入用467,987円を除外。現行の調整後参考上限は10,679,726円。全額一括ではなく買付可能化順に実行する"
+          as_of: "2026-08-29"
+          refresh_rule: "ACT-S3-004完了時に計算結果を取り込む"
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "ACT-S3-004は2026-08-10に完了"
+          scope: "task:ACT-S3-004"
+        - key: "core_order_constraints"
+          label: "買付可能額と楽天証券投資信託買付画面の設定"
+          availability: "resolved_from_repository"
+          source_ref: "transactions/evidence/2026-08-10_rakuten_all_country_purchase_screen.yaml"
+          value_summary: "2026-08-10 14:23時点の買付可能額5,861,859円、特定口座、再投資型、ポイント不使用、NISA成長投資枠0円を確認済み"
+          as_of: "2026-08-10T14:23:00+09:00"
+          refresh_rule: "承認から発注までに買付可能額が減少した場合だけ注文額を再計算する。増加分は後続段階へ分離する"
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "approval"
+          trigger_evidence: "ユーザ提供の楽天証券投資信託買付画面を証拠転記済み"
+          scope: "portfolio"
+        - key: "nomura_existing_cash_transfer"
+          label: "野村證券の既存流動現金1,744,557円の楽天証券移動"
+          availability: "resolved_from_repository"
+          source_ref: "transactions/ledger.yaml#nomura-existing-cash-1744557-transfer-to-rakuten-2026-08-13"
+          value_summary: "2026-08-13に楽天証券へ入金済み・投資可能。移動額1,744,557円に対し現在買付可能額は1,946,765円。差額202,208円の資金源は未分類。野村2銘柄の売却代金485,024円とは別資金"
+          as_of: "2026-08-13"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "approval"
+          trigger_evidence: "ユーザが楽天証券への移動完了を報告"
+          scope: "task:ACT-S3-005"
+      decision_needed: null
+      decision_support_owner: null
+      unblock_condition: "第1段階の約定または注文不成立・取消が判明する。後続段階は追加移管が楽天証券の買付可能額へ反映された時点で独立して進められる"
+      completion_evidence: ["買付注文・約定明細", "買付後の現金残高", "生活防衛資金2,000,000円の残存確認"]
+  - id: "ACT-S3-006"
+    status: "completed"
+    completed_at: "2026-08-12"
+    action_kind: "sell"
+    allocation_effect: "full_exit"
+    workstream: "C_crypto_exit"
+    scheduling: "parallel_now_after_order_parameters_and_user_approval"
+    depends_on: []
+    action: "BTC・ETH・XRPの取得履歴を確保し、3銘柄を全売却する"
+    completion_condition: "暗号資産残高0円"
+    actual_execution:
+      evidence_ref: "transactions/evidence/2026-08-14_sale_proceeds_transfers_to_rakuten.yaml"
+      transaction_ref: "transactions/ledger.yaml#crypto-btc-eth-xrp-full-liquidation-2026-08-12"
+      assets_sold: ["BTC", "ETH", "XRP"]
+      portfolio_balance_after_sale_jpy: 0
+      previous_reported_proceeds_components_jpy: [7346, 302820]
+      previous_reported_proceeds_total_jpy: 310166
+      reported_proceeds_by_asset_jpy: {XRP: 7346, BTC: 171669, ETH: 131351}
+      reported_proceeds_total_jpy: 310366
+      latest_report_difference_jpy: 200
+      proceeds_tax_status: "reported_aggregate_not_tax_reconciled"
+      per_asset_breakdown_status: "user_reported_cash_amounts_not_tax_reconciled"
+      acquisition_history_status: "not_obtained_before_sale_follow_up_in_ACT-S3-016"
+    reference_draft:
+      as_of: "2026-08-09"
+      raw_evidence_ref: "data/raw/evidence/2026-08-09_crypto_summary.json"
+      values:
+        BTC: {market_value_jpy: 177410, profit_loss_jpy: -46181, implied_acquisition_cost_jpy: 223591}
+        ETH: {market_value_jpy: 137310, profit_loss_jpy: -44613, implied_acquisition_cost_jpy: 181923}
+        XRP: {market_value_jpy: 7702, profit_loss_jpy: -5297, implied_acquisition_cost_jpy: 12999}
+      total_market_value_jpy: 322422
+      total_profit_loss_jpy: -96091
+      total_implied_acquisition_cost_jpy: 418513
+      implied_cost_formula: "market_value_jpy - profit_loss_jpy"
+      tax_use_allowed: false
+      tax_limitation: "評価額と損益からの逆算値であり、確定申告用の取得履歴・年間取引報告書の代替にしない"
+      known_missing: ["現在数量", "利用サービス", "正式な取得履歴", "サービスの売却画面・注文条件"]
+    order_specification:
+      status: "completed_from_user_report_order_details_unavailable"
+      execution_allowed: false
+      account_type: "暗号資産取引サービス（利用サービス未確認）"
+      side: "sell"
+      quantity_rule: "BTC・ETH・XRPの実残高全量を売却済み。銘柄別数量は未確認"
+      order_type: "unknown_from_post_execution_user_report"
+      limit_price_rule: null
+      timing: "2026-08-12に全売却完了をユーザ報告。正確な注文・約定日時は未確認"
+      expiration: "unknown_not_in_user_report"
+      partial_fill_handling: "途中経過は未確認。最終暗号資産残高0円を確認"
+      unfilled_or_expired_reorder_rule: "残高0円のため再注文なし"
+      proceeds_destination: "ACT-S3-007で全世界株式コアへ移動"
+      pretrade_tax_check: "取得履歴は売却前に確保されなかった。ACT-S3-016で取引履歴・取得価額・損益を事後照合する"
+      user_approval_required: true
+      user_approval_status: "approved"
+    human_actionability:
+      actor: "codex"
+      next_action: "売却タスクは完了済み。Codexは暗号資産残高0円と楽天証券入金額310,366円をACT-S3-007へ引き渡し、取得履歴・正式な銘柄別約定情報の不足をACT-S3-016の税務資料待ちとして追跡する"
+      required_inputs:
+        - key: "crypto_snapshot_balance"
+          label: "BTC・ETH・XRPの基準時点評価額と損益"
+          availability: "resolved_from_repository"
+          source_ref: "data/raw/evidence/2026-08-09_crypto_summary.json"
+          value_summary: "合計322,422円、評価損益-96,091円。銘柄別評価額・損益を元JSONごと保存済み"
+          as_of: "2026-08-09"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "基準スナップショットに暗号資産評価額と損益が存在"
+          scope: "portfolio:crypto"
+        - key: "crypto_acquisition_history_evidence"
+          label: "BTC・ETH・XRPを含む取引履歴CSVまたは年間取引報告書"
+          availability: "known_event_pending"
+          source_ref: "transactions/tax/2026.yaml#sales[transaction_ref=transactions/ledger.yaml#crypto-btc-eth-xrp-full-liquidation-2026-08-12]"
+          value_summary: "評価額・損益の元JSONは保存済みだが、税務に使える取引履歴・年間資料は含まれていない"
+          as_of: "2026-08-12"
+          refresh_rule: "売却後の取引履歴を出力し、ACT-S3-016で取得価額・実現損益を照合する"
+          request_from_user_if: "暗号資産サービスで売却後の取引履歴が発行され、リポジトリから取得できない場合"
+          blocking: false
+          owner: "user"
+          verification_stage: "post_trade"
+          trigger_evidence: "全売却は完了したが、保存済みcrypto summaryとユーザ売却報告は取得履歴・取得価額・銘柄別約定を含まない"
+          scope: "portfolio:crypto"
+        - key: "crypto_current_balance_and_sell_screen"
+          label: "BTC・ETH・XRPの売却後残高"
+          availability: "resolved_from_repository"
+          source_ref: "transactions/evidence/2026-08-12_crypto_full_liquidation_user_report.yaml"
+          value_summary: "2026-08-12に全売却し、暗号資産ポートフォリオ残高0円とユーザ報告済み"
+          as_of: "2026-08-12"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "post_trade"
+          trigger_evidence: "ユーザがBTC・ETH・XRP全売却と残高0円を報告"
+          scope: "portfolio:crypto"
+      decision_needed: null
+      decision_support_owner: null
+      unblock_condition: "completed"
+      completion_evidence: ["2026-08-12のユーザ全売却報告", "BTC・ETH・XRPのポートフォリオ残高0円", "2026-08-14の銘柄別楽天証券入金報告"]
+  - id: "ACT-S3-007"
+    status: "completed"
+    completed_at: "2026-08-21"
+    action_kind: "buy"
+    allocation_effect: "cash_amount"
+    workstream: "C_crypto_exit"
+    scheduling: "start_when_dependencies_complete"
+    action: "暗号資産売却代金を全世界株式コアへ投入する"
+    completion_condition: "暗号資産資金の移行完了"
+    depends_on: ["ACT-S3-006"]
+    known_state:
+      source_transaction_ref: "transactions/ledger.yaml#crypto-btc-eth-xrp-full-liquidation-2026-08-12"
+      reported_yen_proceeds_jpy: 310366
+      crypto_portfolio_balance_jpy: 0
+      transfer_to_broker_status: "completed_credited_and_investable"
+      transfer_date: "2026-08-14"
+      transferred_to_rakuten_jpy: 310366
+      transfer_transaction_refs:
+        - "transactions/ledger.yaml#crypto-xrp-proceeds-transfer-to-rakuten-2026-08-14"
+        - "transactions/ledger.yaml#crypto-btc-proceeds-transfer-to-rakuten-2026-08-14"
+        - "transactions/ledger.yaml#crypto-eth-proceeds-transfer-to-rakuten-2026-08-14"
+      core_purchase_status: "completed_filled"
+      core_purchase_transaction_ref: "transactions/ledger.yaml#rakuten-all-country-795390-buy-order-2026-08-14"
+      exact_order_funding_allocation_status: "not_tracked_due_to_fungible_broker_cash"
+    order_specification:
+      status: "completed_filled"
+      execution_allowed: false
+      account_type: "楽天証券・特定口座"
+      side: "buy"
+      quantity_rule: "ACT-S3-007とACT-S3-014に対応する795,390円を金額指定で注文済み。口座内現金は資金源別に分離されないため、注文額を各売却代金へ円単位で割り当てない"
+      order_type: "investment_fund_amount_order"
+      limit_price_rule: null
+      timing: "2026-08-14に注文実行済み"
+      expiration: "投資信託注文のため、約定日・取消可否は楽天証券の注文照会に従う"
+      partial_fill_handling: "約定口数・約定基準価額・約定金額を記録し、注文額との差があれば未投資残高として再計算する"
+      unfilled_or_expired_reorder_rule: "注文不成立・取消の場合は買付可能額を再確認し、ユーザ再承認。重複注文・自動再注文なし"
+      proceeds_destination: "全世界株式コア"
+      pretrade_tax_check: "利用口座区分とNISA利用可能枠を確認"
+      user_approval_required: true
+      user_approval_status: "approved"
+    actual_order:
+      status: "completed_filled"
+      order_number: "1274"
+      order_date: "2026-08-14"
+      ordered_amount_jpy: 795390
+      plan_task_associations: ["ACT-S3-007", "ACT-S3-014"]
+      exact_funding_share_jpy: null
+      account_type: "楽天証券・特定口座"
+      product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+      evidence_ref: "transactions/evidence/2026-08-21_rakuten_all_country_fills.yaml#fills.order_1274"
+      transaction_ref: "transactions/ledger.yaml#rakuten-all-country-795390-buy-order-2026-08-14"
+      trade_date: "2026-08-17"
+      settlement_date: "2026-08-21"
+      allotted_units: 204329
+      execution_nav_jpy_per_10000_units: 38927
+      fee_jpy: 0
+      settlement_amount_jpy: 795390
+    human_actionability:
+      actor: "codex"
+      next_action: "完了済み。795,390円の特定口座オルカンは204,329口、1万口当たり基準価額38,927円で約定した"
+      required_inputs:
+        - key: "crypto_sale_settlement"
+          label: "ACT-S3-006の税・手数料控除後受取額と入金状態"
+          availability: "resolved_from_repository"
+          source_ref: "transactions/evidence/2026-08-14_sale_proceeds_transfers_to_rakuten.yaml#aggregate"
+          value_summary: "XRP 7,346円、BTC 171,669円、ETH 131,351円、合計310,366円が楽天証券へ入金済み・投資可能"
+          as_of: "2026-08-14"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "approval"
+          trigger_evidence: "ユーザが銘柄別金額と楽天証券への入金完了を報告"
+          scope: "task:ACT-S3-006"
+        - key: "crypto_proceeds_core_constraints"
+          label: "入金先口座の買付可能額とNISA利用可能枠"
+          availability: "verify_at_execution"
+          source_ref: null
+          value_summary: null
+          as_of: null
+          refresh_rule: "コア買付注文の設定直前に確認"
+          request_from_user_if: null
+          blocking: false
+          owner: "user_and_external_broker"
+          verification_stage: "order_entry"
+          trigger_evidence: "ACT-S3-007の具体的買付注文を入力する段階"
+          scope: "portfolio"
+      decision_needed: null
+      decision_support_owner: null
+      unblock_condition: "completed"
+      completion_evidence: ["transactions/evidence/2026-08-21_rakuten_all_country_fills.yaml#fills.order_1274", "204,329口・1万口当たり基準価額38,927円の約定明細"]
+  - id: "ACT-S3-008"
+    status: "completed"
+    completed_at: "2026-08-13"
+    action_kind: "sell"
+    allocation_effect: "full_exit"
+    workstream: "D_direct_semiconductor_reduction"
+    scheduling: "parallel_now_after_order_parameters_and_user_approval"
+    depends_on: []
+    action: "ヴァンエック・半導体株ETF 1株を全売却する"
+    completion_condition: "保有0株"
+    known_state: "1株全量約定・受渡完了・保有0株。約定単価585.83 USD、手数料2.91 USD、USD受渡代金582.92 USD、表示為替159.140円/USD。円建て税務損益は未確定"
+    next_required_evidence: "年間取引報告書の円建て取得費、円建て手数料、税、円建て実現損益"
+    actual_execution:
+      evidence_ref: "transactions/evidence/2026-08-14_rakuten_smh_settlement.yaml"
+      transaction_ref: "transactions/ledger.yaml#rakuten-1262-smh-sell-fill"
+      order_number: "1262"
+      order_placed_at: "2026-08-09T22:55:00+09:00"
+      settlement_currency: "USD"
+      ordered_quantity: 1
+      filled_quantity: 1
+      unfilled_quantity: 0
+      order_price_usd: 583.49
+      execution_price_usd: 585.83
+      displayed_settlement_amount_usd: 582.92
+      displayed_fee_usd: 2.91
+      displayed_exchange_rate_jpy_per_usd: 159.140
+      gross_minus_displayed_settlement_amount_usd: 2.91
+      displayed_values_reconciliation_status: "resolved"
+      trade_date_japan: "2026-08-12"
+      settlement_date_japan: "2026-08-14"
+      remaining_quantity: 0
+      realized_gain_loss_direction: "gain_user_confirmed"
+      realized_gain_loss_jpy: null
+      status: "settlement_recorded_pending_annual_tax_reconciliation"
+    order_specification:
+      status: "filled"
+      execution_allowed: false
+      account_type: "特定口座（源泉徴収あり）"
+      side: "sell"
+      quantity_rule: "1株全量。追加・重複注文を出さない"
+      order_type: "existing_order_type_unconfirmed"
+      limit_price_rule: null
+      timing: "既存注文を約定監視"
+      expiration: "既存注文画面で確認待ち"
+      partial_fill_handling: "1株注文のため部分約定なし。失効時は再設定前にユーザ確認"
+      unfilled_or_expired_reorder_rule: "注文種別・価格・期限を再設定しユーザ承認。自動再注文しない"
+      proceeds_destination: "ACT-S3-014で全世界株式コアへ移動"
+      pretrade_tax_check: "特定口座の取得価額・実現損益を約定後に記録"
+      user_approval_required: true
+      user_approval_status: "approved"
+    human_actionability:
+      actor: "codex_and_user"
+      next_action: "CodexはACT-S3-009の最新基準価額・政策分母を更新してSOX調整案を作る。SMHの受渡は完了済みで、年間資料発行後に円建て取得費・手数料・税・実現損益を突合する"
+      required_inputs:
+        - key: "smh_existing_order_result"
+          label: "SMH 1株の受渡・税務明細"
+          availability: "resolved_from_repository"
+          source_ref: "transactions/evidence/2026-08-14_rakuten_smh_settlement.yaml"
+          value_summary: "1株を585.83 USDで全量約定。手数料2.91 USD、USD受渡代金582.92 USD、表示為替159.140円/USD、2026-08-14受渡完了"
+          as_of: "2026-08-14"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "settlement"
+          trigger_evidence: "注文番号1262の受渡画面に約定単価585.83 USD、受渡代金582.92 USD、手数料2.91 USD、国内受渡日2026-08-14が表示"
+          scope: "security:SMH"
+      decision_needed: null
+      decision_support_owner: null
+      unblock_condition: "completed"
+      completion_evidence: ["1株の約定明細", "SMH保有残高0株"]
+  - id: "ACT-S3-009"
+    status: "in_progress"
+    action_kind: "sell"
+    allocation_effect: "target_ratio"
+    allocation_basis:
+      denominator: "long_term_investable_assets_jpy"
+      denominator_definition_ref: "strategy/versions/2026-08-09-v2.yaml#scope.allocation_denominator_definition"
+      measurement_time: "immediately_before_order_configuration"
+      targets:
+        - numerator: "direct_semiconductor_market_value_jpy"
+          relation: "approximately_equal"
+          value: 0.08
+    workstream: "D_direct_semiconductor_reduction"
+    scheduling: "start_when_dependencies_complete"
+    action: "特定口座のニッセイSOXを減らし、直接半導体を長期運用資産の8%へ調整する"
+    completion_condition: "実時点の直接半導体比率がおおむね8%"
+    calculation_rule: "直接半導体の実時点評価額 / 実時点の長期運用資産額 = 8%となる口数を再計算"
+    depends_on: ["ACT-S3-008"]
+    order_specification:
+      status: "pending_execution_time_configuration"
+      execution_allowed: false
+      account_type: "特定口座（源泉徴収あり）"
+      side: "sell"
+      quantity_rule: "実行直前の直接半導体評価額がlong_term_investable_assets_jpyの約8%となる口数"
+      order_type: "pending_user_approval"
+      limit_price_rule: null
+      timing: "ACT-S3-008約定と最新基準価額確認後に指定"
+      expiration: "注文種別と同時に指定"
+      partial_fill_handling: "約定口数で比率を再計算し、残注文の維持・取消をユーザ承認"
+      unfilled_or_expired_reorder_rule: "最新基準価額と分母で口数を再計算しユーザ再承認"
+      proceeds_destination: "ACT-S3-014で全世界株式コアへ移動"
+      pretrade_tax_check: "特定口座の取得価額、含み益、税引後手取額を確認"
+      user_approval_required: true
+      user_approval_status: "pending"
+    human_actionability:
+      actor: "codex_and_user"
+      next_action: "SMH約定後、Codexはリポジトリ確認済みの課税・NISA SOX残高、取得価額、評価額を起点に最新基準価額と政策分母を更新し、8%となる売却口数と注文方式の承認を求める。現在数量は注文入力時に共通確認する"
+      required_inputs:
+        - key: "sox_basis_position"
+          label: "課税・NISA SOXの基準残高、取得価額、評価額"
+          availability: "resolved_from_repository"
+          source_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=NISSEI_SOX_1,NISSEI_SOX_2]"
+          value_summary: "課税860,960口、NISA415,654口。取得価額・評価額も記録済み"
+          as_of: "2026-08-09"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "基準スナップショットに課税・NISA SOX明細が存在"
+          scope: "theme:direct_semiconductor"
+        - key: "smh_settlement_result"
+          label: "SMH既存注文の約定結果"
+          availability: "resolved_from_repository"
+          source_ref: "transactions/ledger.yaml#rakuten-1262-smh-sell-fill"
+          value_summary: "SMH 1株は全量約定・受渡完了、保有0株。約定単価585.83 USD、手数料2.91 USD、USD受渡代金582.92 USD、表示為替159.140円/USD"
+          as_of: "2026-08-14"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "ACT-S3-008の全量約定を取引台帳へ登録済み"
+          scope: "task:ACT-S3-008"
+        - key: "sox_execution_market_data"
+          label: "最新SOX基準価額と注文設定直前の政策分母"
+          availability: "refresh_by_codex"
+          source_ref: "data/normalized/snapshot_2026_08.yaml"
+          value_summary: "2026-08-09基準値あり。実行値は要更新"
+          as_of: "2026-08-09"
+          refresh_rule: "売却口数計算の直前に最新一次情報と最新資産状態で更新"
+          request_from_user_if: null
+          blocking: true
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "ACT-S3-008完了によりACT-S3-009の注文案作成を開始"
+          scope: "theme:direct_semiconductor"
+      decision_needed: "売却口数、注文種別、注文日、部分約定・失効時の扱い"
+      decision_support_owner: "Codex"
+      unblock_condition: "実時点分母で売却口数を再計算し、注文仕様をユーザが承認する"
+      completion_evidence: ["課税SOXの約定明細", "約定後の直接半導体比率がおおむね8%"]
+  - id: "ACT-S3-010"
+    status: "completed"
+    completed_at: "2026-08-12"
+    action_kind: "sell"
+    allocation_effect: "target_ratio"
+    allocation_basis:
+      denominator: "long_term_investable_assets_jpy"
+      denominator_definition_ref: "strategy/versions/2026-08-09-v2.yaml#scope.allocation_denominator_definition"
+      measurement_time: "immediately_before_order_configuration"
+      targets:
+        - numerator: "CIBR_market_value_jpy"
+          relation: "approximately_equal"
+          value: 0.03
+    workstream: "E_cybersecurity_reduction"
+    scheduling: "parallel_now_after_execution_refresh_and_user_approval"
+    depends_on: []
+    action: "CIBRの時価評価額を、実行直前のlong_term_investable_assets_jpyの約3%まで縮小する"
+    completion_condition: "CIBR時価評価額 / 実行直前のlong_term_investable_assets_jpyがおおむね3%"
+    actual_execution:
+      evidence_ref: "transactions/evidence/2026-08-12_rakuten_cibr_fill.yaml"
+      transaction_ref: "transactions/ledger.yaml#rakuten-1266-cibr-sell-fill"
+      order_number: "1266"
+      order_placed_at: "2026-08-12T23:06:00+09:00"
+      order_type: "market"
+      execution_condition: "day"
+      extended_hours: false
+      settlement_currency: "JPY"
+      account_type: "特定口座"
+      ordered_quantity: 14
+      filled_quantity: 14
+      unfilled_quantity: 0
+      remaining_quantity: 74
+      trade_date_japan: "2026-08-13"
+      settlement_date_japan: "2026-08-17"
+      execution_price_usd: null
+      net_proceeds_jpy: null
+      status: "filled_pending_settlement_details"
+      provisional_post_fill_ratio: 0.0300598
+      provisional_ratio_basis: "2026-08-09 CIBR価格と2026-08-12現在状態政策分母による中間値。ACT-S3-012で最新値を再計算"
+    reference_calculation_ref: "plans/2026/2026-08-09_act_s3_execution.yaml#reference_targets_at_basis.cybersecurity_transition"
+    reference_draft:
+      as_of: "2026-08-09"
+      current_shares: 88
+      reference_shares_to_sell: 14
+      reference_remaining_shares: 74
+      reference_remaining_value_jpy: 1142614
+      reference_ratio: 0.030041
+      executable: false
+      execution_quantity_intent: "ユーザが2026-08-10にCIBR 14株の売却設定を承認し、2026-08-12に14株すべて約定。追加注文は行わない"
+      post_fill_recalculation_rule: "約定後のCIBR時価評価額とlong_term_investable_assets_jpyで実績比率を再計算する"
+    current_state_recheck:
+      checked_at: "2026-08-12"
+      purpose: "国内株3件と暗号資産全売却を現在状態へ反映した後も14株案が参考目標に整合するかの中間確認"
+      projected_total_assets_jpy: 40027544
+      projected_total_assets_source: "data/normalized/snapshot_2026_08.yamlにholdings/current.yamlとtransactions/ledger.yamlを重ねた現在状態"
+      emergency_fund_excluded_jpy: 2000000
+      points_excluded_jpy: 16233
+      provisional_long_term_investable_assets_jpy: 38011311
+      denominator_formula: "40027544 projected total assets - 2000000 emergency fund - 16233 points"
+      cibr_price_basis_as_of: "2026-08-09"
+      price_refresh_completed: false
+      reference_remaining_shares: 74
+      reference_remaining_value_jpy: 1142614
+      reference_ratio_after_sale: 0.0300598
+      reference_target_value_jpy: 1140339.33
+      reference_value_above_target_jpy: 2274.67
+      quantity_conclusion: "14株売却・74株残し案を維持。基準価格を据え置いた中間値で約3.006%"
+      executable: false
+      execution_blocker: null
+    order_specification:
+      status: "filled"
+      execution_allowed: false
+      broker_capability_ref: "brokers/rakuten/us_equity_sell/versions/2026-08-10.yaml"
+      broker: "楽天証券"
+      symbol: "CIBR"
+      account_type: "特定口座（源泉徴収あり）"
+      side: "sell"
+      quantity: 14
+      expected_remaining_quantity: 74
+      quantity_rule: "2026-08-10のユーザ指定により14株を売却し、約定後74株を残す"
+      order_type: "market"
+      limit_price_rule: null
+      intraday_quote_required: false
+      realtime_bid_ask_monitoring_required: false
+      price_monitoring_rule: "配分整合性の確認には最新取得可能な参考価格を使う。分単位の監視、bid/ask追従、細かな指値設定は行わず、リアルタイム気配値がないことを成行注文のブロッカーにしない"
+      timing: "楽天証券画面で成行注文を受け付けている時間に入力し、執行条件の本日中に表示された米国市場日が意図した日であることを確認する。夜間の値動き監視は不要"
+      expiration: "本日中（注文入力日の米国市場取引日）"
+      extended_hours_enabled: false
+      settlement_currency: "JPY"
+      usd_mmf_auto_purchase: "not_applicable_because_settlement_currency_is_JPY"
+      trading_pin_handling: "ユーザが楽天証券画面へ直接入力し、会話・リポジトリへ保存しない"
+      skip_confirmation_screen: false
+      confirmation_screen_checks: ["銘柄CIBR", "売却14株", "成行", "本日中", "時間外取引なし", "特定口座", "円で受け取る"]
+      partial_fill_handling: "同一注文の残数量を維持し、重複注文を出さない。取引時間終了後に約定数量と残数量を記録する"
+      unfilled_or_expired_reorder_rule: "未約定残が失効した場合は自動再注文せず、残数量と最新配分を再確認してユーザの再承認を得る"
+      proceeds_destination: "ACT-S3-014で全世界株式コアへ移動"
+      pretrade_tax_check: "確認画面の見込み損益・予想受渡代金を確認し、約定後は取得費、手数料、税、実現損益、純受取額をtransactions/ledger.yamlとtransactions/tax/2026.yamlへ記録する"
+      user_approval_required: true
+      user_approval_status: "approved"
+      quantity_intent_status: "approved_14_shares"
+      settings_approval_status: "approved_and_executed"
+    human_actionability:
+      actor: "codex"
+      next_action: "14株は全量約定・受渡完了で追加注文不要。受渡代金222,956円と手数料1,111円を取引台帳へ記録済み。Codexは残り74株を現在保有として扱い、最新CIBR価格と政策分母による実績比率をACT-S3-012で再計算する。約定単価・取得費・税・実現損益は年間資料で突合する"
+      required_inputs:
+        - key: "cibr_basis_position"
+          label: "CIBRの基準保有、取得価額、評価額、損益"
+          availability: "resolved_from_repository"
+          source_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=CIBR]"
+          value_summary: "88株、平均取得価額76.66 USD、評価額1,358,784円、評価損益+326,412円"
+          as_of: "2026-08-09"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "基準スナップショットにCIBR明細が存在"
+          scope: "security:CIBR"
+        - key: "cibr_account_metadata"
+          label: "CIBRの口座・税区分"
+          availability: "resolved_from_repository"
+          source_ref: "holdings/versions/2026-08-09-v2.yaml#instruments.CIBR"
+          value_summary: "楽天証券・特定口座（源泉徴収あり）"
+          as_of: "2026-08-09"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "holdings正本にCIBR口座・税区分が存在"
+          scope: "security:CIBR"
+        - key: "cibr_reference_calculation"
+          label: "3%目標の基準計算"
+          availability: "resolved_from_repository"
+          source_ref: "plans/2026/2026-08-09_act_s3_execution.yaml#reference_targets_at_basis.cybersecurity_transition"
+          value_summary: "参考分母38,035,678円、目標1,141,070円、参考14株売却・74株残し"
+          as_of: "2026-08-09"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "承認済み計画にCIBR参考計算が存在"
+          scope: "security:CIBR"
+        - key: "cibr_current_state_recheck"
+          label: "約定前に行ったCIBR 14株案の中間確認"
+          availability: "resolved_from_repository"
+          source_ref: "plans/2026/2026-08-09_act_s3_execution.yaml#tasks[id=ACT-S3-010].current_state_recheck"
+          value_summary: "暫定分母38,011,311円。2026-08-09価格据え置きで14株売却・74株残し後は約3.006%と確認し、その後14株すべて約定"
+          as_of: "2026-08-12"
+          refresh_rule: "ACT-S3-012で最新価格・為替・政策分母による実績比率へ更新"
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "国内株3件の確認済み約定をcurrent_state_projectionへ反映"
+          scope: "security:CIBR"
+        - key: "cibr_settlement_details"
+          label: "CIBR 14株の約定単価、円受取額、税務明細"
+          availability: "resolved_from_repository"
+          source_ref: "transactions/evidence/2026-08-21_rakuten_cibr_settlement.yaml#settlement"
+          value_summary: "注文番号1266で14株全量約定。受渡代金222,956円、手数料1,111円、国内受渡日2026-08-17。約定単価・取得費・税・実現損益は年間資料待ち"
+          as_of: "2026-08-21"
+          refresh_rule: "年間資料発行後に税務内訳を突合"
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "settlement"
+          trigger_evidence: "2026-08-21の受渡画面に円受渡代金222,956円と手数料1,111円が表示された"
+          scope: "security:CIBR"
+        - key: "cibr_broker_order_capabilities"
+          label: "楽天証券の米国株売却画面の入力項目と選択肢"
+          availability: "resolved_from_repository"
+          source_ref: "brokers/rakuten/us_equity_sell/versions/2026-08-10.yaml"
+          value_summary: "数量、指値／成行／逆指値／トレイリング、本日中、時間外、特定口座、円／ドル受取、米ドルMMF、暗証番号、確認画面省略を確認済み"
+          as_of: "2026-08-10"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "ユーザ提供の楽天証券米国株売却画面を証拠転記済み"
+          scope: "security:CIBR"
+      decision_needed: null
+      decision_support_owner: null
+      unblock_condition: "completed"
+      completion_evidence: ["注文番号1266のCIBR 14株全量約定画面", "残り74株と暫定比率約3.006%", "ACT-S3-012で行う最新値による最終実績比率確認"]
+  - id: "ACT-S3-011"
+    status: "not_started"
+    action_kind: "sell"
+    allocation_effect: "ratio_cap"
+    allocation_basis:
+      denominator: "long_term_investable_assets_jpy"
+      denominator_definition_ref: "strategy/versions/2026-08-09-v2.yaml#scope.allocation_denominator_definition"
+      measurement_time: "after_preceding_satellite_sales_and_immediately_before_order_configuration"
+      targets:
+        - numerator: "total_satellite_market_value_jpy"
+          relation: "maximum"
+          value: 0.20
+    workstream: "F_total_satellite_cap"
+    scheduling: "start_when_dependencies_complete"
+    action: "トヨタを100株単位で必要最小限だけ売却する"
+    completion_condition: "サテライト全体が20%以下"
+    calculation_rule: "実時点評価額で20%以下へ入れる最小100株単位を再計算"
+    depends_on:
+      - "ACT-S3-001"
+      - "ACT-S3-002"
+      - "ACT-S3-009"
+      - "ACT-S3-010"
+    order_specification:
+      status: "pending_execution_time_configuration"
+      execution_allowed: false
+      account_type: "特定口座（源泉徴収あり）"
+      side: "sell"
+      quantity_rule: "先行売却後のサテライト比率を20%以下へ入れる必要最小限の100株単位"
+      order_type: "pending_user_approval"
+      limit_price_rule: null
+      timing: "依存タスク完了後、最新価格と分母で再計算して指定"
+      expiration: "注文種別と同時に指定"
+      partial_fill_handling: "約定株数でサテライト比率を再計算し、20%以下なら残注文取消を検討"
+      unfilled_or_expired_reorder_rule: "最新価格と分母で最小100株単位を再計算しユーザ再承認"
+      proceeds_destination: "ACT-S3-014で全世界株式コアへ移動"
+      pretrade_tax_check: "取得価額、含み益、税引後手取額、同年損失との通算候補を確認"
+      user_approval_required: true
+      user_approval_status: "pending"
+    human_actionability:
+      actor: "codex_and_user"
+      next_action: "依存タスク完了後、Codexはリポジトリ確認済みのトヨタ800株・平均取得価額532円と依存タスク実績を起点に、最新価格・政策分母を更新してサテライト20%以下に必要な最小100株単位と注文案を作る。現在数量は注文入力時に共通確認する"
+      required_inputs:
+        - key: "toyota_basis_position"
+          label: "トヨタの基準保有、取得価額、評価額"
+          availability: "resolved_from_repository"
+          source_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=7203]"
+          value_summary: "800株、平均取得価額532円、2026-08-09評価額2,384,000円"
+          as_of: "2026-08-09"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "基準スナップショットにトヨタ明細が存在"
+          scope: "security:7203"
+        - key: "preceding_sales_results"
+          label: "依存タスクの約定結果"
+          availability: "known_event_pending"
+          source_ref: "plans/2026/2026-08-09_act_s3_execution.yaml#tasks[ACT-S3-001,ACT-S3-002,ACT-S3-009,ACT-S3-010]"
+          value_summary: "依存タスク未完了"
+          as_of: "2026-08-10"
+          refresh_rule: "全依存タスク完了後、トヨタ注文設定直前に更新"
+          request_from_user_if: "依存タスクの約定結果をリポジトリから確認できない場合"
+          blocking: true
+          owner: "codex_and_user"
+          verification_stage: "settlement"
+          trigger_evidence: "ACT-S3-001、002、009、010が未完了"
+          scope: "task:ACT-S3-011-dependencies"
+        - key: "toyota_execution_market_data"
+          label: "最新トヨタ価格と長期運用資産額"
+          availability: "refresh_by_codex"
+          source_ref: "data/normalized/snapshot_2026_08.yaml"
+          value_summary: "基準値あり。実行値は要更新"
+          as_of: "2026-08-09"
+          refresh_rule: "最小100株単位の計算直前に更新"
+          request_from_user_if: null
+          blocking: true
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "ACT-S3-011の依存タスク完了後に注文案作成を開始"
+          scope: "security:7203"
+      decision_needed: "最小売却株数、成行／指値、期限、部分約定・失効時の扱い"
+      decision_support_owner: "Codex"
+      unblock_condition: "先行タスクが完了し、最新値による最小売却案をユーザが承認する"
+      completion_evidence: ["トヨタの約定明細", "約定後の全サテライト比率20%以下"]
+  - id: "ACT-S3-012"
+    status: "not_started"
+    action_kind: "calculate"
+    allocation_effect: "ratio_range"
+    allocation_basis:
+      denominator: "long_term_investable_assets_jpy"
+      denominator_definition_ref: "strategy/versions/2026-08-09-v2.yaml#scope.allocation_denominator_definition"
+      measurement_time: "after_all_first_stage_trade_settlements"
+      targets:
+        - numerator: "total_satellite_market_value_jpy"
+          relation: "range_min"
+          value: 0.15
+        - numerator: "total_satellite_market_value_jpy"
+          relation: "range_max"
+          value: 0.20
+    workstream: "H_first_stage_convergence"
+    scheduling: "start_when_dependencies_complete"
+    action: "全サテライトを実績値で再計算する"
+    completion_condition: "15%から20%なら第一段階終了"
+    depends_on:
+      - "ACT-S3-001"
+      - "ACT-S3-002"
+      - "ACT-S3-006"
+      - "ACT-S3-009"
+      - "ACT-S3-010"
+      - "ACT-S3-011"
+    human_actionability:
+      actor: "codex"
+      next_action: "すべての依存タスクの約定・受渡報告が揃ったら、Codexが最新評価額で全サテライト比率を再計算し第一段階終了可否を提示する"
+      required_inputs:
+        - key: "first_stage_actuals"
+          label: "第一段階依存タスクの約定・受渡実績"
+          availability: "known_event_pending"
+          source_ref: "plans/2026/2026-08-09_act_s3_execution.yaml#tasks"
+          value_summary: "依存タスク未完了"
+          as_of: "2026-08-10"
+          refresh_rule: "各依存タスクの約定・受渡完了時にtransactionsから集約"
+          request_from_user_if: "証券会社・暗号資産サービスの約定実績をリポジトリから確認できない場合"
+          blocking: true
+          owner: "codex_and_user"
+          verification_stage: "settlement"
+          trigger_evidence: "ACT-S3-012の依存タスクが未完了"
+          scope: "task:ACT-S3-012-dependencies"
+        - key: "first_stage_current_valuations"
+          label: "最新保有残高、価格、為替"
+          availability: "refresh_by_codex"
+          source_ref: "data/normalized/snapshot_2026_08.yaml"
+          value_summary: "2026-08-09基準値あり"
+          as_of: "2026-08-09"
+          refresh_rule: "第一段階終了判定の直前に全対象を更新"
+          request_from_user_if: null
+          blocking: true
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "ACT-S3-012の第一段階終了判定を開始"
+          scope: "portfolio"
+      decision_needed: "15～20%内なら第一段階を終了するか"
+      decision_support_owner: "Codex"
+      unblock_condition: "依存タスクの実績と最新評価データがすべて揃う"
+      completion_evidence: ["全サテライトの明細別評価表", "サテライト比率15～20%の計算結果または追加調整理由"]
+  - id: "ACT-S3-014"
+    status: "in_progress"
+    action_kind: "buy"
+    allocation_effect: "cash_amount"
+    workstream: "I_sale_proceeds_to_core"
+    scheduling: "event_driven_as_each_sale_settles"
+    depends_on: []
+    action: "各売却代金が利用可能になり次第、原則として全世界株式コアへ戻す"
+    completion_condition: "不要な現金滞留なし"
+    known_state: "現在までの売却代金はコアへ移行済み。既存バッチ795,390円に加え、CIBR由来222,956円を注文1277、SMH由来92,602円を注文1278でオルカンへ買付約定。今後ACT-S3-009・011等で新たな売却代金が発生した場合は同じタスクで処理する"
+    pending_fx_conversion:
+      status: "completed_settled_and_redeployed"
+      source_amount_usd_total: 1986.92
+      orders:
+        - transaction_ref: "transactions/ledger.yaml#rakuten-1275-usd-jpy-exchange-cibr-2026-08-21"
+          source: "CIBR売却代金"
+          source_amount_usd: 1404.00
+          applied_exchange_rate_jpy_per_usd: 158.838
+        - transaction_ref: "transactions/ledger.yaml#rakuten-1276-usd-jpy-exchange-smh-2026-08-21"
+          source: "SMH売却代金"
+          source_amount_usd: 582.92
+          applied_exchange_rate_jpy_per_usd: 158.859
+      trade_date: "2026-08-24"
+      settlement_date: "2026-08-25"
+      calculated_jpy_before_broker_rounding: 315610.64028
+      confirmed_settlement_amount_jpy: 315558
+      double_count_guard: "CIBR受渡画面の222,956円を別資金として加算しない"
+      redeployment_transaction_refs:
+        - "transactions/ledger.yaml#rakuten-all-country-222956-buy-fill-2026-08-25"
+        - "transactions/ledger.yaml#rakuten-all-country-92602-buy-fill-2026-08-26"
+    sale_proceeds_redeployment_batches:
+      - source: "CIBR売却代金"
+        amount_jpy: 222956
+        transaction_ref: "transactions/ledger.yaml#rakuten-all-country-222956-buy-fill-2026-08-25"
+        order_number: "1277"
+        status: "completed_filled_pending_settlement"
+      - source: "SMH売却代金"
+        amount_jpy: 92602
+        transaction_ref: "transactions/ledger.yaml#rakuten-all-country-92602-buy-fill-2026-08-26"
+        order_number: "1278"
+        status: "completed_filled_pending_settlement"
+    current_batch_execution:
+      status: "completed_filled"
+      order_date: "2026-08-14"
+      combined_order_amount_jpy: 795390
+      plan_task_associations: ["ACT-S3-007", "ACT-S3-014"]
+      funding_sources_in_scope: ["暗号資産売却代金", "野村證券国内株売却代金", "日産自動車売却代金"]
+      exact_yen_funding_allocation: null
+      allocation_reason: "楽天証券口座内現金は資金源別に分離されないため"
+      account_type: "楽天証券・特定口座"
+      product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+      transaction_ref: "transactions/ledger.yaml#rakuten-all-country-795390-buy-order-2026-08-14"
+      evidence_ref: "transactions/evidence/2026-08-21_rakuten_all_country_fills.yaml#fills.order_1274"
+      order_number: "1274"
+      trade_date: "2026-08-17"
+      settlement_date: "2026-08-21"
+      allotted_units: 204329
+      execution_nav_jpy_per_10000_units: 38927
+      fee_jpy: 0
+      clarification_ref: "transactions/evidence/2026-08-14_act_s3_014_nissan_redeployment_clarification.yaml"
+    current_state_projection:
+      source_snapshot_ref: "data/normalized/snapshot_2026_08.yaml"
+      position_overlay_ref: "holdings/current.yaml"
+      transaction_source_ref: "transactions/ledger.yaml"
+      removed_exited_symbols: ["7201", "9444", "2353"]
+      gross_proceeds_jpy: 520200
+      confirmed_nomura_net_proceeds_jpy: 485024
+      provisional_nissan_gross_less_confirmed_fee_jpy: 34445
+      current_state_sale_proceeds_jpy: 519469
+      is_net_proceeds: false
+      confirmed_liquid_cash_jpy: 485024
+      confirmed_liquid_cash_location: "楽天証券 投資可能流動現金"
+      nomura_proceeds_transfer_status: "completed_credited_and_investable"
+      nomura_proceeds_transfer_date: "2026-08-14"
+      nomura_proceeds_transfer_ref: "transactions/ledger.yaml#nomura-9444-2353-proceeds-transfer-to-rakuten-2026-08-14"
+      confirmed_nissan_settlement_amount_jpy: 34445
+      confirmed_nissan_settlement_location: "楽天証券 特定口座"
+      confirmed_domestic_stock_sale_proceeds_total_jpy: 519469
+      displayed_cibr_settlement_amount_jpy: 222956
+      confirmed_cibr_fee_jpy: 1111
+      missing: ["日産の年間資料との突合", "野村證券2件の手数料・税内訳", "全取引の年間資料との突合"]
+      calculation_rule: "履歴スナップショットを変更せず、野村2件は確認済み精算金額485,024円、日産は確認済み受渡金額34,445円で現在状態へ置換する"
+    related_transactions:
+      - "transactions/ledger.yaml#rakuten-1261-7201-sell-fill"
+      - "transactions/ledger.yaml#nomura-79153-9444-sell-fill"
+      - "transactions/ledger.yaml#nomura-79152-2353-sell-fill"
+      - "transactions/ledger.yaml#rakuten-1262-smh-sell-fill"
+      - "transactions/ledger.yaml#rakuten-1266-cibr-sell-fill"
+      - "transactions/ledger.yaml#nomura-9444-2353-proceeds-transfer-to-rakuten-2026-08-14"
+      - "transactions/ledger.yaml#rakuten-all-country-222956-buy-fill-2026-08-25"
+      - "transactions/ledger.yaml#rakuten-all-country-92602-buy-fill-2026-08-26"
+    order_specification:
+      status: "all_current_sale_proceeds_batches_completed_filled_future_sale_events_pending"
+      execution_allowed: false
+      account_type: "今回分は楽天証券・特定口座。後続分は各売却代金の利用可能化時に確認"
+      side: "buy"
+      quantity_rule: "既存795,390円、CIBR由来222,956円、SMH由来92,602円は買付約定済み。今後の売却代金は利用可能額を上限に再計算"
+      order_type: "investment_fund_amount_order"
+      limit_price_rule: null
+      timing: "現在までの売却代金は買付約定済み。今後の売却代金は買付可能になった都度指定"
+      expiration: "今回分は楽天証券の注文照会に従う。後続分は注文時に指定"
+      partial_fill_handling: "今回分は約定口数・約定基準価額を記録し、注文額との差があれば再計算。後続分は注文時に指定"
+      unfilled_or_expired_reorder_rule: "注文不成立・取消の場合は利用可能額を再確認してユーザ再承認。重複注文・自動再注文なし"
+      proceeds_destination: "全世界株式コア"
+      pretrade_tax_check: "利用口座区分とNISA利用可能枠を確認"
+      user_approval_required: true
+      user_approval_status: "approved"
+    human_actionability:
+      actor: "codex_and_user"
+      next_action: "CIBR由来222,956円とSMH由来92,602円のオルカン買付は約定済み。現在ユーザの操作はなく、CodexはACT-S3-009・011等の将来の売却代金が発生した時点で次のコア移行バッチを作成する"
+      required_inputs:
+        - key: "sale_proceeds_settlement"
+          label: "各売却の受渡日、税・手数料控除後買付可能額、利用口座"
+          availability: "resolved_from_repository"
+          source_ref: "transactions/ledger.yaml"
+          value_summary: "CIBR由来222,956円とSMH由来92,602円はオルカン買付約定済み。現在までの対象売却代金に未投資残高なし"
+          as_of: "2026-08-29"
+          refresh_rule: "新たな売却代金が発生した時点で更新"
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "settlement"
+          trigger_evidence: "注文番号1277・1278のオルカン約定画面とユーザの資金源説明"
+          scope: "portfolio:sale_proceeds"
+        - key: "core_purchase_account_capacity"
+          label: "買付先口座とNISA利用可能枠"
+          availability: "verify_at_execution"
+          source_ref: null
+          value_summary: null
+          as_of: null
+          refresh_rule: "各コア買付注文の設定直前に確認"
+          request_from_user_if: null
+          blocking: false
+          owner: "user_and_external_broker"
+          verification_stage: "order_entry"
+          trigger_evidence: "ACT-S3-014の具体的買付注文を入力する段階"
+          scope: "portfolio"
+      decision_needed: null
+      decision_support_owner: null
+      unblock_condition: "現在バッチは完了。次の売却代金が発生した場合、その買付可能額と注文仕様をユーザが承認する"
+      completion_evidence: ["各コア買付の約定明細", "対象売却代金の未投資残高0"]
+  - id: "ACT-S3-015"
+    status: "not_started"
+    action_kind: "sell"
+    allocation_effect: "target_mix"
+    allocation_basis:
+      denominator: "long_term_investable_assets_jpy"
+      denominator_definition_ref: "strategy/versions/2026-08-09-v2.yaml#scope.allocation_denominator_definition"
+      measurement_time: "second_stage_execution_time"
+      targets:
+        - {numerator: "total_satellite_market_value_jpy", relation: "approximately_equal", value: 0.175}
+        - {numerator: "direct_semiconductor_market_value_jpy", relation: "approximately_equal", value: 0.08}
+        - {numerator: "CIBR_market_value_jpy", relation: "approximately_equal", value: 0.03}
+        - {numerator: "URA_market_value_jpy", relation: "approximately_equal", value: 0.025}
+        - {numerator: "MSFT_market_value_jpy", relation: "approximately_equal", value: 0.02}
+        - {numerator: "PLTR_market_value_jpy", relation: "approximately_equal", value: 0.02}
+    workstream: "J_second_stage_convergence"
+    scheduling: "start_when_dependencies_complete"
+    action: "トヨタを最終的に縮小し、承認済み中心構成へ段階的に寄せる"
+    completion_condition: "サテライト17.5%中心構成。15%から20%内なら比率だけを理由に売買しない"
+    depends_on: ["ACT-S3-012"]
+    order_specification:
+      status: "pending_execution_time_configuration"
+      execution_allowed: false
+      account_type: "トヨタは特定口座（源泉徴収あり）。他の必要注文は実行時に確認"
+      side: "sell"
+      quantity_rule: "15%から20%の無売買レンジを優先し、必要な場合だけ実時点分母で段階数量を算定"
+      order_type: "pending_user_approval"
+      limit_price_rule: null
+      timing: "ACT-S3-012完了後、第二段階を実行する場合に個別注文ごとに指定"
+      expiration: "個別注文ごとに指定"
+      partial_fill_handling: "約定後に全ターゲットを再計算し、残注文を個別にユーザ承認"
+      unfilled_or_expired_reorder_rule: "最新値で全ターゲットを再計算しユーザ再承認"
+      proceeds_destination: "原則として全世界株式コア。買い増しは別の明示承認がある場合のみ"
+      pretrade_tax_check: "各口座の取得価額、含み損益、税引後手取額、NISA機会価値を確認"
+      user_approval_required: true
+      user_approval_status: "pending"
+    human_actionability:
+      actor: "codex_and_user"
+      next_action: "ACT-S3-012完了後、Codexが15～20%の無売買レンジを優先した第二段階案を作り、必要な売買だけをユーザへ承認依頼する"
+      required_inputs:
+        - key: "first_stage_allocation_result"
+          label: "ACT-S3-012の実績配分"
+          availability: "known_event_pending"
+          source_ref: "plans/2026/2026-08-09_act_s3_execution.yaml#tasks[ACT-S3-012]"
+          value_summary: "ACT-S3-012未完了"
+          as_of: "2026-08-10"
+          refresh_rule: "ACT-S3-012完了時に計算結果を取り込む"
+          request_from_user_if: "依存タスクの実績がリポジトリに未反映の場合だけ確認する"
+          blocking: true
+          owner: "codex"
+          verification_stage: "approval"
+          trigger_evidence: "依存タスクACT-S3-012が未完了"
+          scope: "task:ACT-S3-012"
+        - key: "second_stage_basis_positions"
+          label: "各口座の基準保有、取得価額、含み損益"
+          availability: "resolved_from_repository"
+          source_ref: "data/normalized/snapshot_2026_08.yaml"
+          value_summary: "2026-08-09基準の全保有明細を記録済み"
+          as_of: "2026-08-09"
+          refresh_rule: null
+          request_from_user_if: null
+          blocking: false
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "基準スナップショットに全保有明細が存在"
+          scope: "portfolio"
+        - key: "second_stage_execution_values"
+          label: "最新価格・為替・長期運用資産額"
+          availability: "refresh_by_codex"
+          source_ref: "data/normalized/snapshot_2026_08.yaml"
+          value_summary: "基準値あり。第二段階開始時に更新"
+          as_of: "2026-08-09"
+          refresh_rule: "第二段階案の作成直前に全対象を更新"
+          request_from_user_if: null
+          blocking: true
+          owner: "codex"
+          verification_stage: "draft"
+          trigger_evidence: "ACT-S3-015の第二段階案作成を開始"
+          scope: "portfolio"
+      decision_needed: "第二段階を開始するか、各個別注文を実行するか"
+      decision_support_owner: "Codex"
+      unblock_condition: "ACT-S3-012が完了し、第二段階案をユーザが承認する"
+      completion_evidence: ["承認済み第二段階注文の約定明細", "最終配分と15～20%レンジの確認"]
+  - id: "ACT-S3-016"
+    status: "collecting"
+    action_kind: "calculate"
+    allocation_effect: "none"
+    workstream: "K_annual_tax_reconciliation"
+    scheduling: "record_each_sale_then_reconcile_after_all_2026_sales_complete"
+    action: "売却のたびに2026年税務記録へ接続し、全売却後に口座横断で実現損益を再集計する"
+    completion_condition: "年間税務状態確定"
+    depends_on:
+      - "ACT-S3-001"
+      - "ACT-S3-002"
+      - "ACT-S3-006"
+      - "ACT-S3-008"
+      - "ACT-S3-009"
+      - "ACT-S3-010"
+      - "ACT-S3-011"
+      - "ACT-S3-015"
+    human_actionability:
+      actor: "codex_and_user"
+      next_action: "Codexは売却報告のたびにtransactions/ledger.yamlとtransactions/tax/2026.yamlへ記録する。ユーザは受渡明細または年間資料が発行された時点で、未記録項目を含む資料だけを提示する"
+      required_inputs:
+        - key: "annual_tax_documents"
+          label: "各証券口座と暗号資産の2026年実現損益、手数料・税、年間取引報告書"
+          availability: "known_event_pending"
+          source_ref: "transactions/tax/2026.yaml"
+          value_summary: "日産、野村證券2件、暗号資産全売却、CIBR 14株、SMH 1株の全量約定を記録済み。日産と野村2件の暫定損失485,831円に対し、SMHを利益側の相殺対象として登録済み。SMHとCIBRの円建て実現損益および全取引の年間資料突合は未完了"
+          as_of: "2026-08-12"
+          refresh_rule: "各売却・受渡の報告時に更新し、年間資料発行後に最終突合する"
+          request_from_user_if: "受渡明細または年間資料が発行され、リポジトリまたは接続済み情報源から取得できない場合"
+          blocking: true
+          owner: "codex_and_user"
+          verification_stage: "post_trade"
+          trigger_evidence: "transactions/tax/2026.yamlに未解決のmissing_fieldsまたは未突合の年間資料がある"
+          scope: "portfolio:tax"
+      decision_needed: "確定申告等の税務対応が必要かを専門家へ確認するか"
+      decision_support_owner: "Codex（集計まで。税務判断は税理士等へ確認）"
+      unblock_condition: "2026年の全売却が完了し、transactions/tax/2026.yamlの全売却が年間資料と突合済みになる"
+      completion_evidence: ["口座横断の2026年実現損益集計表", "未取得資料がないことの確認"]
+
+parallel_workstreams:
+  completed:
+    - "A_existing_order_monitoring: ACT-S3-001, ACT-S3-002"
+  start_now:
+    - "B_available_cash_to_core: ACT-S3-004 -> ACT-S3-005"
+    - "C_crypto_exit: ACT-S3-006 -> ACT-S3-007"
+    - "D_direct_semiconductor_reduction: ACT-S3-008 -> ACT-S3-009"
+    - "E_cybersecurity_reduction: ACT-S3-010"
+    - "G_satellite_cap_verification: ACT-S3-003"
+    - "I_sale_proceeds_to_core: ACT-S3-014（各受渡の都度）"
+  convergence:
+    - "F_total_satellite_cap: 前提完了後にACT-S3-011"
+    - "H_first_stage_convergence: 前提完了後にACT-S3-012"
+    - "J_second_stage_convergence: ACT-S3-012後にACT-S3-015"
+    - "K_annual_tax_reconciliation: 2026年の全売却後にACT-S3-016"
+first_stage_completion_logic:
+  required_outcomes:
+    - "不要ポジションの整理"
+    - "暗号資産0%"
+    - "直接半導体おおむね8%"
+    - "サイバーセキュリティおおむね3%"
+    - "必要な場合のみトヨタを最小100株単位で売却"
+    - "サテライト20%以下"
+  sequencing_note: "required_outcomesの記載順は全面的な実行順ではなく、depends_onを優先する"
+first_stage_stop_rule: "実績再計算後にサテライトが15%から20%なら売却を止める"
+second_stage_rule: >
+  トヨタをさらに段階的に縮小しながら、必要に応じてウラニウム、Microsoft、Palantirを中心構成へ近づける。
+  17.5%へ機械的に合わせるための不要な売買は行わない。

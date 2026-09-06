@@ -274,6 +274,11 @@ def render_on_demand_assessment_prompt(
     groups = classify_on_demand_holdings(snapshot, resolved_buckets=resolved_buckets)
     reference_map = {reference.symbol: reference for reference in computation.market_references}
     collection = computation.metadata.get("on_demand", {}).get("market_reference_collection", {})
+    tactical_cash_policy = computation.metadata.get("tactical_cash_policy", {})
+    tactical_cash_disabled = (
+        tactical_cash_policy.get("enabled") is False
+        and Decimal(str(tactical_cash_policy.get("target_pct", 0))) == 0
+    )
     assessment_date = date.fromisoformat(str(inventory_freshness["requested_at_local"])[:10])
     window = health_check_window or {
         "status": "explicit",
@@ -301,6 +306,8 @@ def render_on_demand_assessment_prompt(
         f"- authoritative_news_lookback_days: {news_lookback_days}",
         f"- health_check_window: {window}",
         f"- computation_generated_at: {computation.generated_at}",
+        f"- tactical_cash_policy: {tactical_cash_policy or {'status': 'not_supplied'}}",
+        f"- tactical_cash_policy_status: {'disabled' if tactical_cash_disabled else 'enabled_or_review_required'}",
         f"- holdings_inventory_source: {snapshot.source_evidence or {}}",
         "",
         "## 2. アセスメント対象",
@@ -311,6 +318,17 @@ def render_on_demand_assessment_prompt(
         f"- security_story_target_count: {len(computation.security_story_targets)}",
     ]
 
+    tactical_cash_instructions = (
+        [
+            "- 承認済み政策では戦術的待機資金が無効・0%である。dip_buy_liquidity_deployment_review は reserve_status: unavailable、selected_action: not_applicable とする。",
+            "- use_option は considered: false、status: not_applicable とし、市場下落時も使用案、発動条件、投入額を再提案しない。reserve_maintenance_is_objective は false とする。",
+        ]
+        if tactical_cash_disabled
+        else [
+            "- 戦術的待機資金が有効、未設定、または政策レビュー対象なら、維持自体を目的にしない。市場下落時は dip_buy_liquidity_deployment_review.use_option に対象、金額または算式、時期、根拠を持つ使用案を記録する。",
+            "- 使用可能または不明な待機資金がある場合、最終選択が hold でも使用案の比較は省略せず、reserve_maintenance_is_objective は false とする。",
+        ]
+    )
     lines.extend(
         [
             "",
@@ -374,8 +392,7 @@ def render_on_demand_assessment_prompt(
             "- 機械IDはCodex向けYAMLの `symbol` フィールドにだけ残し、human_summaryなど人間向け文字列へ混ぜない。",
             "- YAMLでは security_story_targets の全銘柄を一件ずつ記録し、evaluated、story_health、decision、decision_rationale、next_review_triggers、sourcesを必須とする。",
             "- decisionは add / hold / reduce / exit / no_add_pending_thesis、story_healthは healthy / watch / impaired / broken / insufficient_evidence のいずれかにする。",
-            "- 投資待機資金は維持自体を目的にしない。市場下落時は dip_buy_liquidity_deployment_review.use_option に対象、金額または算式、時期、根拠を持つ使用案を必ず記録する。",
-            "- 最終選択が hold でも使用案の比較は省略せず、reserve_maintenance_is_objective は false とする。",
+            *tactical_cash_instructions,
             "- 毎日の連続実行は前提にしない。調査期間に空白がある場合は health_check_window 全体を確認する。",
             "- schema_ref: schemas/health-check-response.schema.yaml",
         ]

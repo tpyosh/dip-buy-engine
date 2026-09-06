@@ -1,0 +1,33 @@
+schema_version: 1
+record_type: "cash_transfer_evidence_transcription"
+evidence_id: "nomura_existing_cash_to_rakuten_2026-08-13"
+confirmed_at: "2026-08-13"
+confirmed_by: "user_report"
+transfer:
+  status: "completed"
+  transfer_date: "2026-08-13"
+  amount_jpy: 1744557
+  from_institution: "野村證券"
+  from_balance_type: "2026-08-09以前から保有していた流動現金"
+  to_institution: "楽天証券"
+  destination_credit_status: "credited_and_investable"
+  purpose: "ACT-S3-005の全世界株式コア買付資金"
+  fee_jpy: null
+rakuten_buying_power_after_transfer:
+  observed_at: "2026-08-13"
+  amount_jpy: 1946765
+  status: "available_for_investment"
+  confirmed_by: "user_report"
+  composition:
+    confirmed_nomura_transfer_component_jpy: 1744557
+    remaining_component_jpy: 202208
+    remaining_component_source: null
+  note: "買付注文額の上限には移動額ではなく、楽天証券で確認された現在買付可能額1,946,765円を使う。差額202,208円の資金源は推測しない"
+distinction:
+  excluded_from_this_transfer:
+    - "トーシンホールディングスと日本駐車場開発の売却により発生した野村預り金485,024円"
+  note: "1,744,557円は2026-08-09基準スナップショットに含まれる既存流動現金であり、新規資産・売却代金として総資産へ加算しない"
+interpretation_limits:
+  - "ユーザの『楽天証券に移動しました』という報告を移動完了として記録する"
+  - "2026-08-13時点の楽天証券買付可能額1,946,765円はユーザ報告で確認済み。実際の注文入力時に減少していた場合だけ注文額を再計算する"
+  - "振込手数料は報告されていないため0円と推定せずnullとする"

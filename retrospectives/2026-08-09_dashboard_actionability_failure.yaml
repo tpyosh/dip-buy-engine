@@ -1,0 +1,138 @@
+schema_version: 1
+record_type: "workflow_retrospective"
+retrospective_id: "2026-08-09_dashboard_actionability_failure"
+period:
+  start: "2026-08-09"
+  end: "2026-08-09"
+prepared_at: "2026-08-09"
+strategy_ref: "strategy/versions/2026-08-09-v2.yaml"
+plan_refs:
+  - "plans/2026/2026-08-09_act_s3_execution.yaml"
+transaction_refs: []
+
+trigger:
+  user_feedback: >
+    ACT-S3-010 | 注文仕様未設定・実行不可 | E |
+    CIBR時価評価額を実行直前の長期運用資産額の約3%へ縮小 | なし
+  observed_problem: "ユーザがこの行を読んでも、次に何をすればよいか分からない"
+  scope_rule: "個別行を修正せず、この記載を生んだ設計・生成・検証プロセスを評価する"
+
+information_available_at_decision_time:
+  - "ユーザはhuman-readableな浅い場所のダッシュボードを要求していた"
+  - "ACT-S3-010の政策目標は、CIBR時価評価額を長期運用資産額のおおむね3%へ縮小することだった"
+  - "数量、注文種別、期限等は実行時点の価格・為替・政策分母で再計算し、ユーザ承認が必要だった"
+  - "Codexは新しい売却方式や指値を独断で決められない"
+  - "前回の指摘後、allocation_basisとorder_specificationの機械契約を追加した"
+  - "ACT-S3-010はorder_typeがpending_user_approval、execution_allowedがfalseになった"
+  - "repository-auditは警告0件、テスト186件はすべて成功していた"
+
+assumptions_at_decision_time:
+  - "実行不可の理由を明示すれば、ユーザは次に注文仕様を決める必要があると理解できる"
+  - "注文仕様の詳細を別セクションに置いても、タスク一覧の行から十分に参照できる"
+  - "安全上のブロック状態を正確に表示することが、人間向けダッシュボードの主要要件である"
+  - "機械可読計画を要約すれば、そのまま行動可能なhuman-readable表示になる"
+  - "depends_onが空なら、ユーザは着手可能と解釈できる"
+
+decision_process:
+  - "最初の問題を、分母と注文仕様の構造化不足として定義した"
+  - "計画スキーマと監査にallocation_basisとorder_specificationを追加した"
+  - "未決定の注文はexecution_allowed=falseとして安全に停止する設計にした"
+  - "ダッシュボードのタスク一覧には、機械状態を短く変換して『注文仕様未設定・実行不可』と表示した"
+  - "別セクションに分母と注文仕様の状態を追加した"
+  - "監査とテストが通ることを完了条件とした"
+
+decisions_made:
+  - "分母省略を監査エラーにする"
+  - "買付・売却タスクの注文仕様省略を監査エラーにする"
+  - "注文仕様未決定時は実行不可にする"
+  - "ダッシュボードではACT-S3-010を注文仕様未設定・実行不可と表示する"
+
+observed_outcomes:
+  - "分母は明示されたが、ユーザが次に提供する情報、選ぶ事項、依頼する処理がタスク行に示されなかった"
+  - "『実行不可』は停止理由を説明したが、停止解除手順を説明しなかった"
+  - "depends_onは空なのに実行不可であり、タスク依存と意思決定・入力依存が別管理になっていた"
+  - "注文仕様の詳細は別セクションに分散し、一覧を浅く読む利用者には届かなかった"
+  - "監査と全テストが成功しても、人間が次の行動を判断できない状態が残った"
+
+five_whys:
+  - why: "なぜユーザは何をすべきか分からなかったか"
+    because: "行が状態・目標・依存先だけを示し、next_user_actionを示していなかった"
+  - why: "なぜnext_user_actionがなかったか"
+    because: "タスクモデルがシステム状態と売買契約を中心に設計され、利用者との対話契約を持っていなかった"
+  - why: "なぜ対話契約を持たなかったか"
+    because: "human-readableダッシュボードを機械可読計画の要約ビューとして扱い、実行支援UIとして設計しなかった"
+  - why: "なぜ要約ビューで十分と判断したか"
+    because: "完全性、安全性、監査可能性を優先し、一覧を読んだユーザが次の一手を一意に理解できるかを受入条件にしなかった"
+  - why: "なぜ受入条件がなかったか"
+    because: "テストがフィールド存在、依存関係、実行禁止だけを検査し、actor・next action・required input・解除条件を検査していなかった"
+
+root_causes:
+  proximal:
+    - "タスク行にnext_user_actionがない"
+    - "blocked_reasonはあるがunblock_conditionがない"
+    - "依存先なしという表示が、注文仕様未決定という別のブロッカーと矛盾して見える"
+  data_model:
+    - "statusが進捗状態と実行可否を兼ね、誰が何をすれば状態遷移するかを表現できない"
+    - "depends_onはタスクIDだけを扱い、ユーザ入力・ユーザ選択・市場データ更新・約定などの外部前提を扱わない"
+    - "order_specificationは設定値を保持するが、設定値を確定するための質問・必要データ・決定責任者を保持しない"
+  presentation:
+    - "一覧と詳細を分離しすぎ、行単独の局所完結性がなかった"
+    - "内部識別子long_term_investable_assets_jpyを説明しても、ユーザの具体操作には変換していなかった"
+    - "『実行不可』という否定形を前面に出し、次に可能な行動を前面に出さなかった"
+  process:
+    - "ユーザ指摘を技術契約の欠落としてだけ解釈し、利用者のジョブ『次に何をすればよいか知る』まで要件を広げなかった"
+    - "Codexが注文方式を独断で決めない制約と、ユーザへ選択材料を提示する責務の間をつなぐ工程がなかった"
+  validation:
+    - "監査はallocation_basisとorder_specificationの存在だけを検査した"
+    - "テストはACT-S3-010がpendingで実行不可であることを成功条件にし、行動不能を正しい結果として固定した"
+    - "ダッシュボードの人間可読性・行動可能性を検査する受入テストがなかった"
+
+process_evaluation_without_outcome_bias:
+  - "未決定注文を実行不可にする安全措置自体は妥当だった"
+  - "分母と注文フィールドを正本へ構造化したことも監査可能性の改善として妥当だった"
+  - "ただし、安全に止める設計は、利用者が安全に再開できる設計を自動的には満たさない"
+  - "注文種別をCodexが独断で選ばなかったことは正しいが、必要データを収集し、選択肢と影響を提示し、ユーザ承認を求める次工程を作らなかったことは不十分だった"
+  - "詳細を別セクションに置く設計は参照資料としては合理的だが、浅いダッシュボードの主要用途には不適合だった"
+
+missing_contract:
+  name: "human_actionability_contract"
+  required_per_open_task:
+    - "actor: 次に動く主体がユーザ、Codex、外部約定、市場データのどれか"
+    - "next_action: 次に行う一つの具体的行動"
+    - "required_inputs: その行動に必要な情報"
+    - "decision_needed: ユーザが選ぶ必要がある事項"
+    - "decision_support_owner: 選択肢・比較材料を誰が準備するか"
+    - "unblock_condition: 何が揃えば実行可能へ遷移するか"
+    - "completion_evidence: 完了報告に必要な証拠"
+  dashboard_locality_rule: "重要なnext_actionとunblock_conditionは別セクションだけでなく、一覧の同じ行または直下に置く"
+
+counterfactual_acceptance_test:
+  question: "この行だけを初めて読んだユーザが、次に誰が何をするかを一意に答えられるか"
+  expected_for_act_s3_010:
+    actor: "Codexとユーザ"
+    next_action: "Codexが最新スナップショット・価格・為替・取得価額から売却株数と成行／指値候補を比較し、ユーザへ承認依頼を出す"
+    user_input: "最新残高・注文可能数量・未反映注文。Codexが取得できない場合のみユーザが提示する"
+    user_decision: "提示された数量・注文種別・期限・部分約定・再注文条件を承認または修正する"
+    unblock_condition: "必要データが揃い、注文仕様がconfiguredとなり、ユーザ承認がapprovedになる"
+  failure_condition: "『未設定』『実行不可』『確認する』だけで、次の主体と操作が特定できない"
+
+lessons:
+  - "機械的完全性、安全性、人間の行動可能性は別の品質軸であり、それぞれ受入条件が必要"
+  - "blocked状態には必ず解除主体、解除操作、必要入力、解除条件を対で持たせる"
+  - "human-readableは日本語へ変換することではなく、利用者の次の操作へ変換すること"
+  - "浅いダッシュボードでは、一覧の各行が局所的に行動可能でなければならない"
+  - "エージェントが決定できない事項は『未決定』で終わらせず、比較材料を準備して承認を求める工程へ接続する"
+  - "テスト成功は実装契約への適合を示すだけで、契約自体の妥当性は示さない"
+
+proposed_followups_not_yet_implemented:
+  - "task schemaにhuman_actionabilityフィールドを追加する"
+  - "外部前提をtask dependencyとは別のblocking_inputsとして構造化する"
+  - "ダッシュボードの全open taskに次の主体・次の一手・必要入力・解除条件・完了証拠を表示する"
+  - "ACT-S3-010の注文設定準備を、曖昧な未設定状態ではなく明示的な次工程としてモデル化する"
+  - "人間が一行だけ読んで次の行動を答えられることを受入テストにする"
+
+followup_decision_refs: []
+unknowns:
+  - "CIBR売却の具体的な注文種別、期限、指値ルール"
+  - "実行時点の最新CIBR価格、USDJPY、長期運用資産額、取得価額、税引後手取額"
+  - "ユーザが注文方式の比較で重視する約定確実性、価格改善、手間の優先順位"

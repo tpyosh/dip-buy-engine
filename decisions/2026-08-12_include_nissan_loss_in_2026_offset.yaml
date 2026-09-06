@@ -1,0 +1,20 @@
+schema_version: 1
+record_type: "execution_tax_policy_update"
+decision_id: "include_nissan_7201_loss_in_2026_same_year_offset"
+decided_at: "2026-08-12"
+decided_by: "user"
+extends_decision_ref: "decisions/2026-08-12_use_current_year_listed_stock_losses.yaml"
+scope: "日産自動車7201の2026年譲渡損失"
+decision:
+  include_transaction_in_2026_listed_stock_loss_offset: true
+  transaction_ref: "transactions/ledger.yaml#rakuten-1261-7201-sell-fill"
+  provisional_realized_gain_loss_jpy: -2355
+  revised_aggregate_provisional_loss_available_jpy: 485831
+  intent: "既に記録した2026年の上場株式等譲渡損失と合わせ、2026年中の上場株式等譲渡益との相殺に利用する"
+  does_not_authorize_security_selection_or_sale: true
+  final_amount_status: "provisional_pending_annual_document_reconciliation"
+calculation:
+  acquisition_cost_jpy: 36800
+  acquisition_cost_formula: "100株 × 保存済み平均取得単価368円"
+  net_settlement_amount_jpy: 34445
+  provisional_realized_gain_loss_formula: "34,445円 - 36,800円 = -2,355円"

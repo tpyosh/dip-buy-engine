@@ -1,0 +1,32 @@
+schema_version: 1
+record_type: "broker_fill_evidence_transcription"
+evidence_id: "rakuten_7201_fill_2026-08-10"
+broker: "楽天証券"
+confirmed_at: "2026-08-10"
+confirmed_by: "user_provided_broker_csv"
+source_attachment:
+  original_path: "/Users/tappeiyoshida/Downloads/stockorder(JP)_20260810.csv"
+  source_encoding: "CP932"
+  raw_file_in_repository: false
+  durability_note: "Downloads上のCSVから、確認できた項目をこのレコードへ転記した"
+interpretation_limits:
+  - "注文日時は表示されているが、約定日は表示されていない"
+  - "注文期限2026-08-20を約定日または受渡日として扱わない"
+  - "受渡日、取得費、源泉徴収税、実現損益、純受取額は表示されていない"
+fill:
+  symbol: "7201"
+  name: "日産自動車"
+  market: "東証(SOR)"
+  account_type: "特定口座"
+  side: "sell"
+  order_type: "market"
+  order_status: "filled_all"
+  order_placed_at: "2026-08-08T09:48:41+09:00"
+  order_valid_through: "2026-08-20"
+  ordered_quantity: 100
+  filled_quantity: 100
+  average_fill_price_jpy: 345
+  gross_proceeds_jpy: 34500
+  fee_jpy: 55
+  order_number: "1261"
+  order_method: "通常注文"

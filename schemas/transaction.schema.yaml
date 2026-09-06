@@ -17,5 +17,26 @@ properties:
   transaction_type:
     enum: ["buy", "sell", "deposit", "withdrawal", "transfer", "fee", "tax"]
   trade_date:
-    type: string
+    type: [string, "null"]
     format: date
+  tax_record:
+    type: object
+    required:
+      - annual_record_ref
+      - status
+      - filing_category
+      - acquisition_cost_jpy
+      - realized_gain_loss_jpy
+      - missing_fields
+    properties:
+      annual_record_ref: {type: string, minLength: 1}
+      status:
+        enum: ["fill_recorded", "settlement_recorded", "tax_details_recorded", "reconciled_to_annual_statement", "non_taxable_reconciled"]
+      filing_category:
+        enum: ["taxable_withholding", "general_taxable", "nisa_tax_exempt", "crypto_misc_income", "unknown_pending_classification"]
+      acquisition_cost_jpy: {type: [number, "null"]}
+      realized_gain_loss_jpy: {type: [number, "null"]}
+      annual_statement_evidence_ref: {type: [string, "null"]}
+      missing_fields:
+        type: array
+        items: {type: string, minLength: 1}

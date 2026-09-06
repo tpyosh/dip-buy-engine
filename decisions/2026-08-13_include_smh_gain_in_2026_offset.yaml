@@ -1,0 +1,18 @@
+schema_version: 1
+record_type: "execution_tax_policy_update"
+decision_id: "include_smh_gain_in_2026_same_year_offset"
+decided_at: "2026-08-13"
+decided_by: "user"
+extends_decision_ref: "decisions/2026-08-12_use_current_year_listed_stock_losses.yaml"
+scope: "SMH 1株の2026年譲渡益"
+decision:
+  include_transaction_as_gain_in_2026_listed_stock_loss_offset: true
+  transaction_ref: "transactions/ledger.yaml#rakuten-1262-smh-sell-fill"
+  realized_gain_loss_direction: "gain_user_confirmed"
+  realized_gain_loss_jpy: null
+  amount_status: "pending_settlement_or_annual_statement"
+  intent: "日産・トーシンホールディングス・日本駐車場開発の2026年暫定譲渡損失との相殺対象にする"
+evidence_limits:
+  execution_price_usd: 583.49
+  snapshot_average_cost_usd: 369.63
+  note: "利益方向は確認できるが、日本の税務上の円建て譲渡益は適用為替、円換算取得費、手数料、税を含む受渡明細または年間取引報告書で確定する"

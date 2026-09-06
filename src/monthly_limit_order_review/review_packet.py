@@ -164,7 +164,10 @@ def build_review_packet(
         + build_holding_execution_conditions(computation)
         + recurring["conditions"]
     )
-    unknown_information = financial_unknowns + build_computation_unknowns(computation)
+    unknown_information = financial_unknowns + build_computation_unknowns(
+        computation,
+        review_mode=review_mode,
+    )
 
     selected_sources = [
         {
@@ -2433,8 +2436,11 @@ def extract_structured_financial_review_context(
         add("旅行は予定するが金額・時期は未確定で、ボーナス等の実現黒字から支出する")
 
     dip = context.get("dip_buy_liquidity", {})
-    add("投資待機資金は市場下落時に使う手段であり、残高維持自体を目的にしない")
     target_ratio = dip.get("target_ratio", {})
+    if target_ratio.get("value") == 0:
+        add("戦術的な投資待機資金は設けない")
+    else:
+        add("投資待機資金は市場下落時に使う手段であり、残高維持自体を目的にしない")
     if target_ratio.get("status") == "proposal_requested_from_current_monthly_independent_review":
         add("投資待機資金の目標比率は今回のオンデマンド独立レビューから提案を受ける")
     purchase_target = dip.get("purchase_target", {})
@@ -2510,7 +2516,9 @@ def build_structured_cash_requirement_inputs(
         else None
     )
     dip_status = "unconfigured"
-    if ratio_value is not None:
+    if ratio_value == 0:
+        dip_status = "configured"
+    elif ratio_value is not None:
         dip_status = "target_calculated_deployment_unconfigured"
     elif target_ratio.get("status") == "proposal_requested_from_current_monthly_independent_review":
         dip_status = "proposal_requested_from_current_review"
@@ -2579,7 +2587,11 @@ def build_structured_cash_requirement_inputs(
             "target_jpy": dip_target,
             "target_ratio": ratio_value,
             "amount_calculation_policy": dip.get("amount_basis"),
-            "decision_owner": "current_on_demand_independent_review_then_user_approval",
+            "decision_owner": (
+                "user_confirmed_policy"
+                if ratio_value == 0
+                else "current_on_demand_independent_review_then_user_approval"
+            ),
             "purchase_target": _structured_value(dip.get("purchase_target")),
             "activation_condition": _structured_value(dip.get("activation_condition")),
             "tranche_amount_jpy": _structured_value(dip.get("tranche_amount_jpy")),
@@ -2611,9 +2623,14 @@ def build_structured_cash_requirement_inputs(
             "収入、手取り、可処分所得、NISA積立額、通常月の残額を月間必須支出へ代用しない",
             "資産総額から月間支出または月間必須支出を推定しない",
             "生活防衛資金、確定支出、予備費を総資産比率または目標株式比率から逆算しない",
-            "投資待機資金の確保・満額維持自体をレビュー目的にしない",
-            "市場下落時に投資待機資金を使う選択肢を省略しない",
-        ],
+        ] + (
+            ["承認済みの戦術的待機資金0円を、独立レビューなしに正の残高へ変更しない"]
+            if ratio_value == 0
+            else [
+                "投資待機資金の確保・満額維持自体をレビュー目的にしない",
+                "市場下落時に投資待機資金を使う選択肢を省略しない",
+            ]
+        ),
     }
 
 
@@ -3236,7 +3253,11 @@ def build_recurring_commitments(
     return {"facts": facts, "conditions": conditions}
 
 
-def build_computation_unknowns(computation: MonthlyComputation) -> list[dict]:
+def build_computation_unknowns(
+    computation: MonthlyComputation,
+    *,
+    review_mode: str | None = None,
+) -> list[dict]:
     snapshot = computation.snapshot
     unknowns: list[dict] = []
     if snapshot.liquidity_target_jpy is None:
@@ -3321,14 +3342,16 @@ def build_computation_unknowns(computation: MonthlyComputation) -> list[dict]:
                 "as_of": snapshot.snapshot_date.isoformat(),
             }
         )
-    unknowns.extend(
-        [
-            {
-                "item": "sale_tax_and_transaction_costs",
-                "reason": "売却税、取得ロット、手数料の確定値はパケットにない",
-                "source": "review_packet_boundary",
-                "as_of": snapshot.snapshot_date.isoformat(),
-            },
+    unknowns.append(
+        {
+            "item": "sale_tax_and_transaction_costs",
+            "reason": "売却税、取得ロット、手数料の確定値はパケットにない",
+            "source": "review_packet_boundary",
+            "as_of": snapshot.snapshot_date.isoformat(),
+        }
+    )
+    if review_mode != "on_demand_operational_review":
+        unknowns.append(
             {
                 "item": "risk_target_parameters",
                 "reason": (
@@ -3339,9 +3362,8 @@ def build_computation_unknowns(computation: MonthlyComputation) -> list[dict]:
                 ),
                 "source": "review_scope",
                 "as_of": snapshot.snapshot_date.isoformat(),
-            },
-        ]
-    )
+            }
+        )
     execution = computation.metadata.get("holding_execution_context", {})
     execution_clear = isinstance(execution, dict) and all(
         execution.get(field) is False

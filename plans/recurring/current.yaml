@@ -1,6 +1,6 @@
 schema_version: 1
-active_record_path: "plans/recurring/versions/2026-03-01.yaml"
-updated_at: "2026-07-26"
+active_record_path: "plans/recurring/versions/2026-08-09.yaml"
+updated_at: "2026-08-09"
 note: >
   証券会社で観測・記録された定期積立状態へのポインタ。
   現行戦略との一致を意味せず、変更が確認されるまで観測事実として扱う。

@@ -1,0 +1,14 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Broker order capability"
+type: object
+required: [schema_version, record_type, capability_id, broker, product_scope, as_of, evidence_ref, screen_fields, scope_limits]
+properties:
+  schema_version: {const: 1}
+  record_type: {const: "broker_order_capability"}
+  capability_id: {type: string, minLength: 1}
+  broker: {type: string, minLength: 1}
+  product_scope: {type: string, minLength: 1}
+  as_of: {type: string, format: date}
+  evidence_ref: {type: string, minLength: 1}
+  screen_fields: {type: object, minProperties: 1}
+  scope_limits: {type: object, minProperties: 1}

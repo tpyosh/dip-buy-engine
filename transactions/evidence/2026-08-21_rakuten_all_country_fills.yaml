@@ -1,0 +1,45 @@
+schema_version: 1
+record_type: "broker_investment_fund_fill_evidence_transcription"
+evidence_id: "rakuten_all_country_fills_2026-08-21"
+broker: "楽天証券"
+confirmed_at: "2026-08-21"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-e012fb82-c9be-4b7b-a30b-af1c2997b6d0.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+fills:
+  order_1274:
+    order_number: "1274"
+    order_placed_at: "2026-08-14T10:45:00+09:00"
+    order_status: "completed_filled"
+    transaction_type: "spot_purchase"
+    product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    account_type: "特定口座"
+    distribution_course: "再投資型"
+    ordered_amount_jpy: 795390
+    trade_date: "2026-08-17"
+    settlement_date: "2026-08-21"
+    allotted_units: 204329
+    execution_nav_jpy_per_10000_units: 38927
+    fee_jpy: 0
+    point_use_jpy: 0
+  order_1268:
+    order_number: "1268"
+    order_placed_at: "2026-08-13T09:05:00+09:00"
+    order_status: "completed_filled"
+    transaction_type: "spot_purchase"
+    product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    account_type: "特定口座"
+    distribution_course: "再投資型"
+    ordered_amount_jpy: 1946765
+    trade_date: "2026-08-14"
+    settlement_date: "2026-08-20"
+    allotted_units: 498928
+    execution_nav_jpy_per_10000_units: 39019
+    fee_jpy: 0
+    point_use_jpy: 0
+interpretation_limits:
+  - "画面の『完了（約定）』を約定完了の根拠とする"
+  - "基準価額は1万口当たりとして記録し、1口当たり価格とは扱わない"
+  - "この画面で下部が切れていた5,861,859円注文は、別の2026-08-21画面で全項目を確認し、transactions/evidence/2026-08-21_rakuten_all_country_stage1_fill.yamlへ記録した"

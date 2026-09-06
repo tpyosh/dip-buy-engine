@@ -1,0 +1,34 @@
+schema_version: 1
+record_type: "investment_fund_order_user_report"
+record_status: "superseded_by_later_fill_screen"
+superseded_by: "transactions/evidence/2026-08-21_rakuten_all_country_fills.yaml#fills.order_1274"
+reported_at: "2026-08-14"
+source_type: "user_report_in_codex_session"
+user_report: "795,390円のオルカンを特定口座で購入済み"
+order:
+  broker: "楽天証券"
+  product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+  account_type: "特定口座"
+  order_method: "投資信託の金額指定買付"
+  ordered_amount_jpy: 795390
+  status: "order_submitted_pending_allotment"
+  order_date: "2026-08-14"
+  order_number: null
+  trade_date: null
+  settlement_date: null
+  allotted_units: null
+  execution_nav_jpy: null
+plan_task_associations: ["ACT-S3-007", "ACT-S3-014"]
+funding_source_context:
+  sources: ["暗号資産売却代金", "野村證券国内株売却代金", "日産自動車売却代金"]
+  exact_yen_allocation: null
+  reason: "楽天証券口座内現金は資金源別に分離されず、ユーザは日産分も付け替え注文完了と確認したため"
+  clarification_ref: "transactions/evidence/2026-08-14_act_s3_014_nissan_redeployment_clarification.yaml"
+unknown_fields:
+  - "order_number"
+  - "exact_order_time"
+  - "trade_date"
+  - "settlement_date"
+  - "allotted_units"
+  - "execution_nav_jpy"
+classification_note: "購入済みというユーザ報告を注文実行済みとして記録し、約定口数・約定基準価額が判明するまで約定完了へ昇格しない"

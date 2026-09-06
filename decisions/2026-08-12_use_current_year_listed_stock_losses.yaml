@@ -1,0 +1,27 @@
+schema_version: 1
+record_type: "execution_tax_policy_decision"
+decision_id: "use_2026_listed_stock_losses_for_same_year_offset"
+decided_at: "2026-08-12"
+decided_by: "user"
+scope: "2026年中の上場株式等の譲渡損益"
+decision:
+  use_2026_realized_losses_for_same_year_listed_stock_gain_offset: true
+  provisional_available_loss_jpy: 483476
+  source_transactions:
+    - "transactions/ledger.yaml#nomura-79153-9444-sell-fill"
+    - "transactions/ledger.yaml#nomura-79152-2353-sell-fill"
+  intent: "2026年中に利益確定したい上場株式等の譲渡益との相殺に利用する"
+  does_not_authorize_security_selection_or_sale: true
+  final_amount_status: "provisional_pending_annual_document_reconciliation"
+tax_treatment:
+  same_nomura_withholding_account: "特定口座内の損益は口座内計算の対象"
+  cross_account_or_general_account: "一般口座または他証券会社の上場株式等譲渡益との通算には確定申告での集計が必要"
+  nisa_exclusion: "NISA口座の譲渡損益は損益通算対象外"
+official_sources_checked_at: "2026-08-12"
+official_sources:
+  - title: "国税庁 No.1465 株式等の譲渡損失（赤字）の取扱い"
+    url: "https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1465.htm"
+  - title: "国税庁 No.1474 上場株式等に係る譲渡損失の損益通算及び繰越控除"
+    url: "https://www.nta.go.jp/taxes/shiraberu/taxanswer/shotoku/1474.htm"
+  - title: "国税庁 株式等の譲渡所得等の金額の計算"
+    url: "https://www.keisan.nta.go.jp/r6yokuaru_sp/cat2/cat21/cat219/seidogaiyo/scid2265.html"

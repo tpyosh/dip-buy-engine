@@ -1,0 +1,30 @@
+schema_version: 1
+record_type: "broker_order_screen_evidence_transcription"
+evidence_id: "rakuten_us_equity_sell_screen_2026-08-10"
+broker: "楽天証券"
+confirmed_at: "2026-08-10"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-6a7fd612-84f6-40ca-b045-4855597cdfdc.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた共通項目を転記した"
+observed_screen:
+  evidence_symbol: "PLTR"
+  market: "米国"
+  fields:
+    - "数量（1株単位）"
+    - "価格方式（指値、成行、逆指値、トレイリング）"
+    - "指値価格"
+    - "見込み損益"
+    - "予想受渡代金"
+    - "執行条件・期限（画面例は本日中）"
+    - "時間外取引の有効化"
+    - "口座区分（画面例は特定）"
+    - "決済方法（円で受け取る、ドルで受け取る）"
+    - "米ドルMMF自動買付設定"
+    - "取引暗証番号"
+    - "確認画面を省略する"
+interpretation_limits:
+  - "PLTRの発注可能数量11株はCIBRへ流用しない"
+  - "表示された指値171.81 USDはCIBRへ流用しない"
+  - "本日中の日付表示は画面取得日の例であり、将来注文の日付として固定しない"

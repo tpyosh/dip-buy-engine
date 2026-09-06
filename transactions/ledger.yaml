@@ -2,8 +2,725 @@ schema_version: 1
 record_type: "confirmed_transaction_ledger"
 owner: "husband"
 currency_reporting: "JPY"
-updated_at: "2026-07-26"
-transactions: []
+updated_at: "2026-08-29"
+transactions:
+  - transaction_id: "rakuten-all-country-376158-buy-fill-2026-08-28"
+    status: "confirmed"
+    transaction_type: "buy"
+    trade_date: "2026-08-28"
+    order_placed_at: "2026-08-26T22:38:00+09:00"
+    execution_confirmed_at: "2026-08-29"
+    symbol: "EMAXIS_SLIM_ALL_COUNTRY"
+    name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    ordered_amount_jpy: 376158
+    quantity: 96843
+    price_jpy_per_10000_units: 38842
+    fee_jpy: 0
+    settlement_amount_jpy: 376158
+    settlement_date: "2026-09-03"
+    order_status: "completed_filled_pending_settlement"
+    account:
+      institution: "楽天証券"
+      account_type: "特定口座"
+      tax_regime: "taxable_withholding"
+    currency: "JPY"
+    order:
+      order_number: "1282"
+      order_method: "investment_fund_amount_order"
+      allotted_units: 96843
+      execution_nav_jpy_per_10000_units: 38842
+    funding_source_context:
+      user_attributed_source: "楽天証券で米ドルとして保有していた余剰現金"
+      source_usd_amount: null
+      fx_conversion_ref: null
+    purpose: "ACT-S3-005の全世界株式コア買付"
+    plan_task_associations: ["ACT-S3-005"]
+    source_evidence: "transactions/evidence/2026-08-29_rakuten_all_country_cash_sweep_fills.yaml#fills.order_1282"
+    unknown_fields: ["source_usd_amount", "fx_conversion_ref"]
+  - transaction_id: "rakuten-all-country-92602-buy-fill-2026-08-26"
+    status: "confirmed"
+    transaction_type: "buy"
+    trade_date: "2026-08-26"
+    order_placed_at: "2026-08-25T07:46:00+09:00"
+    execution_confirmed_at: "2026-08-29"
+    symbol: "EMAXIS_SLIM_ALL_COUNTRY"
+    name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    ordered_amount_jpy: 92602
+    quantity: 23987
+    price_jpy_per_10000_units: 38605
+    fee_jpy: 0
+    settlement_amount_jpy: 92602
+    settlement_date: "2026-09-01"
+    order_status: "completed_filled_pending_settlement"
+    account:
+      institution: "楽天証券"
+      account_type: "特定口座"
+      tax_regime: "taxable_withholding"
+    currency: "JPY"
+    order:
+      order_number: "1278"
+      order_method: "investment_fund_amount_order"
+      allotted_units: 23987
+      execution_nav_jpy_per_10000_units: 38605
+    funding_source_context:
+      user_attributed_source: "SMH売却代金582.92 USDの円転後資金"
+      fx_conversion_ref: "transactions/ledger.yaml#rakuten-1276-usd-jpy-exchange-smh-2026-08-21"
+      source_sale_transaction_ref: "transactions/ledger.yaml#rakuten-1262-smh-sell-fill"
+    purpose: "ACT-S3-014の全世界株式コア買付"
+    plan_task_associations: ["ACT-S3-014"]
+    source_evidence: "transactions/evidence/2026-08-29_rakuten_all_country_cash_sweep_fills.yaml#fills.order_1278"
+    unknown_fields: []
+  - transaction_id: "rakuten-all-country-222956-buy-fill-2026-08-25"
+    status: "confirmed"
+    transaction_type: "buy"
+    trade_date: "2026-08-25"
+    order_placed_at: "2026-08-24T14:15:00+09:00"
+    execution_confirmed_at: "2026-08-29"
+    symbol: "EMAXIS_SLIM_ALL_COUNTRY"
+    name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    ordered_amount_jpy: 222956
+    quantity: 57955
+    price_jpy_per_10000_units: 38471
+    fee_jpy: 0
+    settlement_amount_jpy: 222956
+    settlement_date: "2026-08-31"
+    order_status: "completed_filled_pending_settlement"
+    account:
+      institution: "楽天証券"
+      account_type: "特定口座"
+      tax_regime: "taxable_withholding"
+    currency: "JPY"
+    order:
+      order_number: "1277"
+      order_method: "investment_fund_amount_order"
+      allotted_units: 57955
+      execution_nav_jpy_per_10000_units: 38471
+    funding_source_context:
+      user_attributed_source: "CIBR売却代金1,404.00 USDの円転後資金"
+      fx_conversion_ref: "transactions/ledger.yaml#rakuten-1275-usd-jpy-exchange-cibr-2026-08-21"
+      source_sale_transaction_ref: "transactions/ledger.yaml#rakuten-1266-cibr-sell-fill"
+    purpose: "ACT-S3-014の全世界株式コア買付"
+    plan_task_associations: ["ACT-S3-014"]
+    source_evidence: "transactions/evidence/2026-08-29_rakuten_all_country_cash_sweep_fills.yaml#fills.order_1277"
+    unknown_fields: []
+  - transaction_id: "rakuten-1275-usd-jpy-exchange-cibr-2026-08-21"
+    status: "confirmed"
+    transaction_type: "fx_conversion"
+    trade_date: "2026-08-24"
+    order_placed_at: "2026-08-21T23:19:00+09:00"
+    execution_confirmed_at: "2026-08-21"
+    source_currency: "USD"
+    destination_currency: "JPY"
+    currency: "JPY"
+    source_amount_usd: 1404.00
+    applied_exchange_rate_jpy_per_usd: 158.838
+    calculated_jpy_before_broker_rounding: 223008.552
+    settlement_amount_jpy: 222956
+    settlement_date: "2026-08-25"
+    order_status: "completed_settled"
+    account:
+      institution: "楽天証券"
+      account_type: "米ドル預り金から円預り金への為替取引"
+      tax_regime: "not_assessed"
+    order:
+      order_number: "1275"
+      order_method: "real_time_fx"
+      side: "sell_usd"
+    funding_source_context:
+      user_attributed_source: "CIBR売却代金"
+      source_sale_transaction_ref: "transactions/ledger.yaml#rakuten-1266-cibr-sell-fill"
+    purpose: "ACT-S3-014の全世界株式コア買付資金"
+    plan_task_associations: ["ACT-S3-014"]
+    source_evidence: "transactions/evidence/2026-08-21_rakuten_usd_to_jpy_orders.yaml#orders.order_1275"
+    settlement_confirmation_ref: "transactions/evidence/2026-08-29_rakuten_all_country_cash_sweep_fills.yaml#fills.order_1277"
+    unknown_fields: ["fx_fee_or_spread_jpy", "tax_treatment"]
+  - transaction_id: "rakuten-1276-usd-jpy-exchange-smh-2026-08-21"
+    status: "confirmed"
+    transaction_type: "fx_conversion"
+    trade_date: "2026-08-24"
+    order_placed_at: "2026-08-21T23:21:00+09:00"
+    execution_confirmed_at: "2026-08-21"
+    source_currency: "USD"
+    destination_currency: "JPY"
+    currency: "JPY"
+    source_amount_usd: 582.92
+    applied_exchange_rate_jpy_per_usd: 158.859
+    calculated_jpy_before_broker_rounding: 92602.08828
+    settlement_amount_jpy: 92602
+    settlement_date: "2026-08-25"
+    order_status: "completed_settled"
+    account:
+      institution: "楽天証券"
+      account_type: "米ドル預り金から円預り金への為替取引"
+      tax_regime: "not_assessed"
+    order:
+      order_number: "1276"
+      order_method: "real_time_fx"
+      side: "sell_usd"
+    funding_source_context:
+      user_attributed_source: "SMH売却代金"
+      source_sale_transaction_ref: "transactions/ledger.yaml#rakuten-1262-smh-sell-fill"
+    purpose: "ACT-S3-014の全世界株式コア買付資金"
+    plan_task_associations: ["ACT-S3-014"]
+    source_evidence: "transactions/evidence/2026-08-21_rakuten_usd_to_jpy_orders.yaml#orders.order_1276"
+    settlement_confirmation_ref: "transactions/evidence/2026-08-29_rakuten_all_country_cash_sweep_fills.yaml#fills.order_1278"
+    unknown_fields: ["fx_fee_or_spread_jpy", "tax_treatment"]
+  - transaction_id: "rakuten-all-country-5861859-buy-fill-2026-08-12"
+    status: "confirmed"
+    transaction_type: "buy"
+    trade_date: "2026-08-12"
+    order_placed_at: "2026-08-10T14:33:00+09:00"
+    execution_confirmed_at: "2026-08-21"
+    symbol: "EMAXIS_SLIM_ALL_COUNTRY"
+    name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    ordered_amount_jpy: 5861859
+    quantity: 1515633
+    price_jpy_per_10000_units: 38676
+    fee_jpy: 0
+    settlement_amount_jpy: 5861859
+    settlement_date: "2026-08-18"
+    order_status: "completed_filled"
+    account:
+      institution: "楽天証券"
+      account_type: "特定口座"
+      tax_regime: "taxable_withholding"
+    currency: "JPY"
+    order:
+      order_number: "1263"
+      order_method: "investment_fund_amount_order"
+      ordered_amount_jpy: 5861859
+      allotted_units: 1515633
+      execution_nav_jpy_per_10000_units: 38676
+    plan_task_associations: ["ACT-S3-005"]
+    funding_source_context:
+      source: "ACT-S3-005-STAGE-1で確認した楽天証券買付可能額"
+    source_evidence: "transactions/evidence/2026-08-21_rakuten_all_country_stage1_fill.yaml#fill"
+    unknown_fields: []
+  - transaction_id: "rakuten-all-country-795390-buy-order-2026-08-14"
+    status: "confirmed"
+    transaction_type: "buy"
+    trade_date: "2026-08-17"
+    order_placed_at: "2026-08-14T10:45:00+09:00"
+    execution_confirmed_at: "2026-08-21"
+    symbol: "EMAXIS_SLIM_ALL_COUNTRY"
+    name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    ordered_amount_jpy: 795390
+    quantity: 204329
+    price_jpy_per_10000_units: 38927
+    fee_jpy: 0
+    settlement_amount_jpy: 795390
+    settlement_date: "2026-08-21"
+    order_status: "completed_filled"
+    account:
+      institution: "楽天証券"
+      account_type: "特定口座"
+      tax_regime: "taxable_withholding"
+    currency: "JPY"
+    order:
+      order_number: "1274"
+      order_method: "investment_fund_amount_order"
+      ordered_amount_jpy: 795390
+      allotted_units: 204329
+      execution_nav_jpy_per_10000_units: 38927
+    plan_task_associations: ["ACT-S3-007", "ACT-S3-014"]
+    funding_source_context:
+      sources: ["暗号資産売却代金", "野村證券国内株売却代金", "日産自動車売却代金"]
+      exact_yen_allocation: null
+      reason: "楽天証券口座内現金は資金源別に分離されないため、注文総額を各資金源へ円単位で割り当てない"
+    clarification_evidence: "transactions/evidence/2026-08-14_act_s3_014_nissan_redeployment_clarification.yaml"
+    source_evidence: "transactions/evidence/2026-08-21_rakuten_all_country_fills.yaml#fills.order_1274"
+    unknown_fields: []
+  - transaction_id: "rakuten-all-country-1946765-buy-fill-2026-08-14"
+    status: "confirmed"
+    transaction_type: "buy"
+    trade_date: "2026-08-14"
+    order_placed_at: "2026-08-13T09:05:00+09:00"
+    execution_confirmed_at: "2026-08-21"
+    symbol: "EMAXIS_SLIM_ALL_COUNTRY"
+    name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+    ordered_amount_jpy: 1946765
+    quantity: 498928
+    price_jpy_per_10000_units: 39019
+    fee_jpy: 0
+    settlement_amount_jpy: 1946765
+    settlement_date: "2026-08-20"
+    order_status: "completed_filled"
+    account:
+      institution: "楽天証券"
+      account_type: "特定口座"
+      tax_regime: "taxable_withholding"
+    currency: "JPY"
+    order:
+      order_number: "1268"
+      order_method: "investment_fund_amount_order"
+      ordered_amount_jpy: 1946765
+      allotted_units: 498928
+      execution_nav_jpy_per_10000_units: 39019
+    plan_task_associations: ["ACT-S3-005"]
+    funding_source_context:
+      source: "ACT-S3-005-STAGE-2Aで確認した楽天証券買付可能額"
+      exact_source_composition: null
+      reason: "確認済みの野村證券移動額1,744,557円と買付可能額との差額202,208円の資金源は推測しない"
+    source_evidence: "transactions/evidence/2026-08-21_rakuten_all_country_fills.yaml#fills.order_1268"
+    unknown_fields: ["exact_source_composition"]
+  - transaction_id: "crypto-xrp-proceeds-transfer-to-rakuten-2026-08-14"
+    status: "confirmed"
+    transaction_type: "transfer"
+    trade_date: "2026-08-14"
+    execution_confirmed_at: "2026-08-14"
+    amount_jpy: 7346
+    fee_jpy: null
+    net_amount_jpy: 7346
+    from_account:
+      institution: null
+      balance_type: "XRP売却由来現金"
+    account:
+      institution: "楽天証券"
+      account_type: "証券口座内現金"
+      tax_regime: "not_applicable_internal_cash_transfer"
+    currency: "JPY"
+    purpose: "ACT-S3-007の全世界株式コア買付資金"
+    included_in_basis_snapshot: true
+    source_evidence: "transactions/evidence/2026-08-14_sale_proceeds_transfers_to_rakuten.yaml#transfers.crypto_xrp"
+    unknown_fields: ["source_institution", "fee_jpy"]
+  - transaction_id: "crypto-btc-proceeds-transfer-to-rakuten-2026-08-14"
+    status: "confirmed"
+    transaction_type: "transfer"
+    trade_date: "2026-08-14"
+    execution_confirmed_at: "2026-08-14"
+    amount_jpy: 171669
+    fee_jpy: null
+    net_amount_jpy: 171669
+    from_account:
+      institution: null
+      balance_type: "BTC売却由来現金"
+    account:
+      institution: "楽天証券"
+      account_type: "証券口座内現金"
+      tax_regime: "not_applicable_internal_cash_transfer"
+    currency: "JPY"
+    purpose: "ACT-S3-007の全世界株式コア買付資金"
+    included_in_basis_snapshot: true
+    source_evidence: "transactions/evidence/2026-08-14_sale_proceeds_transfers_to_rakuten.yaml#transfers.crypto_btc"
+    unknown_fields: ["source_institution", "fee_jpy"]
+  - transaction_id: "crypto-eth-proceeds-transfer-to-rakuten-2026-08-14"
+    status: "confirmed"
+    transaction_type: "transfer"
+    trade_date: "2026-08-14"
+    execution_confirmed_at: "2026-08-14"
+    amount_jpy: 131351
+    fee_jpy: null
+    net_amount_jpy: 131351
+    from_account:
+      institution: null
+      balance_type: "ETH売却由来現金"
+    account:
+      institution: "楽天証券"
+      account_type: "証券口座内現金"
+      tax_regime: "not_applicable_internal_cash_transfer"
+    currency: "JPY"
+    purpose: "ACT-S3-007の全世界株式コア買付資金"
+    included_in_basis_snapshot: true
+    source_evidence: "transactions/evidence/2026-08-14_sale_proceeds_transfers_to_rakuten.yaml#transfers.crypto_eth"
+    unknown_fields: ["source_institution", "fee_jpy"]
+  - transaction_id: "nomura-9444-2353-proceeds-transfer-to-rakuten-2026-08-14"
+    status: "confirmed"
+    transaction_type: "transfer"
+    trade_date: "2026-08-14"
+    execution_confirmed_at: "2026-08-14"
+    amount_jpy: 485024
+    fee_jpy: null
+    net_amount_jpy: 485024
+    from_account:
+      institution: "野村證券"
+      balance_type: "9444・2353売却代金"
+    account:
+      institution: "楽天証券"
+      account_type: "証券口座内現金"
+      tax_regime: "not_applicable_internal_cash_transfer"
+    currency: "JPY"
+    purpose: "ACT-S3-014の全世界株式コア買付資金"
+    included_in_basis_snapshot: true
+    source_sale_transaction_refs:
+      - "transactions/ledger.yaml#nomura-79153-9444-sell-fill"
+      - "transactions/ledger.yaml#nomura-79152-2353-sell-fill"
+    source_evidence: "transactions/evidence/2026-08-14_sale_proceeds_transfers_to_rakuten.yaml#transfers.nomura_9444_2353"
+    unknown_fields: ["fee_jpy"]
+  - transaction_id: "nomura-existing-cash-1744557-transfer-to-rakuten-2026-08-13"
+    status: "confirmed"
+    transaction_type: "transfer"
+    trade_date: "2026-08-13"
+    execution_confirmed_at: "2026-08-14"
+    amount_jpy: 1744557
+    fee_jpy: null
+    net_amount_jpy: null
+    from_account:
+      institution: "野村證券"
+      balance_type: "既存流動現金"
+    account:
+      institution: "楽天証券"
+      account_type: "証券口座内現金"
+      tax_regime: "not_applicable_internal_cash_transfer"
+    currency: "JPY"
+    purpose: "ACT-S3-005の全世界株式コア買付資金"
+    included_in_basis_snapshot: true
+    excluded_sale_proceeds_jpy: 485024
+    source_evidence: "transactions/evidence/2026-08-13_nomura_existing_cash_transfer_to_rakuten.yaml#transfer"
+    unknown_fields:
+      - "fee_jpy"
+      - "net_amount_jpy"
+  - transaction_id: "rakuten-1262-smh-sell-fill"
+    status: "confirmed"
+    transaction_type: "sell"
+    trade_date: "2026-08-12"
+    order_placed_at: "2026-08-09T22:55:00+09:00"
+    execution_confirmed_at: "2026-08-13"
+    symbol: "SMH"
+    name: "ヴァンエック・半導体株ETF"
+    quantity: 1
+    order_price_usd: 583.49
+    price_usd: 585.83
+    gross_proceeds_usd: 585.83
+    gross_proceeds_jpy: null
+    acquisition_cost_usd_snapshot_reference: 369.63
+    acquisition_cost_jpy: null
+    fee_usd: 2.91
+    fee_jpy: null
+    tax_jpy: null
+    net_proceeds_usd: 582.92
+    displayed_exchange_rate_jpy_per_usd: 159.140
+    gross_minus_net_proceeds_usd: 2.91
+    displayed_values_reconciliation_status: "resolved"
+    net_proceeds_jpy: null
+    realized_gain_loss_jpy: null
+    realized_gain_loss_direction: "gain_user_confirmed"
+    settlement_date: "2026-08-14"
+    account:
+      institution: "楽天証券"
+      account_type: "特定口座"
+      tax_regime: "taxable_withholding"
+    currency: "USD"
+    order:
+      order_number: "1262"
+      order_type: null
+      ordered_quantity: 1
+      filled_quantity: 1
+      unfilled_quantity: 0
+      execution_condition: "day"
+      settlement_currency: "USD"
+      order_method: "通常注文"
+    source_evidence: "transactions/evidence/2026-08-12_rakuten_smh_fill.yaml#fill"
+    proceeds_evidence: "transactions/evidence/2026-08-14_rakuten_smh_settlement.yaml#settlement"
+    unknown_fields:
+      - "order_type"
+      - "gross_proceeds_jpy"
+      - "acquisition_cost_jpy"
+      - "fee_jpy"
+      - "tax_jpy"
+      - "net_proceeds_jpy"
+      - "realized_gain_loss_jpy"
+      - "annual_statement_reconciliation"
+    tax_record:
+      annual_record_ref: "transactions/tax/2026.yaml"
+      status: "settlement_recorded"
+      filing_category: "taxable_withholding"
+      tax_asset_category: "listed_stock"
+      acquisition_cost_jpy: null
+      realized_gain_loss_jpy: null
+      realized_gain_loss_direction: "gain_user_confirmed"
+      offset_role: "gain_to_offset_against_2026_listed_stock_losses"
+      annual_statement_evidence_ref: null
+      missing_fields:
+        - "gross_proceeds_jpy"
+        - "acquisition_cost_jpy"
+        - "fee_jpy"
+        - "tax_jpy"
+        - "net_proceeds_jpy"
+        - "realized_gain_loss_jpy"
+        - "annual_statement_reconciliation"
+  - transaction_id: "rakuten-1266-cibr-sell-fill"
+    status: "confirmed"
+    transaction_type: "sell"
+    trade_date: "2026-08-13"
+    order_placed_at: "2026-08-12T23:06:00+09:00"
+    execution_confirmed_at: "2026-08-21"
+    symbol: "CIBR"
+    name: "ファーストトラスト ナスダック サイバーセキュリティETF"
+    quantity: 14
+    price_usd: null
+    gross_proceeds_usd: null
+    gross_proceeds_jpy: null
+    fee_jpy: 1111
+    tax_jpy: null
+    displayed_settlement_amount_jpy: 222956
+    user_attributed_proceeds_usd: 1404.00
+    net_proceeds_jpy: null
+    proceeds_reconciliation_status: "pending_fx_settlement_and_annual_statement"
+    settlement_date: "2026-08-17"
+    account:
+      institution: "楽天証券"
+      account_type: "特定口座"
+      tax_regime: "taxable_withholding"
+    currency: "JPY"
+    order:
+      order_number: "1266"
+      order_type: "market"
+      ordered_quantity: 14
+      filled_quantity: 14
+      unfilled_quantity: 0
+      execution_condition: "day"
+      extended_hours: false
+      settlement_currency: "JPY"
+      order_method: "通常注文"
+    source_evidence: "transactions/evidence/2026-08-12_rakuten_cibr_fill.yaml#fill"
+    settlement_evidence: "transactions/evidence/2026-08-21_rakuten_cibr_settlement.yaml#settlement"
+    unknown_fields:
+      - "trade_date_local"
+      - "price_usd"
+      - "gross_proceeds_usd"
+      - "gross_proceeds_jpy"
+      - "exchange_rate"
+      - "acquisition_cost_jpy"
+      - "tax_jpy"
+      - "realized_gain_loss_jpy"
+      - "net_proceeds_jpy"
+    tax_record:
+      annual_record_ref: "transactions/tax/2026.yaml"
+      status: "settlement_recorded"
+      filing_category: "taxable_withholding"
+      tax_asset_category: "listed_stock"
+      acquisition_cost_jpy: null
+      realized_gain_loss_jpy: null
+      annual_statement_evidence_ref: null
+      missing_fields:
+        - "trade_date_local"
+        - "price_usd"
+        - "gross_proceeds_usd"
+        - "gross_proceeds_jpy"
+        - "exchange_rate"
+        - "acquisition_cost_jpy"
+        - "tax_jpy"
+        - "realized_gain_loss_jpy"
+        - "net_proceeds_jpy"
+        - "annual_statement_reconciliation"
+  - transaction_id: "crypto-btc-eth-xrp-full-liquidation-2026-08-12"
+    status: "confirmed"
+    transaction_type: "sell"
+    trade_date: null
+    execution_confirmed_at: "2026-08-12"
+    symbol: "BTC_ETH_XRP_AGGREGATE"
+    symbols: ["BTC", "ETH", "XRP"]
+    name: "BTC・ETH・XRP 全売却（集約記録）"
+    quantity: null
+    price_jpy: null
+    gross_proceeds_jpy: null
+    previous_reported_proceeds_components_jpy: [7346, 302820]
+    previous_reported_proceeds_total_jpy: 310166
+    reported_proceeds_by_asset_jpy: {XRP: 7346, BTC: 171669, ETH: 131351}
+    reported_proceeds_total_jpy: 310366
+    latest_report_difference_jpy: 200
+    latest_report_evidence: "transactions/evidence/2026-08-14_sale_proceeds_transfers_to_rakuten.yaml#reconciliation"
+    fee_jpy: null
+    tax_jpy: null
+    net_proceeds_jpy: null
+    settlement_date: null
+    balance_after_sale_jpy: 0
+    account:
+      institution: null
+      account_type: "暗号資産取引サービス（未特定）"
+      tax_regime: "crypto_misc_income"
+    currency: "JPY"
+    source_evidence: "transactions/evidence/2026-08-12_crypto_full_liquidation_user_report.yaml"
+    unknown_fields:
+      - "trade_date"
+      - "settlement_date"
+      - "institution"
+      - "per_asset_quantity"
+      - "per_asset_execution_price"
+      - "per_asset_proceeds"
+      - "gross_proceeds_jpy"
+      - "acquisition_cost_jpy"
+      - "fee_jpy"
+      - "realized_gain_loss_jpy"
+      - "net_proceeds_jpy"
+    tax_record:
+      annual_record_ref: "transactions/tax/2026.yaml"
+      status: "fill_recorded"
+      filing_category: "crypto_misc_income"
+      acquisition_cost_jpy: null
+      realized_gain_loss_jpy: null
+      annual_statement_evidence_ref: null
+      missing_fields:
+        - "trade_date"
+        - "settlement_date"
+        - "institution"
+        - "per_asset_quantity"
+        - "per_asset_execution_price"
+        - "per_asset_proceeds"
+        - "gross_proceeds_jpy"
+        - "acquisition_cost_jpy"
+        - "fee_jpy"
+        - "realized_gain_loss_jpy"
+        - "net_proceeds_jpy"
+        - "transaction_history_reconciliation"
+  - transaction_id: "rakuten-1261-7201-sell-fill"
+    status: "confirmed"
+    transaction_type: "sell"
+    trade_date: "2026-08-10"
+    order_placed_at: "2026-08-08T09:48:41+09:00"
+    execution_confirmed_at: "2026-08-10"
+    symbol: "7201"
+    name: "日産自動車"
+    quantity: 100
+    price_jpy: 345
+    gross_proceeds_jpy: 34500
+    commission_before_tax_jpy: 50
+    commission_tax_jpy: 5
+    fee_jpy: 55
+    tax_jpy: null
+    net_proceeds_jpy: 34445
+    settlement_date: "2026-08-13"
+    acquisition_cost_jpy: 36800
+    acquisition_cost_calculation: "100株 × 保存済み平均取得単価368円"
+    acquisition_cost_source_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=7201]"
+    realized_gain_loss_jpy: -2355
+    realized_gain_loss_status: "provisional_pending_annual_document_reconciliation"
+    account:
+      institution: "楽天証券"
+      account_type: "特定口座"
+      tax_regime: "taxable_withholding"
+    currency: "JPY"
+    order:
+      order_number: "1261"
+      order_type: "market"
+      ordered_quantity: 100
+      filled_quantity: 100
+      unfilled_quantity: 0
+      order_valid_through: "2026-08-20"
+      route: "東証(SOR)"
+      order_method: "通常注文"
+    source_evidence: "transactions/evidence/2026-08-10_rakuten_7201_fill.yaml#fill"
+    settlement_evidence: "transactions/evidence/2026-08-12_rakuten_7201_settlement.yaml#settlement"
+    unknown_fields:
+      - "tax_jpy"
+      - "annual_statement_reconciliation"
+    tax_record:
+      annual_record_ref: "transactions/tax/2026.yaml"
+      status: "settlement_recorded"
+      filing_category: "taxable_withholding"
+      tax_asset_category: "listed_stock"
+      acquisition_cost_jpy: 36800
+      realized_gain_loss_jpy: -2355
+      annual_statement_evidence_ref: null
+      missing_fields:
+        - "tax_jpy"
+        - "annual_statement_reconciliation"
+  - transaction_id: "nomura-79153-9444-sell-fill"
+    status: "confirmed"
+    transaction_type: "sell"
+    trade_date: "2026-08-10"
+    order_placed_at: "2026-08-08T09:46:00+09:00"
+    execution_confirmed_at: "2026-08-10"
+    symbol: "9444"
+    name: "トーシンホールディングス"
+    quantity: 1500
+    price_jpy: 307
+    gross_proceeds_jpy: 460500
+    settlement_deduction_jpy: 524
+    fee_jpy: null
+    tax_jpy: null
+    net_proceeds_jpy: 459976
+    settlement_date: "2026-08-13"
+    acquisition_cost_jpy: 942000
+    acquisition_cost_calculation: "1,500株 × 保存済み平均取得単価628円"
+    acquisition_cost_source_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=9444]"
+    realized_gain_loss_jpy: -482024
+    realized_gain_loss_status: "provisional_pending_annual_document_reconciliation"
+    account:
+      institution: "野村證券"
+      account_type: "特定口座"
+      tax_regime: "taxable_withholding"
+    currency: "JPY"
+    order:
+      order_number: "79153"
+      order_type: "market"
+      ordered_quantity: 1500
+      filled_quantity: 1500
+      unfilled_quantity: 0
+      order_valid_through: "2026-08-19"
+      channel: "PC/スマホ"
+    source_evidence: "transactions/evidence/2026-08-12_nomura_9444_2353_settlements.yaml#settlements.9444"
+    fill_evidence_ref: "transactions/evidence/2026-08-10_nomura_fills.yaml#fills.9444"
+    unknown_fields:
+      - "fee_jpy"
+      - "tax_jpy"
+      - "annual_statement_reconciliation"
+    tax_record:
+      annual_record_ref: "transactions/tax/2026.yaml"
+      status: "settlement_recorded"
+      filing_category: "taxable_withholding"
+      tax_asset_category: "listed_stock"
+      acquisition_cost_jpy: 942000
+      realized_gain_loss_jpy: -482024
+      realized_gain_loss_status: "provisional_pending_annual_document_reconciliation"
+      annual_statement_evidence_ref: null
+      missing_fields:
+        - "fee_jpy"
+        - "tax_jpy"
+        - "annual_statement_reconciliation"
+  - transaction_id: "nomura-79152-2353-sell-fill"
+    status: "confirmed"
+    transaction_type: "sell"
+    trade_date: "2026-08-10"
+    order_placed_at: "2026-08-08T09:44:00+09:00"
+    execution_confirmed_at: "2026-08-10"
+    symbol: "2353"
+    name: "日本駐車場開発"
+    quantity: 100
+    price_jpy: 252
+    gross_proceeds_jpy: 25200
+    settlement_deduction_jpy: 152
+    fee_jpy: null
+    tax_jpy: null
+    net_proceeds_jpy: 25048
+    settlement_date: "2026-08-13"
+    acquisition_cost_jpy: 26500
+    acquisition_cost_calculation: "100株 × 保存済み平均取得単価265円"
+    acquisition_cost_source_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=2353]"
+    realized_gain_loss_jpy: -1452
+    realized_gain_loss_status: "provisional_pending_annual_document_reconciliation"
+    account:
+      institution: "野村證券"
+      account_type: "一般口座"
+      tax_regime: "general_taxable"
+    currency: "JPY"
+    order:
+      order_number: "79152"
+      order_type: "market"
+      ordered_quantity: 100
+      filled_quantity: 100
+      unfilled_quantity: 0
+      order_valid_through: "2026-08-19"
+      channel: "PC/スマホ"
+    source_evidence: "transactions/evidence/2026-08-12_nomura_9444_2353_settlements.yaml#settlements.2353"
+    fill_evidence_ref: "transactions/evidence/2026-08-10_nomura_fills.yaml#fills.2353"
+    unknown_fields:
+      - "fee_jpy"
+      - "tax_jpy"
+      - "annual_statement_reconciliation"
+    tax_record:
+      annual_record_ref: "transactions/tax/2026.yaml"
+      status: "settlement_recorded"
+      filing_category: "general_taxable"
+      tax_asset_category: "listed_stock"
+      acquisition_cost_jpy: 26500
+      realized_gain_loss_jpy: -1452
+      realized_gain_loss_status: "provisional_pending_annual_document_reconciliation"
+      annual_statement_evidence_ref: null
+      missing_fields:
+        - "fee_jpy"
+        - "tax_jpy"
+        - "annual_statement_reconciliation"
 known_gaps:
   - period: "before_2026-07-26"
     status: "transaction_details_not_available"

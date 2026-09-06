@@ -1,0 +1,235 @@
+schema_version: 1
+record_type: "workflow_retrospective"
+retrospective_id: "2026-08-10_repository_evidence_resolution_failure"
+period:
+  start: "2026-08-10"
+  end: "2026-08-10"
+prepared_at: "2026-08-10"
+strategy_ref: "strategy/versions/2026-08-09-v2.yaml"
+plan_refs:
+  - "plans/2026/2026-08-09_act_s3_execution.yaml"
+snapshot_refs:
+  - "data/normalized/snapshot_2026_08.yaml"
+holding_metadata_refs:
+  - "holdings/versions/2026-08-09-v2.yaml"
+transaction_refs: []
+
+trigger:
+  user_feedback: >
+    ACT-S3-010を進めるためユーザへ提示を求めたCIBRの保有株数、取得価額等は、
+    リポジトリ内のアセットから読み取れるはずなので再確認してほしい。
+  observed_problem: >
+    リポジトリに存在する既知情報を解決・再利用せず、ユーザが同じ情報を再提出することを
+    ACT-S3-010の次の行動として表示した。
+  scope_rule: >
+    個別の文言ミスとして処理せず、ダッシュボードから実行時の根拠へ到達する動線、
+    タスク入力のデータ契約、生成工程、監査の受入条件を評価する。
+
+confirmed_repository_evidence:
+  resolved_from_snapshot:
+    source_ref: "data/normalized/snapshot_2026_08.yaml#holdings[symbol=CIBR]"
+    as_of: "2026-08-09"
+    facts:
+      symbol: "CIBR"
+      institution: "楽天証券"
+      account_type: "特定口座（源泉徴収あり）"
+      quantity: 88
+      avg_cost_usd: 76.66
+      current_price_usd: 97.85
+      market_value_jpy: 1358784
+      profit_loss_jpy: 326412
+  resolved_from_holdings_metadata:
+    source_ref: "holdings/versions/2026-08-09-v2.yaml#instruments.CIBR"
+    as_of: "2026-08-09"
+    facts:
+      institution: "楽天証券"
+      account_type: "特定口座（源泉徴収あり）"
+      tax_regime: "taxable_withholding"
+  resolved_from_plan_basis:
+    source_ref: "plans/2026/2026-08-09_act_s3_execution.yaml"
+    as_of: "2026-08-09"
+    facts:
+      reference_long_term_investable_assets_jpy: 38035678
+      target_ratio: 0.03
+      reference_target_value_jpy: 1141070
+      reference_remaining_shares: 74
+      reference_shares_to_sell: 14
+  resolved_from_generated_market_reference:
+    source_ref: "reports/generated/monthly/2026_08/review_packet.yaml#market_references"
+    as_of: "2026-08-07"
+    fact: "注文案の参考にできる市場価格基準日が記録されている"
+  reference_calculation_check:
+    if_14_shares_sold:
+      remaining_shares: 74
+      reference_remaining_value_jpy: 1142614
+      reference_ratio: 0.030041
+    if_15_shares_sold:
+      remaining_shares: 73
+      reference_ratio: 0.029635
+    conclusion: "2026-08-09基準の参考案は14株売却・74株残しであり、注文数量の確定値ではない"
+
+input_classification_at_recheck:
+  repository_resolved_for_draft:
+    - "CIBRの基準時点保有株数"
+    - "平均取得価額"
+    - "基準時点評価額・評価損益"
+    - "金融機関、口座区分、税区分"
+    - "政策分母の参考額、3%目標額、参考残存株数"
+  refresh_only_before_order:
+    - "基準日後の保有数量変化"
+    - "最新価格とUSD/JPY"
+    - "注文設定直前のlong_term_investable_assets_jpy"
+    - "未反映注文・拘束数量・注文可能数量"
+    - "最新の税引後手取額見込み"
+  repository_missing_or_not_durable:
+    - "CIBR固有の現在の未反映注文状態"
+    - "2026-08スナップショットのraw evidenceをリポジトリ内で再読できる永続参照"
+    - "data/raw/index.yaml上の2026-08スナップショット登録"
+  decision_not_fact:
+    - "成行または指値"
+    - "指値価格ルール"
+    - "有効期限"
+    - "部分約定時の処理"
+    - "未約定・失効時の再注文方法"
+
+information_available_at_decision_time:
+  - "ACT-S3計画のbasis.snapshot_refは2026-08スナップショットを明示していた"
+  - "resume_contractの読取順にも同スナップショットが含まれていた"
+  - "同じ計画のreference_targets_at_basisにCIBRのreference_remaining_shares 74が存在した"
+  - "CIBRの数量・取得価額・評価額はスナップショットに、口座メタデータはholdingsに存在した"
+  - "売買直前には価格、為替、政策分母、未反映注文を更新確認する必要があった"
+  - "注文種別等はユーザ承認が必要な意思決定であり、既存事実ではなかった"
+
+assumptions_at_decision_time:
+  - "required_inputsに列挙した情報は、すべてユーザが新たに提示する情報である"
+  - "実行直前の再確認が必要なら、基準スナップショットは注文案の下書きにも使えない"
+  - "actorとnext_actionを埋めれば、情報源を区別しなくてもhuman_actionabilityを満たす"
+  - "AGENTS.mdとresume_contractに読取順があるため、各タスクから個別ソースへの参照は不要である"
+  - "required_inputsを自由記述の文字列配列にしても、既知・古い・欠損・意思決定を運用で区別できる"
+
+decision_process:
+  - "前回レトロスペクティブを受け、全タスクへhuman_actionabilityを追加した"
+  - "ACT-S3-010に必要そうな項目をrequired_inputsへ自由記述で列挙した"
+  - "各入力についてsnapshot、holdings、strategy、planの順に既存値を探索しなかった"
+  - "同一計画内のreference_remaining_shares 74をACT-S3-010へ参照接続しなかった"
+  - "実行時更新が必要という制約を、既知値から参考注文案を作れない理由として扱った"
+  - "監査とテストではフィールドの存在と文言を確認し、入力の情報源解決を確認しなかった"
+
+decisions_made:
+  - "CIBRの既知情報をリポジトリから組み立てる代わりに、ユーザへ一式の再提示を求めた"
+  - "ダッシュボード上の次の主体をユーザとし、Codexによるrepository-firstの下書き作成を前工程に置かなかった"
+
+observed_outcomes:
+  - "ユーザの再入力負担を不要に増やした"
+  - "リポジトリを正本として再開できるという期待を損なった"
+  - "同じ計画内に参考残存74株があるのに、ユーザには計算前の状態として見せた"
+  - "注文直前の差分確認と、基準時点の全情報再収集を混同した"
+  - "監査とテストが成功しても、既存証拠を再利用しない誤った動線が残った"
+
+five_whys:
+  - why: "なぜリポジトリにあるCIBR情報をユーザへ再提出させたか"
+    because: "required_inputsを必要情報の一覧ではなく、暗黙にユーザ提出物の一覧として表示した"
+  - why: "なぜrequired_inputsをユーザ提出物とみなしたか"
+    because: "各入力にsource_ref、as_of、availability、refresh_rule、request_from_user_ifを持たせていなかった"
+  - why: "なぜ入力の情報源を持たせなかったか"
+    because: "human_actionabilityを対話表示の契約として追加したが、リポジトリ証拠を解決する契約まで設計しなかった"
+  - why: "なぜ証拠解決が設計されなかったか"
+    because: "必要な事実がsnapshot、holdings、strategy、plan内参考計算へ分散し、タスク単位で結合するresolverも直接参照もなかった"
+  - why: "なぜその欠落を検出できなかったか"
+    because: "監査とテストがrequired_inputsの型・存在・表示だけを検査し、repository-firstで解決可能な入力をユーザへ要求していないかを検査しなかった"
+
+root_causes:
+  primary:
+    - "タスク入力にevidence resolution contractがなく、既知・要更新・欠損・意思決定を区別できない"
+    - "ACT-S3タスク文脈をsnapshot、holdings、strategy、plan参考計算から組み立てるresolverがない"
+  repository_navigation:
+    - "浅いダッシュボードの正本リンクがplanとstrategyだけで、snapshot、holdings、financialへの動線がない"
+    - "ACT-S3-010からreference_targets_at_basis.cybersecurity_transition.reference_remaining_sharesへの直接参照がない"
+    - "reference_remaining_sharesは同じYAML内でもタスクから約300行離れ、意味上の接続をフィールドで表していない"
+    - "data/normalizedにcurrent.yamlまたはlatest manifestがなく、最新スナップショットを機械的に発見する共通入口がない"
+    - "data/raw/index.yamlが2026-07までで止まり、2026-08の正規化データとraw evidenceの状態が入口から追えない"
+    - "2026-08スナップショットのsource_evidenceが一時領域やDownloadsを指し、セッションを跨ぐ証拠動線として永続的でない"
+  process:
+    - "required reading orderを文書上の規則としては保持したが、human_actionability生成時に各入力へ適用しなかった"
+    - "鮮度確認が必要という安全要件を、既知値から下書きを作らない理由へ過剰適用した"
+    - "前回の『次の行動が分からない』問題を埋めることに集中し、『その行動を誰が既存データから準備できるか』を再評価しなかった"
+  validation:
+    - "schemaはrequired_inputsを文字列配列としてしか定義していない"
+    - "repository-auditはrequired_inputsがlistかだけを検査し、source resolutionを検査しない"
+    - "ダッシュボードテストは行と文言の存在を確認しても、既知値の再利用やユーザ要求の妥当性を確認しない"
+
+contribution_assessment:
+  repository_navigation_is_high_contributor: true
+  repository_navigation_is_sole_cause: false
+  explanation: >
+    情報の分散、直接参照の欠落、latest/raw evidence入口の不備により誤りが起きやすい構造だった。
+    ただし、計画にsnapshot_refと読取順があり、検索すれば既知値へ到達できたため、
+    Codexがsource resolutionを実行しなかったプロセス上の失敗も独立した原因である。
+
+process_evaluation_without_outcome_bias:
+  appropriate:
+    - "注文直前に数量、価格、為替、政策分母、未反映注文を再確認する安全要件"
+    - "成行・指値等をCodexが独断で確定せず、比較案の後にユーザ承認を求めること"
+    - "2026-08-09の74株残しを固定注文数量として扱わないこと"
+  inappropriate:
+    - "再確認が必要なことを理由に、基準スナップショットを参考注文案へ使わなかったこと"
+    - "既知の保有株数、取得価額、口座をユーザへ再提出させたこと"
+    - "raw evidenceが永続化されていない制約を、正規化スナップショットの既知値を無視する理由にしたこと"
+  correct_counterfactual_process:
+    - "Codexが計画のsnapshot_refからCIBRを解決する"
+    - "holdings/current.yaml経由で口座・税区分を補完する"
+    - "reference_targets_at_basisから参考残存74株、参考売却14株を下書きへ反映する"
+    - "ユーザには基準日後の変更、未反映注文、注文画面固有の制約だけを確認する"
+    - "更新値で数量と注文方式比較を再計算し、具体案への承認を求める"
+
+missing_contract:
+  name: "repository_evidence_resolution_contract"
+  repository_first_rule: >
+    ユーザへ入力を求める前に、計画が参照する正本、current pointer、基準スナップショット、
+    生成済み計算、transactionsを探索し、解決不能または鮮度更新が必要な差分だけを依頼する。
+  required_per_input:
+    - "key: 機械的に識別できる入力名"
+    - "source_priority: 探索する正本の順序"
+    - "source_ref: 解決した値の参照先"
+    - "value: 基準時点の値"
+    - "as_of: 値の基準時点"
+    - "availability: resolved_from_repository / stale_refresh_required / missing_user_input / external_lookup / decision_needed"
+    - "refresh_rule: いつ更新が必要か"
+    - "request_from_user_if: ユーザへ尋ねてよい条件"
+  task_context_requirement: >
+    allocation/orderタスクは、対象保有、口座、政策分母、基準計算、未反映注文を一つの
+    task contextとして解決してからhuman_actionabilityを生成する。
+
+counterfactual_acceptance_test:
+  question: "このユーザ要求は、正本と基準スナップショットを探索しても未解決の情報だけか"
+  expected_for_act_s3_010:
+    repository_draft: "CIBR 88株から参考14株売却・74株残し。楽天証券の特定口座（源泉徴収あり）"
+    user_refresh_request: "2026-08-09以後の数量変化、未反映注文、現在の注文可能数量・注文種別だけを確認"
+    codex_next_action: "更新差分を反映し、成行／指値、期限、部分約定、失効時処理を含む具体案を作成"
+    user_decision: "具体案を承認または修正"
+  failure_condition: "resolved_from_repositoryの入力を、根拠なくユーザ提出物として表示する"
+
+lessons:
+  - "required inputとuser-provided inputは同義ではない"
+  - "鮮度の古い値は捨てるのではなく、基準値として表示し、差分更新の対象にする"
+  - "正本が複数領域へ分かれる場合、読取順だけでなくタスク単位の参照またはresolverが必要"
+  - "human-readableな動線は、ファイルリンクの近さだけでなく、必要事実が自動的に集約されることを含む"
+  - "監査成功は、ユーザへの情報要求が最小かつ正当であることを保証しない"
+  - "raw evidenceの永続性不足と、normalized dataの利用可否は分けて判断する"
+
+proposed_followups_not_yet_implemented:
+  - "required_inputsを文字列からsource_ref、availability、as_of、refresh_ruleを持つ構造へ変更する"
+  - "計画basisのsnapshot_ref、holdings/current、strategy/current、financial/currentを結合するtask context resolverを追加する"
+  - "ダッシュボードを『リポジトリで確認済み』『ユーザに差分確認』『ユーザが決定』へ分ける"
+  - "repository-resolvedな入力をactor=userの提出物にすると監査エラーになる規則を追加する"
+  - "ACT-S3-010から参考残存74株へのreference_calculation_refを持たせる"
+  - "最新normalized snapshotの共通入口を追加し、plan/dashboardから到達可能にする"
+  - "data/raw/index.yamlへ2026-08のevidence状態を登録し、永続化できない一時パスを正本参照として扱わない"
+  - "ACT-S3-010が88株、76.66 USD、口座、分母、74株残しを解決し、差分だけを質問する回帰テストを追加する"
+
+followup_decision_refs: []
+unknowns:
+  - "2026-08-09後のCIBR保有数量・未反映注文の変化"
+  - "注文設定時点のCIBR価格、USD/JPY、long_term_investable_assets_jpy"
+  - "楽天証券の現在の注文画面で利用可能な注文種別と期限"
+  - "成行／指値等のユーザ承認結果"

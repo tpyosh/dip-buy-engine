@@ -9,9 +9,249 @@ required:
   - basis
   - execution_gate
 properties:
+  schema_version:
+    const: 1
   plan_id:
     type: string
   status:
     enum: ["draft", "approved_pending_execution", "active", "completed", "cancelled", "superseded"]
   strategy_ref:
     type: string
+  tasks:
+    type: array
+    items:
+      $ref: "#/$defs/task"
+  execution_guardrails:
+    type: object
+    additionalProperties:
+      $ref: "#/$defs/execution_guardrail"
+  retired_task_records:
+    type: array
+    items:
+      $ref: "#/$defs/retired_task_record"
+$defs:
+  task:
+    type: object
+    required:
+      - id
+      - status
+      - action
+      - action_kind
+      - allocation_effect
+      - human_actionability
+    properties:
+      id: {type: string}
+      status: {type: string}
+      action: {type: string}
+      action_kind:
+        enum: [monitor, calculate, transfer, buy, sell]
+      allocation_effect:
+        enum: [none, cash_amount, full_exit, target_ratio, ratio_cap, ratio_range, target_mix]
+      allocation_basis:
+        $ref: "#/$defs/allocation_basis"
+      order_specification:
+        $ref: "#/$defs/order_specification"
+      human_actionability:
+        $ref: "#/$defs/human_actionability"
+      reference_calculation_ref:
+        type: string
+        minLength: 1
+      reference_draft:
+        type: object
+    allOf:
+      - if:
+          properties:
+            allocation_effect:
+              enum: [target_ratio, ratio_cap, ratio_range, target_mix]
+        then:
+          required: [allocation_basis]
+      - if:
+          properties:
+            action_kind:
+              enum: [buy, sell]
+        then:
+          required: [order_specification]
+  allocation_basis:
+    type: object
+    required:
+      - denominator
+      - denominator_definition_ref
+      - measurement_time
+      - targets
+    properties:
+      denominator: {type: string, minLength: 1}
+      denominator_definition_ref: {type: string, minLength: 1}
+      measurement_time: {type: string, minLength: 1}
+      targets:
+        type: array
+        minItems: 1
+        items:
+          type: object
+          required: [numerator, relation, value]
+          properties:
+            numerator: {type: string, minLength: 1}
+            relation: {enum: [equal, approximately_equal, maximum, minimum, range_min, range_max]}
+            value: {type: number, minimum: 0, maximum: 1}
+  order_specification:
+    type: object
+    required:
+      - status
+      - execution_allowed
+      - account_type
+      - side
+      - quantity_rule
+      - order_type
+      - limit_price_rule
+      - timing
+      - expiration
+      - partial_fill_handling
+      - unfilled_or_expired_reorder_rule
+      - proceeds_destination
+      - pretrade_tax_check
+      - user_approval_required
+      - user_approval_status
+    properties:
+      status:
+        enum: [configured, pending_execution_time_configuration, existing_order_type_unconfirmed]
+      execution_allowed: {type: boolean}
+      account_type: {type: [string, "null"]}
+      side: {enum: [buy, sell]}
+      quantity_rule: {type: string, minLength: 1}
+      order_type:
+        enum: [market, limit, stop, stop_limit, pending_user_approval, existing_order_type_unconfirmed]
+      limit_price_rule: {type: [string, "null"]}
+      timing: {type: string, minLength: 1}
+      expiration: {type: string, minLength: 1}
+      partial_fill_handling: {type: string, minLength: 1}
+      unfilled_or_expired_reorder_rule: {type: string, minLength: 1}
+      proceeds_destination: {type: [string, "null"]}
+      pretrade_tax_check: {type: string, minLength: 1}
+      user_approval_required: {const: true}
+      user_approval_status:
+        enum: [pending, approved, approved_existing_order]
+  human_actionability:
+    type: object
+    required:
+      - actor
+      - next_action
+      - required_inputs
+      - decision_needed
+      - decision_support_owner
+      - unblock_condition
+      - completion_evidence
+    properties:
+      actor:
+        enum: [user, codex, external_broker, codex_and_user, user_and_external_broker]
+      next_action: {type: string, minLength: 1}
+      required_inputs:
+        type: array
+        items:
+          $ref: "#/$defs/input_requirement"
+      decision_needed: {type: [string, "null"]}
+      decision_support_owner: {type: [string, "null"]}
+      unblock_condition: {type: string, minLength: 1}
+      completion_evidence:
+        type: array
+        minItems: 1
+        items: {type: string, minLength: 1}
+  input_requirement:
+    type: object
+    required:
+      - key
+      - label
+      - availability
+      - source_ref
+      - value_summary
+      - as_of
+      - refresh_rule
+      - request_from_user_if
+      - blocking
+      - owner
+      - verification_stage
+      - trigger_evidence
+      - scope
+    properties:
+      key: {type: string, minLength: 1}
+      label: {type: string, minLength: 1}
+      availability:
+        enum: [resolved_from_repository, known_event_pending, refresh_by_codex, verify_at_execution, user_input_blocking]
+      source_ref: {type: [string, "null"]}
+      value_summary: {type: [string, "null"]}
+      as_of: {type: [string, "null"]}
+      refresh_rule: {type: [string, "null"]}
+      request_from_user_if: {type: [string, "null"]}
+      blocking: {type: boolean}
+      owner:
+        enum: [codex, user, external_broker, codex_and_user, user_and_external_broker]
+      verification_stage:
+        enum: [draft, approval, order_entry, settlement, post_trade, continuous]
+      trigger_evidence: {type: [string, "null"]}
+      scope: {type: string, minLength: 1}
+    allOf:
+      - if:
+          properties:
+            availability: {const: resolved_from_repository}
+        then:
+          properties:
+            source_ref: {type: string, minLength: 1}
+            as_of: {type: string, minLength: 1}
+            request_from_user_if: {type: "null"}
+            blocking: {const: false}
+      - if:
+          properties:
+            availability: {const: known_event_pending}
+        then:
+          properties:
+            source_ref: {type: string, minLength: 1}
+            as_of: {type: string, minLength: 1}
+            refresh_rule: {type: string, minLength: 1}
+            trigger_evidence: {type: string, minLength: 1}
+      - if:
+          properties:
+            availability: {const: refresh_by_codex}
+        then:
+          properties:
+            refresh_rule: {type: string, minLength: 1}
+            request_from_user_if: {type: "null"}
+            owner: {const: codex}
+      - if:
+          properties:
+            availability: {const: verify_at_execution}
+        then:
+          properties:
+            refresh_rule: {type: string, minLength: 1}
+            request_from_user_if: {type: "null"}
+            blocking: {const: false}
+            verification_stage: {const: order_entry}
+            trigger_evidence: {type: string, minLength: 1}
+      - if:
+          properties:
+            availability: {const: user_input_blocking}
+        then:
+          properties:
+            source_ref: {type: "null"}
+            as_of: {type: "null"}
+            request_from_user_if: {type: string, minLength: 1}
+            blocking: {const: true}
+  execution_guardrail:
+    type: object
+    required: [status, applies_to, restriction, activation_basis, release_condition, task_tracking, user_todo]
+    properties:
+      status: {enum: [active, released]}
+      applies_to: {type: string, minLength: 1}
+      restriction: {type: string, minLength: 1}
+      activation_basis: {type: string, minLength: 1}
+      release_condition: {type: string, minLength: 1}
+      source_retired_task_id: {type: [string, "null"]}
+      task_tracking: {const: false}
+      user_todo: {const: false}
+  retired_task_record:
+    type: object
+    required: [id, retired_at, reason, migrated_to, disposition, id_reuse_allowed]
+    properties:
+      id: {type: string, minLength: 1}
+      retired_at: {type: string, minLength: 1}
+      reason: {type: string, minLength: 1}
+      migrated_to: {type: string, minLength: 1}
+      disposition: {const: not_applicable_not_a_task}
+      id_reuse_allowed: {const: false}

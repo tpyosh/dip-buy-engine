@@ -1,0 +1,18 @@
+schema_version: 1
+record_type: "user_confirmed_crypto_liquidation_report"
+evidence_id: "crypto_full_liquidation_user_report_2026-08-12"
+confirmed_at: "2026-08-12"
+confirmed_by: "user_message"
+user_report: "暗号資産を全て売却しました。7346+302820円。これで暗号資産のポートフォリオは0円になりました"
+scope:
+  assets: ["BTC", "ETH", "XRP"]
+  portfolio_balance_after_sale_jpy: 0
+reported_proceeds:
+  components_jpy: [7346, 302820]
+  total_jpy: 310166
+  formula: "7,346円 + 302,820円 = 310,166円"
+interpretation_limits:
+  - "2つの金額とBTC・ETH・XRPの対応関係はユーザ報告に明記されていないため推測しない"
+  - "利用サービス、銘柄別数量、約定単価、約定日時、手数料、取得価額は未確認"
+  - "310,166円を税務上の確定売却総額または純受取額へ昇格させない"
+  - "取得履歴・取引履歴・年間資料との突合はACT-S3-016で継続する"

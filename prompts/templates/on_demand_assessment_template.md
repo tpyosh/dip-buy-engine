@@ -39,8 +39,8 @@
 - 最終判断と発注はユーザが行います。売買を自動実行しないでください。
 - 価格変動だけでストーリーの健全性や売却を決めず、価値獲得能力、資本効率、競争優位、反証条件を評価してください。
 - このヘルスチェックは毎日の連続実行を前提としません。`health_check_window` が広がっている場合は、その期間全体の重要事象を確認してください。
-- 投資待機資金は現金残高の維持を目的とせず、相場下落時に使うための手段として扱ってください。
-- 市場下落を確認した場合は、投資待機資金の利用可能額が不明でも、対象、金額または算式、時期、根拠を含む「使う選択肢」を必ず提示してください。最終結論が保留でも使用案を省略しないでください。
+- 後続データの`tactical_cash_policy_status`を優先してください。`disabled`なら、戦術的待機資金を`unavailable`・`not_applicable`として扱い、市場下落時も使用案や発動条件を再提案しないでください。
+- `enabled_or_review_required`の場合だけ、投資待機資金の維持自体を目的にせず、市場下落時には対象、金額または算式、時期、根拠を含む「使う選択肢」を比較してください。
 
 ## 必須出力形式
 
@@ -71,10 +71,11 @@
 - 株式、投資信託、年金プロキシで反応が異なる理由
 
 【投資待機資金の使用判断】
+- 後続データの`tactical_cash_policy_status`
 - 市場が下落局面か、下落ではないか、不明かの判定と根拠
 - 使用可能な投資待機資金があるか、ないか、不明か
-- 下落局面なら、必ず「使う選択肢」の対象、金額または算式、時期、根拠
-- 使う案と使わない案を比較した最終結論。待機資金の満額維持自体を保留理由にしない
+- `disabled`なら`reserve_status: unavailable`、`selected_action: not_applicable`とし、使用案を作らない
+- `enabled_or_review_required`かつ下落局面なら、「使う選択肢」の対象、金額または算式、時期、根拠と、使わない案との比較
 
 【要確認・判断保留】
 - 価格データが古い、ニュースとの因果が弱い、プロキシ精度が低いなどの制約
@@ -92,6 +93,6 @@
 3. YAMLファイルにはMarkdown、コードフェンス、ユーザ向け前置きを混ぜず、`schemas/health-check-response.schema.yaml` に従ってください。
 4. YAMLの `security_story_reviews` には個別株・ETFの全対象を一件ずつ含め、評価したかどうかと判断の痕跡を必ず残してください。
    機械IDはYAMLの `symbol` フィールドだけに使用してください。
-5. YAMLの `dip_buy_liquidity_deployment_review` に、下落判定、投資待機資金の利用可能性、使用案、最終選択を記録してください。下落局面では `use_option.considered: true` が必須です。
+5. YAMLの `dip_buy_liquidity_deployment_review` に、下落判定、現行政策上の利用可能性、使用案、最終選択を記録してください。`tactical_cash_policy_status: disabled`なら`use_option.considered: false`・`status: not_applicable`、それ以外で下落局面かつ待機資金が利用可能または不明なら`use_option.considered: true`です。
 
 以下が保有銘柄リストと価格変動データです。

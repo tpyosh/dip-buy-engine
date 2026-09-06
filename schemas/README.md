@@ -6,11 +6,15 @@
 
 `financial-context.schema.yaml` は収入・支出・ボーナス・生活防衛資金・ローン等の版管理レコード、`holding-metadata.schema.yaml` は口座区分・売却可否・保有意図の版管理レコードを定義します。現在値はそれぞれ `financial/current.yaml` と `holdings/current.yaml` のポインタから読み、Markdown、プロンプト、Pythonコードへ数値を重複保存しません。
 
+`transaction.schema.yaml`は確認済み取引と売却時の税務追跡項目、`annual-tax-record.schema.yaml`は取引金額を複製せず年次の確定申告準備・年間資料突合状態を管理する索引を定義します。売却取引は必ず両者を`transaction_id`で接続します。
+
+`broker-order-capability.schema.yaml`は、証券会社の注文画面で証拠から確認できた入力項目・選択肢・銘柄固有値の流用禁止範囲を定義します。現在使用する版は`brokers/`配下の`current.yaml`から解決します。
+
 `review-packet.schema.yaml` の `account_type_gate` は、売買可能な全明細をNISA・特定口座・一般口座へ分類できることを生成前条件とします。不足時は `generation_status: blocked_missing_account_types` とし、部分レビューやChatGPT回答を生成しません。月次回答の `decisions.actions` は現在保有する全明細の行動を網羅し、未保有資産の購入案または購入なしの結論を分離して記録します。
 
 `independent-decision-request.schema.yaml` と `independent-decision-response.schema.yaml` は過去の個別判断パケットとの互換用です。新しい投資判断はレビュー時期で分岐せず、`review-packet.schema.yaml` によるオンデマンド包括レビューへ集約します。互換用requestにはCodexの結論や候補値を含めず、responseはリクエストと同じ `decision_id` と `user_confirmation_required: true` の承認ゲートを維持します。
 
-月次とオンデマンドの両回答は `dip_buy_liquidity_deployment_review` を必須とします。市場下落中で投資待機資金が利用可能または不明な場合、`use_option.considered` は `true` で、対象、金額または算式、時期、根拠が必要です。`reserve_maintenance_is_objective` は常に `false` です。
+月次とオンデマンドの両回答は `dip_buy_liquidity_deployment_review` を必須とします。現行政策で戦術的待機資金が無効・0%なら、`reserve_status: unavailable`、`use_option.considered: false`、`use_option.status: not_applicable`、`selected_action: not_applicable`とします。戦術的待機資金が有効または政策レビュー中で、市場下落中かつ利用可能または不明な場合だけ、`use_option.considered` は `true`で、対象、金額または算式、時期、根拠が必要です。`reserve_maintenance_is_objective`は常に`false`です。
 
 月次パケットが `proposal_requested_from_current_review` を指定した場合、独立ChatGPTは総資産比0、2.5、5、7.5、10%の投資待機資金候補を比較してから、正本 `strategic_policy_decision.tactical_liquidity_policy` に一つの目標比率、買付対象、発動条件、分割投入、最低残高、補充・終了方法を提案します。生活防衛資金は別枠です。`cash_assessment` と `dip_buy_liquidity_deployment_review` は正本パスを参照し、`decisions.policy_refs` は `policy_id` だけを参照します。提案は `requires_user_approval: true` とし、承認前は家計入力の確定値へ反映しません。
 

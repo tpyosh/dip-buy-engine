@@ -1,0 +1,37 @@
+schema_version: 1
+record_type: "broker_post_fill_proceeds_evidence_transcription"
+record_status: "superseded_by_later_settlement_screen"
+superseded_by: "transactions/evidence/2026-08-14_rakuten_smh_settlement.yaml"
+evidence_id: "rakuten_smh_proceeds_details_2026-08-13"
+broker: "楽天証券"
+confirmed_at: "2026-08-13"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-9f6d0c67-d464-46f5-9763-b03a908b6d65.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+displayed_transaction:
+  order_number: "1262"
+  order_placed_at: "2026-08-09T22:55:00+09:00"
+  status: "filled"
+  settlement_currency: "USD"
+  symbol: "SMH"
+  name: "ヴァンエック・半導体株ETF"
+  market: "米国市場"
+  side: "sell"
+  account_type: "特定口座"
+  execution_condition: "本日中"
+  order_method: "通常注文"
+  ordered_quantity: 1
+  filled_quantity: 1
+  execution_price_usd: 583.49
+  displayed_settlement_amount_usd: 582.92
+  displayed_fee_usd: 2.91
+  gross_minus_displayed_settlement_amount_usd: 0.57
+  displayed_values_reconciliation_status: "unresolved"
+interpretation_limits:
+  - "この転記で583.49 USDを約定単価と解釈した点は、2026-08-14受渡画面により訂正された。583.49 USDは注文時表示価格、実際の約定単価は585.83 USD"
+  - "画面には受渡代金582.92 USドルと手数料2.91 USドルが表示されている"
+  - "約定総額583.49 USドルと受渡代金の差は0.57 USドルで、表示手数料2.91 USドルとは一致しない"
+  - "差額の原因を税、SEC fee、為替、別費用などと推測せず、年間取引報告書または正式な取引明細で突合する"
+  - "国内受渡日は既存証拠の2026-08-14を維持し、この画面だけで2026-08-13中の現金利用可能化を確定しない"

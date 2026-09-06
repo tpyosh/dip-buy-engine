@@ -65,6 +65,11 @@ def test_on_demand_review_prompt_is_a_closed_decision_packet(sample_computation)
     assert "research_cutoff_at:" in prompt
     assert "decision_date:" in prompt
     assert "R-CASH-001" in prompt
+    assert "R-TAX-001" in prompt
+    assert "損益通算" in prompt
+    assert "tax-loss harvesting" in prompt
+    assert "課税口座の含み益ロットと含み損ロットを同一暦年に実現" in prompt
+    assert "`account_tax_comparisons` に記録" in prompt
     assert "R-DELIVERY-001" in prompt
     assert "equity_share_of_equity_bond_sleeve_pct:" in prompt
     assert "- 0" in prompt
@@ -153,7 +158,7 @@ def test_review_packet_selects_financial_facts_without_copying_values_into_templ
     )
     template = TEMPLATE_PATH.read_text(encoding="utf-8")
 
-    assert packet.review_mode == "strategic_policy_second_opinion"
+    assert packet.review_mode == "on_demand_operational_review"
 
     statements = [
         item["statement"] for item in packet.confirmed_user_conditions
@@ -166,7 +171,7 @@ def test_review_packet_selects_financial_facts_without_copying_values_into_templ
     assert "月間必須支出額: 250,000円" in statements
     assert "生活防衛資金の目標額: 2,000,000円" in statements
     assert "生活防衛資金とは別の予備費は確保しない" in statements
-    assert "投資待機資金の目標比率は今回のオンデマンド独立レビューから提案を受ける" in statements
+    assert "戦術的な投資待機資金は設けない" in statements
     assert any(
         "相場下落中でもオール・カントリー型の投資信託を売却"
         in item
@@ -175,7 +180,8 @@ def test_review_packet_selects_financial_facts_without_copying_values_into_templ
     assert any("NISA月次積立額: 100,000円" in item for item in statements)
     assert not any("月額100,000円の具体的な差引先" in item for item in unknown_reasons)
     assert any("ボーナスの正確な手取り額" in item for item in unknown_reasons)
-    assert any("投資待機資金の目標比率" in item for item in unknown_reasons)
+    assert not any("投資待機資金の目標比率" in item for item in unknown_reasons)
+    assert not any("サテライトの目標比率" in item for item in unknown_reasons)
     inline_schema = packet.output_contract["inline_response_schema"]
     assert "account_tax_comparison" in inline_schema["$defs"]
     assert "374,171円" not in template

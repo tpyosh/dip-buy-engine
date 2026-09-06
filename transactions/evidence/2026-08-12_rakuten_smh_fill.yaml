@@ -1,0 +1,39 @@
+schema_version: 1
+record_type: "broker_fill_evidence_transcription"
+record_status: "superseded_by_later_settlement_screen"
+superseded_by: "transactions/evidence/2026-08-14_rakuten_smh_settlement.yaml"
+evidence_id: "rakuten_smh_fill_2026-08-12"
+broker: "楽天証券"
+confirmed_at: "2026-08-13"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-ec99cc0f-66f3-42c2-ab92-98a70c2385f3.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+fill:
+  order_number: "1262"
+  order_placed_at: "2026-08-09T22:55:00+09:00"
+  settlement_currency: "USD"
+  status: "filled"
+  symbol: "SMH"
+  name: "ヴァンエック・半導体株ETF"
+  market: "米国市場"
+  side: "sell"
+  account_type: "特定口座"
+  execution_condition: "本日中"
+  order_method: "通常注文"
+  ordered_quantity: 1
+  filled_quantity: 1
+  unfilled_quantity: 0
+  execution_price_usd: 583.49
+  trade_date_local: null
+  trade_date_japan: "2026-08-12"
+  settlement_date_japan: "2026-08-14"
+  gross_proceeds_usd: 583.49
+  net_proceeds_usd: null
+interpretation_limits:
+  - "この転記で583.49 USDを約定単価と解釈した点は、2026-08-14受渡画面により訂正された。583.49 USDは注文時表示価格、実際の約定単価は585.83 USD"
+  - "状況は約定、注文数量1株・約定数量1株のため全量約定として扱う"
+  - "583.49 USドルは画面の約定単価であり、手数料控除後の受取額ではない"
+  - "注文種別、現地約定日、手数料、税、適用為替、円換算取得費、円建て実現損益は表示されていない"
+  - "ユーザ報告により利益取引として相殺対象へ登録するが、円建て利益額は受渡明細または年間取引報告書まで未確定とする"

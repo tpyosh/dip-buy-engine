@@ -1,0 +1,56 @@
+schema_version: 1
+record_type: "broker_settlement_evidence_transcription"
+evidence_id: "nomura_9444_2353_settlements_2026-08-12"
+broker: "野村證券"
+confirmed_at: "2026-08-12"
+confirmed_by: "user_provided_broker_screenshots"
+source_attachments:
+  - original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-c2e68afa-328d-4107-8ebe-f35b3ebcaca6.png"
+    subject: "9444 トーシンホールディングス"
+  - original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-17662fd3-4804-4efd-816b-b05a16b55039.png"
+    subject: "2353 日本駐車場開発"
+durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+settlements:
+  "9444":
+    name: "トーシンホールディングス"
+    trade_date: "2026-08-10"
+    settlement_date: "2026-08-13"
+    side: "sell"
+    quantity: 1500
+    execution_price_jpy: 307
+    gross_proceeds_jpy: 460500
+    settlement_amount_jpy: 459976
+    gross_to_settlement_difference_jpy: 524
+    account_balance_after_jpy: 485024
+    mrf_balance_after_jpy: 0
+  "2353":
+    name: "日本駐車場開発"
+    trade_date: "2026-08-10"
+    settlement_date: "2026-08-13"
+    side: "sell"
+    quantity: 100
+    execution_price_jpy: 252
+    gross_proceeds_jpy: 25200
+    settlement_amount_jpy: 25048
+    gross_to_settlement_difference_jpy: 152
+    account_balance_after_jpy: null
+    mrf_balance_after_jpy: null
+aggregate:
+  settlement_amount_jpy: 485024
+  formula: "459,976円 + 25,048円 = 485,024円"
+  liquid_cash_confirmed_jpy: 485024
+acquisition_cost_calculation_basis:
+  source_ref: "data/normalized/snapshot_2026_08.yaml"
+  values:
+    "9444": {quantity: 1500, average_acquisition_price_jpy: 628, calculated_acquisition_cost_jpy: 942000}
+    "2353": {quantity: 100, average_acquisition_price_jpy: 265, calculated_acquisition_cost_jpy: 26500}
+  interpretation: "保存済み平均取得単価×売却数量による暫定取得価額。年間資料で最終突合する"
+provisional_realized_losses:
+  "9444": -482024
+  "2353": -1452
+  total_jpy: -483476
+  formula: "(459,976 - 942,000) + (25,048 - 26,500) = -483,476円"
+interpretation_limits:
+  - "画面は精算金額を示すが、手数料と税の内訳を個別表示していない"
+  - "取得価額と実現損失は保存済み平均取得単価を使った暫定計算であり、年間資料との突合前"
+  - "残高485,024円は2件の精算金額合計と一致する"

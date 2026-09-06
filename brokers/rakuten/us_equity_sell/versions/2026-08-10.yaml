@@ -1,0 +1,77 @@
+schema_version: 1
+record_type: "broker_order_capability"
+capability_id: "rakuten_us_equity_sell_2026-08-10"
+broker: "楽天証券"
+product_scope: "us_equity_sell"
+as_of: "2026-08-10"
+evidence_ref: "transactions/evidence/2026-08-10_rakuten_us_equity_sell_screen.yaml"
+official_sources:
+  verified_at: "2026-08-10"
+  trading_hours_url: "https://www.rakuten-sec.co.jp/web/us/stock/rule/session.html"
+  after_market_change_url: "https://www.rakuten-sec.co.jp/smartphone/info/info20260619-02.html"
+  verified_rules:
+    regular_market_jst_standard_time: "23:30-翌06:00"
+    regular_market_jst_daylight_saving_time: "22:30-翌05:00"
+    2026_08_session: "daylight_saving_time"
+    market_orders_not_accepted_during_after_market: true
+screen_fields:
+  symbol:
+    required: true
+    screen_control: "selected_security"
+  quantity:
+    required: true
+    screen_control: "integer_stepper"
+    observed_sell_unit_shares: 1
+    security_specific_available_quantity_must_not_be_reused: true
+  price_type:
+    required: true
+    screen_control: "segmented_control"
+    observed_options: ["limit", "market", "stop", "trailing"]
+  limit_price_usd:
+    required_when: "price_type_is_limit"
+    screen_control: "price_stepper"
+  execution_condition:
+    required: true
+    screen_control: "date_dropdown"
+    observed_selection: "day"
+    configured_order_rule: "成行注文はレギュラーマーケット時間内に本日中で入力する"
+  extended_hours:
+    required: true
+    screen_control: "checkbox"
+    observed_options: [false, true]
+  account_type:
+    required: true
+    screen_control: "fixed_display"
+    observed_value: "特定"
+  settlement_currency:
+    required: true
+    screen_control: "segmented_control"
+    observed_options: ["JPY", "USD"]
+  usd_mmf_auto_purchase:
+    required_when: "settlement_currency_is_USD"
+    screen_control: "linked_setting"
+    observed_status: "unset"
+  trading_pin:
+    required: true
+    handling: "user_enters_locally_never_store_or_request_value"
+  skip_confirmation_screen:
+    required: true
+    screen_control: "checkbox"
+    observed_options: [false, true]
+scope_limits:
+  evidence_screen_symbol: "PLTR"
+  do_not_reuse_from_evidence:
+    - "available_quantity"
+    - "displayed_limit_price"
+    - "estimated_profit_loss"
+    - "estimated_settlement_amount"
+  note: "画面項目と選択肢だけを楽天証券米国株売却の共通仕様として使用する"
+long_term_allocation_default:
+  investor_style: "non_day_trader"
+  price_type: "market"
+  execution_condition: "day"
+  extended_hours_enabled: false
+  intraday_quote_required: false
+  realtime_bid_ask_monitoring_required: false
+  limit_order_use: "exception_only_when_user_requests_a_price_condition_or_concrete_liquidity_or_price_dislocation_evidence_exists"
+  rationale: "長期配分調整では分単位の価格最適化より、承認済み数量を簡潔かつ重複なく執行することを優先する"

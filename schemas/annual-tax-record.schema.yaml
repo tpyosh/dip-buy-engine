@@ -1,0 +1,51 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: "Annual tax reconciliation record"
+type: object
+required:
+  - schema_version
+  - record_type
+  - tax_year
+  - status
+  - transaction_ledger_ref
+  - sales
+  - account_annual_documents
+properties:
+  schema_version: {const: 1}
+  record_type: {const: "annual_tax_reconciliation"}
+  tax_year: {type: integer, minimum: 2000}
+  status:
+    enum: ["collecting", "ready_for_reconciliation", "reconciled", "filing_review_complete"]
+  transaction_ledger_ref: {type: string, minLength: 1}
+  sales:
+    type: array
+    items:
+      type: object
+      required:
+        - transaction_ref
+        - tax_year_assignment_status
+        - filing_category
+        - status
+        - missing_fields
+      properties:
+        transaction_ref: {type: string, minLength: 1}
+        tax_year_assignment_status:
+          enum: ["confirmed_by_trade_date", "provisional_pending_trade_date"]
+        filing_category:
+          enum: ["taxable_withholding", "general_taxable", "nisa_tax_exempt", "crypto_misc_income", "unknown_pending_classification"]
+        status:
+          enum: ["fill_recorded", "settlement_recorded", "tax_details_recorded", "reconciled_to_annual_statement", "non_taxable_reconciled"]
+        missing_fields:
+          type: array
+          items: {type: string, minLength: 1}
+        annual_statement_evidence_ref: {type: [string, "null"]}
+  account_annual_documents:
+    type: array
+    items:
+      type: object
+      required: [account_key, institution, account_type, status, evidence_ref]
+      properties:
+        account_key: {type: string, minLength: 1}
+        institution: {type: string, minLength: 1}
+        account_type: {type: string, minLength: 1}
+        status: {enum: ["not_yet_available", "available_not_recorded", "recorded", "reconciled", "not_issued"]}
+        evidence_ref: {type: [string, "null"]}

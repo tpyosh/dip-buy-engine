@@ -1,6 +1,6 @@
 schema_version: 1
 record_type: "retrospective_index"
-updated_at: "2026-08-02"
+updated_at: "2026-08-10"
 entries:
   - period: "2026-03"
     classification: "historical_review_not_full_retrospective"
@@ -22,3 +22,15 @@ entries:
     classification: "cash_target_inference_failure_full"
     original_review_ref: "reports/generated/monthly/2026_08/review_response.md"
     structured_review_ref: "retrospectives/2026-08-02_cash_target_inference_failure.yaml"
+  - period: "2026-08"
+    classification: "dashboard_actionability_failure_full"
+    original_review_ref: "ACT_S3_DASHBOARD.md"
+    structured_review_ref: "retrospectives/2026-08-09_dashboard_actionability_failure.yaml"
+  - period: "2026-08"
+    classification: "repository_evidence_resolution_failure_full"
+    original_review_ref: "ACT_S3_DASHBOARD.md"
+    structured_review_ref: "retrospectives/2026-08-10_repository_evidence_resolution_failure.yaml"
+  - period: "2026-08"
+    classification: "cibr_generic_staleness_blocker_failure_full"
+    original_review_ref: "ACT_S3_DASHBOARD.md"
+    structured_review_ref: "retrospectives/2026-08-10_cibr_generic_staleness_blocker_failure.yaml"

@@ -1,0 +1,47 @@
+schema_version: 1
+record_type: "broker_fill_evidence_transcription"
+evidence_id: "nomura_fills_2026-08-10"
+broker: "野村證券"
+confirmed_at: "2026-08-10"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-f5364550-a506-4ec1-b760-c0fe2d0988fb.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目をこのレコードへ転記した"
+interpretation_limits:
+  - "注文日時は表示されているが、約定日は表示されていない"
+  - "注文期間2026-08-19を約定日または受渡日として扱わない"
+  - "手数料、税、受渡日は表示されていない"
+fills:
+  "9444":
+    symbol: "9444"
+    name: "トーシンホールディングス"
+    market: "東証"
+    account_type: "特定口座"
+    side: "sell"
+    order_type: "market"
+    order_status: "filled_all"
+    order_placed_at: "2026-08-08T09:46:00+09:00"
+    order_valid_through: "2026-08-19"
+    ordered_quantity: 1500
+    unfilled_quantity: 0
+    filled_quantity: 1500
+    average_fill_price_jpy: 307
+    order_number: "79153"
+    order_channel: "PC/スマホ"
+  "2353":
+    symbol: "2353"
+    name: "日本駐車場開発"
+    market: "東証"
+    account_type: "一般口座"
+    side: "sell"
+    order_type: "market"
+    order_status: "filled_all"
+    order_placed_at: "2026-08-08T09:44:00+09:00"
+    order_valid_through: "2026-08-19"
+    ordered_quantity: 100
+    unfilled_quantity: 0
+    filled_quantity: 100
+    average_fill_price_jpy: 252
+    order_number: "79152"
+    order_channel: "PC/スマホ"

@@ -1,0 +1,38 @@
+schema_version: 1
+record_type: "cash_transfer_evidence_transcription"
+reported_at: "2026-08-14"
+source_type: "user_report_in_codex_session"
+destination:
+  institution: "楽天証券"
+  balance_type: "投資可能流動現金"
+transfers:
+  crypto_xrp:
+    source: "XRP売却由来現金"
+    credited_amount_jpy: 7346
+    credit_status: "credited_and_investable"
+  crypto_btc:
+    source: "BTC売却由来現金"
+    credited_amount_jpy: 171669
+    credit_status: "credited_and_investable"
+  crypto_eth:
+    source: "ETH売却由来現金"
+    credited_amount_jpy: 131351
+    credit_status: "credited_and_investable"
+  nomura_9444_2353:
+    source: "野村證券のトーシンホールディングス・日本駐車場開発売却代金"
+    credited_amount_jpy: 485024
+    credit_status: "credited_and_investable"
+aggregate:
+  crypto_credited_jpy: 310366
+  nomura_credited_jpy: 485024
+  total_credited_jpy: 795390
+  formula: "7,346円 + 171,669円 + 131,351円 + 485,024円 = 795,390円"
+reconciliation:
+  previous_crypto_report_ref: "transactions/evidence/2026-08-12_crypto_full_liquidation_user_report.yaml"
+  previous_crypto_reported_total_jpy: 310166
+  latest_asset_level_crypto_total_jpy: 310366
+  difference_jpy: 200
+  treatment: "今回の銘柄別・楽天証券入金済み報告を資金移動の最新値として採用し、過去の報告証拠は変更しない"
+classification_note: >
+  ユーザ表現は「売却益」だが、この証拠が確認するのは楽天証券へ入金され投資可能になった現金額である。
+  税務上の実現利益、売却総額、手数料控除後純受取額のいずれかは、この報告だけでは確定しない。

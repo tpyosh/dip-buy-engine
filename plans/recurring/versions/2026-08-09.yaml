@@ -1,0 +1,114 @@
+schema_version: 1
+record_id: "recurring_contributions_observed_2026-08-09"
+record_type: "observed_recurring_contribution_state"
+status: "user_confirmed"
+effective_from: "2026-08-09"
+source:
+  user_confirmation:
+    confirmed_at: "2026-08-09"
+    confirmed_facts:
+      - "NISAつみたて投資枠を全世界株式100,000円/月へ変更完了"
+      - "iDeCoのeMAXIS Slim 全世界株式55,000円/月を継続"
+      - "BTCとETHの定期積立を停止完了"
+    unresolved_details:
+      - "NISAで設定した全世界株式商品の正式名称"
+      - "NISA積立の買付日、決済方法、分配金コース"
+
+core_recurring_contributions:
+  total_monthly_jpy: 100000
+  monthly_core_auto_invest_amount_jpy: 100000
+  nisa_growth_quota_status: "exhausted"
+  taxable_core_spot_buy_required: false
+  plans:
+    - day_of_month: null
+      fund_name: "全世界株式（正式商品名未確認）"
+      amount_jpy: 100000
+      settlement_type: null
+      account_type: "NISAつみたて投資枠"
+      distribution_course: null
+  review_guidance:
+    - "新規の定期積立は全世界株式コアへ集中する"
+    - "サテライトは定期積立で増やさない"
+    - "正式商品名等の未確認項目を推測しない"
+  date_based_overrides:
+    - active_from: "2026-01"
+      active_to: "2026-04"
+      total_monthly_jpy: 750000
+      monthly_core_auto_invest_amount_jpy: 750000
+      nisa_growth_quota_status: "not_exhausted_or_default_rule"
+      crypto_weekly_dca:
+        - symbol: "BTC"
+          amount_jpy_per_week: 2000
+        - symbol: "ETH"
+          amount_jpy_per_week: 2000
+      plans:
+        - day_of_month: 1
+          fund_name: "eMAXIS Slim 米国株式(S&P500)"
+          amount_jpy: 225000
+          account_type: "NISA成長投資枠"
+        - day_of_month: 1
+          fund_name: "楽天・プラス・オールカントリー株式インデックス・ファンド"
+          amount_jpy: 425000
+          account_type: "NISA成長投資枠"
+        - day_of_month: 8
+          fund_name: "eMAXIS Slim 米国株式(S&P500)"
+          amount_jpy: 50000
+          account_type: "NISAつみたて投資枠"
+        - day_of_month: 8
+          fund_name: "楽天・プラス・オールカントリー株式インデックス・ファンド"
+          amount_jpy: 50000
+          account_type: "NISAつみたて投資枠"
+    - active_from: "2026-05"
+      active_to: "2026-07"
+      total_monthly_jpy: 100000
+      monthly_core_auto_invest_amount_jpy: 100000
+      nisa_growth_quota_status: "exhausted"
+      taxable_core_spot_buy_required: true
+      core_spot_buy_account_type: "特定口座"
+      baseline_total_core_deployment_target_jpy: 1380000
+      rebalance_mode_core_spot_buy_reference_jpy: 1280000
+      tax_note: "NISAより税効率は落ちるが、当時の承認済み現金再配分計画として特定口座購入を許容"
+      core_spot_buy_allocation_rule:
+        allowed_products_only: true
+        default_allocation:
+          eMAXIS Slim 全世界株式（オール・カントリー）: 0.60
+          eMAXIS Slim 米国株式（S&P500）: 0.40
+      crypto_weekly_dca:
+        - symbol: "BTC"
+          amount_jpy_per_week: 2000
+        - symbol: "ETH"
+          amount_jpy_per_week: 2000
+      plans:
+        - day_of_month: 8
+          fund_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+          amount_jpy: 50000
+          account_type: "NISAつみたて投資枠"
+        - day_of_month: 8
+          fund_name: "eMAXIS Slim 米国株式（S&P500）"
+          amount_jpy: 50000
+          account_type: "NISAつみたて投資枠"
+    - active_from: "2026-08"
+      active_to: "2026-12"
+      total_monthly_jpy: 100000
+      monthly_core_auto_invest_amount_jpy: 100000
+      nisa_growth_quota_status: "exhausted"
+      taxable_core_spot_buy_required: false
+      crypto_weekly_dca: []
+      plans:
+        - day_of_month: null
+          fund_name: "全世界株式（正式商品名未確認）"
+          amount_jpy: 100000
+          account_type: "NISAつみたて投資枠"
+      requires_explicit_followup_rule: true
+      followup_warning_code: "post_2026_nisa_growth_quota_rule_missing"
+  pension_monthly_dca:
+    - symbol: "IDECO_ALL_COUNTRY"
+      fund_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+      amount_jpy_per_month: 55000
+      account_type: "iDeCo"
+      asset_class: "pension"
+  pension_review_guidance:
+    - "iDeCoの全世界株式55,000円/月はユーザ確認済みの継続設定"
+  crypto_weekly_dca: []
+  crypto_review_guidance:
+    - "BTCとETHの定期積立は停止済み。暗号資産の最終目標は0%"

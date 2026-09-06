@@ -1,0 +1,205 @@
+schema_version: 1
+record_type: "workflow_retrospective"
+retrospective_id: "2026-08-10_cibr_generic_staleness_blocker_failure"
+period:
+  start: "2026-08-10"
+  end: "2026-08-10"
+prepared_at: "2026-08-10"
+strategy_ref: "strategy/versions/2026-08-09-v2.yaml"
+plan_refs:
+  - "plans/2026/2026-08-09_act_s3_execution.yaml"
+snapshot_refs:
+  - "data/normalized/snapshot_2026_08.yaml"
+holding_metadata_refs:
+  - "holdings/versions/2026-08-09-v2.yaml"
+prior_retrospective_refs:
+  - "retrospectives/2026-08-10_repository_evidence_resolution_failure.yaml"
+transaction_refs:
+  - "transactions/ledger.yaml"
+
+trigger:
+  user_feedback: >
+    CIBRについて、2026-08-09後の売買・入出庫と現在の未反映注文・拘束数量は
+    どちらもNOだが、なぜCIBRだけをブロッキング事項のように確認するのか分からない。
+    同じ論理なら全銘柄に未報告売買の可能性がある。
+  observed_problem: >
+    全保有に一般的に存在する「基準日後に状態が変わった可能性」を、根拠なくCIBR固有の
+    ユーザ確認事項として前面に出し、注文案作成前のブロッカーに見える表示を作った。
+  scope_rule: >
+    CIBRの質問文だけを評価せず、前回レトロスペクティブ、入力分類モデル、監査、テスト、
+    ダッシュボードが一般的な不確実性をどうブロッカーへ変換したかを評価する。
+
+newly_confirmed_facts:
+  confirmed_by: "user_report"
+  confirmed_at: "2026-08-10"
+  cibr_trades_or_transfers_after_2026_08_09: false
+  cibr_unreflected_orders_or_restricted_quantity_now: false
+  outcome_bias_guard: >
+    回答がNOだったことは質問プロセスを正当化しない。YESを示唆する事前証拠がなく、
+    質問の必要性は回答結果と独立に評価する。
+
+information_available_at_decision_time:
+  - "最新スナップショットは2026-08-09基準で、判断日は2026-08-10だった"
+  - "スナップショットにはCIBR 88株、平均取得価額76.66 USD、評価額1,358,784円が記録されていた"
+  - "holdings metadataにはCIBRの楽天証券・特定口座という口座情報があった"
+  - "CIBRにexecution_statusや既存注文の記録はなかった"
+  - "既存注文が明示されていたのはトーシンHD、日本駐車場開発、SMHだった"
+  - "transactions/ledger.yamlには2026-08-09後のCIBR取引は記録されていなかった"
+  - "ユーザからCIBR売買・入出庫・注文を行ったという報告はなかった"
+  - "同じ理屈上、CIBR以外の全保有にも未報告変更の抽象的可能性は存在した"
+  - "注文直前に最新価格・為替・政策分母を更新し、注文画面で数量と重複注文を確認する安全要件は存在した"
+
+symmetry_check:
+  cibr_specific_evidence_of_change: []
+  securities_with_known_pending_order_state:
+    - symbol: "9444"
+      evidence_ref: "holdings/versions/2026-08-09-v2.yaml#holdings.9444.execution_status"
+    - symbol: "2353"
+      evidence_ref: "holdings/versions/2026-08-09-v2.yaml#holdings.2353.execution_status"
+    - symbol: "SMH"
+      evidence_ref: "holdings/versions/2026-08-09-v2.yaml#holdings.SMH.execution_status"
+  conclusion: >
+    CIBRには既知の注文・取引イベントがなく、他銘柄より強い確認を要求する事実上の根拠はなかった。
+    CIBRが選ばれたのは実行対象として現在注目されていたためであり、リスク差によるものではない。
+
+assumptions_at_decision_time:
+  - "スナップショット後の変更可能性が論理的に残るなら、明示的な否定確認が必要である"
+  - "holdings metadataにCIBR固有のexecution_statusがないことは、注文なしではなく未確認を意味する"
+  - "注文直前チェック項目は、注文案作成前のhuman_actionabilityへすべて表示すべきである"
+  - "『差分だけ確認』ならユーザ負担は十分小さく、確認の根拠や対称性を別途評価しなくてよい"
+  - "現在注目しているタスクだけに一般的な不確実性を展開しても、局所的な行動可能性が高まる"
+
+decision_process:
+  - "前回のrepository evidence resolution failureを受け、既知値と差分更新を分けた"
+  - "前回レトロスペクティブでCIBRの基準日後変更と未反映注文をrefresh-only項目に置いた"
+  - "同レトロスペクティブのcounterfactual acceptance testで、CIBR差分をユーザへ確認することを期待結果にした"
+  - "stale_refresh_requiredは必ずrequest_from_user_ifを持つようスキーマと監査を実装した"
+  - "ACT-S3-010へcibr_position_and_order_deltaを追加し、ダッシュボードに二つの否定確認を表示した"
+  - "テストでCIBR行に『差分確認』が含まれることを成功条件にした"
+  - "全保有に同じ確認原則を適用した場合の質問数と利用者負担を評価しなかった"
+  - "既知イベント、通常の注文画面チェック、抽象的な変更可能性を区別しなかった"
+
+decisions_made:
+  - "CIBRの売買・入出庫の有無をユーザ確認事項にした"
+  - "CIBRの未反映注文・拘束数量の有無をユーザ確認事項にした"
+  - "これらを具体的注文案の前に置き、ダッシュボード上で進行条件に見える形にした"
+
+observed_outcomes:
+  - "ユーザは両方NOと回答したが、質問理由とCIBRだけの特別扱いに疑問を持った"
+  - "ダッシュボードが次の行動を明確にする代わりに、根拠の薄い確認作業を生成した"
+  - "全銘柄へ一般化すると無限に近い否定確認が必要になる非対称な運用になった"
+  - "repository-first改善が、repository factsを信頼せず毎回否定確認する別の過剰確認へ変質した"
+  - "監査とテストが、この過剰確認を正しい状態として固定した"
+
+five_whys:
+  - why: "なぜCIBRだけ基準日後の売買や未反映注文を聞いたか"
+    because: "直近の修正対象がACT-S3-010で、前回の受入テストをCIBR固有の差分確認として書いたため"
+  - why: "なぜ一般的可能性をCIBR固有の差分確認にしたか"
+    because: "既知イベントの存在と、単に反証できない抽象的可能性を区別しなかったため"
+  - why: "なぜ区別できなかったか"
+    because: "stale_refresh_requiredが、既知イベント待ち、通常の実行時検証、ユーザへの事前質問を一つの状態へまとめているため"
+  - why: "なぜstale_refresh_requiredが必ずユーザ質問になったか"
+    because: "スキーマと監査がrequest_from_user_ifを必須にし、更新責任者、ブロッキング性、確認時点、発火根拠を持たないため"
+  - why: "なぜ過剰確認を検出できなかったか"
+    because: "テストが質問の存在を検査し、同じ原則を全保有へ一般化したとき合理的か、事前証拠があるか、通常の注文時チェックで代替できるかを検査しなかったため"
+
+root_causes:
+  primary:
+    - "抽象的な状態変化の可能性を、具体的な不整合・イベント証拠と同じブロッカーとして扱った"
+    - "通常の注文直前プリフライトと、注文案作成を止める必須入力を分離しなかった"
+  remediation_induced_regression:
+    - "前回レトロスペクティブが『差分だけ確認』を無条件に正しい反実仮想として定義した"
+    - "その提案をスキーマ、監査、計画、ダッシュボード、テストへ一貫して実装したため、誤った前提が強固になった"
+    - "repository-firstは再提出防止には効いたが、不要な否定確認を防ぐ原則を持たなかった"
+  data_model:
+    - "stale_refresh_requiredにblocking、refresh_owner、verification_stage、trigger_evidence、scopeがない"
+    - "known_event_pendingとgeneric_pretrade_checkが同じavailabilityへ入る"
+    - "取引が報告されていないときのstable-state assumptionが定義されていない"
+  presentation:
+    - "一般的なプリフライト項目をCIBR詳細欄へ置き、CIBR固有の問題に見せた"
+    - "『接続済み情報源から確認できない場合』という条件文があっても、箇条書き自体がユーザの現在タスクとして表示された"
+    - "注文案作成に本当に必要なユーザ判断と、注文時に画面で自然に確認できる事項を混在させた"
+  validation:
+    - "監査はstale入力にユーザ質問があることを要求するが、その質問に発火根拠があることを要求しない"
+    - "CIBR回帰テストは『差分確認』の存在を成功条件とし、不要な質問がないことを検査しない"
+    - "銘柄間の対称性、質問総数、質問を全保有へ一般化した場合の合理性を受入条件にしていない"
+
+why_cibr_was_singled_out:
+  factual_reason: null
+  process_reason: >
+    CIBRはACT-S3-010として直近の会話・修正の焦点だった。前回レトロスペクティブとテストが
+    CIBRを具体例にしたため、ポートフォリオ共通の実行時チェックをCIBRタスクへ局所展開した。
+  conclusion: "CIBRだけを問題視する合理的理由はなく、実装上の焦点バイアスだった"
+
+process_evaluation_without_outcome_bias:
+  appropriate:
+    - "既存注文が確認済みのトーシンHD、日本駐車場開発、SMHについて、重複注文防止のため現在状態を確認すること"
+    - "注文確定直前に最新価格、為替、政策分母、注文可能数量を確認すること"
+    - "基準時点の14株を固定注文数量として使用しないこと"
+  inappropriate:
+    - "変更を示す証拠がないCIBRについて、基準日翌日に売買なし・注文なしという否定確認を事前ブロッカー化したこと"
+    - "注文画面で実行時に確認できる重複注文・拘束数量を、注文案作成前のユーザ宿題にしたこと"
+    - "同じ可能性が全銘柄にあるのにCIBRだけへ質問を表示したこと"
+  correct_counterfactual_process:
+    - "CIBRは2026-08-09の88株を、変更イベントの報告がない限り注文案下書きの現在基準として扱う"
+    - "最新価格・為替・政策分母はCodexが注文案作成時に更新する"
+    - "未反映注文と注文可能数量は、具体的注文を承認・入力する段階の共通プリフライトで確認する"
+    - "既知注文、矛盾する残高、ユーザ報告、明示した鮮度期限超過などの発火根拠がある場合だけ個別確認を前倒しする"
+    - "発火根拠がない場合、ユーザへ『何もしていないこと』の反復確認を求めない"
+
+missing_contract:
+  name: "evidence_triggered_freshness_and_preflight_contract"
+  stable_state_rule: >
+    最新の正本スナップショット後に取引・移管・注文の報告または矛盾する証拠がなければ、
+    保有数量は下書き計算用に継続しているものとして扱う。これは注文確定値ではなく、
+    実行画面での最終数量確認を省略する意味ではない。
+  required_distinctions:
+    - "known_event_pending: 既存注文・受渡等の具体的イベントがあり、結果確認が必要"
+    - "refresh_by_codex: 市場価格・為替・計算分母をCodexが更新"
+    - "verify_at_execution: 注文画面で数量、重複注文、拘束数量を共通プリフライト確認"
+    - "user_input_blocking: リポジトリにも外部情報源にもなく、注文案を作れない事実"
+    - "generic_uncertainty_non_blocking: 変更証拠のない抽象的可能性で、ユーザ質問を発生させない"
+  required_per_check:
+    - "blocking: 注文案作成を止めるか"
+    - "owner: Codex、ユーザ、証券会社画面のどれが確認するか"
+    - "verification_stage: draft / approval / order_entry / post_trade"
+    - "trigger_evidence: 確認を発火させる具体的証拠"
+    - "scope: portfolio-wideまたは銘柄固有"
+    - "materiality: 未確認時に数量・税・重複注文へ与える影響"
+
+counterfactual_acceptance_tests:
+  no_event_case:
+    given: "最新スナップショット後の取引報告、既存注文、矛盾する証拠がない"
+    expected: "個別銘柄の売買なし・注文なしという否定確認をユーザへ求めず、下書きを作成する"
+  known_order_case:
+    given: "execution_statusに既存注文が記録されている"
+    expected: "重複注文を防ぐため、注文結果を具体的ブロッカーとして確認する"
+  execution_case:
+    given: "具体的注文案をユーザが承認し注文画面へ進む"
+    expected: "全銘柄共通のプリフライトとして現在数量・未反映注文・拘束数量を確認する"
+  symmetry_case:
+    question: "この確認原則を全保有へ適用しても、根拠と負担が合理的か"
+    failure_condition: "現在注目している銘柄だけに、証拠のない一般的可能性をブロッカーとして展開する"
+
+lessons:
+  - "論理的に可能であることと、ユーザへ確認を求める十分な根拠があることは別"
+  - "データの不在を、変更イベントの存在を疑う根拠へ自動変換しない"
+  - "通常の注文時安全確認は必要だが、すべてを事前のユーザ宿題として表示しない"
+  - "改善策は元の失敗を防ぐだけでなく、全対象へ一般化した際の質問負担を評価する"
+  - "回帰テストは特定文言の存在だけでなく、不要なブロッカーがないことも検査する"
+  - "現在の会話焦点を、対象固有のリスク差と取り違えない"
+
+proposed_followups_not_yet_implemented:
+  - "stale_refresh_requiredをknown_event_pending、refresh_by_codex、verify_at_execution、user_input_blocking、generic_uncertainty_non_blockingへ分解する"
+  - "stale入力にrequest_from_user_ifを無条件必須とするスキーマ・監査を廃止する"
+  - "確認項目へblocking、owner、verification_stage、trigger_evidence、scopeを追加する"
+  - "CIBR固有の売買なし・注文なし質問を計画とダッシュボードの現在ブロッカーから除く"
+  - "数量・未反映注文・拘束数量を全売買共通のorder-entryプリフライトへ移す"
+  - "変更イベントの報告がない場合のstable-state assumptionをAGENTS.md、SPEC.md、plans/README.mdへ追加する"
+  - "既知注文がある銘柄だけ状態確認をブロックし、変更証拠のない銘柄は下書きを進める監査テストを追加する"
+  - "全保有へ同じ質問を一般化したときの質問数と対称性を検査するテストを追加する"
+
+followup_decision_refs: []
+unknowns:
+  - "具体的注文入力時点のCIBR価格、USD/JPY、long_term_investable_assets_jpy"
+  - "CIBR注文方式、有効期限、部分約定・失効時処理に対するユーザ承認"

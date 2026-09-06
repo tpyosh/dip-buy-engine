@@ -1,0 +1,197 @@
+schema_version: 1
+record_type: "holding_metadata"
+record_id: "holding_metadata_2026-08-13-v3"
+effective_from: "2026-08-13"
+confirmed_at: "2026-08-13"
+
+execution_context:
+  scope: "portfolio"
+  unreflected_orders: true
+  planned_withdrawals: false
+  restricted_funds: false
+  confirmed_at: "2026-08-10"
+
+holdings:
+  "7203":
+    display_name: "トヨタ自動車"
+    account: &nomura_taxable
+      account_type: "特定口座（源泉徴収あり）"
+      tax_regime: "taxable_withholding"
+      nisa_regime: null
+      nisa_bucket: null
+      confirmed_by: "野村証券CSV"
+      confirmed_at: "2026-08-09"
+    user_intent:
+      holding_reason: "祖父から相続した株式をそのまま保有。トヨタ株としての積極的な保有理由はない"
+      disposition: "sell_if_rationally_justified"
+      sell_condition: "合理的な理由があれば売却してよい"
+      confirmed_at: "2026-08-02"
+
+  "9444":
+    display_name: "トーシンホールディングス"
+    account: *nomura_taxable
+    execution_status:
+      position_quantity: 0
+      position_status: "exited"
+      sell_order_available: false
+      unreflected_orders: false
+      order_in_progress_quantity: 0
+      order_side: "sell"
+      last_order_status: "filled_all"
+      last_filled_quantity: 1500
+      last_average_fill_price_jpy: 307
+      last_order_number: "79153"
+      transaction_ref: "transactions/ledger.yaml#nomura-79153-9444-sell-fill"
+      planned_withdrawals: false
+      restricted_funds: false
+      as_of: "2026-08-10"
+      confirmed_by: "user_provided_broker_screenshot"
+    user_intent:
+      holding_reason: "考慮不要。継続保有理由はない"
+      disposition: "sell_requested"
+      sell_condition: "売却提案を希望"
+      confirmed_at: "2026-08-02"
+
+  "2353":
+    display_name: "日本駐車場開発"
+    account:
+      account_type: "一般口座"
+      tax_regime: "general_taxable"
+      nisa_regime: null
+      nisa_bucket: null
+      confirmed_by: "野村証券CSV"
+      confirmed_at: "2026-08-09"
+    execution_status:
+      position_quantity: 0
+      position_status: "exited"
+      sell_order_available: false
+      unreflected_orders: false
+      order_in_progress_quantity: 0
+      order_side: "sell"
+      last_order_status: "filled_all"
+      last_filled_quantity: 100
+      last_average_fill_price_jpy: 252
+      last_order_number: "79152"
+      transaction_ref: "transactions/ledger.yaml#nomura-79152-2353-sell-fill"
+      planned_withdrawals: false
+      restricted_funds: false
+      as_of: "2026-08-10"
+      confirmed_by: "user_provided_broker_screenshot"
+    user_intent:
+      holding_reason: "誤って一般口座で購入し、税務処理の手間を避けたい。少額保有"
+      disposition: "sell_when_at_a_loss_preferred"
+      sell_condition: "含み損の状態での売却を希望"
+      confirmed_at: "2026-08-02"
+
+  "7201":
+    display_name: "日産自動車"
+    account: &rakuten_taxable
+      account_type: "特定口座（源泉徴収あり）"
+      tax_regime: "taxable_withholding"
+      nisa_regime: null
+      nisa_bucket: null
+      confirmed_by: "楽天証券CSV"
+      confirmed_at: "2026-08-09"
+    execution_status:
+      position_quantity: 0
+      position_status: "exited"
+      sell_order_available: false
+      unreflected_orders: false
+      order_in_progress_quantity: 0
+      order_side: "sell"
+      last_order_status: "filled_all"
+      last_filled_quantity: 100
+      last_average_fill_price_jpy: 345
+      last_order_number: "1261"
+      transaction_ref: "transactions/ledger.yaml#rakuten-1261-7201-sell-fill"
+      planned_withdrawals: false
+      restricted_funds: false
+      as_of: "2026-08-10"
+      confirmed_by: "user_provided_broker_csv"
+    user_intent:
+      holding_reason: "趣味で保有していたが、現在は関心を失っている"
+      disposition: "sell_allowed"
+      sell_condition: "売却してよい"
+      confirmed_at: "2026-08-02"
+
+  SMH:
+    display_name: "ヴァンエック・半導体株ETF"
+    account: *rakuten_taxable
+    execution_status:
+      position_quantity: 0
+      position_status: "exited"
+      sell_order_available: false
+      unreflected_orders: false
+      order_in_progress_quantity: 0
+      order_side: "sell"
+      last_order_status: "filled_all"
+      last_filled_quantity: 1
+      last_average_fill_price_usd: 583.49
+      last_order_number: "1262"
+      transaction_ref: "transactions/ledger.yaml#rakuten-1262-smh-sell-fill"
+      planned_withdrawals: false
+      restricted_funds: false
+      as_of: "2026-08-12"
+      confirmed_by: "user_provided_broker_screenshot"
+  PLTR:
+    display_name: "パランティア・テクノロジーズ"
+    account: *rakuten_taxable
+  CIBR:
+    display_name: "ファーストトラスト ナスダック サイバーセキュリティETF"
+    account: *rakuten_taxable
+  MSFT:
+    display_name: "マイクロソフト"
+    account: *rakuten_taxable
+  URA:
+    display_name: "グローバルX ウラニウム ETF"
+    account: *rakuten_taxable
+
+  NISSEI_SOX_1:
+    display_name: "ニッセイSOX指数インデックスファンド（特定口座）"
+    account: *rakuten_taxable
+    acquisition:
+      method: "staged_purchases"
+      acquisition_years: null
+      status: "unknown"
+
+  NISSEI_SOX_2:
+    display_name: "ニッセイSOX指数インデックスファンド（NISA成長投資枠）"
+    account: &rakuten_nisa_growth
+      account_type: "NISA成長投資枠"
+      tax_regime: "nisa"
+      nisa_regime: "new_nisa_2024_plus"
+      nisa_bucket: "growth"
+      confirmed_by: "楽天証券CSV"
+      confirmed_at: "2026-08-09"
+    acquisition:
+      method: "staged_purchases"
+      acquisition_years: null
+      status: "unknown"
+
+  RAKUTEN_PLUS_ALL_COUNTRY_1:
+    display_name: "楽天・プラス・オールカントリー株式インデックス・ファンド（NISAつみたて投資枠）"
+    account: &rakuten_nisa_tsumitate
+      account_type: "NISAつみたて投資枠"
+      tax_regime: "nisa"
+      nisa_regime: "new_nisa_2024_plus"
+      nisa_bucket: "tsumitate"
+      confirmed_by: "楽天証券CSV"
+      confirmed_at: "2026-08-09"
+  RAKUTEN_PLUS_ALL_COUNTRY_2:
+    display_name: "楽天・プラス・オールカントリー株式インデックス・ファンド（NISA成長投資枠）"
+    account: *rakuten_nisa_growth
+  RAKUTEN_PLUS_SP500:
+    display_name: "楽天・プラス・S&P500インデックス・ファンド"
+    account: *rakuten_taxable
+  EMAXIS_SLIM_SP500_1:
+    display_name: "eMAXIS Slim 米国株式(S&P500)（特定口座）"
+    account: *rakuten_taxable
+  EMAXIS_SLIM_SP500_2:
+    display_name: "eMAXIS Slim 米国株式(S&P500)（NISAつみたて投資枠）"
+    account: *rakuten_nisa_tsumitate
+  EMAXIS_SLIM_SP500_3:
+    display_name: "eMAXIS Slim 米国株式(S&P500)（NISA成長投資枠）"
+    account: *rakuten_nisa_growth
+  EMAXIS_SLIM_ALL_COUNTRY:
+    display_name: "eMAXIS Slim 全世界株式(オール・カントリー)"
+    account: *rakuten_taxable

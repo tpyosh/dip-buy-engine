@@ -1,0 +1,17 @@
+schema_version: 1
+record_type: "plan_execution_clarification"
+reported_at: "2026-08-14"
+source_type: "user_report_in_codex_session"
+user_report: "ACT-S3-014は日産の売却は終了、付け替え先のオルカンは購入注文完了して約定待ちです"
+confirmed_state:
+  nissan_sale_status: "completed"
+  replacement_core_purchase_status: "order_submitted_pending_allotment"
+  replacement_product: "eMAXIS Slim 全世界株式（オール・カントリー）"
+  account_type: "楽天証券・特定口座"
+  related_order_ref: "transactions/ledger.yaml#rakuten-all-country-795390-buy-order-2026-08-14"
+correction:
+  cancelled_next_action: "日産売却代金34,445円について追加のオルカン買付注文を出す"
+  reason: "日産売却代金の付け替え先注文はすでに完了しているため"
+cash_fungibility_note: >
+  楽天証券口座内現金は資金源別に分離されないため、795,390円注文を暗号資産・野村・日産の
+  各売却代金へ円単位で一意に割り当てない。計画タスクとの対応と注文総額だけを記録する。

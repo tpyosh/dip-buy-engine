@@ -1,0 +1,32 @@
+schema_version: 1
+record_type: "broker_buy_order_evidence_transcription"
+record_status: "superseded_by_later_fill_screen"
+superseded_by: "transactions/evidence/2026-08-21_rakuten_all_country_fills.yaml#fills.order_1268"
+evidence_id: "rakuten_all_country_stage2a_order_2026-08-13"
+broker: "楽天証券"
+confirmed_at: "2026-08-13"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-e32fc20c-a1b8-4ccc-8d04-3280a8d4bdef.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+order:
+  order_number: "1268"
+  order_placed_at: "2026-08-13T09:05:00+09:00"
+  status: "accepted_pending_allotment"
+  transaction_type: "spot_purchase"
+  product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+  account_type: "特定口座"
+  distribution_course: "再投資型"
+  ordered_amount_jpy: 1946765
+  point_use_jpy: 0
+  trade_date: "2026-08-14"
+  settlement_date: "2026-08-20"
+  fee_jpy: 0
+  allotted_units: null
+  execution_nav_jpy: null
+  settlement_amount_jpy: null
+interpretation_limits:
+  - "注文状況は受付済みであり、約定口数・約定基準価額・受渡金額はまだ表示されていない"
+  - "約定日2026-08-14と受渡日2026-08-20は画面表示値として記録する"
+  - "注文金額欄のポイント利用表示はなく、承認済み注文票どおりポイント利用0円として記録する"

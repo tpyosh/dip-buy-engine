@@ -1,0 +1,21 @@
+schema_version: 1
+record_type: "financial_cash_requirement_update"
+decision_id: "reserve_mufg_467987_for_near_term_large_purchase"
+decided_at: "2026-08-29"
+decided_by: "user"
+scope: "三菱UFJ銀行普通預金のうち生活防衛資金2,000,000円を超える467,987円"
+decision:
+  reserve_amount_jpy: 467987
+  funding_account: "三菱UFJ銀行 普通預金"
+  purpose: "近々予定している大型購入"
+  scheduled_date: null
+  exclude_from_investable_cash: true
+  separate_from_emergency_fund: true
+  act_s3_005_treatment: "買付対象から除外"
+supersedes_for_future_execution:
+  decision_ref: "decisions/2026-08-10_act_s3_004_emergency_fund_location_approval.md"
+  limited_effect: "467,987円を投資候補とした部分だけを将来の実行について変更する。生活防衛資金2,000,000円の配置承認と過去の注文実績は維持する"
+source_refs:
+  - "financial/versions/2026-08-29-v4.yaml"
+  - "plans/2026/2026-08-09_act_s3_execution.yaml#tasks[ACT-S3-004]"
+  - "plans/2026/2026-08-09_act_s3_execution.yaml#tasks[ACT-S3-005]"

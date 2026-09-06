@@ -1,0 +1,28 @@
+schema_version: 1
+record_type: "broker_investment_fund_fill_evidence_transcription"
+evidence_id: "rakuten_all_country_stage1_fill_2026-08-21"
+broker: "楽天証券"
+confirmed_at: "2026-08-21"
+confirmed_by: "user_provided_broker_screenshot"
+source_attachment:
+  original_path: "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-7740adeb-1080-4615-be21-0b89f493c2bf.png"
+  raw_image_in_repository: false
+  durability_note: "一時ファイルのため、画面上で確認できた項目を転記した"
+fill:
+  order_number: "1263"
+  order_placed_at: "2026-08-10T14:33:00+09:00"
+  order_status: "completed_filled"
+  transaction_type: "spot_purchase"
+  product_name: "eMAXIS Slim 全世界株式（オール・カントリー）"
+  account_type: "特定口座"
+  distribution_course: "再投資型"
+  ordered_amount_jpy: 5861859
+  trade_date: "2026-08-12"
+  settlement_date: "2026-08-18"
+  allotted_units: 1515633
+  execution_nav_jpy_per_10000_units: 38676
+  fee_jpy: 0
+  point_use_jpy: 0
+interpretation_limits:
+  - "画面の『完了（約定）』を約定完了の根拠とする"
+  - "基準価額は1万口当たりとして記録し、1口当たり価格とは扱わない"

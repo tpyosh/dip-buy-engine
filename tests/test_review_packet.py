@@ -159,6 +159,7 @@ def test_complete_strategic_inputs_enable_objective_confirmation_phase(
     sample_computation,
 ) -> None:
     sample_computation = deepcopy(sample_computation)
+    sample_computation.metadata["review_mode"] = "strategic_policy_second_opinion"
     sample_computation.snapshot.snapshot_date = date(2026, 8, 9)
     financial = complete_strategic_financial_context()
     packet = build_review_packet(
@@ -205,6 +206,7 @@ def test_undecided_contribution_horizon_blocks_strategic_packet(
     sample_computation,
 ) -> None:
     sample_computation = deepcopy(sample_computation)
+    sample_computation.metadata["review_mode"] = "strategic_policy_second_opinion"
     sample_computation.snapshot.snapshot_date = date(2026, 8, 9)
     financial = complete_strategic_financial_context()
     financial["strategic_profile"]["planned_contributions"] = {
@@ -344,20 +346,13 @@ def test_cash_case_a_preserves_confirmed_minimum_without_inventing_expenses() ->
     assert cash["emergency_fund"]["target_jpy"] == 2_000_000
     assert cash["emergency_fund"]["status"] == "confirmed_user_target"
     assert cash["emergency_fund"]["spending_months"] == 8
-    assert (
-        cash["dip_buy_liquidity"]["status"]
-        == "proposal_requested_from_current_review"
-    )
-    assert cash["dip_buy_liquidity"]["target_jpy"] is None
-    assert cash["dip_buy_liquidity"]["amount_calculation_policy"] == (
-        "portfolio_snapshot_total_assets_jpy * approved_target_ratio"
-    )
-    assert cash["dip_buy_liquidity"]["decision_owner"] == (
-        "current_on_demand_independent_review_then_user_approval"
-    )
-    assert cash["result"]["minimum_confirmed_cash_jpy"] == 2_000_000
-    assert cash["result"]["cash_target_status"] == "confirmed_minimum_only"
-    assert cash["result"]["total_cash_target_jpy"] is None
+    assert cash["dip_buy_liquidity"]["status"] == "configured"
+    assert cash["dip_buy_liquidity"]["target_jpy"] == 0
+    assert cash["dip_buy_liquidity"]["amount_calculation_policy"] == "none"
+    assert cash["dip_buy_liquidity"]["decision_owner"] == "user_confirmed_policy"
+    assert cash["result"]["minimum_confirmed_cash_jpy"] == 2_467_987
+    assert cash["result"]["cash_target_status"] == "fully_calculable"
+    assert cash["result"]["total_cash_target_jpy"] == 2_467_987
 
 
 def test_current_policy_request_switches_packet_to_strategic_mode(

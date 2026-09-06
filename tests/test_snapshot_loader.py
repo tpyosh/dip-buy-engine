@@ -59,6 +59,54 @@ holdings:
     assert not any("Sum of holding market values" in warning for warning in snapshot.warnings)
 
 
+def test_total_assets_gap_below_point_one_percent_is_ignored(tmp_path: Path) -> None:
+    path = tmp_path / "snapshot_relative_tolerance.yaml"
+    path.write_text(
+        """snapshot_date: "2026-08-09"
+currency_base: "JPY"
+total_assets_jpy: 40000000
+holdings:
+  - symbol: "TEST"
+    name: "Test Asset"
+    asset_class: "core"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 39960001
+    currency: "JPY"
+""",
+        encoding="utf-8",
+    )
+
+    snapshot = load_snapshot(path)
+
+    assert not any("Sum of holding market values" in warning for warning in snapshot.warnings)
+
+
+def test_total_assets_gap_at_point_one_percent_is_reported(tmp_path: Path) -> None:
+    path = tmp_path / "snapshot_relative_tolerance_boundary.yaml"
+    path.write_text(
+        """snapshot_date: "2026-08-09"
+currency_base: "JPY"
+total_assets_jpy: 40000000
+holdings:
+  - symbol: "TEST"
+    name: "Test Asset"
+    asset_class: "core"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 39960000
+    currency: "JPY"
+""",
+        encoding="utf-8",
+    )
+
+    snapshot = load_snapshot(path)
+
+    assert any("Sum of holding market values" in warning for warning in snapshot.warnings)
+
+
 def test_load_snapshot_reads_ocr_metadata_fields(tmp_path: Path) -> None:
     path = tmp_path / "snapshot_with_ocr_metadata.yaml"
     path.write_text(

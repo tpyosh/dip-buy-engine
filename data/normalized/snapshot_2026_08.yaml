@@ -10,19 +10,26 @@ category_totals_jpy:
   ポイント: 16233
   暗号資産: 322422
 source_evidence:
-  primary_source: "moneyforward_assets_machine_readable_yaml"
+  primary_source: "moneyforward_captures_with_broker_csv_detail"
   auxiliary_source: "crypto_summary_json"
   attachment_paths:
-    - "/Users/tappeiyoshida/Downloads/moneyforward_assets_machine_readable.yaml"
+    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-5dbd92da-9f3f-45cc-8c46-ed432c5e9643.png"
+    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-132aae35-2be3-4b41-9cd0-d154e9040ebc.png"
+    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-f608c41a-567f-4910-937e-a5eb53dcd9d5.png"
+    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-09a49787-01ee-4c52-a91a-01d89021429b.png"
+    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-57292264-7f8c-4e26-b89c-45856defe9b9.png"
+    - "/var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-6e3b6bec-aa13-4ed9-bf84-485a64a1e83f.png"
+    - "/Users/tappeiyoshida/Downloads/New_file-2.csv"
+    - "/Users/tappeiyoshida/Downloads/assetbalance(all)_20260809_192319.csv"
     - "/Users/tappeiyoshida/Downloads/crypto_summary_2026-08-09.json"
-  capture_count: 5
+  capture_count: 6
   moneyforward_snapshot_date_present: false
   crypto_summary_processed_date: "2026-08-09"
   snapshot_date_basis: "moneyforward_assets_machine_readable.yaml had snapshot_date null; set snapshot_date to 2026-08-09 using crypto_summary_2026-08-09.json processed_date and the request date 2026-08-09."
   raw_evidence_in_repository: false
 ocr_notes:
-  - "moneyforward_assets_machine_readable.yaml は snapshot_date が null のため、crypto_summary_2026-08-09.json の processed_date と依頼日 2026-08-09 を基準に snapshot_date を 2026-08-09 とした。"
-  - "売買可能明細の account_type は添付 YAML では確認できないため snapshot では null を維持し、既知の口座区分は holdings/versions/2026-08-02.yaml の overlay に委ねる。"
+  - "Money Forward画面に基準日の表示がないため、楽天証券CSVのファイル名、crypto_summary_2026-08-09.json の processed_date、依頼日を基準に snapshot_date を 2026-08-09 とした。"
+  - "楽天証券・野村証券は各1口座のみのため、Money Forwardの証券明細を別資産として加算せず、カテゴリ合計はMoney Forward、証券内の明細・口座区分は各社CSVを正として突合した。"
   - "投資信託の symbol は既存参照互換のため NISSEI_SOX_INDEX_1/2 を NISSEI_SOX_1/2、EMAXIS_SLIM_ALL_COUNTRY_FUND を EMAXIS_SLIM_ALL_COUNTRY に正規化した。"
   - "暗号資産は crypto_summary_2026-08-09.json から個別 holdings を追加した。数量、平均取得単価、現在単価は添付 JSON にないため null のまま保持した。"
   - "crypto_summary_2026-08-09.json の reward_points 162 は portfolio.current_value に含まれない別指標のため total_assets_jpy へ加算していない。"
@@ -32,6 +39,9 @@ validation_notes:
   - "holdings の market_value_jpy 合計は 40,051,909円 で total_assets_jpy より 2円少ないが、上記の株式カテゴリ差額と一致する。"
   - "ポイント集約値 16,233円 は添付 YAML の 3明細内訳（ANA 786円、Tポイント 7円、楽天ポイント 15,440円）と一致。"
   - "暗号資産 3明細の current_value 合計 322,422円 は crypto_summary_2026-08-09.json の portfolio.current_value と一致。"
+  - "楽天証券CSVの資産合計20,213,348円は、保有商品19,620,671円と外貨預り金592,677円の合計に一致し、Money Forward内の楽天証券分と二重計上していない。"
+  - "野村証券CSVのMRF 1,744,557円と株式3明細2,881,500円は、Money Forward内の同一口座明細として扱い、別加算していない。"
+  - "野村証券CSVでは9444が1,500株、2353が100株の注文中数量として表示される。売買方向はCSVから判別できないため holdings metadata では unknown_from_csv とした。"
 holdings:
   - symbol: "LIQUIDITY"
     name: "預金・現金"
@@ -53,7 +63,7 @@ holdings:
     name: "トヨタ自動車"
     source_category: "株式（現物）"
     institution: "野村証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "jun_core"
     quantity: 800
     avg_cost: 532
@@ -69,7 +79,7 @@ holdings:
     name: "トーシンホールディングス"
     source_category: "株式（現物）"
     institution: "野村証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "satellite"
     quantity: 1500
     avg_cost: 628
@@ -85,7 +95,7 @@ holdings:
     name: "日本駐車場開発"
     source_category: "株式（現物）"
     institution: "野村証券"
-    account_type: null
+    account_type: "一般口座"
     asset_class: "satellite"
     quantity: 100
     avg_cost: 265
@@ -101,7 +111,7 @@ holdings:
     name: "日産自動車"
     source_category: "株式（現物）"
     institution: "楽天証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "satellite"
     quantity: 100
     avg_cost: 368
@@ -117,87 +127,87 @@ holdings:
     name: "ヴァンエック・半導体株ETF"
     source_category: "株式（現物）"
     institution: "楽天証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "satellite_core"
     quantity: 1
     avg_cost: 369.63
     current_price: 582.70
     unit_price: null
-    profit_loss_jpy: 33622
+    profit_loss_jpy: 34208
     valuation_jpy: 91950
     market_value_jpy: 91950
     currency: "USD"
-    notes: "前日比 679円、評価損益率 57.64%。"
+    notes: "楽天証券CSV: 前日比 +11.22 USD、評価損益率 59.24%。"
 
   - symbol: "PLTR"
     name: "パランティア・テクノロジーズ"
     source_category: "株式（現物）"
     institution: "楽天証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "satellite"
     quantity: 11
     avg_cost: 151.22
     current_price: 172.01
     unit_price: null
-    profit_loss_jpy: 36081
+    profit_loss_jpy: 38892
     valuation_jpy: 298574
     market_value_jpy: 298574
     currency: "USD"
-    notes: "前日比 3,207円、評価損益率 13.75%。"
+    notes: "楽天証券CSV: 前日比 +16.09 USD、評価損益率 14.97%。"
 
   - symbol: "CIBR"
     name: "ファーストトラスト ナスダック サイバーセキュリティ ETF"
     source_category: "株式（現物）"
     institution: "楽天証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "satellite_core"
     quantity: 88
     avg_cost: 76.66
     current_price: 97.85
     unit_price: null
-    profit_loss_jpy: 294293
+    profit_loss_jpy: 326412
     valuation_jpy: 1358784
     market_value_jpy: 1358784
     currency: "USD"
-    notes: "前日比 7,511円、評価損益率 27.65%。"
+    notes: "楽天証券CSV: 前日比 +1.46 USD、評価損益率 31.61%。"
 
   - symbol: "MSFT"
     name: "マイクロソフト"
     source_category: "株式（現物）"
     institution: "楽天証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "jun_core"
     quantity: 9
     avg_cost: 398.74
     current_price: 499.99
     unit_price: null
-    profit_loss_jpy: 143800
+    profit_loss_jpy: 143785
     valuation_jpy: 710085
     market_value_jpy: 710085
     currency: "USD"
-    notes: "前日比 2,061円、評価損益率 25.39%。"
+    notes: "楽天証券CSV: 前日比 +0.13 USD、評価損益率 25.39%。"
 
   - symbol: "URA"
     name: "グローバルX ウラニウム ETF"
     source_category: "株式（現物）"
     institution: "楽天証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "satellite"
     quantity: 72
     avg_cost: 46.10
     current_price: 44.91
     unit_price: null
-    profit_loss_jpy: -13510
+    profit_loss_jpy: -3556
     valuation_jpy: 510249
     market_value_jpy: 510249
     currency: "USD"
-    notes: "前日比 2,484円、評価損益率 -2.58%。config/portfolio_policy.yaml では satellite_core に解決される。"
+    notes: "楽天証券CSV: 前日比 +1.71 USD、評価損益率 -0.69%。config/portfolio_policy.yaml では satellite_core に解決される。"
 
   - symbol: "NISSEI_SOX_1"
     name: "ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>"
     source_category: "投資信託"
     institution: "楽天証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "satellite_core"
     quantity: 860960
     avg_cost: 15802
@@ -213,7 +223,7 @@ holdings:
     name: "ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>"
     source_category: "投資信託"
     institution: "楽天証券"
-    account_type: null
+    account_type: "NISA成長投資枠"
     asset_class: "satellite_core"
     quantity: 415654
     avg_cost: 14435
@@ -229,7 +239,7 @@ holdings:
     name: "楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)"
     source_category: "投資信託"
     institution: "楽天証券"
-    account_type: null
+    account_type: "NISAつみたて投資枠"
     asset_class: "core"
     quantity: 1084992
     avg_cost: 14286
@@ -245,7 +255,7 @@ holdings:
     name: "楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)"
     source_category: "投資信託"
     institution: "楽天証券"
-    account_type: null
+    account_type: "NISA成長投資枠"
     asset_class: "core"
     quantity: 846995
     avg_cost: 17710
@@ -261,7 +271,7 @@ holdings:
     name: "楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)"
     source_category: "投資信託"
     institution: "楽天証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "core"
     quantity: 106530
     avg_cost: 11715
@@ -277,7 +287,7 @@ holdings:
     name: "eMAXIS Slim 米国株式(S&P500)"
     source_category: "投資信託"
     institution: "楽天証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "core"
     quantity: 337199
     avg_cost: 42349
@@ -293,7 +303,7 @@ holdings:
     name: "eMAXIS Slim 米国株式(S&P500)"
     source_category: "投資信託"
     institution: "楽天証券"
-    account_type: null
+    account_type: "NISAつみたて投資枠"
     asset_class: "core"
     quantity: 408710
     avg_cost: 33398
@@ -309,7 +319,7 @@ holdings:
     name: "eMAXIS Slim 米国株式(S&P500)"
     source_category: "投資信託"
     institution: "楽天証券"
-    account_type: null
+    account_type: "NISA成長投資枠"
     asset_class: "core"
     quantity: 228995
     avg_cost: 39302
@@ -325,7 +335,7 @@ holdings:
     name: "eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)"
     source_category: "投資信託"
     institution: "楽天証券"
-    account_type: null
+    account_type: "特定口座（源泉徴収あり）"
     asset_class: "core"
     quantity: 614397
     avg_cost: 36491

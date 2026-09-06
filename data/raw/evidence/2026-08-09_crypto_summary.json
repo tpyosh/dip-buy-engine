@@ -1,0 +1,33 @@
+{
+  "source": {
+    "type": "screenshot",
+    "captured_time_visible": "17:25",
+    "processed_date": "2026-08-09"
+  },
+  "currency": "JPY",
+  "portfolio": {
+    "current_value": 322422,
+    "profit_loss": -96091,
+    "reward_points": 162
+  },
+  "assets": [
+    {
+      "name_ja": "ビットコイン",
+      "symbol": "BTC",
+      "current_value": 177410,
+      "profit_loss": -46181
+    },
+    {
+      "name_ja": "イーサリアム",
+      "symbol": "ETH",
+      "current_value": 137310,
+      "profit_loss": -44613
+    },
+    {
+      "name_ja": "エックスアールピー",
+      "symbol": "XRP",
+      "current_value": 7702,
+      "profit_loss": -5297
+    }
+  ]
+}

@@ -8,8 +8,7 @@ from .models import CandidateOrder, PortfolioSnapshot, PortfolioWarning
 
 
 VALID_CURRENCIES = {"JPY", "USD"}
-CATEGORY_TOTAL_TOLERANCE_JPY = Decimal("100")
-CATEGORY_TOTAL_TOLERANCE_PCT = Decimal("0.001")
+SNAPSHOT_RECONCILIATION_TOLERANCE_PCT = Decimal("0.001")
 DISAPPEARANCE_VALUE_THRESHOLD_JPY = Decimal("10000")
 MONTH_OVER_MONTH_CHANGE_ABS_THRESHOLD_JPY = Decimal("1000000")
 MONTH_OVER_MONTH_CHANGE_PCT_THRESHOLD = Decimal("0.50")
@@ -174,15 +173,16 @@ def validate_category_totals(snapshot: PortfolioSnapshot) -> list[PortfolioWarni
     for category, expected_total in snapshot.category_totals_jpy.items():
         actual_total = source_category_totals.get(category, item_totals.get(category, Decimal("0")))
         gap = actual_total - expected_total
-        tolerance = max(CATEGORY_TOTAL_TOLERANCE_JPY, abs(expected_total) * CATEGORY_TOTAL_TOLERANCE_PCT)
-        if abs(gap) > tolerance:
+        tolerance = abs(snapshot.total_assets_jpy) * SNAPSHOT_RECONCILIATION_TOLERANCE_PCT
+        if gap and abs(gap) >= tolerance:
             warnings.append(
                 PortfolioWarning(
                     code="category_total_mismatch",
                     severity="warning",
                     message=(
                         f"Category total for {category} does not match item total: "
-                        f"items={actual_total}, category_total={expected_total}, gap={gap}."
+                        f"items={actual_total}, category_total={expected_total}, gap={gap}, "
+                        f"tolerance_exclusive={tolerance}."
                     ),
                 )
             )

@@ -1,6 +1,6 @@
 schema_version: 1
 record_type: "raw_evidence_index"
-updated_at: "2026-07-26"
+updated_at: "2026-08-10"
 entries:
   - normalized_snapshot_ref: "data/normalized/snapshot_2026_03.yaml"
     snapshot_date: "2026-03-07"
@@ -22,3 +22,12 @@ entries:
     snapshot_date: "2026-06-28"
     raw_evidence_in_repository: false
     evidence_status: "chat_attachment_not_persisted"
+  - normalized_snapshot_ref: "data/normalized/snapshot_2026_08.yaml"
+    snapshot_date: "2026-08-09"
+    raw_evidence_in_repository: false
+    evidence_status: "partial_crypto_summary_persisted_other_sources_external"
+    partial_evidence_refs:
+      - "data/raw/evidence/2026-08-09_crypto_summary.json"
+    partial_evidence_scope:
+      confirmed: ["BTC・ETH・XRPの円評価額", "BTC・ETH・XRPの評価損益", "画面表示時刻17:25"]
+      not_confirmed: ["利用サービス", "数量", "取得履歴", "注文画面仕様"]

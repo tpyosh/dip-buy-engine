@@ -105,6 +105,86 @@ holdings:
     assert "pension_classification_check" in warning_codes
 
 
+def test_category_gap_below_point_one_percent_of_total_assets_is_ignored(
+    tmp_path: Path,
+) -> None:
+    current_path = tmp_path / "category_relative_tolerance.yaml"
+    current_path.write_text(
+        """snapshot_date: "2026-08-09"
+currency_base: "JPY"
+total_assets_jpy: 40000000
+category_totals_jpy:
+  core: 20000000
+holdings:
+  - symbol: "CORE"
+    name: "Core Fund"
+    source_category: "core"
+    account_type: "特定口座"
+    asset_class: "core"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 19960001
+    currency: "JPY"
+  - symbol: "CASH"
+    name: "Cash"
+    source_category: "liquidity"
+    account_type: null
+    asset_class: "liquidity"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 20039999
+    currency: "JPY"
+""",
+        encoding="utf-8",
+    )
+
+    warnings = build_ocr_snapshot_validation_warnings(load_snapshot(current_path))
+
+    assert "category_total_mismatch" not in {warning.code for warning in warnings}
+
+
+def test_category_gap_at_point_one_percent_of_total_assets_is_reported(
+    tmp_path: Path,
+) -> None:
+    current_path = tmp_path / "category_relative_tolerance_boundary.yaml"
+    current_path.write_text(
+        """snapshot_date: "2026-08-09"
+currency_base: "JPY"
+total_assets_jpy: 40000000
+category_totals_jpy:
+  core: 20000000
+holdings:
+  - symbol: "CORE"
+    name: "Core Fund"
+    source_category: "core"
+    account_type: "特定口座"
+    asset_class: "core"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 19960000
+    currency: "JPY"
+  - symbol: "CASH"
+    name: "Cash"
+    source_category: "liquidity"
+    account_type: null
+    asset_class: "liquidity"
+    quantity: null
+    avg_cost: null
+    current_price: null
+    market_value_jpy: 20040000
+    currency: "JPY"
+""",
+        encoding="utf-8",
+    )
+
+    warnings = build_ocr_snapshot_validation_warnings(load_snapshot(current_path))
+
+    assert "category_total_mismatch" in {warning.code for warning in warnings}
+
+
 def test_ocr_validation_reports_previous_snapshot_continuity_issues(tmp_path: Path) -> None:
     previous_path = tmp_path / "previous.yaml"
     previous_path.write_text(

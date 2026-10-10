@@ -1,0 +1,49 @@
+schema_version: 1
+record_type: asset_snapshot_evidence_manifest
+snapshot_date: '2026-10-10'
+date_basis: ユーザが指定した基準日。Money Forward画面に日付・各口座更新日時の表示はない。
+sources:
+- source_id: moneyforward_summary
+  path: data/raw/evidence/2026-10-10/moneyforward_summary.png
+  original_path: /var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-5a64dadb-f658-4287-bb77-79cd7e1ea06e.png
+  sha256: 82ad73009e15178d54c16e3627c761c0cb73de9004367aec957ddd72b99f6f74
+  received_on: '2026-10-10'
+  captured_at: null
+- source_id: moneyforward_cash
+  path: data/raw/evidence/2026-10-10/moneyforward_cash.png
+  original_path: /var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-c8c6319d-905d-445f-978a-a05ecad14797.png
+  sha256: 34b70057a0764d6f7ad581a5a4c83ec215501334e14ce68f6fb21a2c7688d315
+  received_on: '2026-10-10'
+  captured_at: null
+- source_id: moneyforward_equities
+  path: data/raw/evidence/2026-10-10/moneyforward_equities.png
+  original_path: /var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-d3ec73fb-abe1-46a7-9513-8ff6cc9912c0.png
+  sha256: c704d21bb033fdf2eea94e79f7e50ad0fa6ea5050b4a00b464b82db672236699
+  received_on: '2026-10-10'
+  captured_at: null
+- source_id: moneyforward_funds
+  path: data/raw/evidence/2026-10-10/moneyforward_funds.png
+  original_path: /var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-14f322d1-d1bc-4498-9c42-916f01c4f148.png
+  sha256: 88cca77b991a8de1975defad51654e391a0d6ca858707fa0c6d46f82f14a766a
+  received_on: '2026-10-10'
+  captured_at: null
+- source_id: moneyforward_pension_points
+  path: data/raw/evidence/2026-10-10/moneyforward_pension_points.png
+  original_path: /var/folders/48/zkhvs5vd1cx72b_r0bymbmlm0000gn/T/codex-clipboard-ca50df97-94c7-4faf-b891-72d7f77a6d65.png
+  sha256: b8bebe6fd7d82f7a37eb90d8b4be62d8a535692f401b798b0a1f503e911c729d
+  received_on: '2026-10-10'
+  captured_at: null
+- source_id: nomura_csv
+  path: data/raw/evidence/2026-10-10/nomura.csv
+  original_path: /Users/tappeiyoshida/Downloads/New_file-3.csv
+  encoding: utf-8-sig
+  sha256: c30647e78d20d83ae1a2468abfd96ab6d4c4575d9968a5acf1197c86dee52e0d
+  received_on: '2026-10-10'
+  exported_at_from_filename: null
+- source_id: rakuten_csv
+  path: data/raw/evidence/2026-10-10/rakuten.csv
+  original_path: /Users/tappeiyoshida/Downloads/assetbalance(all)_20261010_161424.csv
+  encoding: cp932
+  sha256: 1ce4b6e24af3994e7085d49fdf59fea73e32abfa6574e2981b9d89ff28008a53
+  received_on: '2026-10-10'
+  exported_at_from_filename: '2026-10-10T16:14:24+09:00'

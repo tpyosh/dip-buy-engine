@@ -92,14 +92,31 @@ def test_normalized_snapshot_pointer_and_raw_index_cover_latest_snapshot() -> No
     pointer = load_yaml(ROOT / "data/normalized/current.yaml")
     raw_index = load_yaml(ROOT / "data/raw/index.yaml")
 
-    assert pointer["active_snapshot_path"] == "data/normalized/snapshot_2026_08.yaml"
-    assert pointer["active_snapshot_date"] == "2026-08-09"
+    snapshots = [
+        (path, load_yaml(path))
+        for path in (ROOT / "data/normalized").glob("snapshot_20??_??.yaml")
+    ]
+    latest_path, latest = max(snapshots, key=lambda item: item[1]["snapshot_date"])
+    assert pointer["active_snapshot_path"] == latest_path.relative_to(ROOT).as_posix()
+    assert pointer["active_snapshot_date"] == latest["snapshot_date"]
     latest_raw = next(
         entry
         for entry in raw_index["entries"]
         if entry["normalized_snapshot_ref"] == pointer["active_snapshot_path"]
     )
-    assert latest_raw == {
+    assert latest_raw["snapshot_date"] == latest["snapshot_date"]
+    for evidence_ref in latest_raw.get("partial_evidence_refs", []):
+        assert (ROOT / evidence_ref).is_file()
+
+
+def test_historical_crypto_evidence_is_preserved() -> None:
+    raw_index = load_yaml(ROOT / "data/raw/index.yaml")
+    historical_raw = next(
+        entry
+        for entry in raw_index["entries"]
+        if entry["normalized_snapshot_ref"] == "data/normalized/snapshot_2026_08.yaml"
+    )
+    assert historical_raw == {
         "normalized_snapshot_ref": "data/normalized/snapshot_2026_08.yaml",
         "snapshot_date": "2026-08-09",
         "raw_evidence_in_repository": False,

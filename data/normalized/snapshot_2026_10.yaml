@@ -1,0 +1,693 @@
+snapshot_date: '2026-10-10'
+currency_base: JPY
+total_assets_jpy: 37695573
+liquidity_target_jpy: null
+category_totals_jpy:
+  預金・現金: 2245005
+  株式（現物）: 5156496
+  投資信託: 26213967
+  年金: 4063372
+  ポイント: 16733
+source_evidence:
+  primary_source: user_provided_moneyforward_captures
+  auxiliary_source: user_provided_rakuten_and_nomura_csv
+  manifest_ref: data/raw/evidence/2026-10-10/manifest.yaml
+  attachment_paths:
+  - data/raw/evidence/2026-10-10/moneyforward_summary.png
+  - data/raw/evidence/2026-10-10/moneyforward_cash.png
+  - data/raw/evidence/2026-10-10/moneyforward_equities.png
+  - data/raw/evidence/2026-10-10/moneyforward_funds.png
+  - data/raw/evidence/2026-10-10/moneyforward_pension_points.png
+  - data/raw/evidence/2026-10-10/nomura.csv
+  - data/raw/evidence/2026-10-10/rakuten.csv
+  capture_count: 5
+  raw_evidence_in_repository: true
+  moneyforward_snapshot_date_present: false
+  snapshot_date_basis: ユーザが指定した基準日。Money Forward画面に日付・各口座更新日時の表示はない。
+  valuation_basis: Money Forward表示値を全体・カテゴリ・保有明細へ統一。証券会社CSVの異なる数量・価格・評価額はbroker_observationへ別記し合算しない。
+  broker_export_time_basis: 楽天CSVの出力時刻はファイル名由来。個別商品の現在値(更新日)は空欄。野村CSVの基準日も空欄。
+  usd_jpy_reference:
+    value: 158.31
+    displayed_at: 10/10 05:59
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv
+    scope: 楽天CSVの参考為替。Money Forwardへ適用した為替とは断定しない。
+  account_metadata_ref: holdings/versions/2026-08-14-v4.yaml
+  related_plan_ref: plans/2026/2026-08-09_act_s3_execution.yaml
+normalization_notes:
+- 画像の表示値を直接確認して転記。廃止済みOCR専用プロンプト・専用運用は使用していない。
+- 同名投資信託の口座対応はCSVの口座区分と保有数量・商品名を照合し、既存symbolを継承した。楽天オールカントリーのつみたて枠だけは数量差があり、商品名・口座と他の同商品行から対応付けた。
+- 特定口座の源泉徴収あり、および年金のiDeCo区分は既存の口座情報を継承。今回のCSV・年金画像だけで源泉徴収区分や年金制度を新規確認したものではない。
+- 投資信託の数量は口、平均取得価額と基準価額は1万口あたり円。米国株の平均取得価額・現在値はUSD、円評価額は表示値のまま。
+- 画像に取得日、口座ごとの同期日時、為替レートはないため推定しない。
+- 過去のBTC・ETH・XRPは取引台帳で全売却・残高0円が報告済み。過去評価額を繰り越さない。今回キャプチャ自体には暗号資産残高は表示されていない。
+- 売却済み9444・2353・7201・SMHは取引台帳と今回CSVの保有一覧に整合。数量差だけから新しい約定・入出金は作成しない。
+validation_notes:
+- カテゴリ合計37,695,573円は資産総額と一致。
+- 株式明細合計5,156,495円はカテゴリ表示額より1円少ない。
+- 投資信託明細合計26,213,967円はカテゴリ表示額と一致。
+- 全明細合計37,695,572円は資産総額より1円少ない。総資産の0.1%未満の許容差であり残差用の架空資産を追加しない。
+- 預金・現金7明細とポイント4明細はそれぞれカテゴリ表示額と一致。PayPayの負数も表示どおり保持する。
+- 楽天・プラス・オールカントリーのNISAつみたて枠はCSVが50,930口、100,001円多い。単なる価格丸め差として処理しない。
+- 楽天の米国株4明細はCSVが合計30,345円多い。価格更新の差を観測したが、画面同期時刻がないため原因は断定しない。
+- 楽天の円預り金はMoney Forwardが100,000円、CSVが0円。投資信託の差との因果関係を推定しない。
+- 楽天CSVの米国株明細合計は米国株カテゴリ合計より2円少ない。投資信託明細合計はCSVの投資信託カテゴリ合計と一致。保有商品明細合計は保有商品の評価額合計より2円少ない。
+- Tポイントの期限は画面上2024/12/22。基準日より過去だが失効・利用可否は未確認のため7円を削除しない。
+- 取得日・各口座の同期日時・数量差の発生原因・CSVにない注文状況は未確認。
+holdings:
+- symbol: LIQUIDITY
+  name: 預金・現金
+  source_category: 預金・現金
+  institution: null
+  account_type: null
+  asset_class: liquidity
+  quantity: null
+  avg_cost: null
+  current_price: null
+  unit_price: null
+  profit_loss_jpy: null
+  valuation_jpy: 2245005
+  market_value_jpy: 2245005
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_cash.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  components:
+  - name: PayPay
+    institution: PayPay
+    market_value_jpy: -130485
+    currency: JPY
+    quantity: null
+  - name: Suica
+    institution: モバイルSuica（モバイルSuica ID）
+    market_value_jpy: 1915
+    currency: JPY
+    quantity: null
+  - name: 普通
+    institution: 三菱UFJ銀行
+    market_value_jpy: 2263963
+    currency: JPY
+    quantity: null
+  - name: 円預金(普通預金)
+    institution: 楽天銀行
+    market_value_jpy: 8284
+    currency: JPY
+    quantity: null
+  - name: 米ドル
+    institution: 楽天証券
+    market_value_jpy: 959
+    currency: USD
+    quantity: null
+  - name: MRF
+    institution: 野村証券
+    market_value_jpy: 369
+    currency: JPY
+    quantity: null
+  - name: 預り金
+    institution: 楽天証券
+    market_value_jpy: 100000
+    currency: JPY
+    quantity: null
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv
+    foreign_deposit:
+      quantity: 6.06
+      currency: USD
+      exchange_rate_jpy_per_usd: 158.31
+      market_value_jpy: 959
+    jpy_deposit_jpy: 0
+    nomura_mrf_jpy: 369
+    notes: Money Forwardの楽天証券預り金100,000円に対して楽天CSVの円預り金は0円。二つを合算せず原因は未確認。
+- symbol: '7203'
+  name: トヨタ自動車
+  source_category: 株式（現物）
+  institution: 野村証券
+  account_type: 特定口座（源泉徴収あり）
+  asset_class: jun_core
+  quantity: 800
+  avg_cost: 532
+  current_price: 2911
+  unit_price: null
+  profit_loss_jpy: 1902800
+  valuation_jpy: 2328400
+  market_value_jpy: 2328400
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_equities.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: 0
+  profit_loss_pct_displayed: 447.09
+  account_source_ref: data/raw/evidence/2026-10-10/nomura.csv#L13
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/nomura.csv#L13
+    observed_on: '2026-10-10'
+    product_name: トヨタ自動車
+    account_label: 特定
+    quantity: 800
+    order_quantity: null
+    sellable_quantity_round_lot: 800
+    avg_cost: 532
+    current_price: 2910.5
+    price_as_of: null
+    acquisition_cost_jpy: 425600
+    market_value_jpy: 2328400
+    profit_loss_jpy: 1902800
+- symbol: PLTR
+  name: パランティア・テクノロジーズ
+  source_category: 株式（現物）
+  institution: 楽天証券
+  account_type: 特定口座（源泉徴収あり）
+  asset_class: satellite
+  quantity: 11
+  avg_cost: 151.22
+  current_price: 203.33
+  unit_price: null
+  profit_loss_jpy: 94549
+  valuation_jpy: 354231
+  market_value_jpy: 354231
+  currency: USD
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_equities.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: 9755
+  profit_loss_pct_displayed: 36.41
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L27
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L27
+    observed_on: '2026-10-10'
+    product_name: パランティア・テクノロジーズ
+    account_label: 特定
+    quantity: 11
+    quantity_unit: 株
+    avg_cost: 151.2236
+    price_unit: USD
+    current_price: 209.05
+    current_price_updated_on: null
+    market_value_jpy: 364041
+    market_value_foreign_displayed: 2,299.55 USD
+    profit_loss_jpy: 104359
+    profit_loss_pct_displayed: 40.18
+- symbol: CIBR
+  name: ファーストトラスト ナスダック サイバーセキュリティ ETF
+  source_category: 株式（現物）
+  institution: 楽天証券
+  account_type: 特定口座（源泉徴収あり）
+  asset_class: satellite_core
+  quantity: 74
+  avg_cost: 76.66
+  current_price: 108.47
+  unit_price: null
+  profit_loss_jpy: 403113
+  valuation_jpy: 1271281
+  market_value_jpy: 1271281
+  currency: USD
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_equities.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: 22087
+  profit_loss_pct_displayed: 46.43
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L28
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L28
+    observed_on: '2026-10-10'
+    product_name: ファーストトラスト ナスダック サイバーセキュリティETF
+    account_label: 特定
+    quantity: 74
+    quantity_unit: 株
+    avg_cost: 76.6571
+    price_unit: USD
+    current_price: 110
+    current_price_updated_on: null
+    market_value_jpy: 1288643
+    market_value_foreign_displayed: 8,140.00 USD
+    profit_loss_jpy: 420475
+    profit_loss_pct_displayed: 48.43
+- symbol: MSFT
+  name: マイクロソフト
+  source_category: 株式（現物）
+  institution: 楽天証券
+  account_type: 特定口座（源泉徴収あり）
+  asset_class: jun_core
+  quantity: 9
+  avg_cost: 398.74
+  current_price: 532.71
+  unit_price: null
+  profit_loss_jpy: 193035
+  valuation_jpy: 759335
+  market_value_jpy: 759335
+  currency: USD
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_equities.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: 3232
+  profit_loss_pct_displayed: 34.09
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L29
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L29
+    observed_on: '2026-10-10'
+    product_name: マイクロソフト
+    account_label: 特定
+    quantity: 9
+    quantity_unit: 株
+    avg_cost: 398.7366
+    price_unit: USD
+    current_price: 535.07
+    current_price_updated_on: null
+    market_value_jpy: 762362
+    market_value_foreign_displayed: 4,815.63 USD
+    profit_loss_jpy: 196062
+    profit_loss_pct_displayed: 34.62
+- symbol: URA
+  name: グローバルX ウラニウム ETF
+  source_category: 株式（現物）
+  institution: 楽天証券
+  account_type: 特定口座（源泉徴収あり）
+  asset_class: satellite
+  quantity: 72
+  avg_cost: 46.1
+  current_price: 38.87
+  unit_price: null
+  profit_loss_jpy: -70557
+  valuation_jpy: 443248
+  market_value_jpy: 443248
+  currency: USD
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_equities.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: 4575
+  profit_loss_pct_displayed: -13.73
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L30
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L30
+    observed_on: '2026-10-10'
+    product_name: グローバルX ウラニウム ETF
+    account_label: 特定
+    quantity: 72
+    quantity_unit: 株
+    avg_cost: 46.0991
+    price_unit: USD
+    current_price: 38.9
+    current_price_updated_on: null
+    market_value_jpy: 443394
+    market_value_foreign_displayed: 2,800.80 USD
+    profit_loss_jpy: -70411
+    profit_loss_pct_displayed: -13.7
+- symbol: NISSEI_SOX_1
+  name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
+  source_category: 投資信託
+  institution: 楽天証券
+  account_type: 特定口座（源泉徴収あり）
+  asset_class: satellite_core
+  quantity: 860960
+  avg_cost: 15802
+  current_price: 47901
+  unit_price: null
+  profit_loss_jpy: 2763627
+  valuation_jpy: 4124084
+  market_value_jpy: 4124084
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_funds.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: -138701
+  profit_loss_pct_displayed: 203.14
+  quantity_unit: 口
+  price_unit: JPY_per_10000_units
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L31
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L31
+    observed_on: '2026-10-10'
+    product_name: ニッセイSOX指数インデックスファンド(米国半導体株)＜購入・換金手数料なし＞
+    account_label: 特定
+    quantity: 860960
+    quantity_unit: 口
+    avg_cost: 15801.63
+    price_unit: 円
+    current_price: 47901
+    current_price_updated_on: null
+    market_value_jpy: 4124084
+    market_value_foreign_displayed: '-'
+    profit_loss_jpy: 2763627
+    profit_loss_pct_displayed: 203.13
+- symbol: NISSEI_SOX_2
+  name: ニッセイSOX指数インデックスファンド(米国半導体株)<購入・換金手数料なし>
+  source_category: 投資信託
+  institution: 楽天証券
+  account_type: NISA成長投資枠
+  asset_class: satellite_core
+  quantity: 415654
+  avg_cost: 14435
+  current_price: 47901
+  unit_price: null
+  profit_loss_jpy: 1391024
+  valuation_jpy: 1991024
+  market_value_jpy: 1991024
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_funds.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: -66962
+  profit_loss_pct_displayed: 231.84
+  quantity_unit: 口
+  price_unit: JPY_per_10000_units
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L32
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L32
+    observed_on: '2026-10-10'
+    product_name: ニッセイSOX指数インデックスファンド(米国半導体株)＜購入・換金手数料なし＞
+    account_label: NISA成長投資枠
+    quantity: 415654
+    quantity_unit: 口
+    avg_cost: 14435.08
+    price_unit: 円
+    current_price: 47901
+    current_price_updated_on: null
+    market_value_jpy: 1991024
+    market_value_foreign_displayed: '-'
+    profit_loss_jpy: 1391024
+    profit_loss_pct_displayed: 231.83
+- symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
+  name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+  source_category: 投資信託
+  institution: 楽天証券
+  account_type: NISAつみたて投資枠
+  asset_class: core
+  quantity: 1162027
+  avg_cost: 14630
+  current_price: 19635
+  unit_price: null
+  profit_loss_jpy: 581640
+  valuation_jpy: 2281640
+  market_value_jpy: 2281640
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_funds.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: -10110
+  profit_loss_pct_displayed: 34.21
+  quantity_unit: 口
+  price_unit: JPY_per_10000_units
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L33
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L33
+    observed_on: '2026-10-10'
+    product_name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+    account_label: NISAつみたて投資枠
+    quantity: 1212957
+    quantity_unit: 口
+    avg_cost: 14839.77
+    price_unit: 円
+    current_price: 19635
+    current_price_updated_on: null
+    market_value_jpy: 2381641
+    market_value_foreign_displayed: '-'
+    profit_loss_jpy: 581641
+    profit_loss_pct_displayed: 32.31
+- symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
+  name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+  source_category: 投資信託
+  institution: 楽天証券
+  account_type: NISA成長投資枠
+  asset_class: core
+  quantity: 846995
+  avg_cost: 17710
+  current_price: 19635
+  unit_price: null
+  profit_loss_jpy: 163074
+  valuation_jpy: 1663075
+  market_value_jpy: 1663075
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_funds.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: -7369
+  profit_loss_pct_displayed: 10.87
+  quantity_unit: 口
+  price_unit: JPY_per_10000_units
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L34
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L34
+    observed_on: '2026-10-10'
+    product_name: 楽天・プラス・オールカントリー株式インデックス・ファンド(楽天・プラス・オールカントリー)
+    account_label: NISA成長投資枠
+    quantity: 846995
+    quantity_unit: 口
+    avg_cost: 17709.67
+    price_unit: 円
+    current_price: 19635
+    current_price_updated_on: null
+    market_value_jpy: 1663075
+    market_value_foreign_displayed: '-'
+    profit_loss_jpy: 163074
+    profit_loss_pct_displayed: 10.87
+- symbol: RAKUTEN_PLUS_SP500
+  name: 楽天・プラス・S&P500インデックス・ファンド(楽天・プラス・S&P500)
+  source_category: 投資信託
+  institution: 楽天証券
+  account_type: 特定口座（源泉徴収あり）
+  asset_class: core
+  quantity: 106530
+  avg_cost: 11715
+  current_price: 20130
+  unit_price: null
+  profit_loss_jpy: 89645
+  valuation_jpy: 214445
+  market_value_jpy: 214445
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_funds.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: -714
+  profit_loss_pct_displayed: 71.83
+  quantity_unit: 口
+  price_unit: JPY_per_10000_units
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L35
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L35
+    observed_on: '2026-10-10'
+    product_name: 楽天・プラス・Ｓ＆Ｐ５００インデックス・ファンド(楽天・プラス・Ｓ＆Ｐ５００)
+    account_label: 特定
+    quantity: 106530
+    quantity_unit: 口
+    avg_cost: 11715.01
+    price_unit: 円
+    current_price: 20130
+    current_price_updated_on: null
+    market_value_jpy: 214445
+    market_value_foreign_displayed: '-'
+    profit_loss_jpy: 89645
+    profit_loss_pct_displayed: 71.83
+- symbol: EMAXIS_SLIM_SP500_1
+  name: eMAXIS Slim 米国株式(S&P500)
+  source_category: 投資信託
+  institution: 楽天証券
+  account_type: 特定口座（源泉徴収あり）
+  asset_class: core
+  quantity: 337199
+  avg_cost: 42349
+  current_price: 45246
+  unit_price: null
+  profit_loss_jpy: 97691
+  valuation_jpy: 1525691
+  market_value_jpy: 1525691
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_funds.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: -4990
+  profit_loss_pct_displayed: 6.84
+  quantity_unit: 口
+  price_unit: JPY_per_10000_units
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L36
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L36
+    observed_on: '2026-10-10'
+    product_name: eMAXIS Slim 米国株式(S&P500)
+    account_label: 特定
+    quantity: 337199
+    quantity_unit: 口
+    avg_cost: 42348.88
+    price_unit: 円
+    current_price: 45246
+    current_price_updated_on: null
+    market_value_jpy: 1525691
+    market_value_foreign_displayed: '-'
+    profit_loss_jpy: 97691
+    profit_loss_pct_displayed: 6.84
+- symbol: EMAXIS_SLIM_SP500_2
+  name: eMAXIS Slim 米国株式(S&P500)
+  source_category: 投資信託
+  institution: 楽天証券
+  account_type: NISAつみたて投資枠
+  asset_class: core
+  quantity: 419748
+  avg_cost: 33711
+  current_price: 45246
+  unit_price: null
+  profit_loss_jpy: 484192
+  valuation_jpy: 1899192
+  market_value_jpy: 1899192
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_funds.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: -6212
+  profit_loss_pct_displayed: 34.22
+  quantity_unit: 口
+  price_unit: JPY_per_10000_units
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L37
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L37
+    observed_on: '2026-10-10'
+    product_name: eMAXIS Slim 米国株式(S&P500)
+    account_label: NISAつみたて投資枠
+    quantity: 419748
+    quantity_unit: 口
+    avg_cost: 33710.7
+    price_unit: 円
+    current_price: 45246
+    current_price_updated_on: null
+    market_value_jpy: 1899192
+    market_value_foreign_displayed: '-'
+    profit_loss_jpy: 484192
+    profit_loss_pct_displayed: 34.21
+- symbol: EMAXIS_SLIM_SP500_3
+  name: eMAXIS Slim 米国株式(S&P500)
+  source_category: 投資信託
+  institution: 楽天証券
+  account_type: NISA成長投資枠
+  asset_class: core
+  quantity: 228995
+  avg_cost: 39302
+  current_price: 45246
+  unit_price: null
+  profit_loss_jpy: 136111
+  valuation_jpy: 1036111
+  market_value_jpy: 1036111
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_funds.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: -3389
+  profit_loss_pct_displayed: 15.12
+  quantity_unit: 口
+  price_unit: JPY_per_10000_units
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L38
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L38
+    observed_on: '2026-10-10'
+    product_name: eMAXIS Slim 米国株式(S&P500)
+    account_label: NISA成長投資枠
+    quantity: 228995
+    quantity_unit: 口
+    avg_cost: 39302.17
+    price_unit: 円
+    current_price: 45246
+    current_price_updated_on: null
+    market_value_jpy: 1036111
+    market_value_foreign_displayed: '-'
+    profit_loss_jpy: 136111
+    profit_loss_pct_displayed: 15.12
+- symbol: EMAXIS_SLIM_ALL_COUNTRY
+  name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+  source_category: 投資信託
+  institution: 楽天証券
+  account_type: 特定口座（源泉徴収あり）
+  asset_class: core
+  quantity: 3012072
+  avg_cost: 38305
+  current_price: 38109
+  unit_price: null
+  profit_loss_jpy: -59025
+  valuation_jpy: 11478705
+  market_value_jpy: 11478705
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_funds.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  day_change_jpy: -50603
+  profit_loss_pct_displayed: -0.51
+  quantity_unit: 口
+  price_unit: JPY_per_10000_units
+  account_source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L39
+  broker_observation:
+    source_ref: data/raw/evidence/2026-10-10/rakuten.csv#L39
+    observed_on: '2026-10-10'
+    product_name: eMAXIS Slim 全世界株式(オール・カントリー)(オルカン)
+    account_label: 特定
+    quantity: 3012072
+    quantity_unit: 口
+    avg_cost: 38304.96
+    price_unit: 円
+    current_price: 38109
+    current_price_updated_on: null
+    market_value_jpy: 11478705
+    market_value_foreign_displayed: '-'
+    profit_loss_jpy: -59025
+    profit_loss_pct_displayed: -0.51
+- symbol: PENSION_EMAXIS_SLIM_ALL_COUNTRY
+  name: eMAXIS Slim 全世界株式(オール・カントリー)
+  source_category: 年金
+  institution: null
+  account_type: iDeCo
+  asset_class: pension
+  quantity: null
+  avg_cost: null
+  current_price: null
+  unit_price: null
+  profit_loss_jpy: 722677
+  valuation_jpy: 4063372
+  market_value_jpy: 4063372
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_pension_points.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  profit_loss_pct_displayed: 21.63
+  acquisition_cost_jpy: 3340695
+  account_type_source: data/normalized/snapshot_2026_08.yaml#holdings.PENSION_EMAXIS_SLIM_ALL_COUNTRY
+  notes: 年金の制度区分は既存記録を継承。現在価値を1口あたり価格へ転用しない。
+- symbol: POINTS_MILES
+  name: ポイント
+  source_category: ポイント
+  institution: null
+  account_type: null
+  asset_class: other
+  quantity: null
+  avg_cost: null
+  current_price: null
+  unit_price: null
+  profit_loss_jpy: null
+  valuation_jpy: 16733
+  market_value_jpy: 16733
+  currency: JPY
+  source_ref: data/raw/evidence/2026-10-10/moneyforward_pension_points.png
+  acquired_on: null
+  observed_on: '2026-10-10'
+  components:
+  - name: ANAマイレージ(マイル)
+    point_type: null
+    institution: ANAマイレージ
+    quantity: 786
+    conversion_rate: 1.0
+    market_value_jpy: 786
+    expires_on: null
+  - name: Tポイント
+    point_type: Tポイント
+    institution: Vポイント（Yahoo! JAPAN ID）
+    quantity: 7
+    conversion_rate: 1.0
+    market_value_jpy: 7
+    expires_on: '2024-12-22'
+  - name: 通常ポイント
+    point_type: Amazonポイント
+    institution: Amazon.co.jp
+    quantity: 7
+    conversion_rate: 1.0
+    market_value_jpy: 7
+    expires_on: '2027-09-27'
+  - name: 楽天ポイント
+    point_type: 楽天ポイント
+    institution: 楽天市場(my Rakuten)
+    quantity: 15933
+    conversion_rate: 1.0
+    market_value_jpy: 15933
+    expires_on: '2027-09-30'

@@ -1,6 +1,6 @@
 schema_version: 1
 record_type: "raw_evidence_index"
-updated_at: "2026-08-10"
+updated_at: "2026-10-10"
 entries:
   - normalized_snapshot_ref: "data/normalized/snapshot_2026_03.yaml"
     snapshot_date: "2026-03-07"
@@ -31,3 +31,16 @@ entries:
     partial_evidence_scope:
       confirmed: ["BTC・ETH・XRPの円評価額", "BTC・ETH・XRPの評価損益", "画面表示時刻17:25"]
       not_confirmed: ["利用サービス", "数量", "取得履歴", "注文画面仕様"]
+  - normalized_snapshot_ref: data/normalized/snapshot_2026_10.yaml
+    snapshot_date: '2026-10-10'
+    raw_evidence_in_repository: true
+    evidence_status: captures_and_broker_csv_persisted
+    partial_evidence_refs:
+    - data/raw/evidence/2026-10-10/manifest.yaml
+    - data/raw/evidence/2026-10-10/moneyforward_summary.png
+    - data/raw/evidence/2026-10-10/moneyforward_cash.png
+    - data/raw/evidence/2026-10-10/moneyforward_equities.png
+    - data/raw/evidence/2026-10-10/moneyforward_funds.png
+    - data/raw/evidence/2026-10-10/moneyforward_pension_points.png
+    - data/raw/evidence/2026-10-10/nomura.csv
+    - data/raw/evidence/2026-10-10/rakuten.csv

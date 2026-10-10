@@ -26,6 +26,16 @@ from monthly_limit_order_review.utils import to_serializable
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def test_review_packet_includes_normalization_notes(sample_computation) -> None:
+    sample_computation.snapshot.normalization_notes = ["Source field missing"]
+
+    packet = build_review_packet(sample_computation)
+
+    notes = packet.allowed_quantitative_facts["data_quality_notes"]
+    assert notes["normalization_notes"] == ["Source field missing"]
+    assert "ocr_notes" not in notes
+
+
 def complete_strategic_financial_context() -> dict:
     financial = deepcopy(load_financial_context(ROOT)["record"])
     financial["mortgage"]["household_total"]["fixed_or_variable"] = "variable"

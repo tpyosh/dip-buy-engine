@@ -84,7 +84,13 @@ def load_snapshot(path: str | Path) -> PortfolioSnapshot:
         warnings=warnings,
         source_evidence=payload.get("source_evidence") or {},
         category_totals_jpy=load_category_totals(payload),
-        ocr_notes=load_string_list(payload.get("ocr_notes")),
+        # Preserve notes from immutable snapshots written before OCR retirement.
+        normalization_notes=list(
+            dict.fromkeys(
+                load_string_list(payload.get("normalization_notes"))
+                + load_string_list(payload.get("ocr_notes"))
+            )
+        ),
         validation_notes=load_string_list(payload.get("validation_notes")),
     )
 

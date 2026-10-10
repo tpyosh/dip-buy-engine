@@ -2,6 +2,8 @@
 
 `reports/generated/` は、計算結果、allowlist型レビュー・パケット、レビュー依頼、レビュー構造化結果、提案差分、カレンダードラフトなどの自動生成物を置く領域です。
 
+Money ForwardのOCR運用は2026-10-10に廃止しました。過去の生成物に残るOCR手順・専用プロンプトへの参照は再利用しません。[廃止記録](../docs/migrations/2026-10-10-moneyforward-ocr-retirement.md)を参照してください。
+
 - 生成物は事実データ、戦略、計画、取引実績のsource of truthではない。
 - 月次生成物は `reports/generated/monthly/YYYY_MM/` にまとめる。
 - `review_packet.yaml` はChatGPTへ渡してよい情報境界の監査用で、`review_request.md` は同じパケットから生成する。

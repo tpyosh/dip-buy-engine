@@ -34,7 +34,7 @@ class PortfolioSnapshot:
     warnings: list[str] = field(default_factory=list)
     source_evidence: dict = field(default_factory=dict)
     category_totals_jpy: dict[str, Decimal] = field(default_factory=dict)
-    ocr_notes: list[str] = field(default_factory=list)
+    normalization_notes: list[str] = field(default_factory=list)
     validation_notes: list[str] = field(default_factory=list)
 
 

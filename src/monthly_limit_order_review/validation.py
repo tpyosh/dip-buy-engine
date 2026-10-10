@@ -117,14 +117,13 @@ def build_exposure_validation_warnings(exposure_breakdown: dict) -> list[Portfol
     return warnings
 
 
-def build_ocr_snapshot_validation_warnings(
+def build_snapshot_validation_warnings(
     snapshot: PortfolioSnapshot,
     *,
     previous_snapshot: PortfolioSnapshot | None = None,
     classification_audit: list[dict] | None = None,
 ) -> list[PortfolioWarning]:
     warnings: list[PortfolioWarning] = []
-    warnings.extend(validate_source_evidence(snapshot))
     warnings.extend(validate_category_totals(snapshot))
     warnings.extend(validate_currency_consistency(snapshot))
     warnings.extend(validate_duplicate_holdings(snapshot))
@@ -134,27 +133,6 @@ def build_ocr_snapshot_validation_warnings(
     warnings.extend(validate_classification_audit(classification_audit or []))
     if previous_snapshot is not None:
         warnings.extend(validate_previous_snapshot_continuity(snapshot, previous_snapshot))
-    return warnings
-
-
-def validate_source_evidence(snapshot: PortfolioSnapshot) -> list[PortfolioWarning]:
-    evidence = snapshot.source_evidence or {}
-    if not evidence:
-        return []
-
-    warnings: list[PortfolioWarning] = []
-    primary_source = str(evidence.get("primary_source") or evidence.get("primary") or "").lower()
-    if primary_source and "screenshot" not in primary_source and "image" not in primary_source:
-        warnings.append(
-            PortfolioWarning(
-                code="primary_evidence_not_screenshot",
-                severity="warning",
-                message=(
-                    "source_evidence.primary_source is not a Money Forward screenshot/image; "
-                    "pasted text must remain auxiliary evidence."
-                ),
-            )
-        )
     return warnings
 
 
@@ -221,7 +199,7 @@ def validate_duplicate_holdings(snapshot: PortfolioSnapshot) -> list[PortfolioWa
                 PortfolioWarning(
                     code="duplicate_holding_symbol",
                     severity="warning",
-                    message=f"{symbol}: appears {count} times. Verify this is not duplicate OCR/copy-paste overlap.",
+                    message=f"{symbol}: appears {count} times. Verify this is not duplicate input overlap.",
                     related_symbols=[symbol],
                 )
             )
@@ -249,7 +227,7 @@ def validate_duplicate_holdings(snapshot: PortfolioSnapshot) -> list[PortfolioWa
                     severity="warning",
                     message=(
                         f"{holding.symbol}: same name/account/institution/value appears multiple times. "
-                        "Confirm screenshots before counting both entries."
+                        "Confirm source records before counting both entries."
                     ),
                     related_symbols=[holding.symbol],
                 )
@@ -419,7 +397,7 @@ def validate_previous_snapshot_continuity(
                     severity="warning",
                     message=(
                         f"{symbol}: existed in previous snapshot at {previous.market_value_jpy} JPY "
-                        "but is absent from current snapshot. Confirm sale, merge, rename, or OCR miss."
+                        "but is absent from current snapshot. Confirm sale, merge, rename, or missing input."
                     ),
                     related_symbols=[symbol],
                 )
@@ -450,7 +428,7 @@ def validate_previous_snapshot_continuity(
                     severity="warning",
                     message=(
                         f"{symbol}: market_value_jpy changed from {previous.market_value_jpy} to "
-                        f"{current.market_value_jpy} (gap={gap}, pct={pct_change}). Verify OCR digits, "
+                        f"{current.market_value_jpy} (gap={gap}, pct={pct_change}). Verify input values, "
                         "purchases/sales, and account grouping."
                     ),
                     related_symbols=[symbol],

@@ -28,7 +28,6 @@ VALIDATION_WARNING_PREFIXES = (
     "currency_",
     "duplicate_",
     "snapshot_",
-    "ocr_",
     "account_",
     "same_product_",
 )
@@ -3063,7 +3062,7 @@ def build_allowed_quantitative_facts(
         },
         "recurring_commitments": recurring,
         "data_quality_notes": {
-            "ocr_notes": list(snapshot.ocr_notes),
+            "normalization_notes": list(snapshot.normalization_notes),
             "validation_notes": list(snapshot.validation_notes),
             "validation_findings": build_validation_findings(computation),
         },

@@ -9,9 +9,9 @@ category_totals_jpy:
   satellite_core: 800000
   satellite: 400000
 source_evidence:
-  primary_source: "moneyforward_screenshots"
-  auxiliary_source: "moneyforward_pasted_text"
-ocr_notes: []
+  primary_source: "example_structured_records"
+  auxiliary_source: null
+normalization_notes: []
 validation_notes: []
 
 holdings:

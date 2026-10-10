@@ -2,6 +2,9 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+import yaml
+
 from monthly_limit_order_review.snapshot_loader import load_snapshot
 
 
@@ -107,8 +110,8 @@ holdings:
     assert any("Sum of holding market values" in warning for warning in snapshot.warnings)
 
 
-def test_load_snapshot_reads_ocr_metadata_fields(tmp_path: Path) -> None:
-    path = tmp_path / "snapshot_with_ocr_metadata.yaml"
+def test_load_snapshot_reads_normalization_metadata_fields(tmp_path: Path) -> None:
+    path = tmp_path / "snapshot_with_normalization_metadata.yaml"
     path.write_text(
         """snapshot_date: "2026-03-07"
 currency_base: "JPY"
@@ -116,9 +119,9 @@ total_assets_jpy: 1000000
 category_totals_jpy:
   core: 1000000
 source_evidence:
-  primary_source: "moneyforward_screenshots"
-ocr_notes:
-  - "one field was unreadable"
+  primary_source: "broker_csv"
+normalization_notes:
+  - "one field was missing"
 validation_notes:
   - "checked totals"
 holdings:
@@ -136,7 +139,7 @@ holdings:
     valuation_jpy: 1000000
     market_value_jpy: 1000000
     currency: "JPY"
-    notes: "OCR confidence low"
+    notes: "Source field missing"
 """,
         encoding="utf-8",
     )
@@ -145,8 +148,8 @@ holdings:
     holding = snapshot.holdings[0]
 
     assert snapshot.category_totals_jpy["core"] == 1000000
-    assert snapshot.source_evidence["primary_source"] == "moneyforward_screenshots"
-    assert snapshot.ocr_notes == ["one field was unreadable"]
+    assert snapshot.source_evidence["primary_source"] == "broker_csv"
+    assert snapshot.normalization_notes == ["one field was missing"]
     assert snapshot.validation_notes == ["checked totals"]
     assert holding.source_category == "投資信託"
     assert holding.institution == "Test Securities"
@@ -154,4 +157,29 @@ holdings:
     assert holding.unit_price == 1000
     assert holding.profit_loss_jpy == 100000
     assert holding.valuation_jpy == 1000000
-    assert holding.notes == "OCR confidence low"
+    assert holding.notes == "Source field missing"
+
+
+@pytest.mark.parametrize(
+    ("metadata", "expected"),
+    [
+        ({"ocr_notes": ["legacy source uncertainty"]}, ["legacy source uncertainty"]),
+        (
+            {
+                "normalization_notes": ["new source uncertainty", "shared note"],
+                "ocr_notes": ["legacy source uncertainty", "shared note"],
+            },
+            ["new source uncertainty", "shared note", "legacy source uncertainty"],
+        ),
+    ],
+)
+def test_load_snapshot_preserves_legacy_notes(
+    tmp_path: Path, sample_snapshot_path: Path, metadata: dict, expected: list[str]
+) -> None:
+    payload = yaml.safe_load(sample_snapshot_path.read_text(encoding="utf-8"))
+    payload.pop("normalization_notes", None)
+    payload.update(metadata)
+    path = tmp_path / "legacy_notes.yaml"
+    path.write_text(yaml.safe_dump(payload), encoding="utf-8")
+
+    assert load_snapshot(path).normalization_notes == expected

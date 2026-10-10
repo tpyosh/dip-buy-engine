@@ -57,7 +57,7 @@ from .utils import infer_target_month_start, month_key, percent, quantize, targe
 from .validation import (
     apply_candidate_validations,
     build_exposure_validation_warnings,
-    build_ocr_snapshot_validation_warnings,
+    build_snapshot_validation_warnings,
     build_validation_warnings,
 )
 
@@ -870,7 +870,7 @@ def compute_monthly(
     warnings.extend(build_exposure_validation_warnings(exposure_breakdown))
     warnings.extend(previous_snapshot_warnings)
     warnings.extend(
-        build_ocr_snapshot_validation_warnings(
+        build_snapshot_validation_warnings(
             snapshot,
             previous_snapshot=previous_snapshot,
             classification_audit=portfolio_analysis["classification_audit"],
@@ -1122,7 +1122,7 @@ def load_previous_snapshot_for_validation(
             PortfolioWarning(
                 code="previous_snapshot_validation_unavailable",
                 severity="warning",
-                message=f"Could not load previous snapshot for OCR continuity validation: {candidate_path} ({exc})",
+                message=f"Could not load previous snapshot for snapshot continuity validation: {candidate_path} ({exc})",
             )
         ]
 

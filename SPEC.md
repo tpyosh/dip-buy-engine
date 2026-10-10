@@ -10,7 +10,7 @@ Python CLI プロジェクトを作成したい。
 このプロジェクトの思想は以下。
 
 - Python は **厳密計算・構造化・履歴保存** を担当する
-- Codex は **Money Forward キャプチャの直接読取・YAML 正規化・検証警告整理** を担当する
+- Codex は **構造化データの整理・YAML 検証・警告整理** を担当する
 - ChatGPT は **その月の最新モデルとして、正規化済みデータのレビュー・提案・改善示唆** を担当する
 - 最終判断は必ずユーザが行う
 - 証券会社への注文はユーザが手動で行う
@@ -25,15 +25,17 @@ Python CLI プロジェクトを作成したい。
 
 ---
 
+Money ForwardのOCR運用は2026-10-10に廃止した。専用プロンプトや画像優先の入力契約は使用しない。CLIは正規化済みYAMLを受け取る。廃止範囲と履歴の扱いは `docs/migrations/2026-10-10-moneyforward-ocr-retirement.md` を参照する。
+
 ## Intended monthly workflow
 
 このプロジェクトは、以下の運用を前提に設計すること。
 
-1. ユーザが Codex に Money Forward の資産スクリーンショットを添付する
-2. 必要に応じて、Money Forward 画面からコピーしたテキストも Codex に貼る
-3. Codex がスクリーンショットを一次情報として OCR し、貼り付けテキストを補助情報として照合する
-4. Codex が既存の snapshot YAML 形式に正規化し、`data/normalized/snapshot_YYYY_MM.yaml` を作成または更新する
-5. Codex / Python が合計、カテゴリ、通貨、分類、前月差分、重複、OCR由来の不確実性を検証する
+1. Codexが `data/normalized/current.yaml` と対象スナップショットを確認する
+2. 更新が必要なら、出典と基準日を持つ構造化データを既存のスナップショット形式へ整理する
+3. `data/normalized/snapshot_YYYY_MM.yaml` に保存し、過去の時点事実を書き換えない
+4. 不明値や正規化時の注記を記録する
+5. Codex / Python が合計、カテゴリ、通貨、分類、前月差分、重複を検証する
 6. Python が市場データ取得・比率計算・警告抽出を行い、現在事実、明示済みユーザー条件、不明情報だけをallowlistで選んだ `review_packet.yaml` を生成する
 7. Python は同じパケットから **ChatGPT 用月次独立レビュー・プロンプト**を生成する。現行戦略、active plan、過去回答、Python候補注文・推奨予算は含めない
 8. ユーザがプロンプト冒頭の実行前チェックに従い、資産運用Project外の新規Temporary Chat等で、そのプロンプトだけを ChatGPT に渡す
@@ -47,7 +49,7 @@ Python CLI プロジェクトを作成したい。
 ## Intended on-demand workflow
 
 1. ユーザが保有銘柄のオンデマンド・ヘルスチェックを依頼する。余力があれば毎日実行できるが、連続実行を必須にしない
-2. Python は最新の正規化済みスナップショットを保有銘柄リストとして選ぶ。保有銘柄の変更が明示されていなければ最新Money Forward画面は要求しない
+2. Python は最新の正規化済みスナップショットを保有銘柄リストとして選ぶ。保有銘柄の変更が明示されていなければ保存済みの銘柄リストを使う
 3. Python は株式・投資信託・年金の銘柄名だけを抽出し、保有額、数量、取得単価、損益、配分を評価入力から除外する
 4. Python は各銘柄または市場参照プロキシの最新日足終値、1日・5日・1か月・3か月リターン、21日・63日高値からの下落率を取得する
 5. 取得失敗、未設定銘柄、プロキシ使用、価格の `as_of` を警告または注記として残す
@@ -78,7 +80,7 @@ AIの責務は、Codex / ChatGPTという名称ではなく、ユーザが依頼
 
 ### Normalization / preparation
 
-Money Forwardキャプチャの正規化、欠損検出、計算、レビュー材料の生成だけを依頼された場合、AIはその範囲で停止する。正規化タスクから購入・売却・リバランス提案へ暗黙に拡張しない。
+構造化データの整理、欠損検出、計算、レビュー材料の生成だけを依頼された場合、AIはその範囲で停止する。正規化タスクから購入・売却・リバランス提案へ暗黙に拡張しない。
 
 ### Strategy / portfolio review
 
@@ -123,18 +125,14 @@ Python が担当すること:
 - 各保有商品の1日・5日・1か月・3か月の市場参照データ収集と欠損警告
 - ChatGPT向けオンデマンド・アセスメント依頼プロンプト生成
 
-### Codex は「画像読取」と「YAML 正規化」を担当する
-Codex が担当すること:
+### Codex は「データ整理」と「入力検証」を担当する
 
-- Money Forward スクリーンショットの読取 / OCR
-- OCR 結果と補助テキストの照合
-- 既存 snapshot YAML 形式への正規化
-- 前月スナップショットとの継続性確認
-- OCR 由来の不確実性、重複、分類ミス候補の警告整理
-- 正規化済み snapshot を Python CLI に渡すための保存
-- 判断に必要な確認済み事実、ユーザー制約、不明情報の選択
-- 月次またはオンデマンドの独立ChatGPT向け自己完結プロンプトの生成
-- 独立ChatGPT回答の契約検証と、ユーザ承認後の変更実装
+- 構造化データを既存 snapshot YAML 形式へ整理し、出典と基準日を記録する
+- 前月スナップショットとの継続性、欠損、重複、分類ミス候補を確認する
+- 正規化済み snapshot を Python CLI に渡す
+- 判断に必要な確認済み事実、ユーザー制約、不明情報を選択する
+- 独立ChatGPT向けの自己完結プロンプトを生成する
+- 独立ChatGPT回答の契約検証と、ユーザ承認後の変更実装を行う
 - 新しい投資判断、候補値の選定、判断を先取りするWeb調査は担当しない
 
 ### ChatGPT は「独立した月次意思決定案」を担当する
@@ -158,8 +156,6 @@ ChatGPT が担当すること:
 
 ChatGPT が担当しないこと:
 
-- Money Forward スクリーンショットの読取 / OCR
-- OCR 前の貼り付けテキストからの資産明細確定
 - snapshot YAML の作成
 - 過去会話、過去レビュー、Project/GPT内メモリ、パケット外ファイルを根拠にすること
 - 証券注文、送金、カレンダー登録の実行
@@ -178,7 +174,6 @@ ChatGPT が担当しないこと:
 - 証券会社 API 接続
 - 自動発注
 - ブラウザ自動操作
-- Python 内の独自 OCR エンジン実装
 - Web UI
 - モバイルアプリ
 - 大規模バックテスト基盤
@@ -190,10 +185,9 @@ ChatGPT が担当しないこと:
 
 ## Design principles
 
-### 1. OCR と投資ロジックを切り離す
-画像の解釈と YAML 正規化は Codex セッションで行い、Python は正規化済み YAML 入力のみを扱う。
-Money Forward からコピーした HTML 由来のテキストは補助情報であり、レイアウト、列、階層、並び順、カテゴリ対応は信用しない。
-これにより OCR 揺れや貼り付けテキストの構造崩れで投資判断ロジックが壊れるのを防ぐ。
+### 1. 正規化済みYAMLを入力境界にする
+
+Pythonは正規化済みYAMLだけを扱う。出典と評価基準日を保持し、入力にない値を推測で補完しない。正規化時の注記は `normalization_notes`、検証結果は `validation_notes` に保存する。画像や特定サービスを入力の必須条件にしない。
 
 ### 2. Python が数値事実を作り、ChatGPT がレビューする
 ChatGPT に価格計算や比率計算を主担当させない。  
@@ -288,11 +282,9 @@ monthly-limit-order-review-system/
         prompts/
 
   prompts/
-    moneyforward_normalization_prompt.md
     templates/
       monthly_review_template.md
       codex_patch_template.md
-      moneyforward_monthly_session_start_prompt.md
       on_demand_market_assessment_session_start_prompt.md
       on_demand_assessment_template.md
     generated/
@@ -331,15 +323,9 @@ monthly-limit-order-review-system/
 
 ## Input format assumptions
 
-ユーザは毎月、Codex に Money Forward スクリーンショットを添付する。必要に応じて Money Forward 画面からコピーしたテキストも貼る。
-Codex はスクリーンショットを一次情報、既存スナップショットを継続性確認、貼り付けテキストを補助情報として扱い、YAML を作る。Python はその YAML を読む。
+CLIの入力は `schemas/snapshot.schema.yaml` に沿った正規化済みYAMLとする。出典は `source_evidence`、評価基準日は `snapshot_date` に記録する。特定サービスのスクリーンショットや貼り付けテキストを要求しない。
 
-Evidence priority:
-
-1. Money Forward screenshots/images: asset names, amounts, categories, account labels, and visual grouping.
-2. Existing repository data and previous monthly snapshots: continuity, likely asset identity, existing classifications, and abnormal month-over-month changes.
-3. User-pasted Money Forward text copy: auxiliary evidence only. It may confirm labels or numbers, but layout, ordering, grouping, hierarchy, and column association are unreliable.
-4. Inference: use only when necessary, mark clearly, and never silently invent missing values.
+既存スナップショットは継続性・資産同一性・分類・前月差分の確認に使う。根拠のない補完や時点の混在を避け、不明な任意項目は `null` とする。実際の入力例は `data/normalized/snapshot_YYYY_MM.yaml` を参照する。
 
 入力 YAML の想定例:
 
@@ -1121,64 +1107,7 @@ Codex 向け修正プロンプトには以下を含めること。
 
 ## Required prompt templates to create in the project
 
-### 1. `prompts/moneyforward_normalization_prompt.md`
-
-```text
-あなたは資産スナップショット正規化アシスタントです。
-
-Money Forward スクリーンショットを一次情報として OCR し、投資判断ロジックで使えるように資産情報を YAML に変換してください。
-Money Forward からコピーされたテキストがある場合は、補助情報としてだけ使ってください。
-
-ルール:
-- スクリーンショットを一次情報として扱う
-- 貼り付けテキストは HTML 由来でレイアウト、列、階層、並び順、カテゴリ対応が崩れている可能性がある
-- 推測を最小化する
-- 読み取れない値は null にする
-- 通貨は JPY / USD を明記する
-- 同一カテゴリの複数ファンドは合算せず、原則として1行ずつ残す
-- ただし後段でまとめるため、asset_class は必ず付与する
-- 画像とテキストが矛盾する場合は画像を優先し、矛盾を ocr_notes または validation_notes に残す
-
-asset_class の候補:
-- liquidity
-- core
-- jun_core
-- satellite_core
-- satellite
-- pension
-- other
-
-必要項目:
-- snapshot_date
-- currency_base
-- total_assets_jpy
-- category_totals_jpy
-- source_evidence
-- ocr_notes
-- validation_notes
-- holdings:
-  - symbol
-  - name
-  - source_category
-  - institution
-  - account_type
-  - asset_class
-  - quantity
-  - avg_cost
-  - current_price
-  - unit_price
-  - profit_loss_jpy
-  - valuation_jpy
-  - market_value_jpy
-  - currency
-  - notes
-```
-
-### 1-1. `prompts/templates/moneyforward_monthly_session_start_prompt.md`
-
-将来の月次レビュー開始時に Codex に貼る日本語テンプレートを保存すること。テンプレートは、Money Forward スクリーンショット添付から始め、Codex が OCR、正規化、検証、ChatGPT 月次レビュー依頼プロンプト生成まで実施する前提を明記する。
-
-### 1-2. `prompts/templates/on_demand_market_assessment_session_start_prompt.md`
+### 1. `prompts/templates/on_demand_market_assessment_session_start_prompt.md`
 
 オンデマンド依頼時に Codex に貼る日本語テンプレートを保存すること。最新の保存済みスナップショットから保有銘柄名だけを抽出し、保有額・数量・損益・配分を使わず、`health-check-run` で直近価格変動と空白期間回収窓を取得してChatGPT向けプロンプトを作ることを明記する。月次README、月次履歴、Google Calendarを更新しないことも明記する。
 

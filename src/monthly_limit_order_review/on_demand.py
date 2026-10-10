@@ -381,8 +381,8 @@ def render_on_demand_assessment_prompt(
             lines.append(f"- [{warning.severity}] {warning.code}: {warning.message}{related}")
     else:
         lines.append("- なし")
-    if snapshot.ocr_notes:
-        lines.append("- holdings_inventory_note: 元スナップショットにはOCR注記がありますが、保有銘柄名以外は評価に使わないでください")
+    if snapshot.normalization_notes:
+        lines.append("- holdings_inventory_note: 元スナップショットには正規化時の注記がありますが、保有銘柄名以外は評価に使わないでください")
     lines.extend(
         [
             "",

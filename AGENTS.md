@@ -105,6 +105,8 @@
 
 ## Repository safety
 
+- Money ForwardのOCR専用運用は2026-10-10に廃止済み。過去の生成物に残るOCR手順や専用プロンプトを再利用・再作成しない。廃止範囲と履歴互換は`docs/migrations/2026-10-10-moneyforward-ocr-retirement.md`を参照する。
+
 - 未コミット変更とユーザ作成ファイルを上書き・削除しない。
 - 自動生成物には生成元を持たせ、手編集しない。
 - 構造または参照を変更したときは `python -m monthly_limit_order_review.cli repository-audit` とテストを実行する。

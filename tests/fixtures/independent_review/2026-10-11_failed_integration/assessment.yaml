@@ -1,0 +1,497 @@
+schema_version: 1
+source_ref: response.md
+source_sha256: a1d59f48eb4ef5942ef02403dc88a6a16b4e9597fc2331d675c07f56f0f85065
+checks:
+  evidence_sufficiency:
+    verdict: fail
+    reason: 未確認の一覧はあるが、追加確認が行動を変えるかの充足判定がない。
+    evidence_lines:
+    - 224
+  decision_stage:
+    verdict: unknown
+    reason: 統合結果では判断を後日に回している。第1～10論点の全文は未提供で、判断工程の完了証拠は確認できない。
+    evidence_lines:
+    - 211
+  status_quo_comparison:
+    verdict: fail
+    reason: 比較が今後の作業として残り、一案を選ぶ比較が完了していない。
+    evidence_lines:
+    - 215
+  all_country_comparison:
+    verdict: pass
+    reason: 全世界株式100%と本人案の定性的な比較・限界は示している。
+    evidence_lines:
+    - 61
+  tax_and_concentration:
+    verdict: fail
+    reason: 税額と集中リスクの材料を示しているが、両者を比較した選択は後日に回している。
+    evidence_lines:
+    - 110
+  lifestyle_common_contributions:
+    verdict: pass
+    reason: 同一拠出と生活維持、追加投資を混同しない条件を示す。
+    evidence_lines:
+    - 166
+  preference_respected:
+    verdict: pass
+    reason: 効率の不確実性だけで20%を縮小しない。
+    evidence_lines:
+    - 71
+  preference_not_claimed_optimal:
+    verdict: pass
+    reason: 本人希望と現在の構成の最適性を区別する。
+    evidence_lines:
+    - 71
+  proposal_safety:
+    verdict: pass
+    reason: リポジトリも取引計画も変更していないと明記する。
+    evidence_lines:
+    - 288
+  integration_preserves_decisions:
+    verdict: unknown
+    reason: 先行10論点の全文がないため、判断の保存・削除のどちらも確認できない。
+    evidence_lines:
+    - 15
+  next_review:
+    verdict: pass
+    reason: 次回時期と早期見直し条件は存在する。
+    evidence_lines:
+    - 282
+  grounded_values:
+    verdict: unknown
+    reason: 外部の税率・費用・制度の真偽は本修正では検証しない。
+    evidence_lines:
+    - 243
+  next_step_actionability:
+    verdict: fail
+    reason: 情報確認の操作は示すが、確認結果別の投資行動の分岐を示さない。
+    evidence_lines:
+    - 200
+holdings:
+- symbol: '7203'
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 優先整理候補。 当面800株維持。相続時の取得費・相続税特例・期限を確認し、分散投資への転換と比較。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 89
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: PLTR
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 暫定維持。個別企業への集中とサテライト内の役割が未確定。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 102
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: CIBR
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 暫定維持。経費率0.58%、他ファンドとの重複と独自の投資効果を再評価。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 100
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: MSFT
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 暫定維持。全世界株式・S&P500・CIBRとの重複を考慮して、直接保有の必要性を再評価。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 103
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: URA
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 暫定維持。経費率0.69%、原子力・ウラン関連の役割を再評価。含み損だけを売却理由にしない。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 101
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: NISSEI_SOX_1
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 重点見直し候補。 当面全口数維持。半導体集中を減らす利益と、実現益課税・再投資費用を比較。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 99
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: NISSEI_SOX_2
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 暫定維持。集中リスクはあるが、売却時に復活するNISA総枠は時価でなく取得簿価相当。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 127
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: RAKUTEN_PLUS_ALL_COUNTRY_1
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 中核保有として維持する方向。記録数量と証券会社CSVに差があり、数量確認までは保有データの更新を確定しない。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 118
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: RAKUTEN_PLUS_ALL_COUNTRY_2
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 中核保有として維持する方向。長期の非課税運用と分散投資の目的に整合。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 128
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: RAKUTEN_PLUS_SP500
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 暫定維持。既存の全世界株式との重複を評価し、新規買増しは提案しない。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 104
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: EMAXIS_SLIM_SP500_1
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 暫定維持。同じく米国大型株への上乗せと課税負担を比較。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 105
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: EMAXIS_SLIM_SP500_2
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 暫定維持。全世界株式との重複があるが、NISA非課税保有の価値もあるため、現在の保有を直ちに入れ替えない。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 119
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: EMAXIS_SLIM_SP500_3
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 暫定維持。全世界株式との重複を認識し、追加購入は提案しない。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 129
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+- symbol: EMAXIS_SLIM_ALL_COUNTRY
+  decision_class: deferred
+  action: 当面保有し必要な確認後に再評価
+  rationale: 中核保有として維持する方向。 低費用・広域分散で目的と整合。記録上の含み損のみを理由とした売却は行わない。売却数量 `null`
+  comparison: null
+  timing: 2026年10月11日～2027年1月31日（情報確認期間）
+  next_step: 税務条件や配分を確認する
+  quantity: null
+  method: null
+  evidence_lines:
+  - 145
+  - 81
+  - 106
+  unknowns:
+  - field: quantity
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: decision
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+  - field: method
+    reason: 全件の売却数量・注文条件が未確定とされている
+    impact: implementation
+    materiality: null
+    owner: 本人
+    verification: 税務・配分・注文条件の確認
+    verify_by: null
+    branches: []
+majority_review:
+  symbols: []
+  check:
+    verdict: fail
+    reason: 全件nullの妥当性について個別の影響・条件別行動の再点検がない。
+    evidence_lines:
+    - 145

@@ -4,6 +4,7 @@ import shutil
 from argparse import Namespace
 from datetime import datetime
 from pathlib import Path
+from hashlib import sha256
 from zoneinfo import ZoneInfo
 
 import pytest
@@ -26,7 +27,8 @@ SNAPSHOT = "data/normalized/snapshot_2026_10.yaml"
 
 @pytest.fixture
 def review_repository(tmp_path: Path) -> Path:
-    refs = [SNAPSHOT, "prompts/templates/independent_review_template.md"]
+    refs = [SNAPSHOT, "prompts/templates/independent_review_template.md",
+            "prompts/workflows/independent_review.md", "src/monthly_limit_order_review/independent_review.py"]
     for pointer_ref, path_key in [
         ("financial/current.yaml", "active_record_path"),
         ("holdings/current.yaml", "active_record_path"),
@@ -182,3 +184,46 @@ def test_duplicate_stable_ids_are_rejected(review_repository: Path) -> None:
     write_yaml(root / SNAPSHOT, raw)
     with pytest.raises(ValueError, match="Duplicate holding symbols"):
         build(root)
+
+
+def test_decision_stage_cannot_disappear_between_research_and_integration(review_repository: Path) -> None:
+    root = review_repository
+    template = (root / "prompts/templates/independent_review_template.md").read_text()
+    workflow = (root / "prompts/workflows/independent_review.md").read_text()
+    prompt = render_independent_review(build(root), template, workflow)
+    stages = ("research", "sufficiency", "decision", "integration", "documentation")
+    offsets = [prompt.index(f"<!-- stage:{stage} -->") for stage in stages]
+    assert offsets == sorted(offsets)
+    assert "判断工程を飛ばして統合を依頼された場合" in prompt
+    assert "推論や条件付き試算を禁止していません" in prompt
+    assert "論点数は固定しません" in prompt
+    assert "本人承認待ちは提案を作らない理由になりません" in prompt
+    assert "nullごとに" in prompt
+    assert "該当する全件の比較理由・重要性・分岐・解除条件を再検証" in prompt
+    for stage in stages:
+        with pytest.raises(ValueError, match="stages"):
+            render_independent_review(build(root), template, workflow.replace(f"<!-- stage:{stage} -->", ""))
+    with pytest.raises(ValueError, match="REVIEW_WORKFLOW"):
+        render_independent_review(build(root), template.replace("{{REVIEW_WORKFLOW}}", ""), workflow)
+
+
+def test_manifest_identifies_exact_generation_assets(review_repository: Path) -> None:
+    root = review_repository
+    output = write_independent_review(root, root / SNAPSHOT)
+    manifest = load_yaml(output.parent / "generation_manifest.yaml")
+    assert manifest["workflow_id"] == "independent_review_decision_v2"
+    assert manifest["prompt_sha256"] == sha256(output.read_bytes()).hexdigest()
+    for source in manifest["sources"]:
+        assert source["sha256"] == sha256((root / source["source_ref"]).read_bytes()).hexdigest()
+    assert "prompts/workflows/independent_review.md" in {s["source_ref"] for s in manifest["sources"]}
+
+
+def test_generation_does_not_modify_financial_truth_or_history(review_repository: Path) -> None:
+    root = review_repository
+    for ref in ("transactions/ledger.yaml", "brokers/rakuten/us_equity_sell/current.yaml", "plans/2026/user-plan.yaml"):
+        path = root / ref
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text("user_owned: unchanged\n")
+    before = {str(p.relative_to(root)): p.read_bytes() for p in root.rglob("*") if p.is_file()}
+    write_independent_review(root, root / SNAPSHOT)
+    assert all((root / ref).read_bytes() == content for ref, content in before.items())

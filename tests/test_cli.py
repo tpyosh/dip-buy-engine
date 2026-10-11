@@ -106,6 +106,10 @@ def test_generate_review_prompt_writes_only_generated_reports(
         (ROOT / "prompts/templates/independent_review_template.md").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
+    for ref in ("prompts/workflows/independent_review.md", "src/monthly_limit_order_review/independent_review.py"):
+        destination = project_root / ref
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes((ROOT / ref).read_bytes())
     snapshot_path = project_root / "snapshot.yaml"
     snapshot_payload = load_yaml(ROOT / "data/normalized/snapshot_2026_04.yaml")
     for holding in snapshot_payload["holdings"]:

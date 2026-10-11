@@ -8,9 +8,9 @@
 .venv/bin/python -m monthly_limit_order_review.cli generate-review-prompt --snapshot data/normalized/snapshot_2026_10.yaml
 ```
 
-表示された新しい出力先の`review_request.md`全体を、資産運用Project外の新規Temporary Chatへコピー＆ペーストしてください。A・本文完結型なので添付は不要です。ChatGPTが最初の一論点を選び、その後も同じ会話で一工程ずつ依頼します。統合後に返される自己完結したCodex向け文書化依頼を、そのままCodexへ渡してください。
+表示された新しい出力先の`review_request.md`全体を、資産運用Project外の新規Temporary Chatへコピー＆ペーストしてください。A・本文完結型なので添付は不要です。ChatGPTが最初の一論点を選び、その後は調査 → 証拠の充足判定 → 投資判断・行動設計 → 統合 → Codex文書化を、同じ会話で一工程ずつ明示的に依頼します。統合前に比較して一案を選ぶ工程を省略しません。統合後に返される自己完結したCodex向け文書化依頼を、そのままCodexへ渡してください。
 
-`monthly-run`も同じ新方式を生成します。市場価格の先回り収集や旧計画からの残高投影、候補注文計算は行いません。出力は`reports/generated/on_demand/YYYY/<timestamp>_independent_review/`の依頼本文、`review_input.yaml`、状態説明`README.md`です。旧生成物を上書きしません。
+`monthly-run`も同じ新方式を生成します。市場価格の先回り収集や旧計画からの残高投影、候補注文計算は行いません。出力は`reports/generated/on_demand/YYYY/<timestamp>_independent_review/`の依頼本文、`review_input.yaml`、状態説明`README.md`、生成元のSHA-256を持つ`generation_manifest.yaml`です。旧生成物を上書きしません。工程定義は[prompts/workflows/independent_review.md](prompts/workflows/independent_review.md)、回答の品質評価は[docs/independent-review-quality.md](docs/independent-review-quality.md)を参照してください。
 
 以下に残る月次計算、候補値との差分、`review_response.yaml`取込、旧パケットの説明は履歴互換用です。新規レビューにその型を要求せず、投資判断や運用の正本にも使いません。新提案を承認するまでは`strategy/current.yaml`が指す方針を維持します。
 

@@ -46,6 +46,7 @@ from .repository_records import (
     raise_for_repository_errors,
 )
 from .review_parser import parse_review_feedback
+from .review_quality import review_quality_issues
 from .rules import calculate_sox_buy_signal
 from .snapshot_loader import load_snapshot
 from .storage import default_output_paths, load_yaml, on_demand_output_paths, read_text, write_text, write_yaml
@@ -86,6 +87,12 @@ def build_parser() -> argparse.ArgumentParser:
     review_parser.add_argument("--snapshot", required=True, help="Path to normalized snapshot YAML")
     review_parser.add_argument("--output", required=False, help="Path to output markdown prompt")
     review_parser.set_defaults(func=handle_generate_review_prompt)
+
+    quality_parser = subparsers.add_parser(
+        "check-review-quality", help="Check evidence-backed Codex quality annotations without modifying records")
+    quality_parser.add_argument("--assessment", required=True, help="Codex internal quality assessment YAML")
+    quality_parser.add_argument("--review-input", required=True, help="Original generated review_input.yaml")
+    quality_parser.set_defaults(func=handle_check_review_quality)
 
     ingest_parser = subparsers.add_parser("ingest-review", help="Ingest a ChatGPT review text file")
     ingest_parser.add_argument("--snapshot", required=True, help="Path to normalized snapshot YAML")
@@ -255,6 +262,16 @@ def handle_generate_review_prompt(args: argparse.Namespace) -> int:
         raise
     LOGGER.info("Saved fresh independent review request to %s", output_path)
     return 0
+
+
+def handle_check_review_quality(args: argparse.Namespace) -> int:
+    assessment_path = Path(args.assessment).resolve()
+    assessment = load_yaml(assessment_path)
+    source = (assessment_path.parent / assessment["source_ref"]).read_text()
+    issues = review_quality_issues(assessment, load_yaml(Path(args.review_input)), source)
+    print(json.dumps({"status": "fail" if issues else "pass", "issues": issues,
+                      "scope": "annotation_contract_only"}, ensure_ascii=False, indent=2))
+    return 2 if issues else 0
 
 
 def handle_ingest_review(args: argparse.Namespace) -> int:

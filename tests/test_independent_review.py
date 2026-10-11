@@ -75,6 +75,7 @@ def test_prior_advice_and_execution_changes_do_not_change_review_input(review_re
     strategy = load_yaml(root / strategy_ref)
     strategy["approval_ref"] = "decisions/POISON_OLD_REVIEW.md"
     strategy["legacy_review_summary"] = "POISON_OLD_RECOMMENDATION"
+    strategy["purpose"]["enjoyment_preference"] = "POISON_SUPERSEDED_USER_PREFERENCE"
     strategy["allocation"]["target_groups"]["active_hobby"]["target_components"] = {"POISON_OLD_SELECTION": 1}
     write_yaml(root / strategy_ref, strategy)
     metadata_ref = load_yaml(root / "holdings/current.yaml")["active_record_path"]
@@ -104,6 +105,28 @@ def test_unknowns_and_conflicting_observations_are_preserved(review_repository: 
     assert cash["market_value_jpy"] == 2245005
     assert cash["broker_observation"]["jpy_deposit_jpy"] == 0
     assert "qty" not in fund
+
+
+def test_current_user_preferences_survive_without_importing_operating_allocations(review_repository: Path) -> None:
+    root = review_repository
+    financial_ref = load_yaml(root / "financial/current.yaml")["active_record_path"]
+    financial = load_yaml(root / financial_ref)
+    goal = financial["strategic_profile"]["objective_configuration"]["objective_models"]["maximize_terminal_wealth"]
+    payload = build(root)
+    objective = payload["financial_facts"]["values"]["confirmed_investment_objective"]
+    assert objective["lifestyle_constraints"] == goal["lifestyle_constraints"]
+    assert "投資資産の20%程度" in " ".join(objective["lifestyle_constraints"])
+    assert "今回の承認範囲はこの比率を計画前提とすることに限る" in " ".join(objective["lifestyle_constraints"])
+    assert "測定タイミング・許容変動幅は未確認" in " ".join(objective["lifestyle_constraints"])
+    assert payload["financial_facts"]["source_ref"] == financial_ref
+    assert payload["financial_facts"]["stable_id"] == financial["record_id"]
+    assert payload["financial_facts"]["confirmed_at"] == "2026-10-11"
+    assert "target_components" not in yaml.safe_dump(payload)
+    assert "absolute_max_pct" not in yaml.safe_dump(payload)
+    goal["lifestyle_constraints"].append("NEW_USER_PREFERENCE_FROM_SSOT")
+    write_yaml(root / financial_ref, financial)
+    updated = build(root)
+    assert "NEW_USER_PREFERENCE_FROM_SSOT" in updated["financial_facts"]["values"]["confirmed_investment_objective"]["lifestyle_constraints"]
 
 
 def test_missing_account_blocks_all_artifacts(review_repository: Path) -> None:

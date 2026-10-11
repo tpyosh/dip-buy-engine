@@ -90,6 +90,7 @@ def test_generate_review_prompt_writes_only_generated_reports(
             ROOT / "financial/versions/2026-08-09-v2.yaml",
             ROOT / "financial/versions/2026-08-10-v3.yaml",
             ROOT / "financial/versions/2026-08-29-v4.yaml",
+            ROOT / "financial/versions/2026-10-11-v5.yaml",
             ROOT / "holdings/current.yaml",
             ROOT / "holdings/versions/2026-08-09.yaml",
             ROOT / "holdings/versions/2026-08-09-v2.yaml",

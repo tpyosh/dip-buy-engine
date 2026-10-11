@@ -9,6 +9,8 @@
 
 収入や支出の変更時はこのMarkdownへ数値を追記せず、新しい版管理YAMLを作成して `financial/current.yaml` のポインタを更新します。
 
+本人が選ぶ投資上の生活・嗜好条件も、同じ版管理YAMLの`strategic_profile.objective_configuration.objective_models.maximize_terminal_wealth.lifestyle_constraints`を正本とします。嗜好だけの更新では金額・口座・既存の根拠日付を維持し、追加した意向の確認日と適用範囲を記録します。これは戦略・注文計画の変更承認ではありません。
+
 ## Scope
 
 - 対象者: 夫個人

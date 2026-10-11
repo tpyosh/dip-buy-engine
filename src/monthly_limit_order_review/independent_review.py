@@ -159,6 +159,7 @@ def build_independent_review_input(
             "leverage_allowed": investment_goal.get("leverage_allowed"),
             "confirmed_investment_objective": select(investment_goal, (
                 "target_age", "target_date", "optimization_target", "profit_definition", "return_basis", "statistic",
+                "lifestyle_constraints",
             )),
         }),
         "user_directions": source_record(direction_source, direction_record, direction_values),

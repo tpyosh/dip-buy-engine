@@ -21,7 +21,7 @@ def test_financial_values_are_loaded_from_versioned_ssot() -> None:
     record = context["record"]
     regular = record["cash_flow"]["regular_month"]
 
-    assert context["source_path"] == "financial/versions/2026-08-29-v4.yaml"
+    assert context["source_path"] == "financial/versions/2026-10-11-v5.yaml"
     assert regular["essential_expenses_jpy"]["value"] == 250_000
     assert regular["income_after_tax_social_insurance_mortgage_ideco_jpy"][
         "is_expense_value"
@@ -61,6 +61,19 @@ def test_holding_metadata_overlays_accounts_without_rewriting_snapshot() -> None
     assert accounts["NISSEI_SOX_2"] == "NISA成長投資枠"
     assert accounts["9444"] == "特定口座（源泉徴収あり）"
     assert accounts["2353"] == "一般口座"
+
+
+def test_preference_only_version_preserves_all_previous_financial_facts() -> None:
+    previous = load_yaml(ROOT / "financial/versions/2026-08-29-v4.yaml")
+    current = load_financial_context(ROOT)["record"]
+    for field in ("record_id", "confirmed_at"):
+        current[field] = previous[field]
+    current_goal = current["strategic_profile"]["objective_configuration"]["objective_models"]["maximize_terminal_wealth"]
+    previous_goal = previous["strategic_profile"]["objective_configuration"]["objective_models"]["maximize_terminal_wealth"]
+    assert current_goal["lifestyle_constraints"][:len(previous_goal["lifestyle_constraints"])] == previous_goal["lifestyle_constraints"]
+    assert len(current_goal["lifestyle_constraints"]) > len(previous_goal["lifestyle_constraints"])
+    current_goal["lifestyle_constraints"] = previous_goal["lifestyle_constraints"]
+    assert current == previous
 
 
 def test_holding_intent_and_execution_answers_are_machine_readable() -> None:

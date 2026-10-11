@@ -1,5 +1,7 @@
 # Record schemas
 
+新規包括レビューの入力契約は`independent-review-input.schema.yaml`です。現在の事実とユーザーの方向性を検証し、以前の配分・仮説・計画・評価を入力の正本へ含めません。ChatGPTの回答型は固定せず、統合後の自己完結したCodex向け文書化依頼を受け取ります。以下の`review-packet.schema.yaml`と月次回答スキーマの説明は履歴互換用です。ヘルスチェック・家計・口座・取引・税務等のスキーマは継続使用します。
+
 このディレクトリは、手書き・外部入力レコードと、ChatGPTへ渡す閉じたレビュー・パケットの必須項目をJSON Schema形式で定義します。
 
 実行時の詳細な整合性は `repository-audit` と各ローダーでも検証します。戦略、計画、スナップショット、取引、レトロスペクティブに加え、`review-packet.schema.yaml` は生成物 `review_packet.yaml` のallowlist境界、生成前ブロック、対話フェーズ、出力契約を定義します。`monthly-review-response.schema.yaml` と `health-check-response.schema.yaml` はChatGPTからCodexへ渡すYAMLファイルを定義します。月次スキーマは生成時にclosed review packetの `output_contract.inline_response_schema` へ完全インライン化し、独立レビュー実行時はパケット内コピーだけを出力契約として使います。月次回答の取り込み時は、必須フィールド、型、enum、配列構造、null許可、数値範囲をJSON Schemaで検証し、ID一意性、有限候補集合、単一選択、feasibility、配分算式、対象coverage、資金源照合、売却明細照合、戦略から実装への順序を `semantic_validation_checks` とローダーで別途検証します。月次YAMLには、現金要件の導出状態、売買ごとの根拠監査、入力・テンプレート不足を返す `prompt_feedback` を含めます。confirmedの現金条件との不一致や、未確認仮定に依存する `executable` 提案は金額にかかわらず取り込み時に拒否します。生成パケットとAI回答は入力事実の正本ではありません。

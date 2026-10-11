@@ -1,5 +1,7 @@
 # Generated reports
 
+新規の独立レビューは`generate-review-prompt`で`reports/generated/on_demand/YYYY/<timestamp>_independent_review/`へ保存します。`review_request.md`は本文完結型の配布媒体、`review_input.yaml`は生成時入力、`README.md`は状態説明です。共通ルールは`docs/independent-review.md`を参照してください。以下の月次ReviewPacket・回答スキーマ関連の説明は履歴互換用です。
+
 `reports/generated/` は、計算結果、allowlist型レビュー・パケット、レビュー依頼、レビュー構造化結果、提案差分、カレンダードラフトなどの自動生成物を置く領域です。
 
 Money ForwardのOCR運用は2026-10-10に廃止しました。過去の生成物に残るOCR手順・専用プロンプトへの参照は再利用しません。[廃止記録](../docs/migrations/2026-10-10-moneyforward-ocr-retirement.md)を参照してください。

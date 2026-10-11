@@ -1,5 +1,20 @@
 # Monthly Limit Order Review System
 
+## 現在の独立レビューの使い方
+
+現在のスナップショットとユーザーの目的・生活制約・趣味の意向から、毎回新規の独立ChatGPTに判断を依頼します。承認済みの配分や銘柄も必要なら再提案を認めます。過去レビュー、投資仮説、実行計画、タスク進捗、Codexの評価は渡しません。共通ルールは[独立レビューの設計](docs/independent-review.md)を参照してください。
+
+```sh
+.venv/bin/python -m monthly_limit_order_review.cli generate-review-prompt --snapshot data/normalized/snapshot_2026_10.yaml
+```
+
+表示された新しい出力先の`review_request.md`全体を、資産運用Project外の新規Temporary Chatへコピー＆ペーストしてください。A・本文完結型なので添付は不要です。ChatGPTが最初の一論点を選び、その後も同じ会話で一工程ずつ依頼します。統合後に返される自己完結したCodex向け文書化依頼を、そのままCodexへ渡してください。
+
+`monthly-run`も同じ新方式を生成します。市場価格の先回り収集や旧計画からの残高投影、候補注文計算は行いません。出力は`reports/generated/on_demand/YYYY/<timestamp>_independent_review/`の依頼本文、`review_input.yaml`、状態説明`README.md`です。旧生成物を上書きしません。
+
+以下に残る月次計算、候補値との差分、`review_response.yaml`取込、旧パケットの説明は履歴互換用です。新規レビューにその型を要求せず、投資判断や運用の正本にも使いません。新提案を承認するまでは`strategy/current.yaml`が指す方針を維持します。
+
+
 正規化済みの資産スナップショット YAML を入力にして、ChatGPT 向けの月次レビュー用プロンプト、株式・投資信託・年金のオンデマンド・アセスメント依頼プロンプト、Codex 向けの修正プロンプトを生成する Python CLI です。
 
 Codex が構造化データの整理と検証、Python が数値計算と履歴保存、ChatGPT が独立レビューと改善提案を担当し、最終判断と発注はユーザが手動で行います。
@@ -16,7 +31,7 @@ Money ForwardのOCR運用は2026-10-10に廃止しました。専用プロンプ
 
 収入、支出、ボーナス、生活防衛資金、ローンなど変わり得る家計値は [financial/current.yaml](/Users/tappeiyoshida/projects/stock/financial/current.yaml)、口座区分、売却可否、保有意図は [holdings/current.yaml](/Users/tappeiyoshida/projects/stock/holdings/current.yaml) が指す版管理YAMLを正とします。これらの値をMarkdown、プロンプト、Pythonコードへ重複して固定しません。
 
-月次CLIはこの戦略と計画をCodex側の計算・履歴整合確認に使い、旧 `config/portfolio_policy.yaml` のバケット目標値を現在方針として使用しません。ChatGPT向け独立レビューでは、レビュー目的に応じて承認済み政策と判断対象を分離し、運用レビューで承認済みの比率を未知情報へ戻しません。ユーザが明示承認したレビュー制約は、その承認記録を出典にallowlistへ加えます。旧目標値は過去計算と単体テストの再現用fallbackとしてのみ残し、生成済みの過去レビューは書き換えません。承認結果へ接続済みの生成ディレクトリには状態説明を置き、過去依頼を最新依頼として再利用しません。
+Codexはこの戦略と計画を内部の整合確認に使います。新規の独立レビューには目的・生活制約・趣味の意向だけを選び、承認済み配分や以前の推奨理由を固定解として送りません。現行方針は未設定扱いに戻さず、新たな見直し提案の承認までは運用上の正本として維持します。旧設定は過去計算・回答の再現用に残し、生成済みの過去レビューは書き換えません。supersededの依頼や承認結果へ接続済みの過去依頼は再利用しません。
 
 ## Human Approval and Task-Scope Gate
 
@@ -301,7 +316,7 @@ ChatGPTから受け取ったCodex向けYAMLは、全銘柄の評価が揃って�
 
 AIのブランド名を承認境界にせず、`strategy/current.yaml`、active plan、基準日時点のデータ、ユーザが明示したタスク範囲で役割を決めます。
 
-月次レビュー外で新しい資産配分、比率、閾値、銘柄選択、売買判断が必要になった場合、Codexは自分で調査して結論を出しません。確認済み事実、ユーザー制約、不明情報、判断課題だけを `on-demand-decision-prompt` 用パケットへまとめ、資産運用Project外の新規Temporary ChatでChatGPTのセカンドオピニオンを取得するようユーザへ依頼します。Codexの候補値や既存設定はアンカーになるため除外します。
+新しい投資レビューは時期にかかわらず、冒頭の`generate-review-prompt`経路を使います。以下の個別判断パケットの生成・検証コマンドは過去回答との互換用です。Codexは判断や根拠調査を先回りしません。
 
 ```bash
 .venv/bin/python -m monthly_limit_order_review.cli on-demand-decision-prompt \
@@ -328,7 +343,7 @@ python -m pip install -r requirements.txt
 python -m pip install -e .
 ```
 
-## Quick Start (ユーザ向け)
+## 旧月次処理のQuick Start（履歴互換）
 
 1. リポジトリの参照整合性を検証します
 

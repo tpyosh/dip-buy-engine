@@ -101,8 +101,8 @@ def test_generate_review_prompt_writes_only_generated_reports(
     ]:
         destination = project_root / path.relative_to(ROOT)
         destination.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
-    (project_root / "prompts/templates/monthly_review_template.md").write_text(
-        (ROOT / "prompts/templates/monthly_review_template.md").read_text(encoding="utf-8"),
+    (project_root / "prompts/templates/independent_review_template.md").write_text(
+        (ROOT / "prompts/templates/independent_review_template.md").read_text(encoding="utf-8"),
         encoding="utf-8",
     )
     snapshot_path = project_root / "snapshot.yaml"
@@ -117,47 +117,30 @@ def test_generate_review_prompt_writes_only_generated_reports(
             holding["account_type"] = "特定口座（源泉徴収あり）"
     write_yaml(snapshot_path, snapshot_payload)
 
-    def fake_references(requests: dict[str, dict[str, str]]) -> list[MarketReference]:
-        references: list[MarketReference] = []
-        for symbol, params in requests.items():
-            references.append(
-                MarketReference(
-                    symbol=symbol,
-                    yfinance_symbol=params["yfinance_symbol"],
-                    current_price=Decimal("100"),
-                    mean_close_20d=Decimal("100"),
-                    recent_high_21d=Decimal("110"),
-                    recent_high_63d=Decimal("120"),
-                    currency=params["currency"],
-                    as_of=date(2026, 3, 29),
-                    prior_close_21d=Decimal("105"),
-                    prior_close_63d=Decimal("115"),
-                )
-            )
-        return references
+    def forbidden_old_pipeline(*args, **kwargs):
+        raise AssertionError("Fresh reviews must not fetch markets or compute old recommendations")
 
     monkeypatch.setattr("monthly_limit_order_review.cli.get_project_root", lambda: project_root)
-    monkeypatch.setattr("monthly_limit_order_review.cli.fetch_market_references", fake_references)
+    monkeypatch.setattr("monthly_limit_order_review.cli.fetch_market_references", forbidden_old_pipeline)
+    monkeypatch.setattr("monthly_limit_order_review.cli.compute_monthly", forbidden_old_pipeline)
 
     result = handle_generate_review_prompt(Namespace(snapshot=str(snapshot_path), output=None, verbose=False))
 
     assert result == 0
     assert readme_path.read_text(encoding="utf-8") == "# Title\n\n## 目的\nbody\n"
-    assert (project_root / "reports/generated/monthly/2026_04/computation.yaml").exists()
-    packet_path = project_root / "reports/generated/monthly/2026_04/review_packet.yaml"
-    prompt_path = project_root / "reports/generated/monthly/2026_04/review_request.md"
-    assert packet_path.exists()
-    assert prompt_path.exists()
+    packet_paths = list((project_root / "reports/generated/on_demand").glob("*/*/review_input.yaml"))
+    assert len(packet_paths) == 1
+    packet_path = packet_paths[0]
+    prompt_path = packet_path.with_name("review_request.md")
     packet = load_yaml(packet_path)
     prompt = prompt_path.read_text(encoding="utf-8")
-    assert packet["packet_type"] == "on_demand_independent_review"
-    assert packet["review_cadence"] == "on_demand"
-    assert packet["review_target_month"] == "2026_04"
-    assert "# ChatGPT向けオンデマンド包括レビュー" in prompt
-    assert "## 1. モードと対話フェーズ" in prompt
-    assert "generation_status: ready" in prompt
+    assert packet["packet_type"] == "fresh_snapshot_independent_review"
+    assert packet["portfolio_snapshot"]["as_of"] == snapshot_payload["snapshot_date"]
+    assert "一番重要と判断する一論点だけ" in prompt
+    assert "コピー＆ペースト" in prompt
     assert "active_strategy" not in prompt
     assert "candidate_orders" not in prompt
+    assert not (project_root / "reports/generated/monthly").exists()
     assert not (project_root / "docs/portfolio_allocation_latest.svg").exists()
 
 

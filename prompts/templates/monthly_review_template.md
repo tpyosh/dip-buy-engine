@@ -1,5 +1,7 @@
 # ChatGPT向けオンデマンド包括レビュー
 
+<!-- 履歴互換専用。新規包括レビューは independent_review_template.md を使用する。 -->
+
 - レビュー依頼時点: {{REVIEW_REQUESTED_AT}}
 - ポートフォリオ・スナップショット基準日: {{PORTFOLIO_SNAPSHOT_AS_OF}}
 - 計画コンテキスト月: {{REVIEW_TARGET_MONTH}}

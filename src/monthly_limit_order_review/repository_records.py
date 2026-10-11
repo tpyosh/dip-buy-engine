@@ -141,6 +141,9 @@ def audit_repository(project_root: Path) -> list[dict[str, str]]:
         "schemas/holding-metadata.schema.yaml",
         "schemas/independent-decision-request.schema.yaml",
         "schemas/independent-decision-response.schema.yaml",
+        "schemas/independent-review-input.schema.yaml",
+        "docs/independent-review.md",
+        "prompts/templates/independent_review_template.md",
     ]
     for relative_path in required_paths:
         if not (root / relative_path).exists():

@@ -1,0 +1,57 @@
+$schema: https://json-schema.org/draft/2020-12/schema
+title: Fresh snapshot independent review input
+type: object
+additionalProperties: false
+required: [schema_version, packet_type, requested_at, research_cutoff_at, portfolio_snapshot, financial_facts, user_directions, holding_user_intents, observed_recurring_settings, account_type_gate, data_quality_notes]
+properties:
+  schema_version: {const: 1}
+  packet_type: {const: fresh_snapshot_independent_review}
+  requested_at: {type: string}
+  research_cutoff_at: {type: string}
+  portfolio_snapshot:
+    type: object
+    additionalProperties: false
+    required: [source_ref, stable_id, as_of, currency_base, total_assets_jpy, category_totals_jpy, observation_basis, holdings]
+    properties:
+      source_ref: {type: string}
+      stable_id: {type: string}
+      as_of: {type: string}
+      currency_base: {type: string}
+      total_assets_jpy: {type: number}
+      category_totals_jpy: {type: object}
+      observation_basis: {type: object}
+      holdings:
+        type: array
+        items:
+          type: object
+          required: [symbol, name, account_type, market_value_jpy, currency]
+          properties:
+            symbol: {type: string}
+            name: {type: string}
+            account_type: {type: [string, 'null']}
+            market_value_jpy: {type: number}
+            currency: {type: string}
+  financial_facts: {$ref: '#/$defs/source_record'}
+  user_directions: {$ref: '#/$defs/source_record'}
+  holding_user_intents: {$ref: '#/$defs/source_record'}
+  observed_recurring_settings: {$ref: '#/$defs/source_record'}
+  account_type_gate:
+    type: object
+    additionalProperties: false
+    required: [status, checked_holding_count]
+    properties:
+      status: {const: complete}
+      checked_holding_count: {type: integer, minimum: 0}
+  data_quality_notes:
+    type: array
+    items: {type: string}
+$defs:
+  source_record:
+    type: object
+    additionalProperties: false
+    required: [source_ref, stable_id, confirmed_at, values]
+    properties:
+      source_ref: {type: string}
+      stable_id: {type: [string, 'null']}
+      confirmed_at: {type: [string, 'null']}
+      values: {type: object}

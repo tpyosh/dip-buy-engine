@@ -26,6 +26,7 @@ from .independent_decision import (
     render_independent_decision_prompt,
     validate_independent_decision_request,
 )
+from .independent_review import write_independent_review
 from .market_data import fetch_intraday_quote, fetch_market_references
 from .models import MonthlyComputation, PortfolioSnapshot, PortfolioWarning
 from .on_demand import (
@@ -36,7 +37,6 @@ from .on_demand import (
     render_on_demand_assessment_prompt,
 )
 from .portfolio_metrics import build_core_buy_materials, compute_portfolio_metrics, suggest_core_proxy_symbol
-from .prompt_renderer import render_chatgpt_prompt, render_review_generation_blocker
 from .review_packet import build_review_packet
 from .review_readiness import build_account_type_gate, require_complete_account_type_gate
 from .repository_records import (
@@ -108,7 +108,7 @@ def build_parser() -> argparse.ArgumentParser:
 
     decision_parser = subparsers.add_parser(
         "on-demand-decision-prompt",
-        help="Generate a self-contained independent ChatGPT decision prompt",
+        help="Legacy compatibility: render an existing independent decision request",
     )
     decision_parser.add_argument(
         "--request",
@@ -241,36 +241,19 @@ def handle_intraday_quote(args: argparse.Namespace) -> int:
 def handle_generate_review_prompt(args: argparse.Namespace) -> int:
     project_root = get_project_root()
     snapshot_path = Path(args.snapshot)
-    computation = compute_monthly(
-        snapshot_path,
-        project_root=project_root,
-        project_current_state=True,
-    )
-    paths = default_output_paths(project_root, target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path))
-    output_path = Path(args.output) if args.output else paths["review_prompt"]
-    template_text = read_text(project_root / "prompts/templates/monthly_review_template.md")
-    review_packet = build_current_review_packet(computation, project_root)
-    write_yaml(paths["computation"], computation)
-    write_yaml(paths["review_packet"], review_packet)
-    if review_packet.generation_status != "ready":
-        blocker = render_review_generation_blocker(review_packet)
-        write_text(output_path, blocker)
-        write_text(paths["review_prompt_history"], blocker)
-        LOGGER.error(
-            "Review prompt generation blocked: %s",
-            review_packet.generation_status,
-        )
-        return 2
-    prompt = render_chatgpt_prompt(
-        computation,
-        template_text,
-        review_packet=review_packet,
-    )
-    write_text(output_path, prompt)
-    write_text(paths["review_prompt_history"], prompt)
-    LOGGER.info("Saved computation to %s", paths["computation"])
-    LOGGER.info("Saved closed review packet to %s", paths["review_packet"])
-    LOGGER.info("Saved review prompt to %s", output_path)
+    if not snapshot_path.is_absolute():
+        snapshot_path = project_root / snapshot_path
+    output = Path(args.output) if getattr(args, "output", None) else None
+    if output is not None and not output.is_absolute():
+        output = project_root / output
+    try:
+        output_path = write_independent_review(project_root, snapshot_path, output=output)
+    except ValueError as exc:
+        if "blocked_missing_account_types" in str(exc):
+            LOGGER.error("%s", exc)
+            return 2
+        raise
+    LOGGER.info("Saved fresh independent review request to %s", output_path)
     return 0
 
 
@@ -450,38 +433,8 @@ def load_review_input(
 
 
 def handle_monthly_run(args: argparse.Namespace) -> int:
-    project_root = get_project_root()
-    snapshot_path = Path(args.snapshot)
-    computation = compute_monthly(
-        snapshot_path,
-        project_root=project_root,
-        project_current_state=True,
-    )
-    paths = default_output_paths(project_root, target_month_key(computation.snapshot.snapshot_date, snapshot_path=snapshot_path))
-    template_text = read_text(project_root / "prompts/templates/monthly_review_template.md")
-    review_packet = build_current_review_packet(computation, project_root)
-    write_yaml(paths["computation"], computation)
-    write_yaml(paths["review_packet"], review_packet)
-    if review_packet.generation_status != "ready":
-        blocker = render_review_generation_blocker(review_packet)
-        write_text(paths["review_prompt"], blocker)
-        write_text(paths["review_prompt_history"], blocker)
-        LOGGER.error(
-            "On-demand review prompt generation blocked: %s",
-            review_packet.generation_status,
-        )
-        return 2
-    prompt = render_chatgpt_prompt(
-        computation,
-        template_text,
-        review_packet=review_packet,
-    )
-    write_text(paths["review_prompt"], prompt)
-    write_text(paths["review_prompt_history"], prompt)
-    LOGGER.info("Saved computation to %s", paths["computation"])
-    LOGGER.info("Saved closed review packet to %s", paths["review_packet"])
-    LOGGER.info("Saved review prompt to %s", paths["review_prompt"])
-    return 0
+    """Keep the old command name as an alias for fresh independent reviews."""
+    return handle_generate_review_prompt(args)
 
 
 def build_current_review_packet(

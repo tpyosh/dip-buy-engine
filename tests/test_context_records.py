@@ -56,7 +56,7 @@ def test_holding_metadata_overlays_accounts_without_rewriting_snapshot() -> None
     apply_holding_metadata(snapshot, context["record"])
     accounts = {holding.symbol: holding.account_type for holding in snapshot.holdings}
 
-    assert context["source_path"] == "holdings/versions/2026-08-14-v4.yaml"
+    assert context["source_path"] == "holdings/versions/2026-10-12-v5.yaml"
     assert accounts["NISSEI_SOX_1"] == "特定口座（源泉徴収あり）"
     assert accounts["NISSEI_SOX_2"] == "NISA成長投資枠"
     assert accounts["9444"] == "特定口座（源泉徴収あり）"

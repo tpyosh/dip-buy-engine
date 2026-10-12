@@ -121,8 +121,8 @@ def test_monthly_prompt_regression_2026_03(monkeypatch) -> None:
     assert computation.core_buy_materials["core_constituents"]
     assert all_country_constituent["reference_symbol"] in {"VT", "ACWI"}
     assert toyota_audit["raw_bucket"] == "other"
-    assert toyota_audit["resolved_bucket"] == "jun_core"
-    assert toyota_audit["reason"] == "japan_large_cap_core_position_treated_as_jun_core"
+    assert toyota_audit["resolved_bucket"] == "satellite"
+    assert toyota_audit["reason"] == "user_approved_toyota_satellite_classification"
     assert computation.core_buy_materials["monthly_core_budget_tier"] == "rebalance"
     assert computation.core_buy_materials["recommended_monthly_core_buy_budget_jpy"] == 700000
     assert computation.monthly_execution_outputs["candidate_count"] == len(computation.candidate_orders)

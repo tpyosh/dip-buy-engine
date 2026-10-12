@@ -1,9 +1,10 @@
 overrides:
   "7203":
     raw_bucket: "other"
-    overridden_bucket: "jun_core"
-    reason: "japan_large_cap_core_position_treated_as_jun_core"
-    note: "トヨタは運用上、準コア株式として管理"
+    overridden_bucket: "satellite"
+    reason: "user_approved_toyota_satellite_classification"
+    note: "2026-10-12本人承認：トヨタをサテライトに分類。売却時期・数量の承認は含まない"
+    approval_ref: "decisions/2026-10-11_independent_review_record_and_backlog.md#toyota-classification-2026-10-12"
   "MSFT":
     raw_bucket: "jun_core"
     overridden_bucket: "jun_core"

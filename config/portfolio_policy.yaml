@@ -28,7 +28,7 @@ portfolio_buckets:
     preferred_pct_range: [0.00, 0.15]
 
 symbol_to_bucket:
-  "7203": "jun_core"
+  "7203": "satellite"
   "MSFT": "jun_core"
   "ALL_COUNTRY_FUND": "core"
   "SP500_FUND": "core"

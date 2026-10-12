@@ -98,6 +98,7 @@ def test_generate_review_prompt_writes_only_generated_reports(
                 ROOT / "holdings/versions/2026-08-10-v2.yaml",
                 ROOT / "holdings/versions/2026-08-13-v3.yaml",
                 ROOT / "holdings/versions/2026-08-14-v4.yaml",
+                ROOT / "holdings/versions/2026-10-12-v5.yaml",
                 ROOT / "transactions/ledger.yaml",
     ]:
         destination = project_root / path.relative_to(ROOT)

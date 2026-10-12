@@ -1,0 +1,21 @@
+schema_version: 1
+generated_at: '2026-10-11T17:41:55+09:00'
+workflow_id: independent_review_decision_v2
+sources:
+- source_ref: src/monthly_limit_order_review/independent_review.py
+  sha256: e64b0f4fe0e9bd27b6b668e6bee30449dee879e0494a0e801405bf363237ac5d
+- source_ref: prompts/templates/independent_review_template.md
+  sha256: da65523a38f8cbdd2c1574ddebb106a42b017e8eb5a7adbc5851eaee29ac00a4
+- source_ref: prompts/workflows/independent_review.md
+  sha256: 95571cb4d0f99c97ae8a8bd094a2452a62e1c2c42770f80ced2ac026bc4517f4
+- source_ref: data/normalized/snapshot_2026_10.yaml
+  sha256: 3ab8ae3fc8bfd1ef03ba6997df4b12857d4d0e5e2fc0c5434e08ebc3d36e0fe0
+- source_ref: financial/versions/2026-10-11-v5.yaml
+  sha256: d66f478e7110c9aab6384ae2688969b41ae0d12557d784002ed6a7694d72424b
+- source_ref: strategy/versions/2026-08-09-v2.yaml
+  sha256: e38d783df7d270dd75976a1c98c3c7cd003157edf52af0e889e594f217f6ef8a
+- source_ref: holdings/versions/2026-08-14-v4.yaml
+  sha256: 1116270c0ac3f158507ae153bc385cfd21e1720b90df5547338d517718017299
+- source_ref: plans/recurring/versions/2026-08-09.yaml
+  sha256: ed8b8b9feb9cbcf0c22f725d74410638fe3f3471b5e4bbc6b9e44f5073df0a42
+prompt_sha256: ddf196a7c4c8ea0c61555ec71d1391fcf3af4f438e9523696e781329b2ad224b
